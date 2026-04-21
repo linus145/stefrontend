@@ -27,7 +27,7 @@ export function NetworkView({
   onSectionChange 
 }: { 
   isCollapsed: boolean, 
-  onSectionChange: (section: DashboardSection) => void 
+  onSectionChange: (section: DashboardSection, userId?: string | null) => void 
 }) {
   const [activeTab, setActiveTab] = useState<NetworkCategory>('FOUNDER');
   const [searchQuery, setSearchQuery] = useState('');
@@ -160,7 +160,7 @@ export function NetworkView({
                     <CardContent className="p-4">
                       <div className="flex items-start gap-4">
                         {/* Avatar */}
-                        <div className="relative shrink-0 mt-0.5">
+                        <div className="relative shrink-0 mt-0.5 cursor-pointer" onClick={() => onSectionChange('Profile', person.id)}>
                           <Avatar className="w-12 h-12 rounded-lg border border-border/50 bg-muted transition-transform group-hover:scale-105">
                             <AvatarImage 
                               src={person.profile?.profile_image_url || `https://ui-avatars.com/api/?name=${person.first_name}+${person.last_name}&background=e0f2fe&color=0ea5e9`} 
@@ -173,8 +173,8 @@ export function NetworkView({
                         {/* Info */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2">
-                             <div className="min-w-0">
-                                <h3 className="text-[14px] font-bold text-foreground tracking-tight truncate leading-tight">
+                             <div className="min-w-0 cursor-pointer" onClick={() => onSectionChange('Profile', person.id)}>
+                                <h3 className="text-[14px] font-bold text-foreground tracking-tight truncate leading-tight hover:text-sky-500 transition-colors">
                                   {person.first_name} {person.last_name}
                                 </h3>
                                 <p className="text-[10px] font-bold text-sky-600 uppercase tracking-wider mt-0.5">

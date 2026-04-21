@@ -3,9 +3,10 @@ import { User } from '@/types/user.types';
 
 interface EcosystemAboutProps {
   user: User;
+  isOwner?: boolean;
 }
 
-export function EcosystemAbout({ user }: EcosystemAboutProps) {
+export function EcosystemAbout({ user, isOwner = false }: EcosystemAboutProps) {
   const profile = user.profile;
   const isFounder = user.role === 'FOUNDER';
   

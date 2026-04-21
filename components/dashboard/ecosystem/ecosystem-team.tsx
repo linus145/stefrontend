@@ -4,9 +4,10 @@ import { User } from '@/types/user.types';
 
 interface EcosystemTeamProps {
   user: User;
+  isOwner?: boolean;
 }
 
-export function EcosystemTeam({ user }: EcosystemTeamProps) {
+export function EcosystemTeam({ user, isOwner = false }: EcosystemTeamProps) {
   const profile = user.profile;
   
   const teamMembers = [
@@ -43,9 +44,11 @@ export function EcosystemTeam({ user }: EcosystemTeamProps) {
           </div>
         ))}
         
-        <button className="w-full mt-2 py-3 rounded-xl border border-dashed border-border text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-primary hover:border-primary/40 hover:bg-muted/30 transition-all">
-           + Add Team Member
-        </button>
+        {isOwner && (
+          <button className="w-full mt-2 py-3 rounded-xl border border-dashed border-border text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-primary hover:border-primary/40 hover:bg-muted/30 transition-all">
+             + Add Team Member
+          </button>
+        )}
       </div>
     </div>
   );

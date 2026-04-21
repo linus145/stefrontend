@@ -6,43 +6,29 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Rocket, Search, Image as ImageIcon, BarChart2, Loader2, Globe } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { postService } from '@/services/post.service';
-import { PostCard } from './post-card';
+import { PostCard } from './post/post-card';
+import { PostModal } from './post/post-modal';
 import { toast } from 'sonner';
-import { ImageKitProvider, IKUpload } from 'imagekitio-next';
 import { Post } from '@/types/post.types';
 
 interface FeedProps {
   isCollapsed: boolean;
+  onNavigateToProfile: (userId: string) => void;
 }
 
 const PUBLIC_KEY = process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY || '';
 const URL_ENDPOINT = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT || '';
 
-export function Feed({ isCollapsed }: FeedProps) {
+export function Feed({ isCollapsed, onNavigateToProfile }: FeedProps) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const [content, setContent] = useState('');
-  const [mediaUrl, setMediaUrl] = useState('');
-  const [isUploading, setIsUploading] = useState(false);
-  const ikUploadRef = useRef<HTMLInputElement>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Fetch Posts
   const { data: postsData, isLoading } = useQuery({
     queryKey: ['posts'],
     queryFn: () => postService.getPosts(1),
-    refetchInterval: 5000, // Refresh every 5 seconds for live updates
-  });
-
-  // Create Post Mutation
-  const createMutation = useMutation({
-    mutationFn: postService.createPost,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
-      setContent('');
-      setMediaUrl('');
-      toast.success('Post architectural synchronization successful.');
-    },
-    onError: () => toast.error('Creation rejected by network protocol.')
+    refetchInterval: 5000, 
   });
 
   // Like Mutation with Optimistic Updates
@@ -76,7 +62,7 @@ export function Feed({ isCollapsed }: FeedProps) {
       if (context?.previousPosts) {
         queryClient.setQueryData(['posts'], context.previousPosts);
       }
-      toast.error('Signal synchronization failed.');
+      toast.error('Failed to sync reaction.');
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['posts'] });
@@ -87,31 +73,6 @@ export function Feed({ isCollapsed }: FeedProps) {
     likeMutation.mutate(id);
   };
 
-  const handlePost = () => {
-    if (!content.trim() && !mediaUrl) return;
-    createMutation.mutate({ content, media_url: mediaUrl });
-  };
-
-  const handleImageKitAuth = async () => {
-    try {
-      const auth = await postService.getImageKitAuth();
-      return auth;
-    } catch (error) {
-      console.error('ImageKit Auth Error:', error);
-      throw error;
-    }
-  };
-
-  const onUploadStart = () => setIsUploading(true);
-  const onUploadSuccess = (res: any) => {
-    setMediaUrl(res.url);
-    setIsUploading(false);
-    toast.success('System visual asset uploaded.');
-  };
-  const onUploadError = () => {
-    setIsUploading(false);
-    toast.error('Asset transmission failed.');
-  };
 
   return (
     <div className={cn(
@@ -122,7 +83,7 @@ export function Feed({ isCollapsed }: FeedProps) {
       {/* Feed Header */}
       <div className="max-w-2xl mx-auto mb-6 flex items-center justify-between">
         <div className="flex flex-col">
-          <h2 className="text-xl font-semibold text-foreground tracking-tight">Signal Stream</h2>
+          <h2 className="text-xl font-semibold text-foreground tracking-tight">Post Stream</h2>
           <p className="text-[10px] text-sky-500 font-semibold uppercase tracking-[0.2em] flex items-center gap-2">
             <span className="flex h-1.5 w-1.5 rounded-full bg-sky-500 animate-pulse" />
             Live Network
@@ -132,87 +93,48 @@ export function Feed({ isCollapsed }: FeedProps) {
 
       <div className="max-w-2xl mx-auto space-y-2">
         
-        {/* Composer */}
-        {/* Composer (LinkedIn Style) */}
-        <div className="bg-card border border-border/80 rounded-xl p-4 shadow-sm">
-          <div className="flex gap-3">
-            <div className="w-12 h-12 rounded-full bg-muted shrink-0 flex items-center justify-center text-primary font-bold border border-border overflow-hidden">
+        {/* Composer (Open Modal Trigger) */}
+        <div 
+          onClick={() => setIsModalOpen(true)}
+          className="bg-card border border-border/80 rounded-2xl p-5 shadow-sm space-y-4 hover:border-primary/30 transition-all duration-300 cursor-pointer group"
+        >
+          <div className="flex gap-4">
+            <div className="w-12 h-12 rounded-xl bg-muted/50 shrink-0 flex items-center justify-center text-primary font-bold border border-border overflow-hidden shadow-sm group-hover:bg-primary group-hover:text-white transition-all">
                {user?.first_name ? user.first_name.charAt(0) : 'U'}
             </div>
             <div className="flex-1">
-              <textarea 
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder="Start a post"
-                className="w-full bg-background border border-border rounded-full py-3 px-5 text-[14px] text-foreground placeholder:text-muted-foreground placeholder:font-medium resize-none outline-none hover:bg-muted/50 focus:bg-muted/30 focus:ring-1 focus:ring-primary/20 focus:border-primary/30 transition-all min-h-[48px] overflow-hidden custom-scrollbar"
-                rows={content ? 3 : 1}
-              ></textarea>
+               <div className="w-full bg-muted/20 border border-border rounded-2xl py-3 px-5 text-[15px] text-muted-foreground/60 font-medium transition-all min-h-[52px] flex items-center group-hover:bg-muted/30">
+                  What's on your architectural mind?
+               </div>
             </div>
           </div>
 
-          {(mediaUrl || content) && (
-             <div className="mt-4 animate-in fade-in slide-in-from-top-2 duration-300">
-               {mediaUrl && (
-                 <div className="relative rounded-xl overflow-hidden border border-border group/preview shadow-md mb-4">
-                    <img src={mediaUrl} alt="Preview" className="w-full max-h-[400px] object-cover" />
-                    <button 
-                     onClick={() => setMediaUrl('')}
-                     className="absolute top-2 right-2 bg-background/80 backdrop-blur-md text-foreground p-1.5 rounded-full hover:bg-destructive hover:text-white transition-all shadow-sm"
-                    >
-                      <ImageIcon className="h-4 w-4" />
-                    </button>
-                 </div>
-               )}
-               
-               <div className="flex justify-end pt-2 border-t border-border/40">
-                  <button 
-                    disabled={createMutation.isPending || (!content.trim() && !mediaUrl)}
-                    onClick={handlePost}
-                    className="bg-primary hover:bg-primary/90 disabled:opacity-30 text-white text-xs font-semibold py-2 px-6 rounded-full shadow-sm transition-all flex items-center gap-2"
-                  >
-                    {createMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <span>Post</span>}
-                  </button>
-               </div>
-             </div>
-          )}
-
-          <div className="flex items-center justify-between mt-3 px-2">
+          <div className="flex items-center justify-between pt-1">
             <div className="flex items-center gap-1">
-              <ImageKitProvider 
-                publicKey={PUBLIC_KEY} 
-                urlEndpoint={URL_ENDPOINT} 
-                authenticator={handleImageKitAuth}
-              >
-                <button 
-                  disabled={isUploading}
-                  onClick={() => ikUploadRef.current?.click()}
-                  className="flex items-center gap-2 py-2.5 px-3 rounded-lg text-xs font-semibold text-muted-foreground hover:bg-muted/50 transition-all disabled:opacity-50"
-                >
-                  {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImageIcon className="h-5 w-5 text-sky-500" />}
-                  <span>Photo</span>
-                </button>
-                <div className="hidden">
-                  <IKUpload
-                    ref={ikUploadRef}
-                    onUploadStart={onUploadStart}
-                    onSuccess={onUploadSuccess}
-                    onError={onUploadError}
-                  />
-                </div>
-              </ImageKitProvider>
+              <button className="flex items-center gap-2.5 py-2 px-3 rounded-xl text-[13px] font-bold text-muted-foreground hover:bg-primary/5 hover:text-primary transition-all group/btn">
+                <ImageIcon className="h-5 w-5 text-sky-500 group-hover/btn:scale-110 transition-transform" />
+                <span>Photo</span>
+              </button>
               
-              <button className="flex items-center gap-2 py-2.5 px-3 rounded-lg text-xs font-semibold text-muted-foreground hover:bg-muted/50 transition-all">
-                <BarChart2 className="h-5 w-5 text-emerald-500" />
+              <button className="flex items-center gap-2.5 py-2 px-3 rounded-xl text-[13px] font-bold text-muted-foreground hover:bg-emerald-500/5 hover:text-emerald-600 transition-all group/btn">
+                <BarChart2 className="h-5 w-5 text-emerald-500 group-hover/btn:scale-110 transition-transform" />
                 <span>Poll</span>
               </button>
 
-              <button className="flex items-center gap-2 py-2.5 px-3 rounded-lg text-xs font-semibold text-muted-foreground hover:bg-muted/50 transition-all text-nowrap">
-                <Rocket className="h-5 w-5 text-indigo-500" />
+              <button className="flex items-center gap-2.5 py-2 px-3 rounded-xl text-[13px] font-bold text-muted-foreground hover:bg-indigo-500/5 hover:text-indigo-600 transition-all group/btn">
+                <Rocket className="h-5 w-5 text-indigo-500 group-hover/btn:scale-110 transition-transform" />
                 <span>Launch</span>
               </button>
             </div>
           </div>
         </div>
+
+        {/* Global Post Modal */}
+        <PostModal 
+            isOpen={isModalOpen} 
+            onClose={() => setIsModalOpen(false)} 
+            onPostSuccess={() => queryClient.invalidateQueries({ queryKey: ['posts'] })}
+        />
 
         {/* Feed Posts */}
         {isLoading ? (
@@ -234,6 +156,7 @@ export function Feed({ isCollapsed }: FeedProps) {
                 key={post.id} 
                 post={post} 
                 onLike={(id) => onLike(id)} 
+                onNavigateToProfile={onNavigateToProfile}
             />
           ))
         )}

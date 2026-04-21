@@ -4,9 +4,10 @@ import { User } from '@/types/user.types';
 
 interface EcosystemCapTableProps {
   user: User;
+  isOwner?: boolean;
 }
 
-export function EcosystemCapTable({ user }: EcosystemCapTableProps) {
+export function EcosystemCapTable({ user, isOwner = false }: EcosystemCapTableProps) {
   const isFounder = user.role === 'FOUNDER';
 
   return (

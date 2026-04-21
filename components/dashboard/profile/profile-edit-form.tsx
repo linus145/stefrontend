@@ -6,12 +6,15 @@ import { userService } from '@/services/user.service';
 import { toast } from 'sonner';
 import { 
   Loader2, Save, ArrowLeft, User as UserIcon, 
-  MapPin, Globe, Shield 
+  MapPin, Globe, Shield, ImageIcon 
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { User } from '@/types/user.types';
+import { ImageKitProvider, IKUpload } from 'imagekitio-next';
+import { postService } from '@/services/post.service';
+import { getOptimizedImage } from '@/lib/imagekit';
 
 interface ProfileEditFormProps {
   initialUser: User;
@@ -29,6 +32,7 @@ export function ProfileEditForm({ initialUser }: ProfileEditFormProps) {
     bio: initialUser.profile?.bio || '',
     location: initialUser.profile?.location || '',
     profile_image_url: initialUser.profile?.profile_image_url || '',
+    banner_image_url: initialUser.profile?.banner_image_url || '',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -199,15 +203,21 @@ export function ProfileEditForm({ initialUser }: ProfileEditFormProps) {
                   />
                 </div>
               </div>
-              <div className="space-y-2">
-                <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide ml-1">Avatar URL</label>
-                <Input
-                  name="profile_image_url"
-                  value={formData.profile_image_url}
-                  onChange={handleChange}
-                  placeholder="https://..."
-                  className="h-11 bg-muted/30 border-border focus:ring-2 focus:ring-primary/20 focus:border-primary/40 rounded-xl px-4 text-[11px] font-mono transition-all"
-                />
+              <div className="space-y-4">
+                <div className="p-6 bg-primary/5 border border-primary/20 rounded-2xl">
+                  <div className="flex items-start gap-4">
+                    <div className="mt-1">
+                      <ImageIcon className="w-5 h-5 text-primary opacity-70" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-foreground mb-1">Visual Identity Management</h4>
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        To maintain a seamless experience, profile photos and banner images are now managed directly from your profile page. 
+                        Simply click the camera icon on your profile header to update your visual assets.
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

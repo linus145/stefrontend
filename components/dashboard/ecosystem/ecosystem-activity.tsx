@@ -3,9 +3,10 @@ import { User } from '@/types/user.types';
 
 interface EcosystemActivityProps {
   user: User;
+  isOwner?: boolean;
 }
 
-export function EcosystemActivity({ user }: EcosystemActivityProps) {
+export function EcosystemActivity({ user, isOwner = false }: EcosystemActivityProps) {
   const activities = [
     { 
       type: 'Updated Profile', 

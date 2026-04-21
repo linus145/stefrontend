@@ -7,6 +7,7 @@ export interface InvestorProfile {
   bio: string;
   location: string;
   profile_image_url: string;
+  banner_image_url: string;
   firm_name: string;
   preferred_stages: string[];
   preferred_industries: string[];

@@ -11,7 +11,7 @@ export function RightSidebar() {
 
       {/* Trending Startups */}
       <div className="mb-10">
-        <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-6">Trending Signals</h3>
+        <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-6">Trending Posts</h3>
         <div className="space-y-6">
           <TrendingItem label="Vanguard Data" initial="V" role="SEED • FINTECH" />
           <TrendingItem label="Orbit Logistics" initial="O" role="SERIES A • SC" />

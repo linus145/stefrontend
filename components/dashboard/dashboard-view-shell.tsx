@@ -21,6 +21,7 @@ export function DashboardViewShell() {
   const router = useRouter();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [activeSection, setActiveSection] = useState<DashboardSection>('dashboard');
+  const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
   useEffect(() => {
@@ -29,14 +30,19 @@ export function DashboardViewShell() {
     }
   }, [isLoading, isAuthenticated, router]);
 
-  const handleSectionChange = (section: DashboardSection) => {
-    if (section === activeSection) return;
+  const handleSectionChange = (section: DashboardSection, userId: string | null = null) => {
+    if (section === activeSection && userId === selectedProfileId) return;
     setIsTransitioning(true);
     setActiveSection(section);
+    setSelectedProfileId(userId);
     // Artificial delay to make the transition feel intentional and premium
     setTimeout(() => {
       setIsTransitioning(false);
     }, 450);
+  };
+
+  const handleProfileNavigate = (userId: string) => {
+    handleSectionChange('Profile', userId);
   };
 
   if (isLoading || !isAuthenticated || !user) {
@@ -57,7 +63,7 @@ export function DashboardViewShell() {
 
     switch (activeSection) {
       case 'Profile':
-        return <EcosystemContent isCollapsed={isSidebarCollapsed} />;
+        return <EcosystemContent isCollapsed={isSidebarCollapsed} userId={selectedProfileId} />;
       case 'jobs':
         return (
           <div className={cn(
@@ -86,7 +92,7 @@ export function DashboardViewShell() {
              </div>
              <h3 className="text-2xl font-semibold text-foreground tracking-tight mb-2">No news available</h3>
              <p className="text-muted-foreground text-sm max-w-xs text-center font-medium leading-relaxed">
-               The ecosystem logic is currently processing new signals. Please check back shortly for verified news.
+               The ecosystem logic is currently processing new posts. Please check back shortly for verified news.
              </p>
           </div>
         );
@@ -98,7 +104,7 @@ export function DashboardViewShell() {
         return <SettingsView isCollapsed={isSidebarCollapsed} />;
       case 'dashboard':
       default:
-        return <Feed isCollapsed={isSidebarCollapsed} />;
+        return <Feed isCollapsed={isSidebarCollapsed} onNavigateToProfile={handleProfileNavigate} />;
     }
   };
 

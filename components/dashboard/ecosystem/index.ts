@@ -5,3 +5,4 @@ export * from './ecosystem-team';
 export * from './ecosystem-metrics';
 export * from './ecosystem-cap-table';
 export * from './ecosystem-activity';
+export * from './ecosystem-posts';

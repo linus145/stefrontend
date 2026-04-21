@@ -4,9 +4,10 @@ import { User } from '@/types/user.types';
 
 interface EcosystemMetricsProps {
   user: User;
+  isOwner?: boolean;
 }
 
-export function EcosystemMetrics({ user }: EcosystemMetricsProps) {
+export function EcosystemMetrics({ user, isOwner = false }: EcosystemMetricsProps) {
   const isFounder = user.role === 'FOUNDER';
   
   // Dynamic metrics based on role

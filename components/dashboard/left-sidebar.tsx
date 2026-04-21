@@ -15,7 +15,7 @@ interface LeftSidebarProps {
   isCollapsed: boolean;
   onToggle: () => void;
   activeSection: DashboardSection;
-  onSectionChange: (section: DashboardSection) => void;
+  onSectionChange: (section: DashboardSection, userId?: string | null) => void;
 }
 
 export function LeftSidebar({ isCollapsed, onToggle, activeSection, onSectionChange }: LeftSidebarProps) {
@@ -61,13 +61,6 @@ export function LeftSidebar({ isCollapsed, onToggle, activeSection, onSectionCha
             active={activeSection === 'dashboard'}
           />
           <SidebarLink
-            onClick={() => onSectionChange('Profile')}
-            icon={<UserIcon className="h-4 w-4" />}
-            label="Profile"
-            isCollapsed={isCollapsed}
-            active={activeSection === 'Profile'}
-          />
-          <SidebarLink
             onClick={() => onSectionChange('messages')}
             icon={<MessageSquare className="h-4 w-4" />}
             label="Messages"
@@ -93,30 +86,6 @@ export function LeftSidebar({ isCollapsed, onToggle, activeSection, onSectionCha
 
       {/* Bottom Section */}
       <div className={cn("px-4 space-y-6 transition-all", isCollapsed ? "px-4" : "px-4")}>
-        {/* Profile Card */}
-        {user && (
-          <div className={cn(
-            "rounded-xl bg-muted/30 border border-border/50 group hover:border-primary/20 transition-all overflow-hidden",
-            isCollapsed ? "p-2" : "p-2.5"
-          )}>
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 shrink-0 rounded-lg bg-background border border-border flex items-center justify-center text-primary shadow-sm">
-                <UserIcon className="h-3.5 w-3.5" />
-              </div>
-              {!isCollapsed && (
-                <div className="flex-1 min-w-0 animate-in fade-in slide-in-from-left-2 duration-300">
-                  <p className="text-xs font-semibold text-foreground truncate">
-                    {user.first_name} {user.last_name}
-                  </p>
-                  <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-wider opacity-70">
-                    {user.role}
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
         <div className="space-y-3 pb-2">
           <button className={cn(
             "flex items-center justify-center gap-2 w-full transition-all rounded-xl bg-primary text-primary-foreground py-2 text-xs font-semibold shadow-sm hover:opacity-90 active:scale-95",

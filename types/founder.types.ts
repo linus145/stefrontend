@@ -7,6 +7,7 @@ export interface FounderProfile {
   bio: string;
   location: string;
   profile_image_url: string;
+  banner_image_url: string;
   experience_years: number;
   primary_industry: string;
   skills: string[];

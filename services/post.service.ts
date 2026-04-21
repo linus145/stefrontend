@@ -7,6 +7,10 @@ export const postService = {
     return api.get<PaginatedResponse<Post>>(`/posts/?page=${page}`);
   },
 
+  getUserPosts: (userId: string, page: number = 1): Promise<PaginatedResponse<Post>> => {
+    return api.get<PaginatedResponse<Post>>(`/posts/user/${userId}/?page=${page}`);
+  },
+
   createPost: (data: PostCreateData): Promise<Post> => {
     return api.post<Post>('/posts/create/', data);
   },

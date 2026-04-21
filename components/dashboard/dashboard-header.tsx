@@ -11,11 +11,12 @@ import { formatDistanceToNow } from 'date-fns';
 import { api } from '@/lib/api';
 
 import { DashboardSection } from './left-sidebar';
+import { getOptimizedImage } from '@/lib/imagekit';
 
 interface DashboardHeaderProps {
    isCollapsed: boolean;
    activeSection: DashboardSection;
-   onSectionChange: (section: DashboardSection) => void;
+   onSectionChange: (section: DashboardSection, userId?: string | null) => void;
 }
 
 export function DashboardHeader({ isCollapsed, activeSection, onSectionChange }: DashboardHeaderProps) {
@@ -127,7 +128,7 @@ export function DashboardHeader({ isCollapsed, activeSection, onSectionChange }:
                         <div className="p-4 border-b border-border flex justify-between items-center bg-muted/20">
                            <div>
                               <h3 className="text-xs font-bold text-foreground">Notifications</h3>
-                              <p className="text-[10px] text-muted-foreground font-medium">{unreadCount} unread signals</p>
+                              <p className="text-[10px] text-muted-foreground font-medium">{unreadCount} unread notifications</p>
                            </div>
                            <button
                               type="button"
@@ -197,11 +198,24 @@ export function DashboardHeader({ isCollapsed, activeSection, onSectionChange }:
                Connect Wallet
             </button>
 
-            <div className="relative group/avatar cursor-pointer">
+            <div 
+               onClick={() => onSectionChange('Profile')}
+               className="relative group/avatar cursor-pointer"
+            >
                <div className="absolute inset-0 bg-primary/20 blur-md opacity-0 group-hover/avatar:opacity-100 transition-opacity" />
                <div className="w-9 h-9 rounded-full border border-border p-0.5 relative z-10 transition-transform group-hover/avatar:scale-110 shadow-sm">
-                  <div className="w-full h-full rounded-full bg-background overflow-hidden p-0.5">
-                     <img src="https://i.pravatar.cc/150?img=11" alt="Profile" className="w-full h-full object-cover rounded-full" />
+                  <div className="w-full h-full rounded-full bg-background overflow-hidden">
+                     {user?.profile?.profile_image_url ? (
+                        <img 
+                           src={getOptimizedImage(user.profile.profile_image_url)} 
+                           alt="Profile" 
+                           className="w-full h-full object-cover rounded-full" 
+                        />
+                     ) : (
+                        <div className="w-full h-full bg-primary flex items-center justify-center text-[10px] font-bold text-white uppercase">
+                           {user?.first_name?.[0] || 'U'}
+                        </div>
+                     )}
                   </div>
                </div>
             </div>

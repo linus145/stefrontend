@@ -106,6 +106,16 @@ export function MessagesView({ isCollapsed }: { isCollapsed: boolean }) {
     }
   };
 
+  const handleDeleteMessage = async (messageId: string) => {
+    try {
+      await chatService.deleteMessage(messageId);
+      setDisplayMessages(prev => prev.filter(m => m.id !== messageId));
+      toast.success('Message terminated.');
+    } catch (error) {
+      toast.error('Termination failed.');
+    }
+  };
+
   // ─── Loading state ───
   if (isLoadingRooms) {
     return (
@@ -255,10 +265,12 @@ export function MessagesView({ isCollapsed }: { isCollapsed: boolean }) {
                   {displayMessages.map((msg: Message, idx: number) => (
                     <MessageItem
                       key={`${msg.id}-${idx}`}
+                      msgId={msg.id}
                       isMine={msg.sender === currentUser?.id || msg.sender_data?.id === currentUser?.id}
                       text={msg.text}
                       time={format(new Date(msg.created_at), 'HH:mm')}
                       avatar={msg.sender_data?.profile?.profile_image_url || `https://ui-avatars.com/api/?name=${msg.sender_data?.first_name || 'U'}&background=818CF8&color=fff`}
+                      onDelete={() => handleDeleteMessage(msg.id)}
                     />
                   ))}
                   <div ref={messagesEndRef} />
@@ -307,13 +319,36 @@ export function MessagesView({ isCollapsed }: { isCollapsed: boolean }) {
   );
 }
 
-function MessageItem({ isMine, text, time, avatar }: { isMine: boolean; text: string; time: string; avatar?: string }) {
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu';
+import { MoreHorizontal, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
+
+function MessageItem({ 
+  msgId,
+  isMine, 
+  text, 
+  time, 
+  avatar,
+  onDelete 
+}: { 
+  msgId: string;
+  isMine: boolean; 
+  text: string; 
+  time: string; 
+  avatar?: string;
+  onDelete: () => void;
+}) {
   return (
-    <div className={cn("flex gap-3 max-w-[85%] items-end", isMine ? "ml-auto flex-row-reverse" : "")}>
+    <div className={cn("flex gap-3 max-w-[85%] items-end group/item", isMine ? "ml-auto flex-row-reverse" : "")}>
       {!isMine && (
         <img src={avatar} className="w-8 h-8 rounded-lg object-cover shrink-0 border border-border shadow-sm" alt="" />
       )}
-      <div className={cn("flex flex-col", isMine ? "items-end" : "items-start")}>
+      <div className={cn("flex flex-col relative", isMine ? "items-end" : "items-start")}>
         <div className={cn(
           "px-4 py-3 rounded-2xl text-[13px] leading-relaxed shadow-sm font-normal",
           isMine
@@ -322,6 +357,24 @@ function MessageItem({ isMine, text, time, avatar }: { isMine: boolean; text: st
         )}>
           {text}
         </div>
+        
+        {/* Action Menu (Only for own messages) */}
+        {isMine && (
+          <div className="absolute -left-10 top-1/2 -translate-y-1/2 opacity-0 group-hover/item:opacity-100 transition-opacity">
+            <DropdownMenu>
+              <DropdownMenuTrigger className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-muted/80 text-muted-foreground outline-none transition-all">
+                <MoreHorizontal className="w-4 h-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-40 bg-card border-border rounded-xl shadow-xl">
+                <DropdownMenuItem onClick={onDelete} className="flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium text-destructive cursor-pointer hover:bg-destructive/10">
+                   <Trash2 className="w-3.5 h-3.5" />
+                   <span>Delete message</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        )}
+
         <span className="text-[10px] font-medium text-muted-foreground opacity-50 mt-1.5 px-1">{time}</span>
       </div>
     </div>

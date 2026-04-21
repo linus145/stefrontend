@@ -50,4 +50,7 @@ export const chatService = {
   /** Fetches the current JWT from HTTPOnly cookies via a secured endpoint */
   getWsTicket: () => 
     api.get<{ token: string }>('/auth/ws-ticket/'),
+
+  deleteMessage: (messageId: string) => 
+    api.delete(`/chat/messages/${messageId}/delete/`),
 };

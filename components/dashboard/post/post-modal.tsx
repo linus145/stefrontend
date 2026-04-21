@@ -80,19 +80,19 @@ export function PostModal({ isOpen, onClose, onPostSuccess }: PostModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] bg-card border-border p-0 overflow-hidden rounded-2xl shadow-2xl">
+      <DialogContent className="w-[calc(100vw-16px)] sm:max-w-[600px] bg-card border-border p-0 overflow-hidden rounded-2xl shadow-2xl max-h-[95vh]">
         <DialogHeader className="px-6 py-4 border-b border-border flex flex-row items-center justify-between">
           <DialogTitle className="text-lg font-semibold tracking-tight text-foreground">Create Post</DialogTitle>
         </DialogHeader>
 
-        <div className="px-6 py-4 space-y-4 max-h-[70vh] overflow-y-auto custom-scrollbar">
+        <div className="px-4 sm:px-6 py-4 space-y-4 max-h-[60vh] sm:max-h-[70vh] overflow-y-auto custom-scrollbar">
           {/* User Profile Info */}
           <div className="flex items-center gap-3">
-             <div className="w-12 h-12 rounded-xl bg-muted/50 flex items-center justify-center text-primary font-bold border border-border shadow-sm overflow-hidden">
+             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-muted/50 flex items-center justify-center text-primary font-bold border border-border shadow-sm overflow-hidden text-sm sm:text-base">
                 {user?.first_name ? user.first_name.charAt(0) : 'U'}
              </div>
              <div className="space-y-0.5">
-                <p className="text-[14px] font-bold text-foreground leading-none">{user?.first_name} {user?.last_name}</p>
+                <p className="text-[13px] sm:text-[14px] font-bold text-foreground leading-none">{user?.first_name} {user?.last_name}</p>
                 <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-muted/40 border border-border w-fit">
                    <Globe className="w-3 h-3 text-muted-foreground" />
                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">Public</span>
@@ -107,7 +107,7 @@ export function PostModal({ isOpen, onClose, onPostSuccess }: PostModalProps) {
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder="What's on your architectural mind?"
-              className="w-full bg-transparent text-[16px] text-foreground placeholder:text-muted-foreground/50 resize-none outline-none min-h-[150px] leading-relaxed"
+              className="w-full bg-transparent text-[14px] sm:text-[16px] text-foreground placeholder:text-muted-foreground/50 resize-none outline-none min-h-[120px] sm:min-h-[150px] leading-relaxed"
             />
             
             <div className="flex justify-between items-center mt-2">
@@ -141,7 +141,7 @@ export function PostModal({ isOpen, onClose, onPostSuccess }: PostModalProps) {
         </div>
 
         {/* Action Footer */}
-        <div className="px-6 py-4 bg-muted/10 border-t border-border flex items-center justify-between">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 bg-muted/10 border-t border-border flex items-center justify-between">
           <div className="flex items-center gap-2">
             <ImageKitProvider 
               publicKey={PUBLIC_KEY} 
@@ -185,7 +185,7 @@ export function PostModal({ isOpen, onClose, onPostSuccess }: PostModalProps) {
           <button 
             disabled={(!content.trim() && !mediaUrl) || isUploading || isOverLimit || isTooShort}
             onClick={handlePost}
-            className="bg-primary hover:bg-primary/90 disabled:opacity-30 disabled:cursor-not-allowed text-white text-[14px] font-bold py-2 px-10 rounded-full shadow-lg shadow-primary/20 transition-all active:scale-95"
+            className="bg-primary hover:bg-primary/90 disabled:opacity-30 disabled:cursor-not-allowed text-white text-[13px] sm:text-[14px] font-bold py-2 px-6 sm:px-10 rounded-full shadow-lg shadow-primary/20 transition-all active:scale-95"
           >
             {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Post"}
           </button>

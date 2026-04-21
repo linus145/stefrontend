@@ -72,7 +72,7 @@ export function ProfileEditForm({ initialUser }: ProfileEditFormProps) {
   return (
     <div className="max-w-4xl mx-auto space-y-8 pb-20 animate-in fade-in slide-in-from-bottom-2 duration-500">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
             <button 
               onClick={() => router.back()}
@@ -81,13 +81,13 @@ export function ProfileEditForm({ initialUser }: ProfileEditFormProps) {
               <ArrowLeft className="w-3 h-3 group-hover:-translate-x-1 transition-transform" />
               Back to Dashboard
             </button>
-            <h1 className="text-2xl font-semibold text-foreground tracking-tight">Edit Profile</h1>
+            <h1 className="text-xl sm:text-2xl font-semibold text-foreground tracking-tight">Edit Profile</h1>
             <p className="text-sm text-muted-foreground">Manage your identity and digital presence across the STE platform.</p>
         </div>
         <Button 
            onClick={handleSubmit} 
            disabled={isUpdating}
-           className="bg-primary text-primary-foreground hover:opacity-90 px-8 h-11 rounded-xl font-bold text-xs shadow-lg shadow-primary/20 transition-all flex items-center gap-2"
+            className="bg-primary text-primary-foreground hover:opacity-90 px-6 sm:px-8 h-11 rounded-xl font-bold text-xs shadow-lg shadow-primary/20 transition-all flex items-center gap-2 w-full sm:w-auto justify-center"
         >
           {isUpdating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
           Save Changes
@@ -224,19 +224,19 @@ export function ProfileEditForm({ initialUser }: ProfileEditFormProps) {
         </div>
 
         {/* Bottom Actions */}
-        <div className="flex items-center justify-end gap-4 pt-4 border-t border-border">
+        <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 sm:gap-4 pt-4 border-t border-border">
           <Button
             type="button"
             variant="ghost"
             onClick={() => router.back()}
-            className="text-muted-foreground hover:text-foreground px-8 h-12 rounded-xl font-bold text-xs transition-all active:scale-95"
+            className="text-muted-foreground hover:text-foreground px-8 h-12 rounded-xl font-bold text-xs transition-all active:scale-95 w-full sm:w-auto"
           >
             Discard Changes
           </Button>
           <Button
             type="submit"
             disabled={isUpdating}
-            className="bg-primary text-primary-foreground hover:opacity-90 px-10 h-12 rounded-xl font-bold text-[13px] shadow-xl shadow-primary/20 transition-all flex items-center gap-2"
+            className="bg-primary text-primary-foreground hover:opacity-90 px-10 h-12 rounded-xl font-bold text-[13px] shadow-xl shadow-primary/20 transition-all flex items-center gap-2 justify-center w-full sm:w-auto"
           >
             {isUpdating && <Loader2 className="w-4 h-4 animate-spin" />}
             Update Profile

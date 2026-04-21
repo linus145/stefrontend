@@ -42,7 +42,7 @@ export function ProfileEditShell({ initialUser }: ProfileEditShellProps) {
       />
 
       <main className="flex-1 flex flex-col pt-16 transition-all duration-300">
-        <div className="flex-1 overflow-y-auto px-8 py-8 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 custom-scrollbar">
           <ProfileEditForm initialUser={initialUser} />
         </div>
       </main>

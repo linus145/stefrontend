@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Search, Bell, Heart, MessageSquare, Loader2, UserPlus, UserMinus } from 'lucide-react';
+import { Search, Bell, Heart, MessageSquare, Loader2, UserPlus, UserMinus, Home, Briefcase, Users, Newspaper, Network as NetworkIcon, Menu } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 import { ThemeToggle } from './theme-toggle';
@@ -17,9 +17,10 @@ interface DashboardHeaderProps {
    isCollapsed: boolean;
    activeSection: DashboardSection;
    onSectionChange: (section: DashboardSection, userId?: string | null) => void;
+   onMobileMenuToggle?: () => void;
 }
 
-export function DashboardHeader({ isCollapsed, activeSection, onSectionChange }: DashboardHeaderProps) {
+export function DashboardHeader({ isCollapsed, activeSection, onSectionChange, onMobileMenuToggle }: DashboardHeaderProps) {
    const { user } = useAuth();
    const queryClient = useQueryClient();
    const [showNotifications, setShowNotifications] = React.useState(false);
@@ -52,12 +53,24 @@ export function DashboardHeader({ isCollapsed, activeSection, onSectionChange }:
 
    return (
       <header className={cn(
-         "fixed top-0 right-0 h-16 transition-all duration-300 ease-in-out flex items-center justify-between px-8 z-40",
+         "fixed top-0 right-0 h-16 transition-all duration-300 ease-in-out flex items-center justify-between px-4 sm:px-6 lg:px-8 z-40",
          "bg-background/80 backdrop-blur-md border-b border-border",
-         isCollapsed ? "left-20" : "left-60"
+         "left-0 lg:left-auto",
+         isCollapsed ? "lg:left-20" : "lg:left-60"
       )}>
 
-         <div className="flex items-center flex-1 max-w-2xl h-full">
+         {/* Mobile: Hamburger + Brand */}
+         <div className="flex items-center gap-3 lg:hidden">
+            <button
+               onClick={onMobileMenuToggle}
+               className="w-9 h-9 flex items-center justify-center rounded-xl bg-muted/50 border border-border text-muted-foreground hover:text-foreground transition-all active:scale-95"
+            >
+               <Menu className="w-5 h-5" />
+            </button>
+         </div>
+
+         {/* Desktop: Search + Nav Tabs */}
+         <div className="hidden lg:flex items-center flex-1 max-w-2xl h-full">
             <div className="relative group/search h-9 w-72 mr-8">
                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within/search:text-primary transition-colors" />
                <input
@@ -67,47 +80,77 @@ export function DashboardHeader({ isCollapsed, activeSection, onSectionChange }:
                />
             </div>
 
-            <nav className="flex items-center gap-8 h-full ml-4">
+            <nav className="flex items-center gap-6 h-full ml-4">
                <button
                   onClick={() => onSectionChange('dashboard')}
-                  className="relative h-full flex items-center px-1 group/tab"
+                  className="relative h-full flex flex-col items-center justify-center px-3 group/tab min-w-[64px]"
                >
-                  <span className={cn(
-                     "text-[11px] font-bold uppercase tracking-[0.15em] transition-colors",
+                  <Home className={cn(
+                     "w-[18px] h-[18px] mb-1 transition-colors",
                      activeSection === 'dashboard' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
+                  )} />
+                  <span className={cn(
+                     "text-[10px] font-medium transition-colors",
+                     activeSection === 'dashboard' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
                   )}>Home</span>
                   {activeSection === 'dashboard' && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
                </button>
 
                <button
-                  onClick={() => onSectionChange('jobs')}
-                  className="relative h-full flex items-center px-1 group/tab"
+                  onClick={() => onSectionChange('network')}
+                  className="relative h-full flex flex-col items-center justify-center px-3 group/tab min-w-[64px]"
                >
+                  <NetworkIcon className={cn(
+                     "w-[18px] h-[18px] mb-1 transition-colors",
+                     activeSection === 'network' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
+                  )} />
                   <span className={cn(
-                     "text-[11px] font-bold uppercase tracking-[0.15em] transition-colors",
+                     "text-[10px] font-medium transition-colors",
+                     activeSection === 'network' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
+                  )}>Network</span>
+                  {activeSection === 'network' && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
+               </button>
+
+               <button
+                  onClick={() => onSectionChange('jobs')}
+                  className="relative h-full flex flex-col items-center justify-center px-3 group/tab min-w-[64px]"
+               >
+                  <Briefcase className={cn(
+                     "w-[18px] h-[18px] mb-1 transition-colors",
                      activeSection === 'jobs' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
+                  )} />
+                  <span className={cn(
+                     "text-[10px] font-medium transition-colors",
+                     activeSection === 'jobs' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
                   )}>Jobs</span>
                   {activeSection === 'jobs' && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
                </button>
 
                <button
                   onClick={() => onSectionChange('news')}
-                  className="relative h-full flex items-center px-1 group/tab"
+                  className="relative h-full flex flex-col items-center justify-center px-3 group/tab min-w-[64px]"
                >
-                  <div className="flex items-center gap-2">
-                     <span className={cn(
-                        "text-[11px] font-bold uppercase tracking-[0.15em] transition-colors",
+                  <div className="relative">
+                     <Newspaper className={cn(
+                        "w-[18px] h-[18px] mb-1 transition-colors",
                         activeSection === 'news' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
-                     )}>News</span>
-                     <div className="px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-500 text-[8px] font-black uppercase tracking-tighter">New</div>
+                     )} />
+                     <div className="absolute -top-1 -right-3 px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-500 text-[7px] font-black uppercase tracking-tighter scale-75">New</div>
                   </div>
+                  <span className={cn(
+                     "text-[10px] font-medium transition-colors",
+                     activeSection === 'news' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
+                  )}>News</span>
                   {activeSection === 'news' && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
                </button>
             </nav>
          </div>
 
-         <div className="flex items-center gap-6 justify-end">
-            <div className="flex items-center gap-5 pr-6 border-r border-border">
+         {/* Mobile: Bottom navigation tabs (compact) */}
+         {/* Handled by a separate mobile bottom nav */}
+
+         <div className="flex items-center gap-3 sm:gap-6 justify-end">
+            <div className="flex items-center gap-3 sm:gap-5 sm:pr-6 sm:border-r sm:border-border">
                <ThemeToggle />
 
                <div className="relative">
@@ -124,7 +167,7 @@ export function DashboardHeader({ isCollapsed, activeSection, onSectionChange }:
                   </button>
 
                   {showNotifications && (
-                     <div className="absolute top-12 right-0 w-[380px] bg-card border border-border rounded-2xl shadow-md overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                     <div className="absolute top-12 right-0 w-[calc(100vw-32px)] sm:w-[380px] bg-card border border-border rounded-2xl shadow-md overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                         <div className="p-4 border-b border-border flex justify-between items-center bg-muted/20">
                            <div>
                               <h3 className="text-xs font-bold text-foreground">Notifications</h3>
@@ -198,7 +241,7 @@ export function DashboardHeader({ isCollapsed, activeSection, onSectionChange }:
                Connect Wallet
             </button>
 
-            <div 
+            <div
                onClick={() => onSectionChange('Profile')}
                className="relative group/avatar cursor-pointer"
             >
@@ -206,10 +249,10 @@ export function DashboardHeader({ isCollapsed, activeSection, onSectionChange }:
                <div className="w-9 h-9 rounded-full border border-border p-0.5 relative z-10 transition-transform group-hover/avatar:scale-110 shadow-sm">
                   <div className="w-full h-full rounded-full bg-background overflow-hidden">
                      {user?.profile?.profile_image_url ? (
-                        <img 
-                           src={getOptimizedImage(user.profile.profile_image_url)} 
-                           alt="Profile" 
-                           className="w-full h-full object-cover rounded-full" 
+                        <img
+                           src={getOptimizedImage(user.profile.profile_image_url)}
+                           alt="Profile"
+                           className="w-full h-full object-cover rounded-full"
                         />
                      ) : (
                         <div className="w-full h-full bg-primary flex items-center justify-center text-[10px] font-bold text-white uppercase">

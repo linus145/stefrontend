@@ -14,17 +14,17 @@ export default function Home() {
       <main className="relative z-10 w-full">
         
         {/* ================= HERO SECTION ================= */}
-        <section className="relative flex flex-col items-center justify-center pt-48 pb-32 px-6 text-center max-w-5xl mx-auto">
+        <section className="relative flex flex-col items-center justify-center pt-32 sm:pt-40 md:pt-48 pb-20 sm:pb-32 px-4 sm:px-6 text-center max-w-5xl mx-auto">
           <div className="inline-flex items-center rounded-full border border-white/[0.08] bg-white/[0.02] px-4 py-1.5 text-xs text-[#a1a1aa] backdrop-blur-md mb-8">
             <span className="flex h-1.5 w-1.5 rounded-full bg-[#b49cf8] mr-3 animate-pulse shadow-[0_0_10px_#b49cf8]"></span>
             Trusted by alumni from YC, Sequoia, and a16z.
           </div>
           
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-white mb-6 leading-tight">
+          <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold tracking-tight text-white mb-4 sm:mb-6 leading-tight">
             Where capital <br /> meets <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#d9d1fe] to-[#a890fe]">execution.</span>
           </h1>
           
-          <p className="text-lg md:text-xl text-[#a1a1aa] max-w-2xl mx-auto mb-10 leading-relaxed">
+          <p className="text-base sm:text-lg md:text-xl text-[#a1a1aa] max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed px-2">
             The private network for high-velocity founders and conviction-driven investors. Bypass the noise, find your partners, and scale.
           </p>
           
@@ -170,7 +170,7 @@ export default function Home() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-[#1a1a1f] to-[#0a0a0c] border border-white/[0.05] shadow-[0_0_30px_rgba(180,156,248,0.1)] mb-8">
             <svg className="w-8 h-8 text-[#b49cf8]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
           </div>
-          <h2 className="text-4xl font-bold text-white mb-6 tracking-tight">The algorithm for growth.</h2>
+          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6 tracking-tight">The algorithm for growth.</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16 text-left">
             <div className="bg-gradient-to-b from-[#121215] to-[#0a0a0c] border border-white/[0.05] rounded-2xl p-8">
@@ -226,7 +226,7 @@ export default function Home() {
         {/* ================= CTA SECTION ================= */}
         <section className="py-32 px-6 text-center max-w-3xl mx-auto">
           <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_bottom,rgba(119,85,255,0.05)_0%,transparent_40%)] pointer-events-none" />
-          <h2 className="text-5xl font-bold text-white tracking-tight mb-6 relative z-10">
+          <h2 className="text-3xl sm:text-5xl font-bold text-white tracking-tight mb-6 relative z-10">
             Stop indexing. <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#d9d1fe] to-[#a890fe]">Start operating.</span>
           </h2>
           <p className="text-lg text-[#a1a1aa] mb-10 relative z-10">

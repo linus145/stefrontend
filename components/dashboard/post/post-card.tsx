@@ -101,12 +101,12 @@ export function PostCard({ post, onLike, onNavigateToProfile }: PostCardProps) {
   return (
     <div className="bg-card border border-border/60 rounded-xl shadow-sm transition-all group overflow-hidden hover:shadow-md flex flex-col h-full">
       {/* Header */}
-      <div className="p-4 pb-2">
+      <div className="p-3 sm:p-4 pb-2">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2">
             <div 
               onClick={() => onNavigateToProfile(post.author_id)}
-              className="w-12 h-12 rounded-lg bg-muted overflow-hidden border border-border/40 shrink-0 relative hover:ring-2 hover:ring-primary/20 transition-all block cursor-pointer group/avatar"
+              className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-muted overflow-hidden border border-border/40 shrink-0 relative hover:ring-2 hover:ring-primary/20 transition-all block cursor-pointer group/avatar"
             >
               {post.author_image_url ? (
                 <img src={getOptimizedImage(post.author_image_url)} alt={post.author_first_name} className="w-full h-full object-cover transition-transform group-hover/avatar:scale-110" />
@@ -133,7 +133,7 @@ export function PostCard({ post, onLike, onNavigateToProfile }: PostCardProps) {
                    </a>
                  )}
               </div>
-              <p className="text-[11px] text-muted-foreground font-semibold leading-tight mt-0.5 max-w-[280px] truncate opacity-80">
+              <p className="text-[11px] text-muted-foreground font-semibold leading-tight mt-0.5 max-w-[200px] sm:max-w-[280px] truncate opacity-80">
                 {post.author_role}
               </p>
               <div className="flex items-center gap-1 text-[10px] text-muted-foreground font-medium mt-0.5 opacity-70">
@@ -196,7 +196,7 @@ export function PostCard({ post, onLike, onNavigateToProfile }: PostCardProps) {
       </div>
 
       {/* Content */}
-      <div className="px-4 py-2 flex-1 flex flex-col">
+      <div className="px-3 sm:px-4 py-2 flex-1 flex flex-col">
         <div className={cn(
           "text-foreground/90 text-[14px] leading-relaxed whitespace-pre-wrap font-normal mb-auto",
           !isExpanded ? "line-clamp-5 min-h-[105px]" : "min-h-[105px]"
@@ -224,7 +224,7 @@ export function PostCard({ post, onLike, onNavigateToProfile }: PostCardProps) {
       )}
 
       {/* Stats Row */}
-      <div className="px-4 py-2 flex items-center justify-between border-b border-border/40 bg-muted/10">
+      <div className="px-3 sm:px-4 py-2 flex items-center justify-between border-b border-border/40 bg-muted/10">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground hover:text-primary cursor-pointer transition-all">
             <div className={cn(
@@ -251,7 +251,7 @@ export function PostCard({ post, onLike, onNavigateToProfile }: PostCardProps) {
       <div className="px-1 py-1 flex items-center justify-between">
         <button 
           onClick={() => onLike(post.id)}
-          className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-md text-[12px] font-semibold text-muted-foreground transition-all hover:bg-muted/60 active:scale-95"
+          className="flex-1 flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 rounded-md text-[11px] sm:text-[12px] font-semibold text-muted-foreground transition-all hover:bg-muted/60 active:scale-95"
         >
           <Heart className={cn("h-4 w-4", post.user_has_liked && "fill-current text-blue-500")} /> 
           <span className={cn(post.user_has_liked && "text-foreground")}>{post.user_has_liked ? 'Liked' : 'Like'}</span>
@@ -260,7 +260,7 @@ export function PostCard({ post, onLike, onNavigateToProfile }: PostCardProps) {
         <button 
           onClick={() => setIsCommentsOpen(!isCommentsOpen)}
           className={cn(
-            "flex-1 flex items-center justify-center gap-2 py-2.5 rounded-md text-[12px] font-semibold text-muted-foreground transition-all hover:bg-muted/60 active:scale-95",
+            "flex-1 flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 rounded-md text-[11px] sm:text-[12px] font-semibold text-muted-foreground transition-all hover:bg-muted/60 active:scale-95",
             isCommentsOpen && "bg-muted/80"
           )}
         >
@@ -269,7 +269,7 @@ export function PostCard({ post, onLike, onNavigateToProfile }: PostCardProps) {
         </button>
 
         <button 
-          className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-md text-[12px] font-semibold text-muted-foreground transition-all hover:bg-muted/60 active:scale-95"
+          className="flex-1 flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 rounded-md text-[11px] sm:text-[12px] font-semibold text-muted-foreground transition-all hover:bg-muted/60 active:scale-95"
           onClick={handleShare}
         >
           <Share2 className="h-4 w-4" />
@@ -277,7 +277,7 @@ export function PostCard({ post, onLike, onNavigateToProfile }: PostCardProps) {
         </button>
 
         <button 
-           className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-md text-[12px] font-semibold text-muted-foreground transition-all hover:bg-muted/60 active:scale-95"
+           className="flex-1 flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 rounded-md text-[11px] sm:text-[12px] font-semibold text-muted-foreground transition-all hover:bg-muted/60 active:scale-95"
            onClick={() => toast.info("Direct messaging enabled.")}
         >
           <Send className="h-4 w-4" />
@@ -287,7 +287,7 @@ export function PostCard({ post, onLike, onNavigateToProfile }: PostCardProps) {
 
       {/* Comments Section */}
       {isCommentsOpen && (
-        <div className="px-6 pb-6 pt-3 space-y-5 border-t border-border/50 animate-in fade-in slide-in-from-top-2 duration-300">
+        <div className="px-4 sm:px-6 pb-4 sm:pb-6 pt-3 space-y-4 sm:space-y-5 border-t border-border/50 animate-in fade-in slide-in-from-top-2 duration-300">
           <form onSubmit={handleCommentSubmit} className="flex gap-3">
              <div className="w-8 h-8 rounded-lg bg-muted shrink-0 overflow-hidden border border-border flex items-center justify-center text-[10px] font-bold text-muted-foreground">
                {user?.first_name?.charAt(0) || 'U'}

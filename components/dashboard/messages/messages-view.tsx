@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Search, Plus, Send, Paperclip, Smile, Phone, Video, Info, Loader2, MessageSquare } from 'lucide-react';
+import { Search, Plus, Send, Paperclip, Smile, Phone, Video, Info, Loader2, MessageSquare, ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { chatService, ChatRoom, Message } from '@/services/chat.service';
@@ -93,6 +93,11 @@ export function MessagesView({ isCollapsed }: { isCollapsed: boolean }) {
     setTimeout(() => setIsSwitching(false), 400);
   };
 
+  const handleBackToList = () => {
+    setActiveRoomId(null);
+    setDisplayMessages([]);
+  };
+
   const handleSend = () => {
     if (!messageInput.trim() || !activeRoomId) return;
     sendMessage(messageInput.trim());
@@ -128,19 +133,22 @@ export function MessagesView({ isCollapsed }: { isCollapsed: boolean }) {
   return (
     <div className={cn(
       "flex-1 h-[calc(100vh-64px)] bg-background flex transition-all duration-300 ease-in-out",
-      isCollapsed ? "ml-20" : "ml-60"
+      isCollapsed ? "lg:ml-20" : "lg:ml-60"
     )}>
-      {/* Conversations Sidebar */}
-      <div className="w-72 border-r border-border flex flex-col pt-6 bg-sidebar/50">
-        <div className="px-6 mb-6 flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-foreground tracking-tight">Messages</h2>
+      {/* Conversations Sidebar - hidden on mobile when a chat is active */}
+      <div className={cn(
+        "w-full md:w-72 border-r border-border flex flex-col pt-6 bg-sidebar/50 shrink-0",
+        activeRoomId ? "hidden md:flex" : "flex"
+      )}>
+        <div className="px-4 sm:px-6 mb-6 flex items-center justify-between">
+          <h2 className="text-lg sm:text-xl font-semibold text-foreground tracking-tight">Messages</h2>
           <button className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary hover:bg-primary/20 transition-all shadow-sm">
             <Plus className="w-4 h-4" />
           </button>
         </div>
 
         {/* Search */}
-        <div className="px-6 mb-6">
+        <div className="px-4 sm:px-6 mb-6">
           <div className="relative group">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
             <input
@@ -187,7 +195,7 @@ export function MessagesView({ isCollapsed }: { isCollapsed: boolean }) {
                       )}>
                         {room.is_group ? room.name : `${partner?.first_name || ''} ${partner?.last_name || ''}`.trim() || 'User'}
                       </h4>
-                      <span className="text-[10px] text-muted-foreground font-medium">
+                      <span className="text-[10px] text-muted-foreground font-medium shrink-0 ml-2">
                         {room.latest_message ? format(new Date(room.latest_message.created_at), 'HH:mm') : ''}
                       </span>
                     </div>
@@ -203,12 +211,22 @@ export function MessagesView({ isCollapsed }: { isCollapsed: boolean }) {
       </div>
 
       {/* Main Chat Panel */}
-      <div className="flex-1 flex flex-col bg-background relative overflow-hidden">
+      <div className={cn(
+        "flex-1 flex flex-col bg-background relative overflow-hidden",
+        activeRoomId ? "flex" : "hidden md:flex"
+      )}>
         {activeRoomId ? (
           <>
             {/* Chat Header */}
-            <div className="px-8 py-4 border-b border-border flex items-center justify-between bg-background/80 backdrop-blur-md relative z-10">
+            <div className="px-4 sm:px-8 py-4 border-b border-border flex items-center justify-between bg-background/80 backdrop-blur-md relative z-10">
               <div className="flex items-center gap-3">
+                {/* Mobile back button */}
+                <button
+                  onClick={handleBackToList}
+                  className="w-9 h-9 flex items-center justify-center rounded-xl border border-border text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all md:hidden"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                </button>
                 <div className="w-10 h-10 rounded-xl overflow-hidden border border-border shadow-sm">
                   <img
                     src={otherParticipant?.profile?.profile_image_url || `https://ui-avatars.com/api/?name=${otherParticipant?.first_name || 'U'}&background=818CF8&color=fff`}
@@ -231,11 +249,11 @@ export function MessagesView({ isCollapsed }: { isCollapsed: boolean }) {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                <button className="w-9 h-9 flex items-center justify-center rounded-xl border border-border text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all shadow-sm">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <button className="w-9 h-9 hidden sm:flex items-center justify-center rounded-xl border border-border text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all shadow-sm">
                   <Phone className="w-4 h-4" />
                 </button>
-                <button className="w-9 h-9 flex items-center justify-center rounded-xl border border-border text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all shadow-sm">
+                <button className="w-9 h-9 hidden sm:flex items-center justify-center rounded-xl border border-border text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all shadow-sm">
                   <Video className="w-4 h-4" />
                 </button>
                 <button className="w-9 h-9 flex items-center justify-center rounded-xl border border-border text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all shadow-sm">
@@ -245,7 +263,7 @@ export function MessagesView({ isCollapsed }: { isCollapsed: boolean }) {
             </div>
 
             {/* Messages Thread */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-8 space-y-6 relative z-10">
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-8 space-y-6 relative z-10">
               {isSwitching || isLoadingHistory ? (
                 <div className="h-full flex items-center justify-center">
                   <div className="flex flex-col items-center gap-3">
@@ -279,9 +297,9 @@ export function MessagesView({ isCollapsed }: { isCollapsed: boolean }) {
             </div>
 
             {/* Chat Input */}
-            <div className="p-6 bg-gradient-to-t from-background via-background to-transparent relative z-10">
-              <div className="max-w-4xl mx-auto flex items-end gap-2 bg-muted/40 border border-border rounded-2xl p-3 shadow-lg backdrop-blur-xl group-focus-within:border-primary/30 transition-all">
-                <button className="p-2 text-muted-foreground hover:text-primary transition-colors">
+            <div className="p-3 sm:p-6 bg-gradient-to-t from-background via-background to-transparent relative z-10">
+              <div className="max-w-4xl mx-auto flex items-end gap-2 bg-muted/40 border border-border rounded-2xl p-2 sm:p-3 shadow-lg backdrop-blur-xl group-focus-within:border-primary/30 transition-all">
+                <button className="p-2 text-muted-foreground hover:text-primary transition-colors hidden sm:block">
                   <Paperclip className="w-5 h-5 opacity-60" />
                 </button>
                 <textarea
@@ -292,13 +310,13 @@ export function MessagesView({ isCollapsed }: { isCollapsed: boolean }) {
                   className="flex-1 bg-transparent border-none outline-none py-2 text-sm text-foreground placeholder:text-muted-foreground resize-none max-h-32 font-normal"
                   rows={1}
                 />
-                <button className="p-2 text-muted-foreground hover:text-primary transition-colors">
+                <button className="p-2 text-muted-foreground hover:text-primary transition-colors hidden sm:block">
                   <Smile className="w-5 h-5 opacity-60" />
                 </button>
                 <button
                   onClick={handleSend}
                   disabled={!messageInput.trim()}
-                  className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-primary-foreground shadow-sm hover:opacity-90 active:scale-95 transition-all disabled:opacity-30"
+                  className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-primary-foreground shadow-sm hover:opacity-90 active:scale-95 transition-all disabled:opacity-30 shrink-0"
                 >
                   <Send className="w-4.5 h-4.5" />
                 </button>
@@ -344,13 +362,13 @@ function MessageItem({
   onDelete: () => void;
 }) {
   return (
-    <div className={cn("flex gap-3 max-w-[85%] items-end group/item", isMine ? "ml-auto flex-row-reverse" : "")}>
+    <div className={cn("flex gap-3 max-w-[90%] sm:max-w-[85%] items-end group/item", isMine ? "ml-auto flex-row-reverse" : "")}>
       {!isMine && (
         <img src={avatar} className="w-8 h-8 rounded-lg object-cover shrink-0 border border-border shadow-sm" alt="" />
       )}
       <div className={cn("flex flex-col relative", isMine ? "items-end" : "items-start")}>
         <div className={cn(
-          "px-4 py-3 rounded-2xl text-[13px] leading-relaxed shadow-sm font-normal",
+          "px-3 sm:px-4 py-2.5 sm:py-3 rounded-2xl text-[13px] leading-relaxed shadow-sm font-normal",
           isMine
             ? "bg-primary/10 text-foreground rounded-br-none border border-primary/20"
             : "bg-muted/50 text-foreground border border-border rounded-bl-none"
@@ -360,7 +378,7 @@ function MessageItem({
         
         {/* Action Menu (Only for own messages) */}
         {isMine && (
-          <div className="absolute -left-10 top-1/2 -translate-y-1/2 opacity-0 group-hover/item:opacity-100 transition-opacity">
+          <div className="absolute -left-10 top-1/2 -translate-y-1/2 opacity-0 group-hover/item:opacity-100 transition-opacity hidden sm:block">
             <DropdownMenu>
               <DropdownMenuTrigger className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-muted/80 text-muted-foreground outline-none transition-all">
                 <MoreHorizontal className="w-4 h-4" />

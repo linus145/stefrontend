@@ -7,7 +7,7 @@ export function RightSidebar() {
   const { user } = useAuth();
 
   return (
-    <aside className="w-72 h-screen fixed right-0 top-0 bg-sidebar/50 border-l border-border flex flex-col pt-20 pb-8 px-6 z-10 transition-all duration-300">
+    <aside className="w-72 h-screen fixed right-0 top-0 bg-sidebar/50 border-l border-border flex-col pt-20 pb-8 px-6 z-10 transition-all duration-300 hidden xl:flex">
 
       {/* Trending Startups */}
       <div className="mb-10">

@@ -100,28 +100,28 @@ export function NetworkView({
 
   return (
     <div className={cn(
-      "flex-1 min-h-screen bg-background px-8 py-10 transition-all duration-300 ease-in-out",
-      isCollapsed ? "ml-20" : "ml-60"
+      "flex-1 min-h-screen bg-background px-4 sm:px-6 lg:px-8 py-6 sm:py-10 transition-all duration-300 ease-in-out",
+      isCollapsed ? "lg:ml-20" : "lg:ml-60"
     )}>
       <div className="max-w-6xl mx-auto">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+        <div className="flex flex-col gap-4 sm:gap-6 mb-8 sm:mb-12">
           <div>
-            <h1 className="text-3xl font-semibold text-foreground tracking-tight mb-1">Network</h1>
-            <p className="text-muted-foreground text-sm font-medium">Connect with the top 1% of the startup ecosystem.</p>
+            <h1 className="text-2xl sm:text-3xl font-semibold text-foreground tracking-tight mb-1">Network</h1>
+            <p className="text-muted-foreground text-xs sm:text-sm font-medium">Connect with the top 1% of the startup ecosystem.</p>
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="relative group">
+            <div className="relative group flex-1 sm:flex-none">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
               <input
                 type="text"
                 placeholder="Search individuals..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-muted/40 border border-border rounded-xl py-2.5 pl-10 pr-4 text-[13px] text-foreground placeholder:text-muted-foreground focus:ring-1 focus:ring-primary/20 focus:border-primary/30 outline-none transition-all w-64 shadow-sm"
+                className="bg-muted/40 border border-border rounded-xl py-2.5 pl-10 pr-4 text-[13px] text-foreground placeholder:text-muted-foreground focus:ring-1 focus:ring-primary/20 focus:border-primary/30 outline-none transition-all w-full sm:w-64 shadow-sm"
               />
             </div>
-            <Button variant="ghost" size="icon" className="rounded-xl border border-border bg-muted/40 text-muted-foreground hover:text-foreground shadow-sm">
+            <Button variant="ghost" size="icon" className="rounded-xl border border-border bg-muted/40 text-muted-foreground hover:text-foreground shadow-sm shrink-0">
               <Filter className="w-4 h-4" />
             </Button>
           </div>
@@ -129,12 +129,12 @@ export function NetworkView({
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as NetworkCategory)} className="w-full">
-          <TabsList className="bg-transparent border-b border-border rounded-none p-0 h-auto gap-8 mb-8">
+          <TabsList className="bg-transparent border-b border-border rounded-none p-0 h-auto gap-4 sm:gap-8 mb-6 sm:mb-8 overflow-x-auto flex-nowrap w-full">
             {(Object.keys(TAB_MAP) as NetworkCategory[]).map((tab) => (
               <TabsTrigger
                 key={tab}
                 value={tab}
-                className="bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-sky-500 data-[state=active]:text-sky-500 rounded-none pb-4 text-xs font-bold uppercase tracking-widest transition-all relative"
+                className="bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-sky-500 data-[state=active]:text-sky-500 rounded-none pb-3 sm:pb-4 text-[10px] sm:text-xs font-bold uppercase tracking-wider sm:tracking-widest transition-all relative whitespace-nowrap shrink-0"
               >
                 {TAB_MAP[tab]}
               </TabsTrigger>
@@ -151,7 +151,7 @@ export function NetworkView({
             </div>
           ) : (
             <TabsContent value={activeTab} className="mt-0">
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
                 {filteredPeople?.map((person: NetworkPerson) => (
                   <Card
                     key={person.id}

@@ -54,7 +54,7 @@ export function EcosystemContent({ isCollapsed, userId }: EcosystemContentProps)
     return (
       <div className={cn(
         "flex-1 min-h-screen bg-background flex items-center justify-center transition-all duration-300",
-        isCollapsed ? "ml-20" : "ml-60"
+        isCollapsed ? "lg:ml-20" : "lg:ml-60"
       )}>
         <div className="flex flex-col items-center gap-4">
            <div className="w-10 h-10 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
@@ -66,8 +66,8 @@ export function EcosystemContent({ isCollapsed, userId }: EcosystemContentProps)
 
   return (
     <div className={cn(
-      "flex-1 min-h-screen bg-[#F4F2EE] dark:bg-[#06080C] px-4 py-8 transition-all duration-300 ease-in-out",
-      isCollapsed ? "ml-20" : "ml-60"
+      "flex-1 min-h-screen bg-[#F4F2EE] dark:bg-[#06080C] px-3 sm:px-4 py-6 sm:py-8 transition-all duration-300 ease-in-out",
+      isCollapsed ? "lg:ml-20" : "lg:ml-60"
     )}>
       <div className="max-w-[1128px] mx-auto grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6">
         {/* Main Column */}

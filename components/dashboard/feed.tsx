@@ -76,14 +76,17 @@ export function Feed({ isCollapsed, onNavigateToProfile }: FeedProps) {
 
   return (
     <div className={cn(
-      "flex-1 min-h-screen bg-background px-8 py-8 mr-80 transition-all duration-300 ease-in-out",
-      isCollapsed ? "ml-20" : "ml-60"
+      "flex-1 min-h-screen bg-background px-4 sm:px-6 lg:px-8 py-6 sm:py-8 transition-all duration-300 ease-in-out",
+      // Mobile: no sidebar margins, no right margin
+      // Tablet/Desktop: sidebar margins + right sidebar margin
+      "mr-0 xl:mr-80",
+      isCollapsed ? "lg:ml-20" : "lg:ml-60"
     )}>
       
       {/* Feed Header */}
       <div className="max-w-2xl mx-auto mb-6 flex items-center justify-between">
         <div className="flex flex-col">
-          <h2 className="text-xl font-semibold text-foreground tracking-tight">Post Stream</h2>
+          <h2 className="text-lg sm:text-xl font-semibold text-foreground tracking-tight">Post Stream</h2>
           <p className="text-[10px] text-sky-500 font-semibold uppercase tracking-[0.2em] flex items-center gap-2">
             <span className="flex h-1.5 w-1.5 rounded-full bg-sky-500 animate-pulse" />
             Live Network
@@ -96,34 +99,34 @@ export function Feed({ isCollapsed, onNavigateToProfile }: FeedProps) {
         {/* Composer (Open Modal Trigger) */}
         <div 
           onClick={() => setIsModalOpen(true)}
-          className="bg-card border border-border/80 rounded-2xl p-5 shadow-sm space-y-4 hover:border-primary/30 transition-all duration-300 cursor-pointer group"
+          className="bg-card border border-border/80 rounded-2xl p-4 sm:p-5 shadow-sm space-y-4 hover:border-primary/30 transition-all duration-300 cursor-pointer group"
         >
-          <div className="flex gap-4">
-            <div className="w-12 h-12 rounded-xl bg-muted/50 shrink-0 flex items-center justify-center text-primary font-bold border border-border overflow-hidden shadow-sm group-hover:bg-primary group-hover:text-white transition-all">
+          <div className="flex gap-3 sm:gap-4">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-muted/50 shrink-0 flex items-center justify-center text-primary font-bold border border-border overflow-hidden shadow-sm group-hover:bg-primary group-hover:text-white transition-all text-sm sm:text-base">
                {user?.first_name ? user.first_name.charAt(0) : 'U'}
             </div>
             <div className="flex-1">
-               <div className="w-full bg-muted/20 border border-border rounded-2xl py-3 px-5 text-[15px] text-muted-foreground/60 font-medium transition-all min-h-[52px] flex items-center group-hover:bg-muted/30">
+               <div className="w-full bg-muted/20 border border-border rounded-2xl py-2.5 sm:py-3 px-4 sm:px-5 text-sm sm:text-[15px] text-muted-foreground/60 font-medium transition-all min-h-[44px] sm:min-h-[52px] flex items-center group-hover:bg-muted/30">
                   What's on your architectural mind?
                </div>
             </div>
           </div>
 
           <div className="flex items-center justify-between pt-1">
-            <div className="flex items-center gap-1">
-              <button className="flex items-center gap-2.5 py-2 px-3 rounded-xl text-[13px] font-bold text-muted-foreground hover:bg-primary/5 hover:text-primary transition-all group/btn">
-                <ImageIcon className="h-5 w-5 text-sky-500 group-hover/btn:scale-110 transition-transform" />
-                <span>Photo</span>
+            <div className="flex items-center gap-0.5 sm:gap-1">
+              <button className="flex items-center gap-1.5 sm:gap-2.5 py-2 px-2 sm:px-3 rounded-xl text-[12px] sm:text-[13px] font-bold text-muted-foreground hover:bg-primary/5 hover:text-primary transition-all group/btn">
+                <ImageIcon className="h-4 w-4 sm:h-5 sm:w-5 text-sky-500 group-hover/btn:scale-110 transition-transform" />
+                <span className="hidden sm:inline">Photo</span>
               </button>
               
-              <button className="flex items-center gap-2.5 py-2 px-3 rounded-xl text-[13px] font-bold text-muted-foreground hover:bg-emerald-500/5 hover:text-emerald-600 transition-all group/btn">
-                <BarChart2 className="h-5 w-5 text-emerald-500 group-hover/btn:scale-110 transition-transform" />
-                <span>Poll</span>
+              <button className="flex items-center gap-1.5 sm:gap-2.5 py-2 px-2 sm:px-3 rounded-xl text-[12px] sm:text-[13px] font-bold text-muted-foreground hover:bg-emerald-500/5 hover:text-emerald-600 transition-all group/btn">
+                <BarChart2 className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-500 group-hover/btn:scale-110 transition-transform" />
+                <span className="hidden sm:inline">Poll</span>
               </button>
 
-              <button className="flex items-center gap-2.5 py-2 px-3 rounded-xl text-[13px] font-bold text-muted-foreground hover:bg-indigo-500/5 hover:text-indigo-600 transition-all group/btn">
-                <Rocket className="h-5 w-5 text-indigo-500 group-hover/btn:scale-110 transition-transform" />
-                <span>Launch</span>
+              <button className="flex items-center gap-1.5 sm:gap-2.5 py-2 px-2 sm:px-3 rounded-xl text-[12px] sm:text-[13px] font-bold text-muted-foreground hover:bg-indigo-500/5 hover:text-indigo-600 transition-all group/btn">
+                <Rocket className="h-4 w-4 sm:h-5 sm:w-5 text-indigo-500 group-hover/btn:scale-110 transition-transform" />
+                <span className="hidden sm:inline">Launch</span>
               </button>
             </div>
           </div>
@@ -139,7 +142,7 @@ export function Feed({ isCollapsed, onNavigateToProfile }: FeedProps) {
         {/* Feed Posts */}
         {isLoading ? (
           Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-4 opacity-50">
+            <div key={i} className="bg-card border border-border rounded-2xl p-4 sm:p-6 shadow-sm space-y-4 opacity-50">
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-muted animate-pulse" />
                     <div className="space-y-2">

@@ -72,13 +72,13 @@ export function DashboardHeader({
 
    return (
       <header className={cn(
-         "fixed top-0 h-16 transition-all duration-300 ease-in-out flex items-center px-4 sm:px-6 lg:px-8 z-40",
+         "fixed top-0 h-16 transition-all duration-300 ease-in-out flex items-center justify-between px-4 sm:px-6 lg:px-8 z-40",
          "bg-background/80 backdrop-blur-md border-b border-border",
-         "left-0 lg:left-auto",
+         "left-0 right-0 lg:left-auto lg:right-auto",
          isCollapsed ? "lg:left-20" : "lg:left-60",
          hasRightSidebar 
             ? (isRightCollapsed ? "lg:right-16" : "lg:right-72") 
-            : "right-0"
+            : "lg:right-0"
       )}>
 
          {/* Left Section: Mobile Menu / Search */}

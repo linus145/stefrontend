@@ -37,7 +37,7 @@ export function LeftSidebar({ isCollapsed, onToggle, activeSection, onSectionCha
       {/* Mobile Close Button */}
       <button
         onClick={onMobileClose}
-        className="absolute top-4 right-4 lg:hidden w-8 h-8 rounded-lg bg-muted/50 border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-all"
+        className="absolute top-4 right-4 lg:hidden w-8 h-8 rounded-md bg-muted/50 border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-all"
       >
         <X className="h-4 w-4" />
       </button>
@@ -54,7 +54,7 @@ export function LeftSidebar({ isCollapsed, onToggle, activeSection, onSectionCha
       <div className="space-y-6 flex-1 overflow-y-auto custom-scrollbar overflow-x-hidden">
         {/* Brand */}
         <div className={cn("px-6 flex items-center gap-3 transition-all", isCollapsed && !isMobileOpen ? "px-5" : "px-6")}>
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm hover:scale-105 transition-transform cursor-pointer">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground shadow-sm hover:scale-105 transition-transform cursor-pointer">
             <Rocket className="h-4 w-4" />
           </div>
           {(!isCollapsed || isMobileOpen) && (
@@ -120,7 +120,7 @@ export function LeftSidebar({ isCollapsed, onToggle, activeSection, onSectionCha
       <div className={cn("px-4 space-y-6 transition-all", (isCollapsed && !isMobileOpen) ? "px-4" : "px-4")}>
         <div className="space-y-3 pb-2">
           <button className={cn(
-            "flex items-center justify-center gap-2 w-full transition-all rounded-xl bg-primary text-primary-foreground py-2 text-xs font-semibold shadow-sm hover:opacity-90 active:scale-95",
+            "flex items-center justify-center gap-2 w-full transition-all rounded-md bg-primary text-primary-foreground py-2 text-xs font-semibold shadow-sm hover:opacity-90 active:scale-95",
             (isCollapsed && !isMobileOpen) ? "px-0" : "px-2"
           )}>
             <ArrowUpCircle className="h-3.5 w-3.5" />
@@ -159,7 +159,7 @@ function SidebarLink({ onClick, icon, label, isCollapsed, active = false }: {
     <button
       onClick={onClick}
       className={cn(
-        "w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all group relative overflow-hidden",
+        "w-full flex items-center gap-3 px-3 py-2 rounded-md transition-all group relative overflow-hidden",
         active
           ? "bg-primary/10 text-primary shadow-sm"
           : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",

@@ -99,17 +99,21 @@ export function PostCard({ post, onLike, onNavigateToProfile }: PostCardProps) {
   };
 
   return (
-    <div className="bg-card border border-border/60 rounded-xl shadow-sm transition-all group overflow-hidden hover:shadow-md flex flex-col h-full">
+    <div className="bg-card border border-border/60 rounded-md shadow-sm transition-all group overflow-hidden hover:shadow-md flex flex-col h-full">
       {/* Header */}
       <div className="p-3 sm:p-4 pb-2">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2">
             <div 
               onClick={() => onNavigateToProfile(post.author_id)}
-              className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-muted overflow-hidden border border-border/40 shrink-0 relative hover:ring-2 hover:ring-primary/20 transition-all block cursor-pointer group/avatar"
+              className="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-muted overflow-hidden border border-border/40 shrink-0 relative hover:ring-2 hover:ring-primary/20 transition-all block cursor-pointer group/avatar"
             >
               {post.author_image_url ? (
-                <img src={getOptimizedImage(post.author_image_url)} alt={post.author_first_name} className="w-full h-full object-cover transition-transform group-hover/avatar:scale-110" />
+                <img 
+                  src={isOwner ? `${getOptimizedImage(post.author_image_url)}&v=${user?.updated_at ? new Date(user.updated_at).getTime() : Date.now()}` : getOptimizedImage(post.author_image_url)} 
+                  alt={post.author_first_name} 
+                  className="w-full h-full object-cover transition-transform group-hover/avatar:scale-110" 
+                />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-primary/5 text-primary text-sm font-bold uppercase shadow-inner">
                   {post.author_first_name?.charAt(0) || 'U'}
@@ -148,7 +152,7 @@ export function PostCard({ post, onLike, onNavigateToProfile }: PostCardProps) {
             <DropdownMenuTrigger className="text-muted-foreground hover:text-foreground transition-all p-1.5 rounded-full hover:bg-muted/50 outline-none cursor-pointer">
                 <MoreHorizontal className="h-5 w-5" />
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 bg-card border-border rounded-xl shadow-xl">
+            <DropdownMenuContent align="end" className="w-56 bg-card border-border rounded-md shadow-xl">
               <DropdownMenuItem onClick={() => onLike(post.id)} className="flex items-center gap-3 py-2.5 px-3 rounded-lg text-[13px] font-medium cursor-pointer">
                 <Heart className={cn("w-4 h-4 text-muted-foreground", post.user_has_liked && "text-blue-500 fill-current")} />
                 <span>{post.user_has_liked ? 'Remove Like' : 'React with Like'}</span>
@@ -289,8 +293,16 @@ export function PostCard({ post, onLike, onNavigateToProfile }: PostCardProps) {
       {isCommentsOpen && (
         <div className="px-4 sm:px-6 pb-4 sm:pb-6 pt-3 space-y-4 sm:space-y-5 border-t border-border/50 animate-in fade-in slide-in-from-top-2 duration-300">
           <form onSubmit={handleCommentSubmit} className="flex gap-3">
-             <div className="w-8 h-8 rounded-lg bg-muted shrink-0 overflow-hidden border border-border flex items-center justify-center text-[10px] font-bold text-muted-foreground">
-               {user?.first_name?.charAt(0) || 'U'}
+             <div className="w-8 h-8 rounded-md bg-muted shrink-0 overflow-hidden border border-border flex items-center justify-center text-[10px] font-bold text-muted-foreground">
+                {user?.profile?.profile_image_url ? (
+                  <img 
+                    src={`${getOptimizedImage(user.profile.profile_image_url)}&v=${user.updated_at ? new Date(user.updated_at).getTime() : Date.now()}`} 
+                    alt="Me" 
+                    className="w-full h-full object-cover" 
+                  />
+                ) : (
+                  user?.first_name?.charAt(0) || 'U'
+                )}
              </div>
              <div className="flex-1 relative">
                 <input 
@@ -298,7 +310,7 @@ export function PostCard({ post, onLike, onNavigateToProfile }: PostCardProps) {
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
                   placeholder="Write a comment..."
-                  className="w-full bg-muted/50 border border-border rounded-xl py-2 px-4 pr-10 text-[13px] text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary/20 focus:border-primary/40 transition-all"
+                  className="w-full bg-muted/50 border border-border rounded-md py-2 px-4 pr-10 text-[13px] text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary/20 focus:border-primary/40 transition-all"
                 />
                 <button 
                   disabled={commentMutation.isPending || !newComment.trim()}
@@ -320,10 +332,14 @@ export function PostCard({ post, onLike, onNavigateToProfile }: PostCardProps) {
                 <div key={comment.id} className="flex gap-3 group">
                   <div 
                     onClick={() => onNavigateToProfile(comment.user_id || post.author_id)} // Fallback if user_id is missing, but should be there
-                    className="w-8 h-8 rounded-lg bg-muted shrink-0 border border-border flex items-center justify-center text-[10px] font-bold text-muted-foreground overflow-hidden hover:ring-2 hover:ring-primary/20 transition-all cursor-pointer"
+                    className="w-8 h-8 rounded-md bg-muted shrink-0 border border-border flex items-center justify-center text-[10px] font-bold text-muted-foreground overflow-hidden hover:ring-2 hover:ring-primary/20 transition-all cursor-pointer"
                   >
                     {comment.author_image ? (
-                      <img src={getOptimizedImage(comment.author_image)} alt={comment.author_name} className="w-full h-full object-cover" />
+                      <img 
+                        src={(user?.id === comment.user_id) ? `${getOptimizedImage(comment.author_image)}&v=${user?.updated_at ? new Date(user.updated_at).getTime() : Date.now()}` : getOptimizedImage(comment.author_image)} 
+                        alt={comment.author_name} 
+                        className="w-full h-full object-cover" 
+                      />
                     ) : (
                       comment.author_name?.charAt(0) || 'U'
                     )}

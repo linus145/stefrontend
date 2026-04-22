@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
 import { ImageKitProvider, IKUpload } from 'imagekitio-next';
@@ -44,7 +44,7 @@ export function PostModal({ isOpen, onClose, onPostSuccess }: PostModalProps) {
       if (isTooShort) toast.error(`Post is too short. Please provide at least ${MIN_CHARS} characters to maintain layout quality.`);
       return;
     }
-    
+
     try {
       await postService.createPost({ content, media_url: mediaUrl });
       toast.success('Post created successfully!');
@@ -80,7 +80,7 @@ export function PostModal({ isOpen, onClose, onPostSuccess }: PostModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-[calc(100vw-16px)] sm:max-w-[600px] bg-card border-border p-0 overflow-hidden rounded-2xl shadow-2xl max-h-[95vh]">
+      <DialogContent className="w-[calc(100vw-16px)] sm:max-w-[600px] bg-card border-border p-0 overflow-hidden rounded-md shadow-2xl max-h-[95vh]">
         <DialogHeader className="px-6 py-4 border-b border-border flex flex-row items-center justify-between">
           <DialogTitle className="text-lg font-semibold tracking-tight text-foreground">Create Post</DialogTitle>
         </DialogHeader>
@@ -88,16 +88,24 @@ export function PostModal({ isOpen, onClose, onPostSuccess }: PostModalProps) {
         <div className="px-4 sm:px-6 py-4 space-y-4 max-h-[60vh] sm:max-h-[70vh] overflow-y-auto custom-scrollbar">
           {/* User Profile Info */}
           <div className="flex items-center gap-3">
-             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-muted/50 flex items-center justify-center text-primary font-bold border border-border shadow-sm overflow-hidden text-sm sm:text-base">
-                {user?.first_name ? user.first_name.charAt(0) : 'U'}
+             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-muted/50 flex items-center justify-center text-primary font-bold border border-border shadow-sm overflow-hidden text-sm sm:text-base">
+                {user?.profile?.profile_image_url ? (
+                  <img 
+                    src={`${getOptimizedImage(user.profile.profile_image_url)}&v=${user.updated_at ? new Date(user.updated_at).getTime() : Date.now()}`} 
+                    alt={user?.first_name || 'User'} 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  user?.first_name ? user.first_name.charAt(0) : 'U'
+                )}
              </div>
-             <div className="space-y-0.5">
-                <p className="text-[13px] sm:text-[14px] font-bold text-foreground leading-none">{user?.first_name} {user?.last_name}</p>
-                <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-muted/40 border border-border w-fit">
-                   <Globe className="w-3 h-3 text-muted-foreground" />
-                   <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">Public</span>
-                </div>
-             </div>
+            <div className="space-y-0.5">
+              <p className="text-[13px] sm:text-[14px] font-bold text-foreground leading-none">{user?.first_name} {user?.last_name}</p>
+              <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-muted/40 border border-border w-fit">
+                <Globe className="w-3 h-3 text-muted-foreground" />
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">Public</span>
+              </div>
+            </div>
           </div>
 
           {/* Text Area */}
@@ -109,33 +117,33 @@ export function PostModal({ isOpen, onClose, onPostSuccess }: PostModalProps) {
               placeholder="What's on your architectural mind?"
               className="w-full bg-transparent text-[14px] sm:text-[16px] text-foreground placeholder:text-muted-foreground/50 resize-none outline-none min-h-[120px] sm:min-h-[150px] leading-relaxed"
             />
-            
+
             <div className="flex justify-between items-center mt-2">
-                <button className="p-2 rounded-full hover:bg-muted/50 text-muted-foreground transition-all">
-                   <Smile className="w-5 h-5" />
-                </button>
-                <div className={cn(
-                    "text-[11px] font-bold tracking-widest transition-colors",
-                    isOverLimit ? "text-destructive" : 
-                    isTooShort ? "text-orange-500" :
+              <button className="p-2 rounded-full hover:bg-muted/50 text-muted-foreground transition-all">
+                <Smile className="w-5 h-5" />
+              </button>
+              <div className={cn(
+                "text-[11px] font-bold tracking-widest transition-colors",
+                isOverLimit ? "text-destructive" :
+                  isTooShort ? "text-orange-500" :
                     "text-muted-foreground opacity-40"
-                )}>
-                    {isTooShort && <span className="mr-2 animate-pulse">Needs more detail...</span>}
-                    {charCount.toLocaleString()} / {MAX_CHARS.toLocaleString()}
-                </div>
+              )}>
+                {isTooShort && <span className="mr-2 animate-pulse">Needs more detail...</span>}
+                {charCount.toLocaleString()} / {MAX_CHARS.toLocaleString()}
+              </div>
             </div>
           </div>
 
           {/* Media Preview */}
           {mediaUrl && (
-            <div className="relative rounded-2xl overflow-hidden border border-border group shadow-lg animate-in zoom-in-95 duration-300">
-               <img src={getOptimizedImage(mediaUrl)} alt="Preview" className="w-full object-cover max-h-[400px]" />
-               <button 
+            <div className="relative rounded-md overflow-hidden border border-border group shadow-lg animate-in zoom-in-95 duration-300">
+              <img src={getOptimizedImage(mediaUrl)} alt="Preview" className="w-full object-cover max-h-[400px]" />
+              <button
                 onClick={() => { setMediaUrl(''); setMediaType(null); }}
                 className="absolute top-3 right-3 bg-background/80 backdrop-blur-md text-foreground p-2 rounded-full hover:bg-destructive hover:text-white transition-all shadow-md active:scale-90"
-               >
-                 <Trash2 className="w-4 h-4" />
-               </button>
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
             </div>
           )}
         </div>
@@ -143,46 +151,46 @@ export function PostModal({ isOpen, onClose, onPostSuccess }: PostModalProps) {
         {/* Action Footer */}
         <div className="px-4 sm:px-6 py-3 sm:py-4 bg-muted/10 border-t border-border flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <ImageKitProvider 
-              publicKey={PUBLIC_KEY} 
-              urlEndpoint={URL_ENDPOINT} 
+            <ImageKitProvider
+              publicKey={PUBLIC_KEY}
+              urlEndpoint={URL_ENDPOINT}
               authenticator={handleImageKitAuth}
             >
-                <button 
-                  onClick={() => {
-                    setMediaType('image');
-                    ikUploadRef.current?.click();
-                  }}
-                  disabled={isUploading}
-                  className="w-10 h-10 flex items-center justify-center rounded-xl bg-muted/40 text-sky-500 hover:bg-sky-500/10 transition-all active:scale-90 disabled:opacity-50"
-                  title="Add Photo"
-                >
-                  <ImageIcon className="w-5 h-5" />
-                </button>
+              <button
+                onClick={() => {
+                  setMediaType('image');
+                  ikUploadRef.current?.click();
+                }}
+                disabled={isUploading}
+                className="w-10 h-10 flex items-center justify-center rounded-md bg-muted/40 text-sky-500 hover:bg-sky-500/10 transition-all active:scale-90 disabled:opacity-50"
+                title="Add Photo"
+              >
+                <ImageIcon className="w-5 h-5" />
+              </button>
 
-                <div className="hidden">
-                  <IKUpload
-                    ref={ikUploadRef}
-                    onUploadStart={onUploadStart}
-                    onSuccess={(res) => {
-                        onUploadSuccess(res);
-                        setMediaType('image');
-                    }}
-                    onError={onUploadError}
-                  />
-                </div>
+              <div className="hidden">
+                <IKUpload
+                  ref={ikUploadRef}
+                  onUploadStart={onUploadStart}
+                  onSuccess={(res) => {
+                    onUploadSuccess(res);
+                    setMediaType('image');
+                  }}
+                  onError={onUploadError}
+                />
+              </div>
             </ImageKitProvider>
 
-            <button className="w-10 h-10 flex items-center justify-center rounded-xl bg-muted/40 text-emerald-500 hover:bg-emerald-500/10 transition-all active:scale-90" title="Add Video">
-               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-video"><path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.934a.5.5 0 0 0-.777-.416L16 11"/><rect width="14" height="12" x="2" y="6" rx="2"/></svg>
+            <button className="w-10 h-10 flex items-center justify-center rounded-md bg-muted/40 text-emerald-500 hover:bg-emerald-500/10 transition-all active:scale-90" title="Add Video">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-video"><path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.934a.5.5 0 0 0-.777-.416L16 11" /><rect width="14" height="12" x="2" y="6" rx="2" /></svg>
             </button>
 
-            <button className="w-10 h-10 flex items-center justify-center rounded-xl bg-muted/40 text-[#b49cf8] hover:bg-[#b49cf8]/10 transition-all active:scale-90" title="Schedule">
-               <Calendar className="w-5 h-5" />
+            <button className="w-10 h-10 flex items-center justify-center rounded-md bg-muted/40 text-[#b49cf8] hover:bg-[#b49cf8]/10 transition-all active:scale-90" title="Schedule">
+              <Calendar className="w-5 h-5" />
             </button>
           </div>
 
-          <button 
+          <button
             disabled={(!content.trim() && !mediaUrl) || isUploading || isOverLimit || isTooShort}
             onClick={handlePost}
             className="bg-primary hover:bg-primary/90 disabled:opacity-30 disabled:cursor-not-allowed text-white text-[13px] sm:text-[14px] font-bold py-2 px-6 sm:px-10 rounded-full shadow-lg shadow-primary/20 transition-all active:scale-95"

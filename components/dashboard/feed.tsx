@@ -10,6 +10,7 @@ import { PostCard } from './post/post-card';
 import { PostModal } from './post/post-modal';
 import { toast } from 'sonner';
 import { Post } from '@/types/post.types';
+import { getOptimizedImage } from '@/lib/imagekit';
 
 interface FeedProps {
   isCollapsed: boolean;
@@ -100,14 +101,22 @@ export function Feed({ isCollapsed, isRightCollapsed, onNavigateToProfile }: Fee
         {/* Composer (Open Modal Trigger) */}
         <div
           onClick={() => setIsModalOpen(true)}
-          className="bg-card border border-border/80 rounded-2xl p-4 sm:p-5 shadow-sm space-y-4 hover:border-primary/30 transition-all duration-300 cursor-pointer group"
+          className="bg-card border border-border/80 rounded-md p-4 sm:p-5 shadow-sm space-y-4 hover:border-primary/30 transition-all duration-300 cursor-pointer group"
         >
           <div className="flex gap-3 sm:gap-4">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-muted/50 shrink-0 flex items-center justify-center text-primary font-bold border border-border overflow-hidden shadow-sm group-hover:bg-primary group-hover:text-white transition-all text-sm sm:text-base">
-              {user?.first_name ? user.first_name.charAt(0) : 'U'}
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-muted/50 shrink-0 flex items-center justify-center text-primary font-bold border border-border overflow-hidden shadow-sm transition-all text-sm sm:text-base">
+              {user?.profile?.profile_image_url ? (
+                <img 
+                  src={`${getOptimizedImage(user.profile.profile_image_url)}&v=${user.updated_at ? new Date(user.updated_at).getTime() : Date.now()}`} 
+                  alt={user?.first_name || 'User'} 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                user?.first_name ? user.first_name.charAt(0) : 'U'
+              )}
             </div>
             <div className="flex-1">
-              <div className="w-full bg-muted/20 border border-border rounded-2xl py-2.5 sm:py-3 px-4 sm:px-5 text-sm sm:text-[15px] text-muted-foreground/60 font-medium transition-all min-h-[44px] sm:min-h-[52px] flex items-center group-hover:bg-muted/30">
+              <div className="w-full bg-muted/20 border border-border rounded-full py-2.5 sm:py-3 px-4 sm:px-6 text-sm sm:text-[15px] text-muted-foreground/60 font-medium transition-all min-h-[44px] sm:min-h-[52px] flex items-center group-hover:bg-muted/30 hover:border-primary/20">
                 What's on your architectural mind?
               </div>
             </div>
@@ -143,9 +152,9 @@ export function Feed({ isCollapsed, isRightCollapsed, onNavigateToProfile }: Fee
         {/* Feed Posts */}
         {isLoading ? (
           Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="bg-card border border-border rounded-2xl p-4 sm:p-6 shadow-sm space-y-4 opacity-50">
+            <div key={i} className="bg-card border border-border rounded-md p-4 sm:p-6 shadow-sm space-y-4 opacity-50">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-muted animate-pulse" />
+                <div className="w-10 h-10 rounded-md bg-muted animate-pulse" />
                 <div className="space-y-2">
                   <div className="w-24 h-3 bg-muted rounded animate-pulse" />
                   <div className="w-32 h-2 bg-muted rounded animate-pulse" />
@@ -166,7 +175,7 @@ export function Feed({ isCollapsed, isRightCollapsed, onNavigateToProfile }: Fee
         )}
 
         {postsData?.results.length === 0 && (
-          <div className="text-center py-16 bg-muted/10 border border-border rounded-2xl border-dashed">
+          <div className="text-center py-16 bg-muted/10 border border-border rounded-md border-dashed">
             <p className="text-muted-foreground font-semibold text-xs tracking-wide">No network activity observed.</p>
           </div>
         )}

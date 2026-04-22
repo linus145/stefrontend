@@ -97,7 +97,7 @@ export function DashboardHeader({
                <input
                   type="text"
                   placeholder="Search the network..."
-                  className="w-full h-full bg-muted/50 border border-border rounded-xl pl-10 pr-4 text-[13px] text-foreground placeholder:text-muted-foreground focus:ring-1 focus:ring-primary/20 focus:border-primary/30 outline-none transition-all"
+                  className="w-full h-full bg-muted/50 border border-border rounded-md pl-10 pr-4 text-[13px] text-foreground placeholder:text-muted-foreground focus:ring-1 focus:ring-primary/20 focus:border-primary/30 outline-none transition-all"
                />
             </div>
          </div>
@@ -203,7 +203,7 @@ export function DashboardHeader({
                   </button>
 
                   {showNotifications && (
-                     <div className="absolute top-12 right-0 w-[calc(100vw-32px)] sm:w-[380px] bg-card border border-border rounded-2xl shadow-md overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                     <div className="absolute top-12 right-0 w-[calc(100vw-32px)] sm:w-[380px] bg-card border border-border rounded-md shadow-md overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                         <div className="p-4 border-b border-border flex justify-between items-center bg-muted/20">
                            <div>
                               <h3 className="text-xs font-bold text-foreground">Notifications</h3>
@@ -296,7 +296,7 @@ export function DashboardHeader({
                      <div className="w-full h-full rounded-full bg-background overflow-hidden">
                         {user?.profile?.profile_image_url ? (
                            <img
-                              src={getOptimizedImage(user.profile.profile_image_url)}
+                              src={`${getOptimizedImage(user.profile.profile_image_url)}&v=${user.updated_at ? new Date(user.updated_at).getTime() : Date.now()}`}
                               alt="Profile"
                               className="w-full h-full object-cover rounded-full"
                            />
@@ -329,7 +329,7 @@ export function DashboardHeader({
                )}
 
                {showProfileMenu && (
-                  <div className="absolute top-full right-0 mt-1 w-52 bg-card border border-border rounded-2xl shadow-xl py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="absolute top-full right-0 mt-1 w-52 bg-card border border-border rounded-md shadow-xl py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                      <div className="px-4 py-2 mb-1 border-b border-border/50">
                         <p className="text-[11px] font-bold text-foreground truncate">{user?.first_name} {user?.last_name}</p>
                         <p className="text-[9px] text-muted-foreground truncate font-medium">{user?.email}</p>

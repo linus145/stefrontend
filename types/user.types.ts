@@ -11,6 +11,7 @@ export interface User {
   is_active: boolean;
   is_verified: boolean;
   profile: FounderProfile | InvestorProfile | null;
+  profile_image_url?: string | null;
   created_at: string;
   updated_at: string;
 }

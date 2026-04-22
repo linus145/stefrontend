@@ -69,7 +69,7 @@ function TrendingItem({ label, initial, role }: { label: string, initial: string
   return (
     <div className="flex items-center justify-between group cursor-pointer transition-all">
       <div className="flex items-center gap-3">
-        <div className="w-9 h-9 rounded-xl bg-muted/60 border border-border flex items-center justify-center text-foreground font-bold text-xs group-hover:border-primary/40 transition-all">
+        <div className="w-9 h-9 rounded-md bg-muted/60 border border-border flex items-center justify-center text-foreground font-bold text-xs group-hover:border-primary/40 transition-all">
           {initial}
         </div>
         <div>
@@ -87,7 +87,7 @@ function NetworkItem({ name, role, avatar }: { name: string, role: string, avata
     <div className="flex items-center justify-between group transition-all">
       <div className="flex items-center gap-3">
         <div className="relative">
-          <img src={avatar} alt={name} className="w-9 h-9 rounded-xl border border-border object-cover transition-transform group-hover:scale-105" />
+          <img src={avatar} alt={name} className="w-9 h-9 rounded-md border border-border object-cover transition-transform group-hover:scale-105" />
           <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 border-2 border-sidebar" />
         </div>
         <div>
@@ -95,7 +95,7 @@ function NetworkItem({ name, role, avatar }: { name: string, role: string, avata
           <p className="text-[10px] font-medium text-muted-foreground truncate max-w-[120px] opacity-70">{role}</p>
         </div>
       </div>
-      <button className="w-8 h-8 rounded-xl bg-muted/40 border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/40 transition-all">
+      <button className="w-8 h-8 rounded-md bg-muted/40 border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/40 transition-all">
         <UserPlus className="h-3.5 w-3.5" />
       </button>
     </div>

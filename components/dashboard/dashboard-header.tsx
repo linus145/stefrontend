@@ -77,7 +77,7 @@ export function DashboardHeader({
          "left-0 right-0 lg:left-auto lg:right-auto",
          isCollapsed ? "lg:left-20" : "lg:left-60",
          hasRightSidebar
-            ? (isRightCollapsed ? "lg:right-16" : "lg:right-72")
+            ? (isRightCollapsed ? "xl:right-0 lg:right-0" : "xl:right-72 lg:right-0")
             : "lg:right-0"
       )}>
 

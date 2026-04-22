@@ -16,7 +16,7 @@ export function EcosystemAbout({ user, isOwner = false }: EcosystemAboutProps) {
     : (profile && 'preferred_industries' in profile ? profile.preferred_industries : []);
 
   return (
-    <div className="bg-card border border-border rounded-2xl p-6 shadow-sm transition-all hover:border-primary/20">
+    <div className="bg-card border border-border rounded-lg p-6 shadow-sm transition-all hover:border-primary/20">
       <h2 className="text-lg font-semibold text-foreground tracking-tight mb-4">About</h2>
       <p className="text-muted-foreground leading-relaxed text-[13px] mb-6 font-normal">
         {profile?.bio || "No detailed information provided yet. Update your profile to share your story with the ecosystem."}

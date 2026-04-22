@@ -87,7 +87,7 @@ export function ProfileEditForm({ initialUser }: ProfileEditFormProps) {
         <Button 
            onClick={handleSubmit} 
            disabled={isUpdating}
-            className="bg-primary text-primary-foreground hover:opacity-90 px-6 sm:px-8 h-11 rounded-xl font-bold text-xs shadow-lg shadow-primary/20 transition-all flex items-center gap-2 w-full sm:w-auto justify-center"
+            className="bg-primary text-primary-foreground hover:opacity-90 px-6 sm:px-8 h-11 rounded-md font-bold text-xs shadow-lg shadow-primary/20 transition-all flex items-center gap-2 w-full sm:w-auto justify-center"
         >
           {isUpdating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
           Save Changes
@@ -101,7 +101,7 @@ export function ProfileEditForm({ initialUser }: ProfileEditFormProps) {
             <UserIcon className="w-4 h-4 text-primary" />
             <h2 className="text-[13px] font-bold uppercase tracking-widest text-foreground opacity-80">Identity</h2>
           </div>
-          <div className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-6">
+          <div className="bg-card border border-border rounded-lg p-6 shadow-sm space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide ml-1">First Name</label>
@@ -109,7 +109,7 @@ export function ProfileEditForm({ initialUser }: ProfileEditFormProps) {
                   name="first_name"
                   value={formData.first_name}
                   onChange={handleChange}
-                  className="h-11 bg-muted/30 border-border focus:ring-2 focus:ring-primary/20 focus:border-primary/40 rounded-xl px-4 text-sm transition-all"
+                  className="h-11 bg-muted/30 border-border focus:ring-2 focus:ring-primary/20 focus:border-primary/40 rounded-md px-4 text-sm transition-all"
                 />
               </div>
               <div className="space-y-2">
@@ -118,7 +118,7 @@ export function ProfileEditForm({ initialUser }: ProfileEditFormProps) {
                   name="last_name"
                   value={formData.last_name}
                   onChange={handleChange}
-                  className="h-11 bg-muted/30 border-border focus:ring-2 focus:ring-primary/20 focus:border-primary/40 rounded-xl px-4 text-sm transition-all"
+                  className="h-11 bg-muted/30 border-border focus:ring-2 focus:ring-primary/20 focus:border-primary/40 rounded-md px-4 text-sm transition-all"
                 />
               </div>
             </div>
@@ -128,7 +128,7 @@ export function ProfileEditForm({ initialUser }: ProfileEditFormProps) {
                 name="email"
                 value={formData.email}
                 readOnly
-                className="h-11 bg-muted/20 border-border/50 text-muted-foreground/70 rounded-xl px-4 text-sm cursor-not-allowed border-dashed"
+                className="h-11 bg-muted/20 border-border/50 text-muted-foreground/70 rounded-md px-4 text-sm cursor-not-allowed border-dashed"
               />
             </div>
 
@@ -140,7 +140,7 @@ export function ProfileEditForm({ initialUser }: ProfileEditFormProps) {
                   value={formData.headline}
                   onChange={handleChange}
                   placeholder="e.g. Founder & CEO | AI Engineer"
-                  className="h-11 bg-muted/30 border-border focus:ring-2 focus:ring-primary/20 focus:border-primary/40 rounded-xl px-4 text-sm transition-all"
+                  className="h-11 bg-muted/30 border-border focus:ring-2 focus:ring-primary/20 focus:border-primary/40 rounded-md px-4 text-sm transition-all"
                 />
               </div>
               <div className="space-y-2">
@@ -154,7 +154,7 @@ export function ProfileEditForm({ initialUser }: ProfileEditFormProps) {
                     value={formData.phone_number}
                     onChange={handleChange}
                     placeholder="00000 00000"
-                    className="h-11 bg-muted/30 border-border focus:ring-2 focus:ring-primary/20 focus:border-primary/40 rounded-xl pl-16 pr-4 text-sm font-medium tracking-wide transition-all"
+                    className="h-11 bg-muted/30 border-border focus:ring-2 focus:ring-primary/20 focus:border-primary/40 rounded-md pl-16 pr-4 text-sm font-medium tracking-wide transition-all"
                   />
                 </div>
               </div>
@@ -168,7 +168,7 @@ export function ProfileEditForm({ initialUser }: ProfileEditFormProps) {
             <Shield className="w-4 h-4 text-primary opacity-70" />
             <h2 className="text-[13px] font-bold uppercase tracking-widest text-foreground opacity-80">Professional Narrative</h2>
           </div>
-          <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+          <div className="bg-card border border-border rounded-lg p-6 shadow-sm">
             <div className="space-y-2">
               <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide ml-1">About</label>
               <Textarea
@@ -176,7 +176,7 @@ export function ProfileEditForm({ initialUser }: ProfileEditFormProps) {
                 value={formData.bio}
                 onChange={handleChange}
                 placeholder="Describe your professional journey and mission..."
-                className="min-h-[160px] bg-muted/30 border-border focus:ring-2 focus:ring-primary/20 focus:border-primary/40 rounded-xl p-4 text-[13px] leading-relaxed resize-none transition-all"
+                className="min-h-[160px] bg-muted/30 border-border focus:ring-2 focus:ring-primary/20 focus:border-primary/40 rounded-md p-4 text-[13px] leading-relaxed resize-none transition-all"
               />
             </div>
           </div>
@@ -188,7 +188,7 @@ export function ProfileEditForm({ initialUser }: ProfileEditFormProps) {
             <Globe className="w-4 h-4 text-primary opacity-50" />
             <h2 className="text-[13px] font-bold uppercase tracking-widest text-foreground opacity-80">Additional Information</h2>
           </div>
-          <div className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-6">
+          <div className="bg-card border border-border rounded-lg p-6 shadow-sm space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide ml-1">Location</label>
@@ -199,12 +199,12 @@ export function ProfileEditForm({ initialUser }: ProfileEditFormProps) {
                     value={formData.location}
                     onChange={handleChange}
                     placeholder="City, Country"
-                    className="h-11 bg-muted/30 border-border focus:ring-2 focus:ring-primary/20 focus:border-primary/40 rounded-xl pl-10 pr-4 text-sm transition-all"
+                    className="h-11 bg-muted/30 border-border focus:ring-2 focus:ring-primary/20 focus:border-primary/40 rounded-md pl-10 pr-4 text-sm transition-all"
                   />
                 </div>
               </div>
               <div className="space-y-4">
-                <div className="p-6 bg-primary/5 border border-primary/20 rounded-2xl">
+                <div className="p-6 bg-primary/5 border border-primary/20 rounded-lg">
                   <div className="flex items-start gap-4">
                     <div className="mt-1">
                       <ImageIcon className="w-5 h-5 text-primary opacity-70" />
@@ -229,14 +229,14 @@ export function ProfileEditForm({ initialUser }: ProfileEditFormProps) {
             type="button"
             variant="ghost"
             onClick={() => router.back()}
-            className="text-muted-foreground hover:text-foreground px-8 h-12 rounded-xl font-bold text-xs transition-all active:scale-95 w-full sm:w-auto"
+            className="text-muted-foreground hover:text-foreground px-8 h-12 rounded-md font-bold text-xs transition-all active:scale-95 w-full sm:w-auto"
           >
             Discard Changes
           </Button>
           <Button
             type="submit"
             disabled={isUpdating}
-            className="bg-primary text-primary-foreground hover:opacity-90 px-10 h-12 rounded-xl font-bold text-[13px] shadow-xl shadow-primary/20 transition-all flex items-center gap-2 justify-center w-full sm:w-auto"
+            className="bg-primary text-primary-foreground hover:opacity-90 px-10 h-12 rounded-md font-bold text-[13px] shadow-xl shadow-primary/20 transition-all flex items-center gap-2 justify-center w-full sm:w-auto"
           >
             {isUpdating && <Loader2 className="w-4 h-4 animate-spin" />}
             Update Profile

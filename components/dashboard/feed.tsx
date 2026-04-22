@@ -81,7 +81,7 @@ export function Feed({ isCollapsed, isRightCollapsed, onNavigateToProfile }: Fee
       "flex-1 min-h-screen bg-background px-4 sm:px-6 lg:px-8 py-6 sm:py-8 transition-all duration-300 ease-in-out",
       // Mobile: no sidebar margins, no right margin
       // Tablet/Desktop: sidebar margins + right sidebar margin
-      isRightCollapsed ? "xl:mr-16" : "xl:mr-80",
+      isRightCollapsed ? "xl:mr-0 lg:mr-0" : "xl:mr-72 lg:mr-0",
       isCollapsed ? "lg:ml-20" : "lg:ml-60"
     )}>
 

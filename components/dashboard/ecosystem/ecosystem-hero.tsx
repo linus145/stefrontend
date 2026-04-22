@@ -42,7 +42,7 @@ export function EcosystemHero({ user, onUpdate, isOwner = false, activeTab, onTa
   };
   
   return (
-    <div className="relative mb-8 bg-card border border-border rounded-2xl overflow-hidden shadow-sm group/hero">
+    <div className="relative mb-8 bg-card border border-border rounded-lg overflow-hidden shadow-sm group/hero">
       {/* Banner Section */}
       <div className="relative h-36 sm:h-48 md:h-64 overflow-hidden">
         <img 

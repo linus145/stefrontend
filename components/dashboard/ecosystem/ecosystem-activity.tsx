@@ -23,7 +23,7 @@ export function EcosystemActivity({ user, isOwner = false }: EcosystemActivityPr
   ];
 
   return (
-    <div className="bg-card border border-border rounded-2xl p-6 shadow-sm transition-all hover:border-primary/20">
+    <div className="bg-card border border-border rounded-lg p-6 shadow-sm transition-all hover:border-primary/20">
       <h2 className="text-lg font-semibold text-foreground tracking-tight mb-6">Recent Activity</h2>
       <div className="space-y-6">
         {activities.map((act, idx) => (

@@ -71,7 +71,7 @@ export function EcosystemPosts({ user, isOwner = false }: EcosystemPostsProps) {
 
   if (posts.length === 0) {
     return (
-      <div className="bg-card border border-border rounded-2xl p-12 text-center shadow-sm">
+      <div className="bg-card border border-border rounded-lg p-12 text-center shadow-sm">
         <div className="w-16 h-16 rounded-full bg-muted/20 flex items-center justify-center mx-auto mb-4">
           <MessageSquare className="w-8 h-8 text-muted-foreground opacity-20" />
         </div>

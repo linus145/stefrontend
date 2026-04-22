@@ -19,16 +19,16 @@ export function EcosystemTeam({ user, isOwner = false }: EcosystemTeamProps) {
   ];
 
   return (
-    <div className="bg-card border border-border rounded-2xl p-6 shadow-sm transition-all hover:border-primary/20">
+    <div className="bg-card border border-border rounded-lg p-6 shadow-sm transition-all hover:border-primary/20">
       <h2 className="text-lg font-semibold text-foreground tracking-tight mb-5">Core Team</h2>
       <div className="space-y-3">
         {teamMembers.map((member, idx) => (
           <div 
             key={idx} 
-            className="flex items-center justify-between p-4 rounded-xl bg-muted/40 border border-border group cursor-pointer hover:border-primary/30 transition-all shadow-sm"
+            className="flex items-center justify-between p-4 rounded-md bg-muted/40 border border-border group cursor-pointer hover:border-primary/30 transition-all shadow-sm"
           >
             <div className="flex items-center gap-3">
-               <div className="w-10 h-10 rounded-xl overflow-hidden border border-border bg-sidebar flex items-center justify-center shadow-sm">
+               <div className="w-10 h-10 rounded-md overflow-hidden border border-border bg-sidebar flex items-center justify-center shadow-sm">
                  {member.avatar ? (
                     <img src={member.avatar} alt={member.name} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
                  ) : (
@@ -45,7 +45,7 @@ export function EcosystemTeam({ user, isOwner = false }: EcosystemTeamProps) {
         ))}
         
         {isOwner && (
-          <button className="w-full mt-2 py-3 rounded-xl border border-dashed border-border text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-primary hover:border-primary/40 hover:bg-muted/30 transition-all">
+          <button className="w-full mt-2 py-3 rounded-md border border-dashed border-border text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-primary hover:border-primary/40 hover:bg-muted/30 transition-all">
              + Add Team Member
           </button>
         )}

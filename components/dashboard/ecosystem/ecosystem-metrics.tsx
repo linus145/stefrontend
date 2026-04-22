@@ -48,7 +48,7 @@ export function EcosystemMetrics({ user, isOwner = false }: EcosystemMetricsProp
       {metrics.map((m, idx) => (
         <div 
           key={idx} 
-          className="bg-card border border-border rounded-2xl p-5 shadow-sm transition-all group hover:border-primary/20"
+          className="bg-card border border-border rounded-lg p-5 shadow-sm transition-all group hover:border-primary/20"
         >
           <div className="flex justify-between items-start mb-4">
             <div className="flex items-center gap-2">

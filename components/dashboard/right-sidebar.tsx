@@ -12,20 +12,23 @@ export function RightSidebar({ isCollapsed, onToggle }: RightSidebarProps) {
 
   return (
     <aside className={cn(
-      "h-screen fixed right-0 top-0 bg-sidebar/50 border-l border-border flex flex-col pt-20 pb-8 z-20 transition-all duration-300 ease-in-out hidden xl:flex",
-      isCollapsed ? "w-16 px-2" : "w-72 px-6"
+      "h-screen fixed right-0 top-0 bg-sidebar/50 flex flex-col pt-20 pb-8 z-20 transition-all duration-300 ease-in-out hidden xl:flex",
+      isCollapsed ? "w-0 border-l-0" : "w-72 border-l border-border px-6"
     )}>
       {/* Toggle Button */}
       <button
         onClick={onToggle}
-        className="absolute -left-3 top-24 w-6 h-6 rounded-full bg-background border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/50 transition-all shadow-sm z-30"
+        className={cn(
+          "absolute top-24 w-6 h-6 rounded-full bg-background border flex items-center justify-center text-muted-foreground hover:text-primary transition-all shadow-sm z-30",
+          isCollapsed ? "-left-6 border-border hover:border-primary/50 shadow-md" : "-left-3 border-border hover:border-primary/50"
+        )}
       >
-        {isCollapsed ? <ChevronLeft className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
+        {isCollapsed ? <ChevronLeft className="h-4 w-4 ml-1" /> : <ChevronRight className="h-3.5 w-3.5" />}
       </button>
 
       <div className={cn(
-        "flex flex-col h-full transition-opacity duration-300",
-        isCollapsed ? "opacity-0 pointer-events-none" : "opacity-100"
+        "flex flex-col h-full transition-all duration-300 overflow-hidden",
+        isCollapsed ? "w-0 opacity-0 pointer-events-none" : "w-60 opacity-100"
       )}>
         {/* Trending Startups */}
         <div className="mb-10">

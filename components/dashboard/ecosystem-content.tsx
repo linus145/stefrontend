@@ -93,7 +93,7 @@ export function EcosystemContent({ isCollapsed, userId }: EcosystemContentProps)
           )}
 
           {activeTab === 'Jobs' && (
-            <div className="bg-card border border-border rounded-2xl p-12 text-center shadow-sm">
+            <div className="bg-card border border-border rounded-lg p-12 text-center shadow-sm">
                <Zap className="w-12 h-12 text-primary mx-auto mb-4 opacity-20" />
                <h3 className="text-lg font-bold text-foreground mb-2">No active job listings</h3>
                <p className="text-sm text-muted-foreground">Keep an eye on this space for future opportunities.</p>
@@ -103,7 +103,7 @@ export function EcosystemContent({ isCollapsed, userId }: EcosystemContentProps)
 
         {/* Sidebar Column */}
         <div className="hidden lg:block space-y-4">
-          <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
+          <div className="bg-card border border-border rounded-md p-4 shadow-sm">
              <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-semibold text-foreground">Analytics</h3>
                 <span className="text-[10px] text-muted-foreground font-medium">Private to you</span>
@@ -111,12 +111,12 @@ export function EcosystemContent({ isCollapsed, userId }: EcosystemContentProps)
              <EcosystemMetrics user={profileUser} isOwner={isOwner} />
           </div>
           
-          <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
+          <div className="bg-card border border-border rounded-md p-4 shadow-sm">
              <h3 className="text-sm font-semibold text-foreground mb-4">Cap Table Highlights</h3>
              <EcosystemCapTable user={profileUser} isOwner={isOwner} />
           </div>
 
-          <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
+          <div className="bg-card border border-border rounded-md p-4 shadow-sm">
              <h3 className="text-sm font-semibold text-foreground mb-4">Promoted</h3>
              <div className="space-y-4">
                 <div className="flex gap-3 scale-95 origin-left opacity-80 hover:opacity-100 transition-opacity cursor-pointer">

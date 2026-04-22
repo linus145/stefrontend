@@ -104,10 +104,10 @@ export function DashboardHeader({
 
          {/* Center Section: Navigation Tabs (Desktop) / Theme Toggle (Mobile) */}
          <div className="flex lg:flex-none items-center justify-center">
-            <nav className="hidden lg:flex items-center gap-1 xl:gap-4 h-full">
+            <nav className="hidden lg:flex items-center gap-1 xl:gap-2 h-full">
                <button
                   onClick={() => onSectionChange('dashboard')}
-                  className="relative h-full flex flex-col items-center justify-center px-4 group/tab min-w-[72px]"
+                  className="relative h-full flex flex-col items-center justify-center px-3 group/tab min-w-[64px]"
                >
                   <Home className={cn(
                      "w-[20px] h-[20px] mb-1 transition-all group-hover/tab:scale-110",
@@ -122,7 +122,7 @@ export function DashboardHeader({
 
                <button
                   onClick={() => onSectionChange('network')}
-                  className="relative h-full flex flex-col items-center justify-center px-4 group/tab min-w-[72px]"
+                  className="relative h-full flex flex-col items-center justify-center px-3 group/tab min-w-[64px]"
                >
                   <NetworkIcon className={cn(
                      "w-[20px] h-[20px] mb-1 transition-all group-hover/tab:scale-110",
@@ -137,7 +137,7 @@ export function DashboardHeader({
 
                <button
                   onClick={() => onSectionChange('jobs')}
-                  className="relative h-full flex flex-col items-center justify-center px-4 group/tab min-w-[72px]"
+                  className="relative h-full flex flex-col items-center justify-center px-3 group/tab min-w-[64px]"
                >
                   <Briefcase className={cn(
                      "w-[20px] h-[20px] mb-1 transition-all group-hover/tab:scale-110",
@@ -151,8 +151,28 @@ export function DashboardHeader({
                </button>
 
                <button
+                  onClick={() => onSectionChange('hire')}
+                  className="relative h-full flex flex-col items-center justify-center px-3 group/tab min-w-[64px]"
+               >
+                  <div className="relative">
+                     <Users className={cn(
+                        "w-[20px] h-[20px] mb-1 transition-all group-hover/tab:scale-110",
+                        activeSection === 'hire' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
+                     )} />
+                     <div className="absolute -top-1 -right-4 px-1 py-0.5 bg-primary/20 border border-primary/30 rounded-[4px] text-[6px] font-black text-primary uppercase tracking-tighter scale-75 animate-pulse">
+                        Soon
+                     </div>
+                  </div>
+                  <span className={cn(
+                     "text-[10px] font-bold uppercase tracking-tight transition-colors",
+                     activeSection === 'hire' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
+                  )}>Hire</span>
+                  {activeSection === 'hire' && <div className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
+               </button>
+
+               <button
                   onClick={() => onSectionChange('news')}
-                  className="relative h-full flex flex-col items-center justify-center px-4 group/tab min-w-[72px]"
+                  className="relative h-full flex flex-col items-center justify-center px-3 group/tab min-w-[64px]"
                >
                   <div className="relative">
                      <Newspaper className={cn(

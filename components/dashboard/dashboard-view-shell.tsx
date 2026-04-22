@@ -13,9 +13,10 @@ import { SettingsView } from '@/components/dashboard/settings/settings-view';
 import { DashboardHeader } from '@/components/dashboard/dashboard-header';
 import { GlobalLoader } from '@/components/ui/global-loader';
 import { DashboardThemeProvider } from '@/context/DashboardThemeContext';
-import { Briefcase, Newspaper } from 'lucide-react';
+import { Briefcase, Newspaper, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { MobileBottomNav } from '@/components/dashboard/mobile-bottom-nav';
+import { MobilePostView } from '@/components/dashboard/post/mobile-post-view';
 
 export function DashboardViewShell() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -109,6 +110,32 @@ export function DashboardViewShell() {
         return <NetworkView isCollapsed={isSidebarCollapsed} onSectionChange={handleSectionChange} />;
       case 'settings':
         return <SettingsView isCollapsed={isSidebarCollapsed} />;
+      case 'hire':
+        return (
+          <div className={cn(
+            "flex-1 flex flex-col items-center justify-center p-4 sm:p-8 animate-in fade-in slide-in-from-bottom-4 duration-1000 transition-all ease-out",
+            isSidebarCollapsed ? "lg:ml-20" : "lg:ml-60"
+          )}>
+            <div className="w-24 h-24 rounded-3xl bg-primary/10 border border-dashed border-primary/30 flex items-center justify-center mb-8 relative group">
+              <div className="absolute inset-0 bg-primary/5 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+              <Users className="w-10 h-10 text-primary opacity-40 group-hover:opacity-60 transition-all group-hover:scale-110" />
+            </div>
+            <h3 className="text-2xl font-semibold text-foreground tracking-tight mb-2">Talent Portal Coming Soon</h3>
+            <p className="text-muted-foreground text-sm max-w-xs text-center font-medium leading-relaxed">
+              We're building a premium hiring experience for the startup ecosystem. Stay tuned!
+            </p>
+          </div>
+        );
+      case 'create-post':
+        return (
+          <MobilePostView 
+            onClose={() => handleSectionChange('dashboard')} 
+            onPostSuccess={() => {
+              handleSectionChange('dashboard');
+              // Optionally refresh feed
+            }} 
+          />
+        );
       case 'dashboard':
       default:
         return (

@@ -101,7 +101,7 @@ export function Feed({ isCollapsed, isRightCollapsed, onNavigateToProfile }: Fee
         {/* Composer (Open Modal Trigger) */}
         <div
           onClick={() => setIsModalOpen(true)}
-          className="bg-card border border-border/80 rounded-md p-4 sm:p-5 shadow-sm space-y-4 hover:border-primary/30 transition-all duration-300 cursor-pointer group"
+          className="hidden lg:block bg-card border border-border/80 rounded-md p-4 sm:p-5 shadow-sm space-y-4 hover:border-primary/30 transition-all duration-300 cursor-pointer group"
         >
           <div className="flex gap-3 sm:gap-4">
             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-muted/50 shrink-0 flex items-center justify-center text-primary font-bold border border-border overflow-hidden shadow-sm transition-all text-sm sm:text-base">

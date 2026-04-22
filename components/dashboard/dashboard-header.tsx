@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Search, Bell, Heart, MessageSquare, Loader2, UserPlus, UserMinus, Home, Briefcase, Users, Newspaper, Network as NetworkIcon, Menu } from 'lucide-react';
+import { Search, Bell, Heart, MessageSquare, Loader2, UserPlus, UserMinus, Home, Briefcase, Users, Newspaper, Network as NetworkIcon, Menu, Settings, User, LogOut, ChevronDown } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 import { ThemeToggle } from './theme-toggle';
@@ -15,15 +15,27 @@ import { getOptimizedImage } from '@/lib/imagekit';
 
 interface DashboardHeaderProps {
    isCollapsed: boolean;
+   isRightCollapsed?: boolean;
+   hasRightSidebar?: boolean;
    activeSection: DashboardSection;
    onSectionChange: (section: DashboardSection, userId?: string | null) => void;
    onMobileMenuToggle?: () => void;
 }
 
-export function DashboardHeader({ isCollapsed, activeSection, onSectionChange, onMobileMenuToggle }: DashboardHeaderProps) {
+export function DashboardHeader({ 
+   isCollapsed, 
+   isRightCollapsed, 
+   hasRightSidebar, 
+   activeSection, 
+   onSectionChange, 
+   onMobileMenuToggle 
+}: DashboardHeaderProps) {
    const { user } = useAuth();
    const queryClient = useQueryClient();
    const [showNotifications, setShowNotifications] = React.useState(false);
+   const [showProfileMenu, setShowProfileMenu] = React.useState(false);
+   const [isMenuLocked, setIsMenuLocked] = React.useState(false);
+   const { logout } = useAuth();
 
    const { data: notifications } = useQuery({
       queryKey: ['notifications'],
@@ -51,106 +63,114 @@ export function DashboardHeader({ isCollapsed, activeSection, onSectionChange, o
       }
    };
 
+   const toggleMenu = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      const nextLocked = !isMenuLocked;
+      setIsMenuLocked(nextLocked);
+      setShowProfileMenu(nextLocked);
+   };
+
    return (
       <header className={cn(
-         "fixed top-0 right-0 h-16 transition-all duration-300 ease-in-out flex items-center justify-between px-4 sm:px-6 lg:px-8 z-40",
+         "fixed top-0 h-16 transition-all duration-300 ease-in-out flex items-center px-4 sm:px-6 lg:px-8 z-40",
          "bg-background/80 backdrop-blur-md border-b border-border",
          "left-0 lg:left-auto",
-         isCollapsed ? "lg:left-20" : "lg:left-60"
+         isCollapsed ? "lg:left-20" : "lg:left-60",
+         hasRightSidebar 
+            ? (isRightCollapsed ? "lg:right-16" : "lg:right-72") 
+            : "right-0"
       )}>
 
-         {/* Mobile: Hamburger + Brand */}
-         <div className="flex items-center gap-3 lg:hidden">
-            <button
-               onClick={onMobileMenuToggle}
-               className="w-9 h-9 flex items-center justify-center rounded-xl bg-muted/50 border border-border text-muted-foreground hover:text-foreground transition-all active:scale-95"
-            >
-               <Menu className="w-5 h-5" />
-            </button>
-         </div>
+         {/* Left Section: Mobile Menu / Search */}
+         <div className="flex items-center gap-3 lg:flex-1">
+            <div className="flex items-center gap-3 lg:hidden">
+               <button
+                  onClick={onMobileMenuToggle}
+                  className="w-9 h-9 flex items-center justify-center rounded-xl bg-muted/50 border border-border text-muted-foreground hover:text-foreground transition-all active:scale-95"
+               >
+                  <Menu className="w-5 h-5" />
+               </button>
+            </div>
 
-         {/* Desktop: Search + Nav Tabs */}
-         <div className="hidden lg:flex items-center flex-1 max-w-2xl h-full">
-            <div className="relative group/search h-9 w-72 mr-8">
+            <div className="hidden lg:flex items-center relative group/search h-9 w-64 xl:w-72">
                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within/search:text-primary transition-colors" />
                <input
                   type="text"
-                  placeholder="Universal search..."
+                  placeholder="Search the network..."
                   className="w-full h-full bg-muted/50 border border-border rounded-xl pl-10 pr-4 text-[13px] text-foreground placeholder:text-muted-foreground focus:ring-1 focus:ring-primary/20 focus:border-primary/30 outline-none transition-all"
                />
             </div>
-
-            <nav className="flex items-center gap-6 h-full ml-4">
-               <button
-                  onClick={() => onSectionChange('dashboard')}
-                  className="relative h-full flex flex-col items-center justify-center px-3 group/tab min-w-[64px]"
-               >
-                  <Home className={cn(
-                     "w-[18px] h-[18px] mb-1 transition-colors",
-                     activeSection === 'dashboard' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
-                  )} />
-                  <span className={cn(
-                     "text-[10px] font-medium transition-colors",
-                     activeSection === 'dashboard' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
-                  )}>Home</span>
-                  {activeSection === 'dashboard' && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
-               </button>
-
-               <button
-                  onClick={() => onSectionChange('network')}
-                  className="relative h-full flex flex-col items-center justify-center px-3 group/tab min-w-[64px]"
-               >
-                  <NetworkIcon className={cn(
-                     "w-[18px] h-[18px] mb-1 transition-colors",
-                     activeSection === 'network' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
-                  )} />
-                  <span className={cn(
-                     "text-[10px] font-medium transition-colors",
-                     activeSection === 'network' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
-                  )}>Network</span>
-                  {activeSection === 'network' && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
-               </button>
-
-               <button
-                  onClick={() => onSectionChange('jobs')}
-                  className="relative h-full flex flex-col items-center justify-center px-3 group/tab min-w-[64px]"
-               >
-                  <Briefcase className={cn(
-                     "w-[18px] h-[18px] mb-1 transition-colors",
-                     activeSection === 'jobs' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
-                  )} />
-                  <span className={cn(
-                     "text-[10px] font-medium transition-colors",
-                     activeSection === 'jobs' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
-                  )}>Jobs</span>
-                  {activeSection === 'jobs' && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
-               </button>
-
-               <button
-                  onClick={() => onSectionChange('news')}
-                  className="relative h-full flex flex-col items-center justify-center px-3 group/tab min-w-[64px]"
-               >
-                  <div className="relative">
-                     <Newspaper className={cn(
-                        "w-[18px] h-[18px] mb-1 transition-colors",
-                        activeSection === 'news' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
-                     )} />
-                     <div className="absolute -top-1 -right-3 px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-500 text-[7px] font-black uppercase tracking-tighter scale-75">New</div>
-                  </div>
-                  <span className={cn(
-                     "text-[10px] font-medium transition-colors",
-                     activeSection === 'news' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
-                  )}>News</span>
-                  {activeSection === 'news' && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
-               </button>
-            </nav>
          </div>
 
-         {/* Mobile: Bottom navigation tabs (compact) */}
-         {/* Handled by a separate mobile bottom nav */}
+         {/* Center Section: Navigation Tabs (Dynamic Center) */}
+         <nav className="hidden lg:flex items-center gap-1 xl:gap-4 h-full">
+            <button
+               onClick={() => onSectionChange('dashboard')}
+               className="relative h-full flex flex-col items-center justify-center px-4 group/tab min-w-[72px]"
+            >
+               <Home className={cn(
+                  "w-[20px] h-[20px] mb-1 transition-all group-hover/tab:scale-110",
+                  activeSection === 'dashboard' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
+               )} />
+               <span className={cn(
+                  "text-[10px] font-bold uppercase tracking-tight transition-colors",
+                  activeSection === 'dashboard' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
+               )}>Home</span>
+               {activeSection === 'dashboard' && <div className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
+            </button>
 
-         <div className="flex items-center gap-3 sm:gap-6 justify-end">
-            <div className="flex items-center gap-3 sm:gap-5 sm:pr-6 sm:border-r sm:border-border">
+            <button
+               onClick={() => onSectionChange('network')}
+               className="relative h-full flex flex-col items-center justify-center px-4 group/tab min-w-[72px]"
+            >
+               <NetworkIcon className={cn(
+                  "w-[20px] h-[20px] mb-1 transition-all group-hover/tab:scale-110",
+                  activeSection === 'network' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
+               )} />
+               <span className={cn(
+                  "text-[10px] font-bold uppercase tracking-tight transition-colors",
+                  activeSection === 'network' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
+               )}>Network</span>
+               {activeSection === 'network' && <div className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
+            </button>
+
+            <button
+               onClick={() => onSectionChange('jobs')}
+               className="relative h-full flex flex-col items-center justify-center px-4 group/tab min-w-[72px]"
+            >
+               <Briefcase className={cn(
+                  "w-[20px] h-[20px] mb-1 transition-all group-hover/tab:scale-110",
+                  activeSection === 'jobs' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
+               )} />
+               <span className={cn(
+                  "text-[10px] font-bold uppercase tracking-tight transition-colors",
+                  activeSection === 'jobs' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
+               )}>Jobs</span>
+               {activeSection === 'jobs' && <div className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
+            </button>
+
+            <button
+               onClick={() => onSectionChange('news')}
+               className="relative h-full flex flex-col items-center justify-center px-4 group/tab min-w-[72px]"
+            >
+               <div className="relative">
+                  <Newspaper className={cn(
+                     "w-[20px] h-[20px] mb-1 transition-all group-hover/tab:scale-110",
+                     activeSection === 'news' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
+                  )} />
+                  <div className="absolute -top-1 -right-3 px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-500 text-[7px] font-black uppercase tracking-tighter scale-75">New</div>
+               </div>
+               <span className={cn(
+                  "text-[10px] font-bold uppercase tracking-tight transition-colors",
+                  activeSection === 'news' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
+               )}>News</span>
+               {activeSection === 'news' && <div className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
+            </button>
+         </nav>
+
+         {/* Right Section: Actions / Profile */}
+         <div className="flex items-center gap-3 sm:gap-6 lg:flex-1 justify-end h-full">
+            <div className="flex items-center gap-3 sm:gap-5 sm:pr-6 sm:border-r sm:border-border h-8">
                <ThemeToggle />
 
                <div className="relative">
@@ -241,26 +261,97 @@ export function DashboardHeader({ isCollapsed, activeSection, onSectionChange, o
                Connect Wallet
             </button>
 
+            {/* LinkedIn-style "Me" Section on the right */}
             <div
-               onClick={() => onSectionChange('Profile')}
-               className="relative group/avatar cursor-pointer"
+               className="relative h-full flex flex-col items-center justify-center px-3 group/profile cursor-pointer min-w-[64px]"
+               onMouseEnter={() => !isMenuLocked && setShowProfileMenu(true)}
+               onMouseLeave={() => !isMenuLocked && setShowProfileMenu(false)}
             >
-               <div className="absolute inset-0 bg-primary/20 blur-md opacity-0 group-hover/avatar:opacity-100 transition-opacity" />
-               <div className="w-9 h-9 rounded-full border border-border p-0.5 relative z-10 transition-transform group-hover/avatar:scale-110 shadow-sm">
-                  <div className="w-full h-full rounded-full bg-background overflow-hidden">
-                     {user?.profile?.profile_image_url ? (
-                        <img
-                           src={getOptimizedImage(user.profile.profile_image_url)}
-                           alt="Profile"
-                           className="w-full h-full object-cover rounded-full"
-                        />
-                     ) : (
-                        <div className="w-full h-full bg-primary flex items-center justify-center text-[10px] font-bold text-white uppercase">
-                           {user?.first_name?.[0] || 'U'}
-                        </div>
-                     )}
+               <div
+                  onClick={() => onSectionChange('Profile')}
+                  className="relative mb-0.5"
+               >
+                  <div className={cn(
+                     "w-6 h-6 rounded-full border p-0.5 relative z-10 transition-all duration-300",
+                     (activeSection === 'Profile' || activeSection === 'settings' || showProfileMenu) ? "border-primary" : "border-muted-foreground/30 group-hover/profile:border-foreground"
+                  )}>
+                     <div className="w-full h-full rounded-full bg-background overflow-hidden">
+                        {user?.profile?.profile_image_url ? (
+                           <img
+                              src={getOptimizedImage(user.profile.profile_image_url)}
+                              alt="Profile"
+                              className="w-full h-full object-cover rounded-full"
+                           />
+                        ) : (
+                           <div className="w-full h-full bg-primary flex items-center justify-center text-[10px] font-bold text-white uppercase">
+                              {user?.first_name?.[0] || 'U'}
+                           </div>
+                        )}
+                     </div>
                   </div>
                </div>
+
+               <div
+                  onClick={toggleMenu}
+                  className="flex items-center gap-0.5"
+               >
+                  <span className={cn(
+                     "text-[10px] font-medium transition-colors",
+                     (activeSection === 'Profile' || activeSection === 'settings' || showProfileMenu) ? "text-foreground" : "text-muted-foreground group-hover/profile:text-foreground"
+                  )}>Me</span>
+                  <ChevronDown className={cn(
+                     "w-3 h-3 transition-transform duration-300",
+                     (showProfileMenu || isMenuLocked) ? "rotate-180 text-primary" : "text-muted-foreground group-hover/profile:text-foreground"
+                  )} />
+               </div>
+
+               {/* Indicator Bar */}
+               {(activeSection === 'Profile' || activeSection === 'settings') && (
+                  <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />
+               )}
+
+               {showProfileMenu && (
+                  <div className="absolute top-full right-0 mt-1 w-52 bg-card border border-border rounded-2xl shadow-xl py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                     <div className="px-4 py-2 mb-1 border-b border-border/50">
+                        <p className="text-[11px] font-bold text-foreground truncate">{user?.first_name} {user?.last_name}</p>
+                        <p className="text-[9px] text-muted-foreground truncate font-medium">{user?.email}</p>
+                     </div>
+
+                     <button
+                        onClick={() => {
+                           onSectionChange('Profile');
+                           setShowProfileMenu(false);
+                           setIsMenuLocked(false);
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-[12px] font-medium text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all group/item"
+                     >
+                        <User className="w-4 h-4 transition-colors group-hover/item:text-primary" />
+                        Profile
+                     </button>
+
+                     <button
+                        onClick={() => {
+                           onSectionChange('settings');
+                           setShowProfileMenu(false);
+                           setIsMenuLocked(false);
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-[12px] font-medium text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all group/item"
+                     >
+                        <Settings className="w-4 h-4 transition-colors group-hover/item:text-primary" />
+                        Settings
+                     </button>
+
+                     <div className="mt-1 pt-1 border-t border-border/50">
+                        <button
+                           onClick={() => logout()}
+                           className="w-full flex items-center gap-3 px-4 py-2.5 text-[12px] font-medium text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-all group/item"
+                        >
+                           <LogOut className="w-4 h-4 transition-colors group-hover/item:text-destructive" />
+                           Logout
+                        </button>
+                     </div>
+                  </div>
+               )}
             </div>
          </div>
       </header>

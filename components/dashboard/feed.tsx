@@ -13,13 +13,14 @@ import { Post } from '@/types/post.types';
 
 interface FeedProps {
   isCollapsed: boolean;
+  isRightCollapsed?: boolean;
   onNavigateToProfile: (userId: string) => void;
 }
 
 const PUBLIC_KEY = process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY || '';
 const URL_ENDPOINT = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT || '';
 
-export function Feed({ isCollapsed, onNavigateToProfile }: FeedProps) {
+export function Feed({ isCollapsed, isRightCollapsed, onNavigateToProfile }: FeedProps) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -28,7 +29,7 @@ export function Feed({ isCollapsed, onNavigateToProfile }: FeedProps) {
   const { data: postsData, isLoading } = useQuery({
     queryKey: ['posts'],
     queryFn: () => postService.getPosts(1),
-    refetchInterval: 5000, 
+    refetchInterval: 5000,
   });
 
   // Like Mutation with Optimistic Updates
@@ -79,12 +80,12 @@ export function Feed({ isCollapsed, onNavigateToProfile }: FeedProps) {
       "flex-1 min-h-screen bg-background px-4 sm:px-6 lg:px-8 py-6 sm:py-8 transition-all duration-300 ease-in-out",
       // Mobile: no sidebar margins, no right margin
       // Tablet/Desktop: sidebar margins + right sidebar margin
-      "mr-0 xl:mr-80",
+      isRightCollapsed ? "xl:mr-16" : "xl:mr-80",
       isCollapsed ? "lg:ml-20" : "lg:ml-60"
     )}>
-      
+
       {/* Feed Header */}
-      <div className="max-w-2xl mx-auto mb-6 flex items-center justify-between">
+      <div className="max-w-3xl mx-auto mb-6 flex items-center justify-between">
         <div className="flex flex-col">
           <h2 className="text-lg sm:text-xl font-semibold text-foreground tracking-tight">Post Stream</h2>
           <p className="text-[10px] text-sky-500 font-semibold uppercase tracking-[0.2em] flex items-center gap-2">
@@ -94,21 +95,21 @@ export function Feed({ isCollapsed, onNavigateToProfile }: FeedProps) {
         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto space-y-2">
-        
+      <div className="max-w-3xl mx-auto space-y-2">
+
         {/* Composer (Open Modal Trigger) */}
-        <div 
+        <div
           onClick={() => setIsModalOpen(true)}
           className="bg-card border border-border/80 rounded-2xl p-4 sm:p-5 shadow-sm space-y-4 hover:border-primary/30 transition-all duration-300 cursor-pointer group"
         >
           <div className="flex gap-3 sm:gap-4">
             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-muted/50 shrink-0 flex items-center justify-center text-primary font-bold border border-border overflow-hidden shadow-sm group-hover:bg-primary group-hover:text-white transition-all text-sm sm:text-base">
-               {user?.first_name ? user.first_name.charAt(0) : 'U'}
+              {user?.first_name ? user.first_name.charAt(0) : 'U'}
             </div>
             <div className="flex-1">
-               <div className="w-full bg-muted/20 border border-border rounded-2xl py-2.5 sm:py-3 px-4 sm:px-5 text-sm sm:text-[15px] text-muted-foreground/60 font-medium transition-all min-h-[44px] sm:min-h-[52px] flex items-center group-hover:bg-muted/30">
-                  What's on your architectural mind?
-               </div>
+              <div className="w-full bg-muted/20 border border-border rounded-2xl py-2.5 sm:py-3 px-4 sm:px-5 text-sm sm:text-[15px] text-muted-foreground/60 font-medium transition-all min-h-[44px] sm:min-h-[52px] flex items-center group-hover:bg-muted/30">
+                What's on your architectural mind?
+              </div>
             </div>
           </div>
 
@@ -118,7 +119,7 @@ export function Feed({ isCollapsed, onNavigateToProfile }: FeedProps) {
                 <ImageIcon className="h-4 w-4 sm:h-5 sm:w-5 text-sky-500 group-hover/btn:scale-110 transition-transform" />
                 <span className="hidden sm:inline">Photo</span>
               </button>
-              
+
               <button className="flex items-center gap-1.5 sm:gap-2.5 py-2 px-2 sm:px-3 rounded-xl text-[12px] sm:text-[13px] font-bold text-muted-foreground hover:bg-emerald-500/5 hover:text-emerald-600 transition-all group/btn">
                 <BarChart2 className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-500 group-hover/btn:scale-110 transition-transform" />
                 <span className="hidden sm:inline">Poll</span>
@@ -133,33 +134,33 @@ export function Feed({ isCollapsed, onNavigateToProfile }: FeedProps) {
         </div>
 
         {/* Global Post Modal */}
-        <PostModal 
-            isOpen={isModalOpen} 
-            onClose={() => setIsModalOpen(false)} 
-            onPostSuccess={() => queryClient.invalidateQueries({ queryKey: ['posts'] })}
+        <PostModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onPostSuccess={() => queryClient.invalidateQueries({ queryKey: ['posts'] })}
         />
 
         {/* Feed Posts */}
         {isLoading ? (
           Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="bg-card border border-border rounded-2xl p-4 sm:p-6 shadow-sm space-y-4 opacity-50">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-muted animate-pulse" />
-                    <div className="space-y-2">
-                        <div className="w-24 h-3 bg-muted rounded animate-pulse" />
-                        <div className="w-32 h-2 bg-muted rounded animate-pulse" />
-                    </div>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-muted animate-pulse" />
+                <div className="space-y-2">
+                  <div className="w-24 h-3 bg-muted rounded animate-pulse" />
+                  <div className="w-32 h-2 bg-muted rounded animate-pulse" />
                 </div>
-                <div className="w-full h-32 bg-muted rounded animate-pulse" />
+              </div>
+              <div className="w-full h-32 bg-muted rounded animate-pulse" />
             </div>
           ))
         ) : (
           postsData?.results.map(post => (
-            <PostCard 
-                key={post.id} 
-                post={post} 
-                onLike={(id) => onLike(id)} 
-                onNavigateToProfile={onNavigateToProfile}
+            <PostCard
+              key={post.id}
+              post={post}
+              onLike={(id) => onLike(id)}
+              onNavigateToProfile={onNavigateToProfile}
             />
           ))
         )}

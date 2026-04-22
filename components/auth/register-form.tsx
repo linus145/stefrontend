@@ -46,19 +46,19 @@ export function RegisterForm() {
 
   return (
     <div className="w-full pb-10">
-      <div className="relative w-full rounded-2xl bg-[#121215] shadow-2xl border border-white/[0.05] overflow-hidden">
+      <div className="relative w-full rounded-2xl bg-white shadow-sm hover:shadow-md transition-shadow border border-slate-200 overflow-hidden">
         
         {/* The top gradient border effect */}
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#b49cf8] to-transparent opacity-80" />
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-indigo-500 to-transparent opacity-80" />
         
         <div className="p-8">
-          <h2 className="text-[17px] font-medium text-white text-center mb-8">Request Access</h2>
+          <h2 className="text-[17px] font-medium text-slate-900 text-center mb-8">Request Access</h2>
           
           {/* SSO Buttons replication to keep aesthetic mirroring consistent */}
           <div className="space-y-3 mb-8">
             <button
               type="button"
-              className="w-full flex items-center justify-center gap-3 rounded-lg bg-[#1a1a1f] px-4 py-2.5 text-sm font-medium text-[#d4d4d8] hover:bg-[#202026] transition-colors border border-white/[0.03]"
+              className="w-full flex items-center justify-center gap-3 rounded-lg bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors border border-slate-200 shadow-sm"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
@@ -73,21 +73,21 @@ export function RegisterForm() {
           {/* Divider */}
           <div className="relative mb-8">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-white/[0.08]"></div>
+              <div className="w-full border-t border-slate-200"></div>
             </div>
-            <div className="relative flex justify-center text-[10px] font-bold uppercase tracking-widest text-[#71717a]">
-              <span className="bg-[#121215] px-4">Or sign up with email</span>
+            <div className="relative flex justify-center text-[10px] font-bold uppercase tracking-widest text-slate-400">
+              <span className="bg-white px-4">Or sign up with email</span>
             </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-[11px] font-semibold tracking-wider text-[#a1a1aa] uppercase" htmlFor="first_name">
+                <label className="text-[11px] font-semibold tracking-wider text-slate-600 uppercase" htmlFor="first_name">
                   First Name
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#71717a]">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                     <User className="h-4 w-4" />
                   </div>
                   <input
@@ -95,12 +95,12 @@ export function RegisterForm() {
                     disabled={isSubmitting}
                     value={formData.first_name}
                     onChange={handleChange}
-                    className="w-full rounded-md bg-[#09090b] border border-white/[0.08] text-[#f4f4f5] pl-10 pr-4 py-2.5 text-sm transition-colors focus:ring-1 focus:ring-[#b49cf8] focus:border-[#b49cf8] outline-none"
+                    className="w-full rounded-md bg-slate-50 border border-slate-200 text-slate-900 pl-10 pr-4 py-2.5 text-sm transition-colors focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="text-[11px] font-semibold tracking-wider text-[#a1a1aa] uppercase" htmlFor="last_name">
+                <label className="text-[11px] font-semibold tracking-wider text-slate-600 uppercase" htmlFor="last_name">
                   Last Name
                 </label>
                 <input
@@ -108,17 +108,17 @@ export function RegisterForm() {
                   disabled={isSubmitting}
                   value={formData.last_name}
                   onChange={handleChange}
-                  className="w-full rounded-md bg-[#09090b] border border-white/[0.08] text-[#f4f4f5] px-4 py-2.5 text-sm transition-colors focus:ring-1 focus:ring-[#b49cf8] focus:border-[#b49cf8] outline-none"
+                  className="w-full rounded-md bg-slate-50 border border-slate-200 text-slate-900 px-4 py-2.5 text-sm transition-colors focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-[11px] font-semibold tracking-wider text-[#a1a1aa] uppercase" htmlFor="role">
+              <label className="text-[11px] font-semibold tracking-wider text-slate-600 uppercase" htmlFor="role">
                 Account Type
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#71717a]">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                   <Briefcase className="h-4 w-4" />
                 </div>
                 <select
@@ -126,25 +126,25 @@ export function RegisterForm() {
                   disabled={isSubmitting}
                   value={formData.role}
                   onChange={handleChange}
-                  className="w-full rounded-md bg-[#09090b] border border-white/[0.08] text-[#f4f4f5] pl-10 pr-4 py-2.5 text-sm transition-colors focus:ring-1 focus:ring-[#b49cf8] focus:border-[#b49cf8] outline-none appearance-none"
+                  className="w-full rounded-md bg-slate-50 border border-slate-200 text-slate-900 pl-10 pr-4 py-2.5 text-sm transition-colors focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none appearance-none"
                 >
                   <option value="FOUNDER">Founder</option>
                   <option value="INVESTOR">Investor</option>
                    <option value="MENTOR">Mentor</option>
                 </select>
                 {/* Custom dropdown arrow */}
-                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-[#71717a]">
+                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">
                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
                 </div>
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-[11px] font-semibold tracking-wider text-[#a1a1aa] uppercase" htmlFor="email">
+              <label className="text-[11px] font-semibold tracking-wider text-slate-600 uppercase" htmlFor="email">
                 Email Address
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#71717a]">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                   <Mail className="h-4 w-4" />
                 </div>
                 <input
@@ -155,17 +155,17 @@ export function RegisterForm() {
                   disabled={isSubmitting}
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full rounded-md bg-[#09090b] border border-white/[0.08] text-[#f4f4f5] pl-10 pr-4 py-2.5 text-sm transition-colors focus:ring-1 focus:ring-[#b49cf8] focus:border-[#b49cf8] outline-none placeholder:text-[#52525b]"
+                  className="w-full rounded-md bg-slate-50 border border-slate-200 text-slate-900 pl-10 pr-4 py-2.5 text-sm transition-colors focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none placeholder:text-slate-400"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-[11px] font-semibold tracking-wider text-[#a1a1aa] uppercase" htmlFor="password">
+              <label className="text-[11px] font-semibold tracking-wider text-slate-600 uppercase" htmlFor="password">
                 Password
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#71717a]">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                   <Lock className="h-4 w-4" />
                 </div>
                 <input
@@ -176,17 +176,17 @@ export function RegisterForm() {
                   disabled={isSubmitting}
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full rounded-md bg-[#09090b] border border-white/[0.08] text-[#f4f4f5] pl-10 pr-10 py-2.5 text-sm transition-colors focus:ring-1 focus:ring-[#b49cf8] focus:border-[#b49cf8] outline-none placeholder:text-[#52525b]"
+                  className="w-full rounded-md bg-slate-50 border border-slate-200 text-slate-900 pl-10 pr-10 py-2.5 text-sm transition-colors focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none placeholder:text-slate-400"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center justify-center text-[#71717a] hover:text-white transition-colors"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
-              <p className="text-[10px] text-[#52525b] mt-1">
+              <p className="text-[10px] text-slate-500 mt-1">
                 Requires 8+ chars, 1 uppercase, 1 number natively bounding Django constraints.
               </p>
             </div>
@@ -194,7 +194,7 @@ export function RegisterForm() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-[#b49cf8] to-[#8061f2] py-2.5 text-sm font-semibold text-white shadow-lg hover:shadow-[0_0_20px_rgba(180,156,248,0.3)] transition-all disabled:opacity-70 disabled:cursor-not-allowed mt-4"
+              className="w-full flex items-center justify-center gap-2 rounded-lg bg-indigo-600 py-2.5 text-sm font-semibold text-white shadow-sm hover:shadow-md hover:bg-indigo-700 transition-all disabled:opacity-70 disabled:cursor-not-allowed mt-4"
             >
               {isSubmitting ? 'Architecting Account...' : 'Continue'}
               {!isSubmitting && <ArrowRight className="h-4 w-4" />}
@@ -203,9 +203,9 @@ export function RegisterForm() {
         </div>
       </div>
       
-      <div className="mt-6 text-center text-sm text-[#a1a1aa]">
+      <div className="mt-6 text-center text-sm text-slate-500">
         Already have an account?{' '}
-        <Link href="/login" className="font-medium text-[#d4d4d8] hover:text-white transition-colors">
+        <Link href="/login" className="font-medium text-slate-900 hover:text-indigo-600 transition-colors">
           Sign In natively
         </Link>
       </div>

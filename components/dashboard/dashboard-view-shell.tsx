@@ -25,6 +25,7 @@ export function DashboardViewShell() {
   const [activeSection, setActiveSection] = useState<DashboardSection>('dashboard');
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isRightSidebarCollapsed, setIsRightSidebarCollapsed] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -110,7 +111,13 @@ export function DashboardViewShell() {
         return <SettingsView isCollapsed={isSidebarCollapsed} />;
       case 'dashboard':
       default:
-        return <Feed isCollapsed={isSidebarCollapsed} onNavigateToProfile={handleProfileNavigate} />;
+        return (
+          <Feed 
+            isCollapsed={isSidebarCollapsed} 
+            isRightCollapsed={isRightSidebarCollapsed}
+            onNavigateToProfile={handleProfileNavigate} 
+          />
+        );
     }
   };
 
@@ -119,12 +126,12 @@ export function DashboardViewShell() {
       <div className="flex min-h-screen bg-background selection:bg-primary/20">
         {/* Mobile sidebar overlay */}
         {isMobileSidebarOpen && (
-          <div 
+          <div
             className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden animate-in fade-in duration-200"
             onClick={() => setIsMobileSidebarOpen(false)}
           />
         )}
-        
+
         <LeftSidebar
           isCollapsed={isSidebarCollapsed}
           onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
@@ -136,6 +143,8 @@ export function DashboardViewShell() {
 
         <DashboardHeader
           isCollapsed={isSidebarCollapsed}
+          isRightCollapsed={isRightSidebarCollapsed}
+          hasRightSidebar={activeSection === 'dashboard'}
           activeSection={activeSection}
           onSectionChange={handleSectionChange}
           onMobileMenuToggle={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
@@ -145,7 +154,12 @@ export function DashboardViewShell() {
           {renderContent()}
         </div>
 
-        {activeSection === 'dashboard' && <RightSidebar />}
+        {activeSection === 'dashboard' && (
+          <RightSidebar 
+            isCollapsed={isRightSidebarCollapsed} 
+            onToggle={() => setIsRightSidebarCollapsed(!isRightSidebarCollapsed)} 
+          />
+        )}
 
         {/* Mobile Bottom Navigation */}
         <MobileBottomNav

@@ -112,13 +112,7 @@ export function LeftSidebar({ isCollapsed, onToggle, activeSection, onSectionCha
             isCollapsed={isCollapsed && !isMobileOpen}
             active={activeSection === 'messages'}
           />
-          <SidebarLink
-            onClick={() => onSectionChange('settings')}
-            icon={<Settings className="h-4 w-4" />}
-            label="Settings"
-            isCollapsed={isCollapsed && !isMobileOpen}
-            active={activeSection === 'settings'}
-          />
+
         </nav>
       </div>
 

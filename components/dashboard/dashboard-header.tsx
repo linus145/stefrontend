@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Search, Bell, Heart, MessageSquare, Loader2, UserPlus, UserMinus, Home, Briefcase, Users, Newspaper, Network as NetworkIcon, Menu, Settings, User, LogOut, ChevronDown } from 'lucide-react';
+import { Search, Bell, Heart, MessageSquare, Loader2, UserPlus, UserMinus, Home, Briefcase, Users, Newspaper, Network as NetworkIcon, Menu, Settings, User, LogOut, ChevronDown, Wallet } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 import { ThemeToggle } from './theme-toggle';
@@ -22,13 +22,13 @@ interface DashboardHeaderProps {
    onMobileMenuToggle?: () => void;
 }
 
-export function DashboardHeader({ 
-   isCollapsed, 
-   isRightCollapsed, 
-   hasRightSidebar, 
-   activeSection, 
-   onSectionChange, 
-   onMobileMenuToggle 
+export function DashboardHeader({
+   isCollapsed,
+   isRightCollapsed,
+   hasRightSidebar,
+   activeSection,
+   onSectionChange,
+   onMobileMenuToggle
 }: DashboardHeaderProps) {
    const { user } = useAuth();
    const queryClient = useQueryClient();
@@ -72,12 +72,12 @@ export function DashboardHeader({
 
    return (
       <header className={cn(
-         "fixed top-0 h-16 transition-all duration-300 ease-in-out flex items-center justify-between px-4 sm:px-6 lg:px-8 z-40",
-         "bg-background/80 backdrop-blur-md border-b border-border",
+         "fixed top-0 transition-all duration-300 ease-in-out flex items-center justify-between px-4 sm:px-6 lg:px-8 z-40",
+         "h-20 lg:h-16 bg-background/80 backdrop-blur-md border-b border-border",
          "left-0 right-0 lg:left-auto lg:right-auto",
          isCollapsed ? "lg:left-20" : "lg:left-60",
-         hasRightSidebar 
-            ? (isRightCollapsed ? "lg:right-16" : "lg:right-72") 
+         hasRightSidebar
+            ? (isRightCollapsed ? "lg:right-16" : "lg:right-72")
             : "lg:right-0"
       )}>
 
@@ -102,83 +102,99 @@ export function DashboardHeader({
             </div>
          </div>
 
-         {/* Center Section: Navigation Tabs (Dynamic Center) */}
-         <nav className="hidden lg:flex items-center gap-1 xl:gap-4 h-full">
-            <button
-               onClick={() => onSectionChange('dashboard')}
-               className="relative h-full flex flex-col items-center justify-center px-4 group/tab min-w-[72px]"
-            >
-               <Home className={cn(
-                  "w-[20px] h-[20px] mb-1 transition-all group-hover/tab:scale-110",
-                  activeSection === 'dashboard' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
-               )} />
-               <span className={cn(
-                  "text-[10px] font-bold uppercase tracking-tight transition-colors",
-                  activeSection === 'dashboard' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
-               )}>Home</span>
-               {activeSection === 'dashboard' && <div className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
-            </button>
-
-            <button
-               onClick={() => onSectionChange('network')}
-               className="relative h-full flex flex-col items-center justify-center px-4 group/tab min-w-[72px]"
-            >
-               <NetworkIcon className={cn(
-                  "w-[20px] h-[20px] mb-1 transition-all group-hover/tab:scale-110",
-                  activeSection === 'network' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
-               )} />
-               <span className={cn(
-                  "text-[10px] font-bold uppercase tracking-tight transition-colors",
-                  activeSection === 'network' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
-               )}>Network</span>
-               {activeSection === 'network' && <div className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
-            </button>
-
-            <button
-               onClick={() => onSectionChange('jobs')}
-               className="relative h-full flex flex-col items-center justify-center px-4 group/tab min-w-[72px]"
-            >
-               <Briefcase className={cn(
-                  "w-[20px] h-[20px] mb-1 transition-all group-hover/tab:scale-110",
-                  activeSection === 'jobs' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
-               )} />
-               <span className={cn(
-                  "text-[10px] font-bold uppercase tracking-tight transition-colors",
-                  activeSection === 'jobs' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
-               )}>Jobs</span>
-               {activeSection === 'jobs' && <div className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
-            </button>
-
-            <button
-               onClick={() => onSectionChange('news')}
-               className="relative h-full flex flex-col items-center justify-center px-4 group/tab min-w-[72px]"
-            >
-               <div className="relative">
-                  <Newspaper className={cn(
+         {/* Center Section: Navigation Tabs (Desktop) / Theme Toggle (Mobile) */}
+         <div className="flex lg:flex-none items-center justify-center">
+            <nav className="hidden lg:flex items-center gap-1 xl:gap-4 h-full">
+               <button
+                  onClick={() => onSectionChange('dashboard')}
+                  className="relative h-full flex flex-col items-center justify-center px-4 group/tab min-w-[72px]"
+               >
+                  <Home className={cn(
                      "w-[20px] h-[20px] mb-1 transition-all group-hover/tab:scale-110",
-                     activeSection === 'news' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
+                     activeSection === 'dashboard' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
                   )} />
-                  <div className="absolute -top-1 -right-3 px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-500 text-[7px] font-black uppercase tracking-tighter scale-75">New</div>
-               </div>
-               <span className={cn(
-                  "text-[10px] font-bold uppercase tracking-tight transition-colors",
-                  activeSection === 'news' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
-               )}>News</span>
-               {activeSection === 'news' && <div className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
-            </button>
-         </nav>
+                  <span className={cn(
+                     "text-[10px] font-bold uppercase tracking-tight transition-colors",
+                     activeSection === 'dashboard' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
+                  )}>Home</span>
+                  {activeSection === 'dashboard' && <div className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
+               </button>
+
+               <button
+                  onClick={() => onSectionChange('network')}
+                  className="relative h-full flex flex-col items-center justify-center px-4 group/tab min-w-[72px]"
+               >
+                  <NetworkIcon className={cn(
+                     "w-[20px] h-[20px] mb-1 transition-all group-hover/tab:scale-110",
+                     activeSection === 'network' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
+                  )} />
+                  <span className={cn(
+                     "text-[10px] font-bold uppercase tracking-tight transition-colors",
+                     activeSection === 'network' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
+                  )}>Network</span>
+                  {activeSection === 'network' && <div className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
+               </button>
+
+               <button
+                  onClick={() => onSectionChange('jobs')}
+                  className="relative h-full flex flex-col items-center justify-center px-4 group/tab min-w-[72px]"
+               >
+                  <Briefcase className={cn(
+                     "w-[20px] h-[20px] mb-1 transition-all group-hover/tab:scale-110",
+                     activeSection === 'jobs' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
+                  )} />
+                  <span className={cn(
+                     "text-[10px] font-bold uppercase tracking-tight transition-colors",
+                     activeSection === 'jobs' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
+                  )}>Jobs</span>
+                  {activeSection === 'jobs' && <div className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
+               </button>
+
+               <button
+                  onClick={() => onSectionChange('news')}
+                  className="relative h-full flex flex-col items-center justify-center px-4 group/tab min-w-[72px]"
+               >
+                  <div className="relative">
+                     <Newspaper className={cn(
+                        "w-[20px] h-[20px] mb-1 transition-all group-hover/tab:scale-110",
+                        activeSection === 'news' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
+                     )} />
+                     <div className="absolute -top-1 -right-3 px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-500 text-[7px] font-black uppercase tracking-tighter scale-75">New</div>
+                  </div>
+                  <span className={cn(
+                     "text-[10px] font-bold uppercase tracking-tight transition-colors",
+                     activeSection === 'news' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
+                  )}>News</span>
+                  {activeSection === 'news' && <div className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
+               </button>
+            </nav>
+
+            <div className="lg:hidden">
+               <ThemeToggle />
+            </div>
+         </div>
 
          {/* Right Section: Actions / Profile */}
          <div className="flex items-center gap-3 sm:gap-6 lg:flex-1 justify-end h-full">
             <div className="flex items-center gap-3 sm:gap-5 sm:pr-6 sm:border-r sm:border-border h-8">
-               <ThemeToggle />
+               <div className="hidden lg:block">
+                  <ThemeToggle />
+               </div>
+
+               {/* Mobile Wallet Icon */}
+               <button className="flex lg:hidden text-muted-foreground hover:text-foreground transition-all hover:scale-105 active:scale-95">
+                  <div className="relative">
+                     <Wallet className="w-6 h-6" />
+                     <div className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 border-2 border-background" />
+                  </div>
+               </button>
 
                <div className="relative">
                   <button
                      onClick={() => setShowNotifications(!showNotifications)}
                      className="relative text-muted-foreground hover:text-foreground transition-all hover:scale-105 active:scale-95"
                   >
-                     <Bell className="w-5 h-5" />
+                     <Bell className="w-6 h-6 lg:w-5 lg:h-5" />
                      {unreadCount > 0 && (
                         <span className="absolute -top-1 -right-1 min-w-[15px] h-[15px] px-1 rounded-full bg-primary flex items-center justify-center text-[8px] font-bold text-primary-foreground border-2 border-background">
                            {unreadCount}
@@ -256,9 +272,11 @@ export function DashboardHeader({
                </div>
             </div>
 
-            <button className="hidden xl:flex items-center gap-2.5 px-5 py-2 rounded-xl bg-primary/5 border border-primary/20 text-foreground text-[10px] font-semibold hover:bg-primary/10 transition-all shadow-sm group">
+            <button className="hidden lg:flex items-center gap-2.5 px-4 xl:px-5 py-2 rounded-xl bg-primary/5 border border-primary/20 text-foreground text-[10px] font-bold hover:bg-primary/10 transition-all shadow-sm group">
                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 group-hover:animate-pulse" />
-               Connect Wallet
+               <span className="transition-all duration-300">
+                  {isRightCollapsed ? 'Connect Wallet' : 'Wallet'}
+               </span>
             </button>
 
             {/* LinkedIn-style "Me" Section on the right */}
@@ -272,7 +290,7 @@ export function DashboardHeader({
                   className="relative mb-0.5"
                >
                   <div className={cn(
-                     "w-6 h-6 rounded-full border p-0.5 relative z-10 transition-all duration-300",
+                     "w-7 h-7 lg:w-6 lg:h-6 rounded-full border p-0.5 relative z-10 transition-all duration-300",
                      (activeSection === 'Profile' || activeSection === 'settings' || showProfileMenu) ? "border-primary" : "border-muted-foreground/30 group-hover/profile:border-foreground"
                   )}>
                      <div className="w-full h-full rounded-full bg-background overflow-hidden">
@@ -296,11 +314,11 @@ export function DashboardHeader({
                   className="flex items-center gap-0.5"
                >
                   <span className={cn(
-                     "text-[10px] font-medium transition-colors",
+                     "text-[10px] font-medium transition-colors hidden sm:block",
                      (activeSection === 'Profile' || activeSection === 'settings' || showProfileMenu) ? "text-foreground" : "text-muted-foreground group-hover/profile:text-foreground"
                   )}>Me</span>
                   <ChevronDown className={cn(
-                     "w-3 h-3 transition-transform duration-300",
+                     "w-3.5 h-3.5 lg:w-3 lg:h-3 transition-transform duration-300",
                      (showProfileMenu || isMenuLocked) ? "rotate-180 text-primary" : "text-muted-foreground group-hover/profile:text-foreground"
                   )} />
                </div>

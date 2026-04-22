@@ -14,5 +14,13 @@ export const authService = {
   // Backend reads refresh_token from HttpOnly cookie — no body needed.
   refreshToken: (): Promise<{ status: string; message: string }> => {
     return api.post<{ status: string; message: string }>('/auth/token/refresh/', {});
+  },
+
+  changePassword: (data: any): Promise<BaseAPIResponse<any>> => {
+    return api.post<BaseAPIResponse<any>>('/auth/change-password/', data);
+  },
+
+  updateMobileNumber: (phone_number: string): Promise<BaseAPIResponse<any>> => {
+    return api.post<BaseAPIResponse<any>>('/auth/update-mobile/', { phone_number });
   }
 };

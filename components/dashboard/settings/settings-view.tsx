@@ -1,17 +1,19 @@
+'use client';
+
 import React, { useState } from 'react';
 import { 
-  User, Lock, Bell, Eye, Shield, Camera, 
+  User, Lock, Bell, Eye, EyeOff, Shield, Camera, 
   Mail, Phone, Save, Trash2, Smartphone, 
-  MapPin, Globe, CreditCard, LogOut
+  MapPin, Globe, CreditCard, LogOut, ChevronDown, CheckCircle2
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
+import { PrivacyTab } from './privacy-tab';
+import { NotificationsTab } from './notifications-tab';
+import { SecurityTab } from './security-tab';
 
 type SettingsTab = 'Privacy' | 'Notifications' | 'Security';
 
@@ -90,24 +92,20 @@ export function SettingsView({ isCollapsed }: { isCollapsed: boolean }) {
         <div className="max-w-3xl mx-auto space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
           
           <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as SettingsTab)} className="w-full">
-            {/* Placeholder Content for other tabs with standard Cards */}
-            {['Privacy', 'Notifications', 'Security'].map((tab) => (
-              <TabsContent key={tab} value={tab} className="space-y-8 mt-0">
-                <div>
-                  <h3 className="text-2xl font-semibold text-foreground tracking-tight">{tab} Settings</h3>
-                  <p className="text-muted-foreground text-sm font-medium mt-1">Configure how you interact with the STE platform.</p>
-                </div>
-                <Card className="rounded-2xl border-border bg-card shadow-sm p-12 flex flex-col items-center justify-center text-center">
-                   <div className="w-16 h-16 rounded-2xl bg-muted/50 border border-border flex items-center justify-center text-primary mb-6">
-                      {menuItems.find(m => m.id === tab)?.icon}
-                   </div>
-                   <h4 className="text-lg font-bold text-foreground mb-2">{tab} Controls</h4>
-                   <p className="text-sm text-muted-foreground max-w-xs mx-auto">
-                      Advanced {tab.toLowerCase()} features are currently being verified for the unified STE 2.0 release.
-                   </p>
-                </Card>
-              </TabsContent>
-            ))}
+            {/* Privacy Tab */}
+            <TabsContent value="Privacy">
+               <PrivacyTab />
+            </TabsContent>
+
+            {/* Notifications Tab */}
+            <TabsContent value="Notifications">
+               <NotificationsTab />
+            </TabsContent>
+
+            {/* Security Tab */}
+            <TabsContent value="Security">
+               <SecurityTab />
+            </TabsContent>
 
           </Tabs>
 

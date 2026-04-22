@@ -74,15 +74,15 @@ export function DashboardHeader({
       <header className={cn(
          "fixed top-0 transition-all duration-300 ease-in-out flex items-center justify-between px-4 sm:px-6 lg:px-8 z-40",
          "h-20 lg:h-16 bg-background/80 backdrop-blur-md border-b border-border",
-         "left-0 right-0 lg:left-auto lg:right-auto",
+         "left-0 right-0",
          isCollapsed ? "lg:left-20" : "lg:left-60",
          hasRightSidebar
-            ? (isRightCollapsed ? "xl:right-0 lg:right-0" : "xl:right-72 lg:right-0")
-            : "lg:right-0"
+            ? (isRightCollapsed ? "xl:right-0" : "xl:right-72")
+            : ""
       )}>
 
          {/* Left Section: Mobile Menu / Search */}
-         <div className="flex items-center gap-3 lg:flex-1">
+         <div className="flex items-center gap-3 lg:flex-1 min-w-0">
             <div className="flex items-center gap-3 lg:hidden">
                <button
                   onClick={onMobileMenuToggle}
@@ -92,19 +92,19 @@ export function DashboardHeader({
                </button>
             </div>
 
-            <div className="hidden lg:flex items-center relative group/search h-9 w-64 xl:w-72">
+            <div className="hidden lg:flex items-center relative group/search h-9 w-48 xl:w-64 min-w-0 flex-shrink">
                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within/search:text-primary transition-colors" />
                <input
                   type="text"
                   placeholder="Search the network..."
-                  className="w-full h-full bg-muted/50 border border-border rounded-md pl-10 pr-4 text-[13px] text-foreground placeholder:text-muted-foreground focus:ring-1 focus:ring-primary/20 focus:border-primary/30 outline-none transition-all"
+                  className="w-full h-full bg-muted/50 border border-border rounded-md pl-10 pr-4 text-[13px] text-foreground placeholder:text-muted-foreground focus:ring-1 focus:ring-primary/20 focus:border-primary/30 outline-none transition-all min-w-0"
                />
             </div>
          </div>
 
          {/* Center Section: Navigation Tabs (Desktop) / Theme Toggle (Mobile) */}
-         <div className="flex lg:flex-none items-center justify-center">
-            <nav className="hidden lg:flex items-center gap-1 xl:gap-2 h-full">
+         <div className="flex lg:flex-none items-center justify-center min-w-0">
+            <nav className="hidden lg:flex items-center gap-1 xl:gap-2 h-full min-w-0 overflow-x-auto custom-scrollbar">
                <button
                   onClick={() => onSectionChange('dashboard')}
                   className="relative h-full flex flex-col items-center justify-center px-3 group/tab min-w-[64px]"
@@ -195,8 +195,8 @@ export function DashboardHeader({
          </div>
 
          {/* Right Section: Actions / Profile */}
-         <div className="flex items-center gap-3 sm:gap-6 lg:flex-1 justify-end h-full">
-            <div className="flex items-center gap-3 sm:gap-5 sm:pr-6 sm:border-r sm:border-border h-8">
+         <div className="flex items-center gap-3 sm:gap-6 lg:flex-1 justify-end h-full min-w-0">
+            <div className="flex items-center gap-3 sm:gap-5 sm:pr-6 sm:border-r sm:border-border h-8 min-w-0">
                <div className="hidden lg:block">
                   <ThemeToggle />
                </div>

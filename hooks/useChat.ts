@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { chatService } from '../services/chat.service';
 
+import { appConfig } from '../lib/config';
+
 /**
  * Shape of a message arriving over the WebSocket.
  * This is the raw payload the Django consumer broadcasts.
@@ -77,7 +79,7 @@ export const useChat = (
 
     // 2. Open the WebSocket with the token
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const host = '127.0.0.1:8000';
+    const host = appConfig.wsBaseUrl;
     const socketUrl = `${protocol}//${host}/ws/chat/${roomId}/?token=${token}`;
 
     const socket = new WebSocket(socketUrl);

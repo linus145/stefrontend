@@ -4,9 +4,9 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { userService } from '@/services/user.service';
 import { toast } from 'sonner';
-import { 
-  Loader2, Save, ArrowLeft, User as UserIcon, 
-  MapPin, Globe, Shield, ImageIcon 
+import {
+  Loader2, Save, ArrowLeft, User as UserIcon,
+  MapPin, Globe, Shield, ImageIcon
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -39,7 +39,7 @@ export function ProfileEditForm({ initialUser }: ProfileEditFormProps) {
     const { name, value } = e.target;
     // Email is read-only, but logic included for consistency
     if (name === 'email') return;
-    
+
     if (name === 'phone_number') {
       const digits = value.replace(/\D/g, '').slice(0, 10);
       setFormData(prev => ({ ...prev, [name]: digits }));
@@ -74,20 +74,20 @@ export function ProfileEditForm({ initialUser }: ProfileEditFormProps) {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
-            <button 
-              onClick={() => router.back()}
-              className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors mb-2 group w-fit"
-            >
-              <ArrowLeft className="w-3 h-3 group-hover:-translate-x-1 transition-transform" />
-              Back to Dashboard
-            </button>
-            <h1 className="text-xl sm:text-2xl font-semibold text-foreground tracking-tight">Edit Profile</h1>
-            <p className="text-sm text-muted-foreground">Manage your identity and digital presence across the STE platform.</p>
+          <button
+            onClick={() => router.back()}
+            className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors mb-2 group w-fit"
+          >
+            <ArrowLeft className="w-3 h-3 group-hover:-translate-x-1 transition-transform" />
+            Back to Dashboard
+          </button>
+          <h1 className="text-xl sm:text-2xl font-semibold text-foreground tracking-tight">Edit Profile</h1>
+          <p className="text-sm text-muted-foreground">Manage your identity and digital presence across the BE2linq platform.</p>
         </div>
-        <Button 
-           onClick={handleSubmit} 
-           disabled={isUpdating}
-            className="bg-primary text-primary-foreground hover:opacity-90 px-6 sm:px-8 h-11 rounded-md font-bold text-xs shadow-lg shadow-primary/20 transition-all flex items-center gap-2 w-full sm:w-auto justify-center"
+        <Button
+          onClick={handleSubmit}
+          disabled={isUpdating}
+          className="bg-primary text-primary-foreground hover:opacity-90 px-6 sm:px-8 h-11 rounded-md font-bold text-xs shadow-lg shadow-primary/20 transition-all flex items-center gap-2 w-full sm:w-auto justify-center"
         >
           {isUpdating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
           Save Changes
@@ -146,10 +146,10 @@ export function ProfileEditForm({ initialUser }: ProfileEditFormProps) {
               <div className="space-y-2">
                 <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide ml-1">Mobile Number</label>
                 <div className="relative">
-                   <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-2 pr-2 border-r border-border/50 select-none">
-                      <span className="text-[13px] font-bold text-primary">+91</span>
-                   </div>
-                   <Input
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-2 pr-2 border-r border-border/50 select-none">
+                    <span className="text-[13px] font-bold text-primary">+91</span>
+                  </div>
+                  <Input
                     name="phone_number"
                     value={formData.phone_number}
                     onChange={handleChange}
@@ -212,7 +212,7 @@ export function ProfileEditForm({ initialUser }: ProfileEditFormProps) {
                     <div>
                       <h4 className="text-sm font-bold text-foreground mb-1">Visual Identity Management</h4>
                       <p className="text-xs text-muted-foreground leading-relaxed">
-                        To maintain a seamless experience, profile photos and banner images are now managed directly from your profile page. 
+                        To maintain a seamless experience, profile photos and banner images are now managed directly from your profile page.
                         Simply click the camera icon on your profile header to update your visual assets.
                       </p>
                     </div>

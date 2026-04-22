@@ -19,7 +19,7 @@ export function Header() {
             <span className="text-indigo-600 font-bold text-sm italic">S</span>
           </div>
           <span className="text-xl font-bold italic tracking-wider text-slate-900">
-            STE
+            BE2linq
           </span>
         </Link>
 

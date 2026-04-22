@@ -8,7 +8,7 @@ export function GlobalLoader() {
       <div className="relative flex flex-col items-center">
         {/* Outer Glow */}
         <div className="absolute -inset-12 bg-primary/10 blur-[80px] rounded-full animate-pulse"></div>
-        
+
         {/* Main Logo/Icon Placeholder with Gradient Border */}
         <div className="relative h-16 w-16 mb-8">
           <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-primary/80 to-primary animate-spin-slow opacity-20"></div>
@@ -20,7 +20,7 @@ export function GlobalLoader() {
         {/* Text and Skeleton bar */}
         <div className="space-y-4 text-center">
           <h2 className="text-xl font-bold tracking-widest text-foreground animate-pulse italic">
-            STE <span className="text-primary">ARCHITECT</span>
+            BE2linq <span className="text-primary">ARCHITECT</span>
           </h2>
           <div className="w-48 h-[2px] bg-border rounded-full overflow-hidden relative">
             <div className="absolute top-0 left-0 h-full w-1/2 bg-gradient-to-r from-transparent via-primary to-transparent animate-shimmer"></div>

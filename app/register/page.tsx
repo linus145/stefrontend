@@ -2,7 +2,7 @@ import { RegisterForm } from '@/components/auth/register-form';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Register | STE Platform',
+  title: 'Register | BE2linq Platform',
   description: 'Sign up for the highly-optimized Startup Ecosystem.',
 };
 
@@ -16,7 +16,7 @@ export default function RegisterPage() {
         {/* Branding mapping exactly to login */}
         <div className="mb-8 text-center space-y-2 mt-12 md:mt-0">
           <h1 className="text-4xl font-bold italic tracking-wider text-slate-900">
-            STE
+            BE2linq
           </h1>
           <p className="text-[10px] uppercase font-semibold tracking-[0.2em] text-slate-500">
             ENTER THE ETHER

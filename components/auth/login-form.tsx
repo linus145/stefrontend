@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import Link from 'next/link';
+import { toast } from 'sonner';
 import { ArrowRight, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 
 export function LoginForm() {
@@ -11,16 +12,41 @@ export function LoginForm() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string[]>>({});
+  const [generalError, setGeneralError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) return;
+    setErrors({});
+    setGeneralError(null);
+    
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+
+    if (!trimmedEmail || !trimmedPassword) {
+      const newErrors: Record<string, string[]> = {};
+      if (!trimmedEmail) newErrors.email = ['Email is required'];
+      if (!trimmedPassword) newErrors.password = ['Password is required'];
+      setErrors(newErrors);
+      toast.error('Required fields are missing', {
+        description: 'Please enter both your email and password to sign in.'
+      });
+      return;
+    }
     
     setIsSubmitting(true);
     try {
       await login(email, password);
-    } catch {
-      // Errors handled inside Context toast natively
+    } catch (error: any) {
+      // Structure: { email: [...], password: [...], detail: "..." }
+      if (error.data && typeof error.data === 'object') {
+        setErrors(error.data);
+        if (error.data.detail || error.data.non_field_errors) {
+          setGeneralError(error.data.detail || error.data.non_field_errors[0]);
+        }
+      } else {
+        setGeneralError(error.message || 'Invalid credentials.');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -41,6 +67,12 @@ export function LoginForm() {
         <div className="p-8">
           <h2 className="text-[17px] font-medium text-slate-900 text-center mb-8">Sign in to your account</h2>
           
+          {generalError && (
+            <div className="mb-6 p-3 rounded-lg bg-red-50 border border-red-100 text-red-600 text-xs font-medium animate-in fade-in slide-in-from-top-2 duration-300">
+              {generalError}
+            </div>
+          )}
+
           {/* SSO Buttons */}
           <div className="space-y-3 mb-8">
             <button
@@ -88,14 +120,18 @@ export function LoginForm() {
                 <input
                   id="email"
                   type="email"
-                  required
                   placeholder="founder@ste.io"
                   disabled={isSubmitting}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-md bg-slate-50 border border-slate-200 text-slate-900 pl-10 pr-4 py-2.5 text-sm transition-colors focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none placeholder:text-slate-400"
+                  className={`w-full rounded-md bg-slate-50 border ${errors.email ? 'border-red-400 ring-1 ring-red-400' : 'border-slate-200'} text-slate-900 pl-10 pr-4 py-2.5 text-sm transition-colors focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none placeholder:text-slate-400`}
                 />
               </div>
+              {errors.email && (
+                <p className="text-[10px] font-medium text-red-500 mt-1 animate-in fade-in slide-in-from-top-1 duration-200">
+                  {errors.email[0]}
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -114,12 +150,11 @@ export function LoginForm() {
                 <input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
-                  required
                   placeholder="••••••••"
                   disabled={isSubmitting}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full rounded-md bg-slate-50 border border-slate-200 text-slate-900 pl-10 pr-10 py-2.5 text-sm transition-colors focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none placeholder:text-slate-400"
+                  className={`w-full rounded-md bg-slate-50 border ${errors.password ? 'border-red-400 ring-1 ring-red-400' : 'border-slate-200'} text-slate-900 pl-10 pr-10 py-2.5 text-sm transition-colors focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none placeholder:text-slate-400`}
                 />
                 <button
                   type="button"
@@ -129,6 +164,11 @@ export function LoginForm() {
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
+              {errors.password && (
+                <p className="text-[10px] font-medium text-red-500 mt-1 animate-in fade-in slide-in-from-top-1 duration-200">
+                  {errors.password[0]}
+                </p>
+              )}
             </div>
 
             <button

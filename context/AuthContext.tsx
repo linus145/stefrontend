@@ -46,9 +46,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       toast.success('Successfully logged in.');
       router.push('/dashboard');
     } catch (error: any) {
-      // Clean error presentation
+      // Re-enabled toast for all errors as per user request
       toast.error('Login Failed', {
-        description: error.response?.data?.message || error.data?.message || error.message || 'Invalid credentials.'
+        description: error.response?.data?.detail || error.data?.detail || error.data?.message || error.message || 'Invalid credentials.'
       });
       throw error;
     } finally {

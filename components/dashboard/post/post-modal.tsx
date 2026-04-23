@@ -7,12 +7,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { ImageKitProvider, IKUpload } from 'imagekitio-next';
 import { ImageIcon, Loader2, X, Globe, Smile, Calendar, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 import { postService } from '@/services/post.service';
+import { uploadService } from '@/services/upload.service';
 import { getOptimizedImage } from '@/lib/imagekit';
 
 interface PostModalProps {
@@ -21,8 +21,6 @@ interface PostModalProps {
   onPostSuccess: () => void;
 }
 
-const PUBLIC_KEY = process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY || '';
-const URL_ENDPOINT = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT || '';
 const MAX_CHARS = 1800;
 const MIN_CHARS = 100;
 
@@ -32,8 +30,7 @@ export function PostModal({ isOpen, onClose, onPostSuccess }: PostModalProps) {
   const [mediaUrl, setMediaUrl] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [mediaType, setMediaType] = useState<'image' | 'video' | null>(null);
-  const ikUploadRef = useRef<HTMLInputElement>(null);
-  const ikVideoUploadRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const charCount = content.length;
   const isOverLimit = charCount > MAX_CHARS;
@@ -58,24 +55,23 @@ export function PostModal({ isOpen, onClose, onPostSuccess }: PostModalProps) {
     }
   };
 
-  const handleImageKitAuth = async () => {
-    try {
-      return await postService.getImageKitAuth();
-    } catch (error) {
-      console.error('ImageKit Auth Error:', error);
-      throw error;
-    }
-  };
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  const onUploadStart = () => setIsUploading(true);
-  const onUploadSuccess = (res: any) => {
-    setMediaUrl(res.url);
-    setIsUploading(false);
-    toast.success('Media uploaded successfully.');
-  };
-  const onUploadError = () => {
-    setIsUploading(false);
-    toast.error('Media upload failed.');
+    setIsUploading(true);
+    try {
+      const result = await uploadService.uploadImage(file, '/posts');
+      setMediaUrl(result.image_url);
+      setMediaType('image');
+      toast.success('Media uploaded successfully.');
+    } catch (error) {
+      toast.error('Media upload failed.');
+    } finally {
+      setIsUploading(false);
+      // Reset input so the same file can be re-selected
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
   };
 
   return (
@@ -151,35 +147,23 @@ export function PostModal({ isOpen, onClose, onPostSuccess }: PostModalProps) {
         {/* Action Footer */}
         <div className="px-4 sm:px-6 py-3 sm:py-4 bg-muted/10 border-t border-border flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <ImageKitProvider
-              publicKey={PUBLIC_KEY}
-              urlEndpoint={URL_ENDPOINT}
-              authenticator={handleImageKitAuth}
-            >
-              <button
-                onClick={() => {
-                  setMediaType('image');
-                  ikUploadRef.current?.click();
-                }}
-                disabled={isUploading}
-                className="w-10 h-10 flex items-center justify-center rounded-md bg-muted/40 text-sky-500 hover:bg-sky-500/10 transition-all active:scale-90 disabled:opacity-50"
-                title="Add Photo"
-              >
-                <ImageIcon className="w-5 h-5" />
-              </button>
+            {/* Hidden file input for server-side upload */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileSelect}
+              className="hidden"
+            />
 
-              <div className="hidden">
-                <IKUpload
-                  ref={ikUploadRef}
-                  onUploadStart={onUploadStart}
-                  onSuccess={(res) => {
-                    onUploadSuccess(res);
-                    setMediaType('image');
-                  }}
-                  onError={onUploadError}
-                />
-              </div>
-            </ImageKitProvider>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading}
+              className="w-10 h-10 flex items-center justify-center rounded-md bg-muted/40 text-sky-500 hover:bg-sky-500/10 transition-all active:scale-90 disabled:opacity-50"
+              title="Add Photo"
+            >
+              {isUploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <ImageIcon className="w-5 h-5" />}
+            </button>
 
             <button className="w-10 h-10 flex items-center justify-center rounded-md bg-muted/40 text-emerald-500 hover:bg-emerald-500/10 transition-all active:scale-90" title="Add Video">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-video"><path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.934a.5.5 0 0 0-.777-.416L16 11" /><rect width="14" height="12" x="2" y="6" rx="2" /></svg>

@@ -5,12 +5,10 @@ import { X, Globe, Image as ImageIcon, Video, FileText, BarChart2, MoreHorizonta
 import { useAuth } from '@/hooks/useAuth';
 import { getOptimizedImage } from '@/lib/imagekit';
 import { postService } from '@/services/post.service';
+import { uploadService } from '@/services/upload.service';
 import { toast } from 'sonner';
-import { ImageKitProvider, IKUpload } from 'imagekitio-next';
 import { cn } from '@/lib/utils';
 
-const PUBLIC_KEY = process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY || '';
-const URL_ENDPOINT = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT || '';
 const MAX_CHARS = 1800;
 const MIN_CHARS = 100;
 
@@ -25,7 +23,7 @@ export function MobilePostView({ onClose, onPostSuccess }: MobilePostViewProps) 
   const [mediaUrl, setMediaUrl] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [isPosting, setIsPosting] = useState(false);
-  const ikUploadRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const charCount = content.length;
   const isOverLimit = charCount > MAX_CHARS;
@@ -50,19 +48,21 @@ export function MobilePostView({ onClose, onPostSuccess }: MobilePostViewProps) 
     }
   };
 
-  const onUploadError = (err: any) => {
-    setIsUploading(false);
-    toast.error('Media upload failed.');
-  };
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  const onUploadSuccess = (res: any) => {
-    setMediaUrl(res.url);
-    setIsUploading(false);
-    toast.success('Media uploaded!');
-  };
-
-  const onUploadStart = () => {
     setIsUploading(true);
+    try {
+      const result = await uploadService.uploadImage(file, '/posts');
+      setMediaUrl(result.image_url);
+      toast.success('Media uploaded!');
+    } catch (error) {
+      toast.error('Media upload failed.');
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
   };
 
   return (
@@ -140,22 +140,20 @@ export function MobilePostView({ onClose, onPostSuccess }: MobilePostViewProps) 
         </div>
       </div>
 
-      {/* ImageKit Provider Hidden */}
-      <ImageKitProvider publicKey={PUBLIC_KEY} urlEndpoint={URL_ENDPOINT}>
-        <IKUpload
-          className="hidden"
-          ref={ikUploadRef}
-          onError={onUploadError}
-          onSuccess={onUploadSuccess}
-          onUploadStart={onUploadStart}
-        />
-      </ImageKitProvider>
+      {/* Hidden file input for server-side upload */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileSelect}
+        className="hidden"
+      />
 
       {/* Footer Toolbar */}
       <div className="border-t border-border bg-background/80 backdrop-blur-md p-4 pb-8 sm:pb-4 flex items-center justify-between sticky bottom-0">
         <div className="flex items-center gap-6 text-muted-foreground">
           <button 
-            onClick={() => ikUploadRef.current?.click()}
+            onClick={() => fileInputRef.current?.click()}
             className="flex flex-col items-center gap-1 hover:text-primary transition-all group"
           >
             <div className="p-2 rounded-full group-hover:bg-primary/10 transition-colors">

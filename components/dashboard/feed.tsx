@@ -18,8 +18,7 @@ interface FeedProps {
   onNavigateToProfile: (userId: string) => void;
 }
 
-const PUBLIC_KEY = process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY || '';
-const URL_ENDPOINT = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT || '';
+
 
 export function Feed({ isCollapsed, isRightCollapsed, onNavigateToProfile }: FeedProps) {
   const { user } = useAuth();

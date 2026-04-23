@@ -2,9 +2,9 @@ import React from 'react';
 import Link from 'next/link';
 import { Plus, Zap, Share2, MoreHorizontal, Edit3, Camera, ImageIcon, Loader2 } from 'lucide-react';
 import { User } from '@/types/user.types';
-import { ImageKitProvider, IKUpload } from 'imagekitio-next';
 import { postService } from '@/services/post.service';
 import { userService } from '@/services/user.service';
+import { uploadService } from '@/services/upload.service';
 import { toast } from 'sonner';
 import { getOptimizedImage } from '@/lib/imagekit';
 import { cn } from '@/lib/utils';
@@ -19,6 +19,8 @@ interface EcosystemHeroProps {
 
 export function EcosystemHero({ user, onUpdate, isOwner = false, activeTab, onTabChange }: EcosystemHeroProps) {
   const [isUploading, setIsUploading] = React.useState(false);
+  const bannerInputRef = React.useRef<HTMLInputElement>(null);
+  const avatarInputRef = React.useRef<HTMLInputElement>(null);
   const profile = user.profile;
   const isFounder = user.role === 'FOUNDER';
   
@@ -40,9 +42,46 @@ export function EcosystemHero({ user, onUpdate, isOwner = false, activeTab, onTa
       setIsUploading(false);
     }
   };
+
+  const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+      const result = await uploadService.uploadImage(file, '/profiles/banners');
+      await userService.updateProfile({ banner_image_url: result.image_url });
+      toast.success("Ecosystem banner synchronized.");
+      if (onUpdate) onUpdate();
+    } catch (error) {
+      toast.error("Banner upload failed.");
+    } finally {
+      setIsUploading(false);
+      if (bannerInputRef.current) bannerInputRef.current.value = '';
+    }
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+      const result = await uploadService.uploadImage(file, '/profiles/avatars');
+      await handleProfileUpdate(result.image_url);
+    } catch (error) {
+      setIsUploading(false);
+      toast.error("Transmission failed.");
+    }
+    if (avatarInputRef.current) avatarInputRef.current.value = '';
+  };
   
   return (
     <div className="relative mb-8 bg-card border border-border rounded-lg overflow-hidden shadow-sm group/hero">
+      {/* Hidden file inputs */}
+      <input ref={bannerInputRef} type="file" accept="image/*" onChange={handleBannerUpload} className="hidden" />
+      <input ref={avatarInputRef} type="file" accept="image/*" onChange={handleAvatarUpload} className="hidden" />
+
       {/* Banner Section */}
       <div className="relative h-36 sm:h-48 md:h-64 overflow-hidden">
         <img 
@@ -54,36 +93,13 @@ export function EcosystemHero({ user, onUpdate, isOwner = false, activeTab, onTa
         
         {isOwner && (
           <div className="absolute top-4 right-4 z-20">
-            <ImageKitProvider 
-              publicKey={process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY || ''} 
-              urlEndpoint={process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT || ''} 
-              authenticator={async () => {
-                const res = await postService.getImageKitAuth();
-                return res;
-              }}
+            <label 
+              onClick={() => bannerInputRef.current?.click()}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-black/40 backdrop-blur-md text-white/80 hover:text-white border border-white/20 hover:bg-black/60 transition-all cursor-pointer text-[10px] font-bold uppercase tracking-widest opacity-0 group-hover/hero:opacity-100"
             >
-              <IKUpload
-                onError={() => toast.error("Banner upload failed.")}
-                onSuccess={async (res) => {
-                  try {
-                    await userService.updateProfile({ banner_image_url: res.url });
-                    toast.success("Ecosystem banner synchronized.");
-                    if (onUpdate) onUpdate();
-                  } catch (e) {
-                    toast.error("Failed to update banner URL.");
-                  }
-                }}
-                style={{ display: 'none' }}
-                id="hero-banner-upload"
-              />
-              <label 
-                htmlFor="hero-banner-upload"
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-black/40 backdrop-blur-md text-white/80 hover:text-white border border-white/20 hover:bg-black/60 transition-all cursor-pointer text-[10px] font-bold uppercase tracking-widest opacity-0 group-hover/hero:opacity-100"
-              >
-                <ImageIcon className="w-3.5 h-3.5" />
-                Edit Banner
-              </label>
-            </ImageKitProvider>
+              <ImageIcon className="w-3.5 h-3.5" />
+              Edit Banner
+            </label>
           </div>
         )}
       </div>
@@ -93,53 +109,32 @@ export function EcosystemHero({ user, onUpdate, isOwner = false, activeTab, onTa
         <div className="relative flex justify-between items-start">
           {/* Overlapping Avatar */}
           <div className="-mt-16 sm:-mt-20 md:-mt-24 relative z-10">
-            <ImageKitProvider 
-              publicKey={process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY || ''} 
-              urlEndpoint={process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT || ''} 
-              authenticator={async () => {
-                const res = await postService.getImageKitAuth();
-                return res;
-              }}
-            >
-              <div className="relative group/avatar">
-                <div className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-full bg-card border-4 border-card p-0.5 shadow-xl overflow-hidden relative">
-                  {isUploading && (
-                    <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-                      <Loader2 className="w-8 h-8 text-white animate-spin" />
-                    </div>
-                  )}
-                  
-                  {profile?.profile_image_url ? (
-                    <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-primary-foreground font-bold text-3xl sm:text-4xl md:text-5xl uppercase">
-                        {user.first_name[0]}
-                    </div>
-                  )}
+            <div className="relative group/avatar">
+              <div className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-full bg-card border-4 border-card p-0.5 shadow-xl overflow-hidden relative">
+                {isUploading && (
+                  <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+                    <Loader2 className="w-8 h-8 text-white animate-spin" />
+                  </div>
+                )}
+                
+                {profile?.profile_image_url ? (
+                  <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-primary-foreground font-bold text-3xl sm:text-4xl md:text-5xl uppercase">
+                      {user.first_name[0]}
+                  </div>
+                )}
 
-                  {isOwner && (
-                    <>
-                      <IKUpload
-                        onError={() => {
-                          setIsUploading(false);
-                          toast.error("Transmission failed.");
-                        }}
-                        onSuccess={(res) => handleProfileUpdate(res.url)}
-                        onUploadStart={() => setIsUploading(true)}
-                        style={{ display: 'none' }}
-                        id="hero-avatar-upload"
-                      />
-                      <label 
-                        htmlFor="hero-avatar-upload"
-                        className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 opacity-0 group-hover/avatar:opacity-100 transition-opacity cursor-pointer"
-                      >
-                        <Camera className="w-8 h-8 text-white shadow-xl" />
-                      </label>
-                    </>
-                  )}
-                </div>
+                {isOwner && (
+                  <label 
+                    onClick={() => avatarInputRef.current?.click()}
+                    className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 opacity-0 group-hover/avatar:opacity-100 transition-opacity cursor-pointer"
+                  >
+                    <Camera className="w-8 h-8 text-white shadow-xl" />
+                  </label>
+                )}
               </div>
-            </ImageKitProvider>
+            </div>
           </div>
 
           {/* Action Buttons */}

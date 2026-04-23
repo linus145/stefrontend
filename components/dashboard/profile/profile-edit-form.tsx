@@ -12,8 +12,6 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { User } from '@/types/user.types';
-import { ImageKitProvider, IKUpload } from 'imagekitio-next';
-import { postService } from '@/services/post.service';
 import { getOptimizedImage } from '@/lib/imagekit';
 
 interface ProfileEditFormProps {

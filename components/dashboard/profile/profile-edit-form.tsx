@@ -82,7 +82,7 @@ export function ProfileEditForm({ initialUser }: ProfileEditFormProps) {
             Back to Dashboard
           </button>
           <h1 className="text-xl sm:text-2xl font-semibold text-foreground tracking-tight">Edit Profile</h1>
-          <p className="text-sm text-muted-foreground">Manage your identity and digital presence across the BE2linq platform.</p>
+          <p className="text-sm text-muted-foreground">Manage your identity and digital presence across the B2linq platform.</p>
         </div>
         <Button
           onClick={handleSubmit}

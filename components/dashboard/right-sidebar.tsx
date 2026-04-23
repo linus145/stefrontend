@@ -59,7 +59,7 @@ export function RightSidebar({ isCollapsed, onToggle }: RightSidebarProps) {
             <div className="h-full w-2/3 bg-primary" />
           </div>
           <p className="text-[9px] text-muted-foreground uppercase tracking-widest text-center opacity-40">
-            &copy; {new Date().getFullYear()} BE2linq INC.
+            &copy; {new Date().getFullYear()} B2linq INC.
           </p>
         </div>
       </div>

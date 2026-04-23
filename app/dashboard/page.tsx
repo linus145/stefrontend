@@ -3,7 +3,7 @@ import { Metadata } from 'next';
 import { DashboardViewShell } from '@/components/dashboard/dashboard-view-shell';
 
 export const metadata: Metadata = {
-  title: 'Home | BE2linq Platform',
+  title: 'Home | B2linq Platform',
   description: 'Manage your startup ecosystem and identity.',
 };
 

@@ -66,7 +66,7 @@ export function PostCard({ post, onLike, onNavigateToProfile }: PostCardProps) {
     // Check if navigator.share is available
     if (navigator.share) {
       navigator.share({
-        title: 'BE2linq Post',
+        title: 'B2linq Post',
         text: post.content,
         url: window.location.href,
       }).catch(console.error);

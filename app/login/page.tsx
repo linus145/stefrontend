@@ -2,7 +2,7 @@ import { LoginForm } from '@/components/auth/login-form';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Sign In | BE2linq Platform',
+  title: 'Sign In | B2linq Platform',
   description: 'Log into the highly-optimized Startup Ecosystem securely.',
 };
 
@@ -16,7 +16,7 @@ export default function LoginPage() {
         {/* Branding */}
         <div className="mb-8 text-center space-y-2">
           <h1 className="text-4xl font-bold italic tracking-wider text-slate-900">
-            BE2linq
+            B2linq
           </h1>
           <p className="text-[10px] uppercase font-semibold tracking-[0.2em] text-slate-500">
             ENTER THE ETHER

@@ -124,7 +124,7 @@ export function EcosystemContent({ isCollapsed, userId }: EcosystemContentProps)
                   <Zap className="w-5 h-5 text-emerald-500" />
                 </div>
                 <div>
-                  <p className="text-[11px] font-bold text-foreground leading-tight mb-0.5">Scale with BE2linq AI</p>
+                  <p className="text-[11px] font-bold text-foreground leading-tight mb-0.5">Scale with B2linq AI</p>
                   <p className="text-[10px] text-muted-foreground leading-tight">Architecture your next pivot with speed.</p>
                 </div>
               </div>

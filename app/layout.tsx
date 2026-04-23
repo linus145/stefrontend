@@ -9,8 +9,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'BE2linq Dashboard - Premium App',
-  description: 'A modern, dynamic Next.js application built for the BE2linq platform.',
+  title: 'B2linq Dashboard - Premium App',
+  description: 'A modern, dynamic Next.js application built for the B2linq platform.',
 };
 
 export const viewport: Viewport = {

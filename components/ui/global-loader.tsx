@@ -20,7 +20,7 @@ export function GlobalLoader() {
         {/* Text and Skeleton bar */}
         <div className="space-y-4 text-center">
           <h2 className="text-xl font-bold tracking-widest text-foreground animate-pulse italic">
-            BE2linq <span className="text-primary">ARCHITECT</span>
+            B2linq <span className="text-primary">ARCHITECT</span>
           </h2>
           <div className="w-48 h-[2px] bg-border rounded-full overflow-hidden relative">
             <div className="absolute top-0 left-0 h-full w-1/2 bg-gradient-to-r from-transparent via-primary to-transparent animate-shimmer"></div>

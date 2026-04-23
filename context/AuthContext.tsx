@@ -12,6 +12,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
+  googleLogin: (token: string) => Promise<void>;
   logout: () => Promise<void>;
   fetchProfile: () => Promise<void>;
 }
@@ -49,6 +50,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Re-enabled toast for all errors as per user request
       toast.error('Login Failed', {
         description: error.response?.data?.detail || error.data?.detail || error.data?.message || error.message || 'Invalid credentials.'
+      });
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const googleLogin = async (token: string) => {
+    setIsLoading(true);
+    try {
+      const resp = await authService.googleLogin(token);
+      setUser(resp.data.user);
+
+      toast.success('Successfully logged in with Google.');
+      router.push('/dashboard');
+    } catch (error: any) {
+      toast.error('Google Login Failed', {
+        description: error.response?.data?.detail || error.data?.detail || error.data?.message || error.message || 'Verification failed.'
       });
       throw error;
     } finally {
@@ -97,7 +116,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, logout, fetchProfile }}>
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, googleLogin, logout, fetchProfile }}>
       {children}
     </AuthContext.Provider>
   );

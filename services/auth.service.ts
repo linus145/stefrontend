@@ -22,5 +22,9 @@ export const authService = {
 
   updateMobileNumber: (phone_number: string): Promise<BaseAPIResponse<any>> => {
     return api.post<BaseAPIResponse<any>>('/auth/update-mobile/', { phone_number });
+  },
+  
+  googleLogin: (token: string): Promise<BaseAPIResponse<AuthResponsePayload>> => {
+    return api.post<BaseAPIResponse<AuthResponsePayload>>('/auth/google-login/', { token });
   }
 };

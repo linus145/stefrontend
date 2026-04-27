@@ -11,8 +11,8 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  googleLogin: (token: string) => Promise<void>;
+  login: (email: string, password: string, redirectTo?: string) => Promise<void>;
+  googleLogin: (token: string, redirectTo?: string) => Promise<void>;
   logout: () => Promise<void>;
   fetchProfile: () => Promise<void>;
 }
@@ -38,14 +38,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string, redirectTo: string = '/dashboard') => {
     setIsLoading(true);
     try {
       const resp = await authService.login(email, password);
       setUser(resp.data.user);
 
       toast.success('Successfully logged in.');
-      router.push('/dashboard');
+      router.push(redirectTo);
     } catch (error: any) {
       // Re-enabled toast for all errors as per user request
       toast.error('Login Failed', {
@@ -57,14 +57,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const googleLogin = async (token: string) => {
+  const googleLogin = async (token: string, redirectTo: string = '/dashboard') => {
     setIsLoading(true);
     try {
       const resp = await authService.googleLogin(token);
       setUser(resp.data.user);
 
       toast.success('Successfully logged in with Google.');
-      router.push('/dashboard');
+      router.push(redirectTo);
     } catch (error: any) {
       toast.error('Google Login Failed', {
         description: error.response?.data?.detail || error.data?.detail || error.data?.message || error.message || 'Verification failed.'

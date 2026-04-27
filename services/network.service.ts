@@ -22,6 +22,7 @@ export interface NetworkPerson {
     status: 'PENDING' | 'ACCEPTED' | 'REJECTED';
     is_incoming: boolean;
     sender_id: string;
+    connected_at?: string;
   };
 }
 

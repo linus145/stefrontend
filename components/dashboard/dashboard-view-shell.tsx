@@ -11,6 +11,7 @@ import { MessagesView } from '@/components/dashboard/messages/messages-view';
 import { NetworkView } from '@/components/dashboard/network/network-view';
 import { SettingsView } from '@/components/dashboard/settings/settings-view';
 import { DashboardHeader } from '@/components/dashboard/dashboard-header';
+import { JobsView } from '@/components/dashboard/jobs/jobs-view';
 import { GlobalLoader } from '@/components/ui/global-loader';
 import { DashboardThemeProvider } from '@/context/DashboardThemeContext';
 import { Briefcase, Newspaper, Users } from 'lucide-react';
@@ -73,18 +74,36 @@ export function DashboardViewShell() {
       case 'jobs':
         return (
           <div className={cn(
-            "flex-1 flex flex-col items-center justify-center p-4 sm:p-8 animate-in fade-in slide-in-from-bottom-4 duration-1000 transition-all ease-out",
+            "flex-1 flex flex-col p-4 sm:p-8 animate-in fade-in slide-in-from-bottom-4 duration-1000 transition-all ease-out",
             "lg:ml-0",
             isSidebarCollapsed ? "lg:ml-20" : "lg:ml-60"
           )}>
-            <div className="w-24 h-24 rounded-3xl bg-muted/20 border border-dashed border-border/50 flex items-center justify-center mb-8 relative group">
-              <div className="absolute inset-0 bg-sky-500/5 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
-              <Briefcase className="w-10 h-10 text-muted-foreground opacity-20 group-hover:opacity-40 transition-all group-hover:scale-110" />
+            {/* Recruiter CTA Banner */}
+            <a
+              href="/recruiter/register"
+              className="group relative mb-8 w-full rounded-xl overflow-hidden border border-teal-500/20 bg-gradient-to-r from-teal-500/5 via-cyan-500/5 to-teal-500/5 hover:from-teal-500/10 hover:via-cyan-500/10 hover:to-teal-500/10 transition-all"
+            >
+              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-teal-400 via-cyan-500 to-teal-400 opacity-70" />
+              <div className="flex items-center justify-between px-6 py-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                    <Users className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">Are you a company? Start posting jobs</p>
+                    <p className="text-xs text-muted-foreground">Reach thousands of founders and professionals on B2linq</p>
+                  </div>
+                </div>
+                <div className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-teal-600 to-cyan-600 text-white text-xs font-semibold shadow-sm group-hover:shadow-lg transition-all">
+                  Register →
+                </div>
+              </div>
+            </a>
+
+            {/* Active Job Listings */}
+            <div className="flex-1 min-h-0">
+               <JobsView isCollapsed={isSidebarCollapsed} />
             </div>
-            <h3 className="text-2xl font-semibold text-foreground tracking-tight mb-2">No active listings</h3>
-            <p className="text-muted-foreground text-sm max-w-xs text-center font-medium leading-relaxed">
-              There are currently no job posts or ecosystem feeds available in this section.
-            </p>
           </div>
         );
       case 'news':

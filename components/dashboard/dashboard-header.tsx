@@ -150,8 +150,10 @@ export function DashboardHeader({
                   {activeSection === 'jobs' && <div className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
                </button>
 
-               <button
-                  onClick={() => onSectionChange('hire')}
+               <a
+                  href="/recruiter"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="relative h-full flex flex-col items-center justify-center px-3 group/tab min-w-[64px]"
                >
                   <div className="relative">
@@ -168,7 +170,7 @@ export function DashboardHeader({
                      activeSection === 'hire' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
                   )}>Hire</span>
                   {activeSection === 'hire' && <div className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
-               </button>
+               </a>
 
                <button
                   onClick={() => onSectionChange('news')}

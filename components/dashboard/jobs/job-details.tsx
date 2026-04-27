@@ -28,7 +28,7 @@ export function JobDetails({ job, applications, onClose, onApply }: JobDetailsPr
   const hasApplied = applications.some(app => app.job === job.id);
 
   return (
-    <div className="flex flex-col h-full bg-white">
+    <div className="flex flex-col h-full bg-card">
       {/* Detail Header */}
       <div className="p-6 border-b border-border/50 relative">
         <button 
@@ -39,7 +39,7 @@ export function JobDetails({ job, applications, onClose, onApply }: JobDetailsPr
         </button>
         
         <div className="flex gap-4 mb-4">
-          <div className="w-16 h-16 rounded-sm bg-white border border-border/50 flex items-center justify-center overflow-hidden shrink-0">
+          <div className="w-16 h-16 rounded-sm bg-card border border-border/50 flex items-center justify-center overflow-hidden shrink-0">
             {job.company_logo ? (
               <img src={job.company_logo} alt="" className="w-full h-full object-contain p-2" />
             ) : (
@@ -93,9 +93,9 @@ export function JobDetails({ job, applications, onClose, onApply }: JobDetailsPr
       </div>
 
       {/* Detail Content */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6 bg-[#f3f3f3]/30">
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6 bg-muted/30">
         {/* Profile Match Section */}
-        <section className="bg-white border border-border/50 rounded-sm p-5 shadow-sm">
+        <section className="bg-card border border-border/50 rounded-sm p-5 shadow-sm">
           <h3 className="text-base font-bold text-foreground mb-4 tracking-tight">How your profile and resume fit this job</h3>
           <div className="flex items-center justify-between group cursor-pointer">
             <div className="flex items-center gap-3">
@@ -113,7 +113,7 @@ export function JobDetails({ job, applications, onClose, onApply }: JobDetailsPr
 
         {/* Hiring Team Section */}
         {job.hr_profile && (
-          <section className="bg-white border border-border/50 rounded-sm p-5 shadow-sm">
+          <section className="bg-card border border-border/50 rounded-sm p-5 shadow-sm">
             <h3 className="text-base font-bold text-foreground mb-4 tracking-tight">Meet the hiring team</h3>
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-full overflow-hidden border border-border/50 shadow-sm">
@@ -138,7 +138,7 @@ export function JobDetails({ job, applications, onClose, onApply }: JobDetailsPr
         )}
 
         {/* About the Job */}
-        <section className="bg-white border border-border/50 rounded-sm p-5 shadow-sm">
+        <section className="bg-card border border-border/50 rounded-sm p-5 shadow-sm">
           <h3 className="text-base font-bold text-foreground mb-4 tracking-tight">About the job</h3>
           <div className="text-[13px] text-foreground/90 leading-relaxed whitespace-pre-wrap font-normal">
             {job.description}
@@ -146,10 +146,10 @@ export function JobDetails({ job, applications, onClose, onApply }: JobDetailsPr
         </section>
 
         {/* About the Company */}
-        <section className="bg-white border border-border/50 rounded-sm p-5 shadow-sm pb-4">
+        <section className="bg-card border border-border/50 rounded-sm p-5 shadow-sm pb-4">
           <h3 className="text-base font-bold text-foreground mb-4 tracking-tight">About the company</h3>
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-12 h-12 rounded bg-white border border-border/50 flex items-center justify-center overflow-hidden shadow-sm">
+            <div className="w-12 h-12 rounded bg-card border border-border/50 flex items-center justify-center overflow-hidden shadow-sm">
               {job.company_logo ? (
                 <img src={job.company_logo} alt="" className="w-full h-full object-contain p-1" />
               ) : (

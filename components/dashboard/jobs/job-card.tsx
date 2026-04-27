@@ -28,7 +28,7 @@ export function JobCard({ job, isSelected, onClick }: JobCardProps) {
       </button>
 
       <div className="flex gap-3">
-        <div className="w-12 h-12 rounded-sm bg-white flex items-center justify-center shrink-0 overflow-hidden border border-border/50">
+        <div className="w-12 h-12 rounded-sm bg-card flex items-center justify-center shrink-0 overflow-hidden border border-border/50">
           {job.company_logo ? (
             <img src={job.company_logo} alt={job.company_name} className="w-full h-full object-contain p-1" />
           ) : (

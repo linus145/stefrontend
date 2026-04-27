@@ -138,7 +138,7 @@ export function JobsView({ isCollapsed }: JobsViewProps) {
       <div className="flex-1 flex gap-6 overflow-hidden">
         {/* Left Side: Job/App List */}
         <div className={cn(
-          "flex-1 overflow-y-auto custom-scrollbar bg-white border border-border/50 rounded-lg transition-all duration-500",
+          "flex-1 overflow-y-auto custom-scrollbar bg-card border border-border/50 rounded-lg transition-all duration-500",
           selectedJob ? "hidden lg:block lg:flex-[0.4]" : "w-full"
         )}>
           {isLoading ? (

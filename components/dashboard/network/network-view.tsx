@@ -138,7 +138,7 @@ export function NetworkView({
           <div className="flex flex-col lg:flex-row gap-6">
             {/* Left Sidebar: Tab Selection */}
             <div className="lg:w-72 shrink-0">
-              <div className="bg-white border border-border/40 rounded-sm overflow-hidden shadow-sm sticky top-24">
+              <div className="bg-card border border-border/40 rounded-sm overflow-hidden shadow-sm sticky top-24">
                 <div className="px-5 py-4 border-b border-border/40">
                   <h2 className="text-sm font-semibold text-foreground tracking-tight">Manage my network</h2>
                 </div>
@@ -186,7 +186,7 @@ export function NetworkView({
             {/* Right Side: Content List */}
             <div className="flex-1 min-w-0">
               {isLoading ? (
-                <div className="flex flex-col items-center justify-center py-24 gap-6 animate-in fade-in duration-500 bg-white border border-border/50 rounded-sm shadow-sm">
+                <div className="flex flex-col items-center justify-center py-24 gap-6 animate-in fade-in duration-500 bg-card border border-border/50 rounded-sm shadow-sm">
                   <div className="relative">
                     <div className="w-12 h-12 border-2 border-sky-200 border-t-sky-500 rounded-full animate-spin" />
                     <div className="absolute inset-0 bg-sky-500/5 blur-2xl rounded-full" />
@@ -195,7 +195,7 @@ export function NetworkView({
                 </div>
               ) : (
                 <TabsContent value={activeTab} className="mt-0">
-                  <div className="bg-white border border-border/50 rounded-sm overflow-hidden shadow-sm">
+                  <div className="bg-card border border-border/50 rounded-sm overflow-hidden shadow-sm">
                     {/* Header */}
                     <div className="p-4 sm:p-6 border-b border-border/50">
                       <h2 className="text-xl font-normal text-foreground mb-4">
@@ -217,7 +217,7 @@ export function NetworkView({
                               placeholder="Search by name"
                               value={searchQuery}
                               onChange={(e) => setSearchQuery(e.target.value)}
-                              className="pl-10 pr-4 py-1.5 bg-white border border-border rounded-md text-sm w-full sm:w-64 focus:ring-1 focus:ring-primary outline-none"
+                              className="pl-10 pr-4 py-1.5 bg-card border border-border rounded-md text-sm w-full sm:w-64 focus:ring-1 focus:ring-primary outline-none"
                             />
                           </div>
                           <button className="text-sm font-bold text-[#0a66c2] hover:underline whitespace-nowrap hidden sm:block">
@@ -232,7 +232,7 @@ export function NetworkView({
                       {filteredPeople?.map((person: NetworkPerson) => (
                         <div key={person.id} className="p-4 sm:p-6 flex items-start gap-4 hover:bg-muted/5 transition-colors group">
                           <div className="relative cursor-pointer" onClick={() => onSectionChange('Profile', person.id)}>
-                            <Avatar className="w-16 h-16 sm:w-20 sm:h-20 border-2 border-white shadow-sm">
+                            <Avatar className="w-16 h-16 sm:w-20 sm:h-20 border-2 border-background shadow-sm">
                               <AvatarImage src={person.profile?.profile_image_url} className="object-cover" />
                               <AvatarFallback className="text-lg">{person.first_name[0]}</AvatarFallback>
                             </Avatar>

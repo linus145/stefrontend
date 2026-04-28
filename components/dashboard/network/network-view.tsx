@@ -75,6 +75,7 @@ export function NetworkView({
         description: 'Connection removed successfully.'
       });
       queryClient.invalidateQueries({ queryKey: ['network'] });
+      queryClient.invalidateQueries({ queryKey: ['chat-rooms'] });
     },
     onError: (error: any) => {
       toast.error('Failed to disconnect', {

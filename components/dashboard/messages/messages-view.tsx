@@ -101,6 +101,17 @@ export function MessagesView({
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [displayMessages]);
 
+  // ─── Auto-clear chat if room is no longer active (e.g. disconnected) ───
+  useEffect(() => {
+    if (activeRoomId && rooms.length > 0) {
+      const roomExists = rooms.some(r => r.id === activeRoomId);
+      if (!roomExists && !isLoadingRooms) {
+        setActiveRoomId(null);
+        setDisplayMessages([]);
+      }
+    }
+  }, [rooms, activeRoomId, isLoadingRooms]);
+
   // ─── Derived data ───
   const activeRoom = rooms.find((r: ChatRoom) => r.id === activeRoomId);
   const otherParticipant = activeRoom?.participants_data?.find((p: any) => p.id !== currentUser?.id);
@@ -234,9 +245,9 @@ export function MessagesView({
       {/* Main Chat Panel */}
       <div className={cn(
         "flex-1 flex flex-col bg-background relative overflow-hidden",
-        activeRoomId ? "flex" : "hidden md:flex"
+        activeRoomId && activeRoom ? "flex" : "hidden md:flex"
       )}>
-        {activeRoomId ? (
+        {activeRoomId && activeRoom ? (
           <>
             {/* Chat Header */}
             <div className="px-4 sm:px-8 py-4 border-b border-border flex items-center justify-between bg-background/80 backdrop-blur-md relative z-10">

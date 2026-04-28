@@ -19,13 +19,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-type NetworkCategory = 'FOUNDER' | 'INVESTOR' | 'MENTOR' | 'CONNECTIONS';
+type NetworkCategory = 'FOUNDER' | 'INVESTOR' | 'MENTOR' | 'CONNECTIONS' | 'INVITATIONS';
 
 const TAB_MAP: Record<NetworkCategory, string> = {
   FOUNDER: 'Cofounders',
   INVESTOR: 'Investors',
   MENTOR: 'Mentors',
-  CONNECTIONS: 'My Connections'
+  CONNECTIONS: 'My Connections',
+  INVITATIONS: 'Invitations'
 };
 
 export function NetworkView({
@@ -45,7 +46,10 @@ export function NetworkView({
       if (activeTab === 'CONNECTIONS') {
         return networkService.getMyConnections().then(res => res);
       }
-      return networkService.getPeople(activeTab, true);
+      if (activeTab === 'INVITATIONS') {
+        return networkService.getInvitations().then(res => res);
+      }
+      return networkService.getPeople(activeTab, false);
     },
   });
 
@@ -139,7 +143,7 @@ export function NetworkView({
             {/* Left Sidebar: Tab Selection */}
             <div className="lg:w-72 shrink-0">
               <div className="bg-card border border-border/40 rounded-sm overflow-hidden shadow-sm sticky top-24">
-                <div className="px-5 py-4 border-b border-border/40">
+                <div className="px-5 py-4 border-b border-border/40 flex items-center justify-between">
                   <h2 className="text-sm font-semibold text-foreground tracking-tight">Manage my network</h2>
                 </div>
                 <nav className="flex flex-col py-1">
@@ -147,7 +151,8 @@ export function NetworkView({
                     const Icon = tab === 'CONNECTIONS' ? Users :
                       tab === 'FOUNDER' ? User :
                         tab === 'INVESTOR' ? Briefcase :
-                          tab === 'MENTOR' ? Star : Users;
+                          tab === 'MENTOR' ? Star :
+                            tab === 'INVITATIONS' ? UserPlus : Users;
                     const isActive = activeTab === tab;
 
                     return (
@@ -168,14 +173,11 @@ export function NetworkView({
                           )} />
                           <span className="truncate">{TAB_MAP[tab]}</span>
                         </div>
-                        <span className={cn(
-                          "text-xs tabular-nums min-w-[20px] text-right transition-opacity duration-200",
-                          isActive
-                            ? "text-primary/70 font-medium"
-                            : "text-foreground/35 group-hover:text-foreground/50"
-                        )}>
-                          {tab === 'CONNECTIONS' ? (filteredPeople?.length || 0) : ''}
-                        </span>
+                        {isActive && (
+                          <span className="text-xs tabular-nums min-w-[20px] text-right text-primary/70 font-medium">
+                            {filteredPeople?.length || 0}
+                          </span>
+                        )}
                       </button>
                     );
                   })}
@@ -199,7 +201,9 @@ export function NetworkView({
                     {/* Header */}
                     <div className="p-4 sm:p-6 border-b border-border/50">
                       <h2 className="text-xl font-normal text-foreground mb-4">
-                        {activeTab === 'CONNECTIONS' ? `${filteredPeople?.length || 0} connections` : `${TAB_MAP[activeTab]}`}
+                        {activeTab === 'CONNECTIONS' ? `${filteredPeople?.length || 0} connections` : 
+                         activeTab === 'INVITATIONS' ? `${filteredPeople?.length || 0} invitations` : 
+                         `${TAB_MAP[activeTab]}`}
                       </h2>
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div className="flex items-center gap-1 text-sm text-muted-foreground">
@@ -220,38 +224,35 @@ export function NetworkView({
                               className="pl-10 pr-4 py-1.5 bg-card border border-border rounded-md text-sm w-full sm:w-64 focus:ring-1 focus:ring-primary outline-none"
                             />
                           </div>
-                          <button className="text-sm font-bold text-[#0a66c2] hover:underline whitespace-nowrap hidden sm:block">
-                            Search with filters
-                          </button>
                         </div>
                       </div>
                     </div>
 
                     {/* Unified List */}
                     <div className="divide-y divide-border/50">
-                      {filteredPeople?.map((person: NetworkPerson) => (
-                        <div key={person.id} className="p-4 sm:p-6 flex items-start gap-4 hover:bg-muted/5 transition-colors group">
-                          <div className="relative cursor-pointer" onClick={() => onSectionChange('Profile', person.id)}>
-                            <Avatar className="w-16 h-16 sm:w-20 sm:h-20 border-2 border-background shadow-sm">
-                              <AvatarImage src={person.profile?.profile_image_url} className="object-cover" />
-                              <AvatarFallback className="text-lg">{person.first_name[0]}</AvatarFallback>
-                            </Avatar>
-                          </div>
+                      {filteredPeople?.map((person: NetworkPerson) => {
+                        const status = person.connection_info?.status;
+                        const isIncoming = person.connection_info?.is_incoming;
+                        const connectionId = person.connection_info?.id;
 
-                          <div className="flex-1 min-w-0">
-                            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                              <div className="min-w-0 cursor-pointer" onClick={() => onSectionChange('Profile', person.id)}>
-                                <h3 className="text-base font-bold text-foreground hover:underline leading-tight">
-                                  {person.first_name} {person.last_name}
-                                </h3>
-                                <p className="text-[13px] text-foreground/90 mt-1 line-clamp-2 leading-snug">
-                                  {person.profile?.headline || person.role}
-                                </p>
-                                {activeTab === 'CONNECTIONS' ? (
-                                  <p className="text-[11px] text-muted-foreground mt-1.5">
-                                    Connected on {person.connection_info?.connected_at ? new Date(person.connection_info.connected_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'recently'}
+                        return (
+                          <div key={person.id} className="p-4 sm:p-6 flex items-start gap-4 hover:bg-muted/5 transition-colors group">
+                            <div className="relative cursor-pointer" onClick={() => onSectionChange('Profile', person.id)}>
+                              <Avatar className="w-16 h-16 sm:w-20 sm:h-20 border-2 border-background shadow-sm">
+                                <AvatarImage src={person.profile?.profile_image_url} className="object-cover" />
+                                <AvatarFallback className="text-lg">{person.first_name[0]}</AvatarFallback>
+                              </Avatar>
+                            </div>
+
+                            <div className="flex-1 min-w-0">
+                              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                                <div className="min-w-0 cursor-pointer" onClick={() => onSectionChange('Profile', person.id)}>
+                                  <h3 className="text-base font-bold text-foreground hover:underline leading-tight">
+                                    {person.first_name} {person.last_name}
+                                  </h3>
+                                  <p className="text-[13px] text-foreground/90 mt-1 line-clamp-2 leading-snug">
+                                    {person.profile?.headline || person.role}
                                   </p>
-                                ) : (
                                   <div className="flex items-center gap-2 mt-2">
                                     <div className="flex items-center gap-1 text-[10px] font-bold text-muted-foreground uppercase tracking-wider bg-muted/50 px-2 py-0.5 rounded">
                                       <MapPin className="w-2.5 h-2.5 text-sky-500 opacity-60" />
@@ -262,48 +263,73 @@ export function NetworkView({
                                       {(person.profile?.expertise?.[0] || 'Member')}
                                     </div>
                                   </div>
-                                )}
-                              </div>
+                                </div>
 
-                              <div className="flex items-center gap-3">
-                                {activeTab === 'CONNECTIONS' ? (
-                                  <>
+                                <div className="flex items-center gap-3">
+                                  {status === 'ACCEPTED' ? (
+                                    <>
+                                      <Button
+                                        variant="outline"
+                                        onClick={() => onSectionChange('messages', person.id)}
+                                        className="rounded-full border-[#0a66c2] text-[#0a66c2] font-bold text-sm hover:bg-[#0a66c2]/5 h-9 px-6"
+                                      >
+                                        Message
+                                      </Button>
+                                      <DropdownMenu>
+                                        <DropdownMenuTrigger className="flex items-center justify-center size-9 text-muted-foreground rounded-full hover:bg-muted transition-colors outline-none">
+                                          <MoreHorizontal className="w-5 h-5" />
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end" className="rounded-lg shadow-xl border-border/50">
+                                          <DropdownMenuItem onClick={() => onSectionChange('Profile', person.id)} className="gap-2 cursor-pointer py-2">
+                                            <User className="w-4 h-4 text-muted-foreground" /> View Profile
+                                          </DropdownMenuItem>
+                                          <DropdownMenuItem onClick={() => disconnectMutation.mutate(person.id)} className="gap-2 cursor-pointer py-2 text-destructive">
+                                            <UserX className="w-4 h-4" /> Remove Connection
+                                          </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                      </DropdownMenu>
+                                    </>
+                                  ) : status === 'PENDING' ? (
+                                    isIncoming ? (
+                                      <div className="flex items-center gap-2">
+                                        <Button
+                                          onClick={() => respondMutation.mutate({ id: connectionId!, status: 'ACCEPTED' })}
+                                          className="rounded-full bg-[#0a66c2] text-white font-bold text-sm h-9 px-6"
+                                        >
+                                          Accept
+                                        </Button>
+                                        <Button
+                                          variant="outline"
+                                          onClick={() => respondMutation.mutate({ id: connectionId!, status: 'REJECTED' })}
+                                          className="rounded-full border-muted-foreground text-muted-foreground font-bold text-sm h-9 px-6"
+                                        >
+                                          Ignore
+                                        </Button>
+                                      </div>
+                                    ) : (
+                                      <Button
+                                        disabled
+                                        className="rounded-full border-muted border text-muted-foreground font-bold text-sm h-9 px-6 bg-transparent"
+                                      >
+                                        Pending
+                                      </Button>
+                                    )
+                                  ) : (
                                     <Button
-                                      variant="outline"
-                                      onClick={() => onSectionChange('messages')}
-                                      className="rounded-full border-[#0a66c2] text-[#0a66c2] font-bold text-sm hover:bg-[#0a66c2]/5 h-9 px-6"
+                                      onClick={() => connectMutation.mutate(person.id)}
+                                      disabled={connectMutation.isPending}
+                                      className="rounded-full border-[#0a66c2] text-[#0a66c2] border-2 font-bold text-sm hover:bg-[#0a66c2]/5 h-9 px-8 transition-all"
                                     >
-                                      Message
+                                      {connectMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin mr-2" /> : <UserPlus className="w-4 h-4 mr-2" />}
+                                      Connect
                                     </Button>
-                                    <DropdownMenu>
-                                      <DropdownMenuTrigger className="flex items-center justify-center size-9 text-muted-foreground rounded-full hover:bg-muted transition-colors outline-none">
-                                        <MoreHorizontal className="w-5 h-5" />
-                                      </DropdownMenuTrigger>
-                                      <DropdownMenuContent align="end" className="rounded-lg shadow-xl border-border/50">
-                                        <DropdownMenuItem onClick={() => onSectionChange('Profile', person.id)} className="gap-2 cursor-pointer py-2">
-                                          <User className="w-4 h-4 text-muted-foreground" /> View Profile
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => disconnectMutation.mutate(person.id)} className="gap-2 cursor-pointer py-2 text-destructive">
-                                          <UserX className="w-4 h-4" /> Remove Connection
-                                        </DropdownMenuItem>
-                                      </DropdownMenuContent>
-                                    </DropdownMenu>
-                                  </>
-                                ) : (
-                                  <Button
-                                    onClick={() => connectMutation.mutate(person.id)}
-                                    disabled={connectMutation.isPending}
-                                    className="rounded-full border-[#0a66c2] text-[#0a66c2] border-2 font-bold text-sm hover:bg-[#0a66c2]/5 h-9 px-8 transition-all"
-                                  >
-                                    {connectMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin mr-2" /> : <UserPlus className="w-4 h-4 mr-2" />}
-                                    Connect
-                                  </Button>
-                                )}
+                                  )}
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
 
                       {!isLoading && filteredPeople?.length === 0 && (
                         <div className="p-20 text-center">
@@ -319,14 +345,6 @@ export function NetworkView({
             </div>
           </div>
         </Tabs>
-
-        {!isLoading && filteredPeople?.length === 0 && (
-          <div className="text-center py-24 bg-muted/20 rounded-sm border border-dashed border-border animate-in fade-in duration-700">
-            <Search className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-20" />
-            <h3 className="text-foreground font-semibold tracking-tight mb-2">No results detected</h3>
-            <p className="text-muted-foreground text-sm">Try adjusting your filters or search query.</p>
-          </div>
-        )}
       </div>
     </div>
   );

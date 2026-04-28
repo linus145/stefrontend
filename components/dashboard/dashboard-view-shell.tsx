@@ -31,9 +31,24 @@ export function DashboardViewShell() {
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.push('/login');
+      router.replace('/login');
     }
   }, [isLoading, isAuthenticated, router]);
+
+  // LinkedIn/Google-style back-button trap:
+  // Push a duplicate history entry so pressing back stays on dashboard
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      window.history.pushState(null, '', window.location.href);
+
+      const handlePopState = () => {
+        window.history.pushState(null, '', window.location.href);
+      };
+
+      window.addEventListener('popstate', handlePopState);
+      return () => window.removeEventListener('popstate', handlePopState);
+    }
+  }, [isLoading, isAuthenticated]);
 
   // Close mobile sidebar on navigation
   const handleSectionChange = (section: DashboardSection, userId: string | null = null) => {
@@ -124,7 +139,7 @@ export function DashboardViewShell() {
           </div>
         );
       case 'messages':
-        return <MessagesView isCollapsed={isSidebarCollapsed} />;
+        return <MessagesView isCollapsed={isSidebarCollapsed} targetUserId={selectedProfileId} />;
       case 'network':
         return <NetworkView isCollapsed={isSidebarCollapsed} onSectionChange={handleSectionChange} />;
       case 'settings':

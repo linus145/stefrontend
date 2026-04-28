@@ -45,7 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(resp.data.user);
 
       toast.success('Successfully logged in.');
-      router.push(redirectTo);
+      router.replace(redirectTo);
     } catch (error: any) {
       // Re-enabled toast for all errors as per user request
       toast.error('Login Failed', {
@@ -64,7 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(resp.data.user);
 
       toast.success('Successfully logged in with Google.');
-      router.push(redirectTo);
+      router.replace(redirectTo);
     } catch (error: any) {
       toast.error('Google Login Failed', {
         description: error.response?.data?.detail || error.data?.detail || error.data?.message || error.message || 'Verification failed.'
@@ -86,7 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(null);
       // Wait for the state to settle before pushing
       setTimeout(() => {
-        router.push('/login');
+        router.replace('/login');
         setIsLoading(false);
         toast.info('Logged out securely.');
       }, 100);
@@ -102,6 +102,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const response = await userService.getProfile();
         setUser(response.data);
+        // If authenticated user lands on home page (e.g., browser reopen), go to dashboard
+        if (pathname === '/') {
+          router.replace('/dashboard');
+        }
       } catch {
         // Profile failed (401). User is not authenticated.
         // Explicitly call logout to clear potentially invalid cookies
@@ -114,6 +118,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     initializeAuth();
   }, []);
+
+  // Global route guard: redirect authenticated users away from public pages
+  // This fires on EVERY pathname change (including browser back button)
+  useEffect(() => {
+    if (!isLoading && user && PUBLIC_PATHS.includes(pathname)) {
+      router.replace('/dashboard');
+    }
+  }, [pathname, isLoading, user, router]);
 
   return (
     <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, googleLogin, logout, fetchProfile }}>

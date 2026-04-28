@@ -33,6 +33,9 @@ export const networkService = {
   getMyConnections: () => 
     api.get<NetworkPerson[]>('/interactions/network/my-connections/'),
     
+  getInvitations: () => 
+    api.get<NetworkPerson[]>('/interactions/network/invitations/'),
+    
   connect: (receiverId: string) => 
     api.post('/interactions/network/connect/', { receiver_id: receiverId }),
     

@@ -31,14 +31,14 @@ export function RecruiterShell() {
   // Redirect if not authenticated
   React.useEffect(() => {
     if (!authLoading && !isAuthenticated) {
-      router.push('/recruiter/login');
+      router.replace('/recruiter/login');
     }
   }, [authLoading, isAuthenticated, router]);
 
   // Redirect to register if no company
   React.useEffect(() => {
     if (!companyLoading && companyCheck && !companyCheck.data.has_company) {
-      router.push('/recruiter/register');
+      router.replace('/recruiter/register');
     }
   }, [companyLoading, companyCheck, router]);
 

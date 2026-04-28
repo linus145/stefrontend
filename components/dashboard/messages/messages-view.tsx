@@ -9,13 +9,34 @@ import { useAuth } from '@/hooks/useAuth';
 import { useChat, WsMessage } from '@/hooks/useChat';
 import { format } from 'date-fns';
 
-export function MessagesView({ isCollapsed }: { isCollapsed: boolean }) {
+export function MessagesView({ 
+  isCollapsed,
+  targetUserId 
+}: { 
+  isCollapsed: boolean,
+  targetUserId?: string | null 
+}) {
   const { user: currentUser } = useAuth();
   const queryClient = useQueryClient();
   const [activeRoomId, setActiveRoomId] = useState<string | null>(null);
   const [isSwitching, setIsSwitching] = useState(false);
   const [messageInput, setMessageInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // ─── Initialize chat with target user if provided ───
+  useEffect(() => {
+    if (targetUserId) {
+      chatService.initialize1to1(targetUserId)
+        .then(room => {
+          setActiveRoomId(room.id);
+          queryClient.invalidateQueries({ queryKey: ['chat-rooms'] });
+        })
+        .catch(err => {
+          console.error("Failed to initialize chat:", err);
+          toast.error("Could not open chat with this user.");
+        });
+    }
+  }, [targetUserId, queryClient]);
 
   // ─── Single source-of-truth for displayed messages ───
   const [displayMessages, setDisplayMessages] = useState<Message[]>([]);

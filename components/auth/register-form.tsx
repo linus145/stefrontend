@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
@@ -11,7 +11,7 @@ import { GoogleLoginButton } from './google-login-button';
 
 export function RegisterForm() {
   const router = useRouter();
-  const { logout } = useAuth();
+  const { logout, isAuthenticated, isLoading } = useAuth();
   
   const [formData, setFormData] = useState({
     first_name: '',
@@ -24,6 +24,18 @@ export function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [generalError, setGeneralError] = useState<string | null>(null);
+
+  // Client-side auth guard: redirect authenticated users away from register
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      router.replace('/dashboard');
+    }
+  }, [isLoading, isAuthenticated, router]);
+
+  // Prevent flash of register form while checking auth or if already authenticated
+  if (isLoading || isAuthenticated) {
+    return null;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,7 +71,7 @@ export function RegisterForm() {
       await logout().catch(() => {}); 
       
       toast.success('Account created safely! Redirecting to login.');
-      router.push('/login');
+      router.replace('/login');
     } catch (error: any) {
       const errorData = error.data;
       // Handle both standard DRF and the custom {status, data} pattern shown by user

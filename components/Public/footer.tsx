@@ -10,7 +10,7 @@ export function Footer() {
           <div className="col-span-1 md:col-span-1 space-y-4">
             <Link href="/" className="inline-block">
               <span className="text-2xl font-bold italic tracking-wider text-slate-900">
-                STE
+                B2LINQ
               </span>
             </Link>
             <p className="text-sm text-slate-500 leading-relaxed">
@@ -32,10 +32,10 @@ export function Footer() {
           <div className="space-y-4">
             <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">Company</h4>
             <ul className="space-y-2 text-sm text-slate-600">
-              <li><Link href="#" className="hover:text-indigo-600 transition-colors">About Us</Link></li>
-              <li><Link href="#" className="hover:text-indigo-600 transition-colors">Careers</Link></li>
-              <li><Link href="#" className="hover:text-indigo-600 transition-colors">Blog</Link></li>
-              <li><Link href="#" className="hover:text-indigo-600 transition-colors">Contact</Link></li>
+              <li><Link href="/aboutus" className="hover:text-indigo-600 transition-colors">About Us</Link></li>
+              <li><Link href="/careers" className="hover:text-indigo-600 transition-colors">Careers</Link></li>
+              <li><Link href="/blogs" className="hover:text-indigo-600 transition-colors">Blog</Link></li>
+              <li><Link href="/contactus" className="hover:text-indigo-600 transition-colors">Contact</Link></li>
             </ul>
           </div>
 

@@ -59,7 +59,7 @@ export function LeftSidebar({ isCollapsed, onToggle, activeSection, onSectionCha
           </div>
           {(!isCollapsed || isMobileOpen) && (
             <div className="animate-in fade-in slide-in-from-left-2 duration-300">
-              <h1 className="text-foreground font-semibold text-base leading-tight tracking-tight uppercase">STE</h1>
+              <h1 className="text-foreground font-semibold text-base leading-tight tracking-tight uppercase">B2LINQ</h1>
               <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-[0.2em] opacity-80">Architect</p>
             </div>
           )}

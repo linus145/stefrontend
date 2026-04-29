@@ -50,7 +50,7 @@ export function EcosystemCapTable({ user, isOwner = false }: EcosystemCapTablePr
         
         <div className="mt-6 p-3 rounded-md bg-muted/30 border border-dashed border-border flex items-center gap-2">
            <ShieldCheck className="w-3.5 h-3.5 text-primary opacity-70" />
-           <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">Verified by STE</span>
+           <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">Verified by B2LINQ</span>
         </div>
       </div>
     </div>

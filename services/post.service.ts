@@ -36,7 +36,8 @@ export const postService = {
   },
 
   getNotifications: (): Promise<any[]> => {
-    return api.get<any[]>('/notifications/');
+    return api.get<PaginatedResponse<any>>('/notifications/')
+      .then(res => res.results || []);
   },
 
   markNotificationRead: (id: string): Promise<void> => {
@@ -52,10 +53,11 @@ export const postService = {
   },
 
   getComments: (postId: string): Promise<any[]> => {
-    return api.get<any[]>(`/comments/post/${postId}/`);
+    return api.get<PaginatedResponse<any>>(`/interactions/comments/?post_id=${postId}`)
+      .then(res => res.results || []);
   },
 
   createComment: (postId: string, content: string): Promise<any> => {
-    return api.post('/comments/create/', { post: postId, content });
+    return api.post('/interactions/comments/', { post_id: postId, content });
   }
 };

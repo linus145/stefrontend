@@ -66,7 +66,8 @@ export const useChat = (
     let token: string | null = null;
     try {
       const resp = await chatService.getWsTicket();
-      token = (resp as any)?.data?.token || (resp as any)?.token || null;
+      // api.get() already unwraps response.data, so resp IS {token: "uuid"} directly
+      token = (resp as any)?.token || null;
     } catch (e) {
       console.error('[Chat WS] Failed to fetch ws-ticket:', e);
       return; // No point connecting without auth

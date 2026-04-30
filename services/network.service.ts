@@ -26,22 +26,32 @@ export interface NetworkPerson {
   };
 }
 
+export interface PaginatedResponse<T> {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
+}
+
 export const networkService = {
   getPeople: (role: string, excludeExisting: boolean = false) => 
-    api.get<NetworkPerson[]>(`/interactions/network/people/?role=${role}&exclude_existing=${excludeExisting}`),
+    api.get<PaginatedResponse<NetworkPerson>>(`/interactions/network/people/?role=${role}&exclude_existing=${excludeExisting}`)
+      .then(res => res.results || []),
 
   getMyConnections: () => 
-    api.get<NetworkPerson[]>('/interactions/network/my-connections/'),
+    api.get<PaginatedResponse<NetworkPerson>>('/interactions/network/my-connections/')
+      .then(res => res.results || []),
     
   getInvitations: () => 
-    api.get<NetworkPerson[]>('/interactions/network/invitations/'),
+    api.get<PaginatedResponse<NetworkPerson>>('/interactions/network/invitations/')
+      .then(res => res.results || []),
     
   connect: (receiverId: string) => 
     api.post('/interactions/network/connect/', { receiver_id: receiverId }),
     
   respondToConnection: (connectionId: string, status: 'ACCEPTED' | 'REJECTED') => 
     api.patch(`/interactions/network/connect/${connectionId}/`, { status }),
-
+  
   disconnect: (userId: string) => 
     api.delete(`/interactions/network/disconnect/${userId}/`),
 };

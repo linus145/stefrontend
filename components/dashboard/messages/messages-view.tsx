@@ -48,7 +48,7 @@ export function MessagesView({
     refetchInterval: 30000, // Refresh room list every 30s for latest-message previews
   });
 
-  const rooms: ChatRoom[] = (roomsData as any)?.results ?? (Array.isArray(roomsData) ? roomsData : []);
+  const rooms: ChatRoom[] = Array.isArray(roomsData) ? roomsData : [];
 
   // ─── Fetch message history for the active room ───
   const { data: historyData, isLoading: isLoadingHistory } = useQuery({
@@ -59,9 +59,8 @@ export function MessagesView({
 
   // When history arrives, set it as the baseline
   useEffect(() => {
-    const results = (historyData as any)?.results ?? (Array.isArray(historyData) ? historyData : null);
-    if (results) {
-      setDisplayMessages(results);
+    if (Array.isArray(historyData)) {
+      setDisplayMessages(historyData);
     }
   }, [historyData]);
 

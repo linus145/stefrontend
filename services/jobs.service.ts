@@ -46,7 +46,11 @@ export const jobsService = {
 
   getPublicJobs: (params?: Record<string, string>): Promise<BaseAPIResponse<JobPost[]>> => {
     const query = params ? '?' + new URLSearchParams(params).toString() : '';
-    return api.get<BaseAPIResponse<JobPost[]>>(`/jobs/posts/${query}`);
+    return api.get<any>(`/jobs/posts/${query}`).then(res => {
+      // Handle both PaginatedResponse and BaseAPIResponse
+      const items = res.results || res.data || [];
+      return { status: 'success', message: '', data: items };
+    });
   },
 
   getJobDetail: (jobId: string): Promise<BaseAPIResponse<JobPost>> => {
@@ -57,7 +61,10 @@ export const jobsService = {
 
   getMyJobs: (status?: string): Promise<BaseAPIResponse<JobPost[]>> => {
     const query = status ? `?status=${status}` : '';
-    return api.get<BaseAPIResponse<JobPost[]>>(`/jobs/my-posts/${query}`);
+    return api.get<any>(`/jobs/my-posts/${query}`).then(res => {
+      const items = res.results || res.data || [];
+      return { status: 'success', message: '', data: items };
+    });
   },
 
   createJob: (data: JobPostCreatePayload): Promise<BaseAPIResponse<JobPost>> => {
@@ -80,7 +87,10 @@ export const jobsService = {
 
   getJobApplications: (jobId: string, status?: string): Promise<BaseAPIResponse<JobApplication[]>> => {
     const query = status ? `?status=${status}` : '';
-    return api.get<BaseAPIResponse<JobApplication[]>>(`/jobs/posts/${jobId}/applications/${query}`);
+    return api.get<any>(`/jobs/posts/${jobId}/applications/${query}`).then(res => {
+      const items = res.results || res.data || [];
+      return { status: 'success', message: '', data: items };
+    });
   },
 
   updateApplicationStatus: (applicationId: string, newStatus: string): Promise<BaseAPIResponse<JobApplication>> => {
@@ -88,7 +98,10 @@ export const jobsService = {
   },
 
   getMyApplications: (): Promise<BaseAPIResponse<JobApplication[]>> => {
-    return api.get<BaseAPIResponse<JobApplication[]>>('/jobs/my-applications/');
+    return api.get<any>('/jobs/my-applications/').then(res => {
+      const items = res.results || res.data || [];
+      return { status: 'success', message: '', data: items };
+    });
   },
 
   // ─── Dashboard Stats ──────────────────────────────────────────

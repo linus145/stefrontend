@@ -11,7 +11,7 @@ async function getProfileData() {
   const cookieString = cookieStore.toString();
 
   try {
-    const response = await fetch(`${appConfig.apiBaseUrl}/auth/profile/`, {
+    const response = await fetch(`${appConfig.serverApiBaseUrl}/auth/profile/`, {
       headers: {
         'Cookie': cookieString,
       },

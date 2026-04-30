@@ -39,13 +39,15 @@ export interface Message {
 }
 
 export const chatService = {
-  getRooms: () => api.get<ChatRoom[]>('/chat/rooms/'),
+  getRooms: () => api.get<{ results: ChatRoom[] }>('/chat/rooms/')
+    .then(res => (res as any)?.results || []),
   
   initialize1to1: (targetUserId: string) => 
     api.post<ChatRoom>('/chat/rooms/1to1/', { target_user_id: targetUserId }),
     
   getMessageHistory: (roomId: string) => 
-    api.get<{ results: Message[] }>(`/chat/rooms/${roomId}/messages/`),
+    api.get<{ results: Message[] }>(`/chat/rooms/${roomId}/messages/`)
+      .then(res => (res as any)?.results || []),
 
   /** Fetches the current JWT from HTTPOnly cookies via a secured endpoint */
   getWsTicket: () => 

@@ -33,7 +33,7 @@ export function JobDetails({ job, applications, onClose, onApply }: JobDetailsPr
       <div className="p-6 border-b border-border/50 relative">
         <button 
           onClick={onClose}
-          className="lg:hidden absolute top-4 right-4 p-2 rounded-full hover:bg-muted"
+          className="absolute top-4 right-4 p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-all"
         >
           <X className="w-5 h-5" />
         </button>

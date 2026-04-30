@@ -6,7 +6,9 @@ const nextConfig: NextConfig = {
       return [
         {
           source: '/api/:path*',
-          destination: 'http://127.0.0.1:8000/api/:path*/', // Proxy to Django backend with trailing slash
+          // Using localhost instead of 127.0.0.1 ensures cookies map to the frontend domain.
+          // Trailing slash ensures Django's APPEND_SLASH does not throw a 500 error on POSTs.
+          destination: 'http://localhost:8000/api/:path*/', 
         },
       ];
     }

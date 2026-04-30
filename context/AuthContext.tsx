@@ -109,7 +109,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } catch {
         // Profile failed (401). User is not authenticated.
         // Explicitly call logout to clear potentially invalid cookies
-        await authService.logout().catch(() => {});
+        await authService.logout().catch(() => { });
         setUser(null);
       } finally {
         setIsLoading(false);

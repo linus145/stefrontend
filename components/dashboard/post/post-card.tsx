@@ -322,50 +322,82 @@ export function PostCard({ post, onLike, onNavigateToProfile }: PostCardProps) {
             </div>
           </form>
 
-          <div className="space-y-5">
+          <div className="space-y-4">
             {isLoadingComments ? (
               <div className="flex justify-center p-4">
                 <Loader2 className="h-5 w-5 animate-spin text-primary/50" />
               </div>
             ) : (
               comments?.map((comment: any) => (
-                <div key={comment.id} className="flex gap-3 group">
+                <div key={comment.id} className="flex gap-3 group mt-4 first:mt-0">
                   <div
-                    onClick={() => onNavigateToProfile(comment.user_id || post.author_id)} // Fallback if user_id is missing, but should be there
-                    className="w-8 h-8 rounded-md bg-muted shrink-0 border border-border flex items-center justify-center text-[10px] font-bold text-muted-foreground overflow-hidden hover:ring-2 hover:ring-primary/20 transition-all cursor-pointer"
+                    onClick={() => onNavigateToProfile(comment.user_id || post.author_id)} 
+                    className="w-10 h-10 rounded-full bg-muted shrink-0 border border-border/50 flex items-center justify-center text-[13px] font-bold text-muted-foreground overflow-hidden hover:ring-2 hover:ring-primary/20 transition-all cursor-pointer"
                   >
-                    {comment.author_image ? (
+                    {comment.author_image_url ? (
                       <img
-                        src={(user?.id === comment.user_id) ? `${getOptimizedImage(comment.author_image)}&v=${user?.updated_at ? new Date(user.updated_at).getTime() : Date.now()}` : getOptimizedImage(comment.author_image)}
-                        alt={comment.author_name}
+                        src={(user?.id === comment.user_id) ? `${getOptimizedImage(comment.author_image_url)}&v=${user?.updated_at ? new Date(user.updated_at).getTime() : Date.now()}` : getOptimizedImage(comment.author_image_url)}
+                        alt={comment.author_first_name}
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      comment.author_name?.charAt(0) || 'U'
+                      (comment.author_first_name || 'U').charAt(0).toUpperCase()
                     )}
                   </div>
-                  <div className="flex-1">
-                    <div className="flex justify-between items-baseline mb-1">
-                      <div className="flex items-center gap-1.5">
-                        <button
-                          onClick={() => onNavigateToProfile(comment.user_id || post.author_id)}
-                          className="text-xs font-bold text-foreground hover:text-primary hover:underline transition-colors cursor-pointer"
-                        >
-                          {comment.author_name}
-                        </button>
-                        {comment.author_linkedin_url && (
-                          <a href={comment.author_linkedin_url} target="_blank" rel="noopener noreferrer">
-                            <div className="w-2.5 h-2.5 bg-[#0A66C2] rounded-[1px] flex items-center justify-center hover:brightness-110 transition-all">
-                              <span className="text-[6px] text-white font-bold leading-none">in</span>
-                            </div>
-                          </a>
-                        )}
+                  
+                  <div className="flex flex-col flex-1 min-w-0">
+                    <div className="flex justify-between items-start">
+                      <div className="flex flex-col min-w-0">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <button
+                            onClick={() => onNavigateToProfile(comment.user_id || post.author_id)}
+                            className="text-[14px] font-bold text-foreground hover:text-primary hover:underline transition-colors cursor-pointer truncate"
+                          >
+                            {comment.author_first_name || 'LinkedIn Member'}
+                          </button>
+                          {/* Placeholder for verification badge and connection degree */}
+                          <span className="text-[13px] text-muted-foreground font-normal shrink-0">• 1st</span>
+                        </div>
+                        {/* Sub-headline/Role */}
+                        <p className="text-[13px] text-muted-foreground truncate leading-tight mt-0.5">
+                          Professional at STE Platform
+                        </p>
                       </div>
-                      <span className="text-[10px] text-muted-foreground font-medium opacity-60">
-                        {new Date(comment.created_at).toLocaleDateString()}
-                      </span>
+                      
+                      <div className="flex items-center gap-2 shrink-0 ml-2">
+                        <span className="text-[12px] text-muted-foreground font-normal">
+                          {formatDistanceToNow(new Date(comment.created_at), { addSuffix: false }).replace('about ', '').replace(' hours', 'h').replace(' minutes', 'm').replace(' days', 'd')}
+                        </span>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger className="text-muted-foreground hover:text-foreground p-1 rounded-full hover:bg-muted transition-colors opacity-0 group-hover:opacity-100">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-32">
+                            <DropdownMenuItem className="text-xs">Report</DropdownMenuItem>
+                            {(isOwner || user?.id === comment.user_id) && (
+                              <DropdownMenuItem className="text-xs text-destructive">Delete</DropdownMenuItem>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
                     </div>
-                    <p className="text-[13px] text-foreground/80 leading-relaxed font-normal">{comment.content}</p>
+
+                    {/* Comment text */}
+                    <p className="text-[14px] text-foreground/90 leading-normal mt-2 whitespace-pre-wrap break-words">
+                      {comment.content}
+                    </p>
+
+                    {/* Action buttons (Like, Reply counts) */}
+                    <div className="flex items-center gap-4 mt-3">
+                      <button className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors group/btn">
+                        <Heart className="w-4 h-4 group-hover/btn:fill-muted-foreground/20" />
+                        <span className="text-[13px] font-medium">0</span>
+                      </button>
+                      <button className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors group/btn">
+                        <MessageSquare className="w-4 h-4 group-hover/btn:fill-muted-foreground/20" />
+                        <span className="text-[13px] font-medium">0</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))

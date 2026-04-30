@@ -58,6 +58,6 @@ export const postService = {
   },
 
   createComment: (postId: string, content: string): Promise<any> => {
-    return api.post('/interactions/comments/', { post_id: postId, content });
+    return api.post('/interactions/comments/', { post: postId, content });
   }
 };

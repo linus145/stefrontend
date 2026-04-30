@@ -49,7 +49,7 @@ export function JobCard({ job, isSelected, onClick }: JobCardProps) {
               <span className="w-4 h-4 rounded-full bg-emerald-500/10 flex items-center justify-center">
                 <CheckCircle2 className="w-3 h-3 text-emerald-600" />
               </span>
-              Actively reviewing applicants
+              {job.hiring_status === 'ACTIVELY_HIRING' ? 'Actively hiring' : 'Actively reviewing applicants'}
             </div>
             <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
               <span className="font-medium">Promoted</span>

@@ -50,6 +50,7 @@ export type JobType = 'FULL_TIME' | 'PART_TIME' | 'CONTRACT' | 'INTERNSHIP';
 export type WorkMode = 'REMOTE' | 'ONSITE' | 'HYBRID';
 export type ExperienceLevel = 'ENTRY' | 'MID' | 'SENIOR' | 'LEAD';
 export type JobStatus = 'DRAFT' | 'ACTIVE' | 'CLOSED';
+export type HiringStatus = 'ACTIVELY_HIRING' | 'ACTIVELY_REVIEWING';
 
 export interface JobPost {
   id: string;
@@ -68,6 +69,7 @@ export interface JobPost {
   skills_required: string[];
   experience_level: ExperienceLevel;
   status: JobStatus;
+  hiring_status: HiringStatus;
   deadline: string | null;
   applications_count: number;
   company_is_genuine?: boolean;
@@ -88,6 +90,7 @@ export interface JobPostCreatePayload {
   skills_required?: string[];
   experience_level?: ExperienceLevel;
   status?: JobStatus;
+  hiring_status?: HiringStatus;
   deadline?: string | null;
 }
 

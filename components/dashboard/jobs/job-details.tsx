@@ -53,7 +53,9 @@ export function JobDetails({ job, applications, onClose, onApply }: JobDetailsPr
               <span>•</span>
               <span>{job.location}</span>
               <span>•</span>
-              <span className="text-foreground font-medium">Over 100 applicants</span>
+              <span className="text-foreground font-medium">
+                {job.applications_count} applicant{job.applications_count !== 1 ? 's' : ''}
+              </span>
             </div>
           </div>
         </div>
@@ -61,6 +63,9 @@ export function JobDetails({ job, applications, onClose, onApply }: JobDetailsPr
         <div className="flex flex-wrap gap-2 mb-6">
           <div className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-emerald-600/30 bg-emerald-500/5 text-emerald-700 text-xs font-semibold">
             <CheckCircle2 className="w-3.5 h-3.5" />
+            {job.hiring_status === 'ACTIVELY_HIRING' ? 'Actively hiring' : 'Actively reviewing applicants'}
+          </div>
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-border bg-muted/30 text-muted-foreground text-xs font-semibold">
             {job.work_mode === 'ONSITE' ? 'On-site' : job.work_mode.toLowerCase()}
           </div>
           <div className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-border bg-muted/30 text-muted-foreground text-xs font-semibold">

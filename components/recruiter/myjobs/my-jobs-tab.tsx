@@ -10,7 +10,7 @@ import {
   Edit3, Trash2, X, ArrowRight, ChevronDown
 } from 'lucide-react';
 import { JobPost, JobPostCreatePayload, JobStatus } from '@/types/jobs.types';
-import { PostJobForm } from './post-job-form';
+import { PostJobForm } from '@/components/recruiter/myjobs/post-job-form';
 
 interface MyJobsTabProps {
   isCollapsed: boolean;

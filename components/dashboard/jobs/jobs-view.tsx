@@ -33,6 +33,8 @@ export function JobsView({ isCollapsed }: JobsViewProps) {
   const [resumeUrl, setResumeUrl] = useState('');
   const [coverLetter, setCoverLetter] = useState('');
 
+  const [statusFilter, setStatusFilter] = useState('');
+
   // Queries
   const { data: jobsResponse, isLoading: isJobsLoading } = useQuery({
     queryKey: ['public-jobs', searchQuery],
@@ -41,13 +43,23 @@ export function JobsView({ isCollapsed }: JobsViewProps) {
   });
 
   const { data: appsResponse, isLoading: isAppsLoading } = useQuery({
-    queryKey: ['my-applications'],
-    queryFn: () => jobsService.getMyApplications(),
+    queryKey: ['my-applications', statusFilter],
+    queryFn: () => jobsService.getMyApplications(statusFilter || undefined),
+    enabled: activeTab === 'applications',
   });
 
   const isLoading = activeTab === 'browse' ? isJobsLoading : isAppsLoading;
   const jobs = Array.isArray(jobsResponse?.data) ? jobsResponse.data : [];
   const applications = Array.isArray(appsResponse?.data) ? appsResponse.data : [];
+
+  const appStatusOptions = [
+    { label: 'All', value: '' },
+    { label: 'Pending', value: 'PENDING' },
+    { label: 'Reviewed', value: 'REVIEWED' },
+    { label: 'Shortlisted', value: 'SHORTLISTED' },
+    { label: 'Hired', value: 'HIRED' },
+    { label: 'Rejected', value: 'REJECTED' },
+  ];
 
   // Mutations
   const applyMutation = useMutation({
@@ -117,20 +129,41 @@ export function JobsView({ isCollapsed }: JobsViewProps) {
         </div>
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder={activeTab === 'browse' ? "Search jobs, companies, skills..." : "Search your applications..."}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-muted/30 border border-border rounded-xl text-sm focus:ring-1 focus:ring-primary outline-none transition-all"
-            />
-          </div>
-          <button className="flex items-center gap-2 px-4 py-2 bg-muted/30 border border-border rounded-xl text-sm font-medium hover:bg-muted/50 transition-all">
-            <Filter className="w-4 h-4" />
-            Filters
-          </button>
+          {activeTab === 'browse' ? (
+            <>
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Search jobs, companies, skills..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 bg-muted/30 border border-border rounded-xl text-sm focus:ring-1 focus:ring-primary outline-none transition-all"
+                />
+              </div>
+              <button className="flex items-center gap-2 px-4 py-2 bg-muted/30 border border-border rounded-xl text-sm font-medium hover:bg-muted/50 transition-all">
+                <Filter className="w-4 h-4" />
+                Filters
+              </button>
+            </>
+          ) : (
+            <div className="flex gap-2 overflow-x-auto w-full pb-1">
+              {appStatusOptions.map(opt => (
+                <button
+                  key={opt.value}
+                  onClick={() => setStatusFilter(opt.value)}
+                  className={cn(
+                    "px-4 py-1.5 rounded-full text-xs font-semibold transition-all whitespace-nowrap border",
+                    statusFilter === opt.value
+                      ? "bg-primary/10 text-primary border-primary/30"
+                      : "bg-muted/30 text-muted-foreground border-border hover:bg-muted/50"
+                  )}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

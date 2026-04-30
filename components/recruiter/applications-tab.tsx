@@ -31,8 +31,8 @@ export function ApplicationsTab({ isCollapsed, selectedJobId, onBack }: Applicat
   const [activeJobId, setActiveJobId] = useState<string | null>(selectedJobId);
 
   const { data: applicationsResponse, isLoading } = useQuery({
-    queryKey: ['job-applications', activeJobId, statusFilter],
-    queryFn: () => jobsService.getJobApplications(activeJobId!, statusFilter || undefined),
+    queryKey: ['job-applications', activeJobId],
+    queryFn: () => jobsService.getJobApplications(activeJobId!),
     enabled: !!activeJobId,
   });
 
@@ -48,7 +48,16 @@ export function ApplicationsTab({ isCollapsed, selectedJobId, onBack }: Applicat
   });
 
   const jobs = Array.isArray(jobsResponse?.data) ? jobsResponse.data : [];
-  const applications = Array.isArray(applicationsResponse?.data) ? applicationsResponse.data : [];
+  const allApplications = Array.isArray(applicationsResponse?.data) ? applicationsResponse.data : [];
+  
+  const applications = statusFilter 
+    ? allApplications.filter(app => app.status === statusFilter)
+    : allApplications;
+
+  const getStatusCount = (statusValue: string) => {
+    if (!statusValue) return allApplications.length;
+    return allApplications.filter(app => app.status === statusValue).length;
+  };
 
   const statusOptions: { label: string; value: string; color: string }[] = [
     { label: 'All', value: '', color: '' },
@@ -138,7 +147,7 @@ export function ApplicationsTab({ isCollapsed, selectedJobId, onBack }: Applicat
                 )}
               >
                 {opt.color && <div className={cn("w-1.5 h-1.5 rounded-full", opt.color)} />}
-                {opt.label}
+                {opt.label} ({getStatusCount(opt.value)})
               </button>
             ))}
           </div>

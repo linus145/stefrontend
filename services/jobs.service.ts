@@ -97,8 +97,9 @@ export const jobsService = {
     return api.patch<BaseAPIResponse<JobApplication>>(`/jobs/applications/${applicationId}/status/`, { status: newStatus });
   },
 
-  getMyApplications: (): Promise<BaseAPIResponse<JobApplication[]>> => {
-    return api.get<any>('/jobs/my-applications/').then(res => {
+  getMyApplications: (status?: string): Promise<BaseAPIResponse<JobApplication[]>> => {
+    const query = status ? `?status=${status}` : '';
+    return api.get<any>(`/jobs/my-applications/${query}`).then(res => {
       const items = res.results || res.data || [];
       return { status: 'success', message: '', data: items };
     });

@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { CompanyLoginForm } from '@/components/recruiter/company-login-form';
+import { CompanyLoginForm } from '@/components/recruiter/company/company-login-form';
 
 export const metadata: Metadata = {
   title: 'Company Login | B2linq Recruiter',

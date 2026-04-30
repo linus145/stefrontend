@@ -43,6 +43,11 @@ const STATUS_OPTIONS = [
   { value: 'ACTIVE', label: 'Active — Publish immediately' },
 ];
 
+const HIRING_STATUS_OPTIONS = [
+  { value: 'ACTIVELY_HIRING', label: 'Actively Hiring' },
+  { value: 'ACTIVELY_REVIEWING', label: 'Actively Reviewing' },
+];
+
 export function PostJobForm({ isCollapsed, editJob, onClose, onSuccess }: PostJobFormProps) {
   const isEditing = !!editJob;
 
@@ -58,6 +63,7 @@ export function PostJobForm({ isCollapsed, editJob, onClose, onSuccess }: PostJo
     skills_required: editJob?.skills_required || [],
     experience_level: editJob?.experience_level || 'ENTRY',
     status: editJob?.status || 'DRAFT',
+    hiring_status: editJob?.hiring_status || 'ACTIVELY_HIRING',
     deadline: editJob?.deadline ? editJob.deadline.split('T')[0] : null,
   });
 
@@ -312,16 +318,27 @@ export function PostJobForm({ isCollapsed, editJob, onClose, onSuccess }: PostJo
             />
           </FormField>
 
-          {/* Status */}
-          <FormField label="Publish Status" id="status">
-            <SelectField
-              id="status"
-              value={formData.status!}
-              onChange={handleChange}
-              options={isEditing ? [...STATUS_OPTIONS, { value: 'CLOSED', label: 'Closed — Stop accepting applications' }] : STATUS_OPTIONS}
-              disabled={isSubmitting}
-            />
-          </FormField>
+          {/* Status & Hiring Status */}
+          <div className="grid grid-cols-2 gap-4">
+            <FormField label="Publish Status" id="status">
+              <SelectField
+                id="status"
+                value={formData.status!}
+                onChange={handleChange}
+                options={isEditing ? [...STATUS_OPTIONS, { value: 'CLOSED', label: 'Closed — Stop accepting applications' }] : STATUS_OPTIONS}
+                disabled={isSubmitting}
+              />
+            </FormField>
+            <FormField label="Hiring Status" id="hiring_status">
+              <SelectField
+                id="hiring_status"
+                value={formData.hiring_status!}
+                onChange={handleChange}
+                options={HIRING_STATUS_OPTIONS}
+                disabled={isSubmitting}
+              />
+            </FormField>
+          </div>
 
           {/* Submit */}
           <div className="flex gap-3 pt-4">

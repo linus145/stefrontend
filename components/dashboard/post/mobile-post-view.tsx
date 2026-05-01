@@ -254,7 +254,7 @@ export function MobilePostView({ onClose, onPostSuccess }: MobilePostViewProps) 
                   onEmojiClick={onEmojiClick}
                   theme={isDark ? Theme.DARK : Theme.LIGHT}
                   width="100%"
-                  height={320}
+                  height={280}
                   skinTonesDisabled
                   searchDisabled
                   previewConfig={{ showPreview: false }}

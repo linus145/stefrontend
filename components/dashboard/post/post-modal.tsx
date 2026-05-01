@@ -238,8 +238,8 @@ export function PostModal({ isOpen, onClose, onPostSuccess }: PostModalProps) {
                   <EmojiPicker
                     onEmojiClick={onEmojiClick}
                     theme={isDark ? Theme.DARK : Theme.LIGHT}
-                    width={280}
-                    height={350}
+                    width={250}
+                    height={300}
                     skinTonesDisabled
                     searchDisabled
                     previewConfig={{ showPreview: false }}

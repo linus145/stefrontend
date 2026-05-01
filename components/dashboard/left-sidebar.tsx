@@ -26,12 +26,12 @@ export function LeftSidebar({ isCollapsed, onToggle, activeSection, onSectionCha
   return (
     <aside
       className={cn(
-        "h-screen fixed left-0 top-0 bg-sidebar border-r border-border flex flex-col justify-between py-6 z-50 transition-all duration-300 ease-in-out",
-        // Desktop: normal sidebar behavior
-        "hidden lg:flex",
+        "bg-sidebar border-r border-border flex flex-col justify-between py-6 z-30 transition-all duration-300 ease-in-out",
+        // Desktop: fixed below header
+        "hidden lg:flex fixed left-0 top-16 h-[calc(100vh-64px)]",
         isCollapsed ? "lg:w-20" : "lg:w-60",
-        // Mobile: overlay sidebar
-        isMobileOpen && "!flex w-72 shadow-2xl"
+        // Mobile: full height overlay
+        isMobileOpen && "!flex fixed left-0 top-0 h-screen w-72 shadow-2xl z-50"
       )}
     >
       {/* Mobile Close Button */}
@@ -53,17 +53,6 @@ export function LeftSidebar({ isCollapsed, onToggle, activeSection, onSectionCha
       {/* Top Section */}
       <div className="space-y-6 flex-1 overflow-y-auto custom-scrollbar overflow-x-hidden">
         {/* Brand */}
-        <div className={cn("px-6 flex items-center gap-3 transition-all", isCollapsed && !isMobileOpen ? "px-5" : "px-6")}>
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground shadow-sm hover:scale-105 transition-transform cursor-pointer">
-            <Rocket className="h-4 w-4" />
-          </div>
-          {(!isCollapsed || isMobileOpen) && (
-            <div className="animate-in fade-in slide-in-from-left-2 duration-300">
-              <h1 className="text-foreground font-semibold text-base leading-tight tracking-tight uppercase">B2LINQ</h1>
-              <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-[0.2em] opacity-80">Architect</p>
-            </div>
-          )}
-        </div>
 
         {/* Mobile-only: Quick Navigation */}
         {isMobileOpen && (
@@ -103,16 +92,8 @@ export function LeftSidebar({ isCollapsed, onToggle, activeSection, onSectionCha
           </nav>
         )}
 
-        {/* Navigation */}
+        {/* Navigation - Moved to Header */}
         <nav className="space-y-1.5 px-3">
-          <SidebarLink
-            onClick={() => onSectionChange('messages')}
-            icon={<MessageSquare className="h-4 w-4" />}
-            label="Messages"
-            isCollapsed={isCollapsed && !isMobileOpen}
-            active={activeSection === 'messages'}
-          />
-
         </nav>
       </div>
 

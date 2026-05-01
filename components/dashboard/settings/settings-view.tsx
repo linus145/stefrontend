@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { 
-  User, Lock, Bell, Eye, EyeOff, Shield, Camera, 
-  Mail, Phone, Save, Trash2, Smartphone, 
+import {
+  User, Lock, Bell, Eye, EyeOff, Shield, Camera,
+  Mail, Phone, Save, Trash2, Smartphone,
   MapPin, Globe, CreditCard, LogOut, ChevronDown, CheckCircle2
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
@@ -29,8 +29,7 @@ export function SettingsView({ isCollapsed }: { isCollapsed: boolean }) {
 
   return (
     <div className={cn(
-      "flex-1 min-h-screen bg-background flex flex-col md:flex-row transition-all duration-300 ease-in-out",
-      isCollapsed ? "lg:ml-20" : "lg:ml-60"
+      "flex-1 min-h-screen bg-background flex flex-col md:flex-row transition-all duration-300 ease-in-out"
     )}>
       {/* Settings Navigation */}
       {/* Mobile: Horizontal tabs on top */}
@@ -70,8 +69,8 @@ export function SettingsView({ isCollapsed }: { isCollapsed: boolean }) {
               onClick={() => setActiveTab(item.id)}
               className={cn(
                 "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all group",
-                activeTab === item.id 
-                  ? "bg-primary/10 text-primary border border-primary/20 shadow-sm" 
+                activeTab === item.id
+                  ? "bg-primary/10 text-primary border border-primary/20 shadow-sm"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
               )}
             >
@@ -90,34 +89,34 @@ export function SettingsView({ isCollapsed }: { isCollapsed: boolean }) {
       {/* Main Content */}
       <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 lg:p-10">
         <div className="max-w-3xl mx-auto space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
-          
+
           <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as SettingsTab)} className="w-full">
             {/* Privacy Tab */}
             <TabsContent value="Privacy">
-               <PrivacyTab />
+              <PrivacyTab />
             </TabsContent>
 
             {/* Notifications Tab */}
             <TabsContent value="Notifications">
-               <NotificationsTab />
+              <NotificationsTab />
             </TabsContent>
 
             {/* Security Tab */}
             <TabsContent value="Security">
-               <SecurityTab />
+              <SecurityTab />
             </TabsContent>
 
           </Tabs>
 
           {/* Footer Actions */}
           <div className="pt-6 sm:pt-8 border-t border-border flex flex-col sm:flex-row justify-end gap-3 sticky bottom-0 bg-background/80 backdrop-blur-sm z-20 py-4 -mx-4 sm:-mx-6 lg:-mx-10 px-4 sm:px-6 lg:px-10">
-             <Button variant="ghost" className="rounded-xl font-bold text-xs text-muted-foreground uppercase tracking-widest px-6 h-11">
-                Discard
-             </Button>
-             <Button className="rounded-xl bg-primary text-primary-foreground font-bold text-xs uppercase tracking-widest px-8 h-11 shadow-md hover:translate-y-[-1px] active:scale-95 transition-all">
-                <Save className="w-4 h-4 mr-2" />
-                Save Changes
-             </Button>
+            <Button variant="ghost" className="rounded-xl font-bold text-xs text-muted-foreground uppercase tracking-widest px-6 h-11">
+              Discard
+            </Button>
+            <Button className="rounded-xl bg-primary text-primary-foreground font-bold text-xs uppercase tracking-widest px-8 h-11 shadow-md hover:translate-y-[-1px] active:scale-95 transition-all">
+              <Save className="w-4 h-4 mr-2" />
+              Save Changes
+            </Button>
           </div>
         </div>
       </div>
@@ -129,7 +128,7 @@ function SettingsField({ label, value, icon }: { label: string; value: string; i
   return (
     <div className="space-y-2 group">
       <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest ml-1 transition-colors group-focus-within:text-primary">
-         {label}
+        {label}
       </label>
       <div className="relative">
         {icon && (
@@ -137,7 +136,7 @@ function SettingsField({ label, value, icon }: { label: string; value: string; i
             {icon}
           </div>
         )}
-        <Input 
+        <Input
           defaultValue={value}
           className={cn(
             "h-11 bg-background border-border rounded-xl focus:ring-1 focus:ring-primary/40 transition-all shadow-sm text-sm",

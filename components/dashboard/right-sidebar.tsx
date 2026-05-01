@@ -12,7 +12,7 @@ export function RightSidebar({ isCollapsed, onToggle }: RightSidebarProps) {
 
   return (
     <aside className={cn(
-      "h-screen fixed right-0 top-0 bg-sidebar/50 flex flex-col pt-20 pb-8 z-20 transition-all duration-300 ease-in-out hidden xl:flex",
+      "fixed right-0 top-16 h-[calc(100vh-64px)] bg-sidebar/50 flex flex-col pt-8 pb-8 z-20 transition-all duration-300 ease-in-out hidden xl:flex",
       isCollapsed ? "w-0 border-l-0" : "w-72 border-l border-border px-6"
     )}>
       {/* Toggle Button */}

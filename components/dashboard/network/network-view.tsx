@@ -111,8 +111,7 @@ export function NetworkView({
 
   return (
     <div className={cn(
-      "flex-1 min-h-screen bg-background px-4 sm:px-6 lg:px-8 py-6 sm:py-10 transition-all duration-300 ease-in-out",
-      isCollapsed ? "lg:ml-20" : "lg:ml-60"
+      "flex-1 min-h-screen bg-background px-4 sm:px-6 lg:px-8 py-6 sm:py-10 transition-all duration-300 ease-in-out"
     )}>
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col gap-4 sm:gap-6 mb-8 sm:mb-12">
@@ -202,9 +201,9 @@ export function NetworkView({
                     {/* Header */}
                     <div className="p-4 sm:p-6 border-b border-border/50">
                       <h2 className="text-xl font-normal text-foreground mb-4">
-                        {activeTab === 'CONNECTIONS' ? `${filteredPeople?.length || 0} connections` : 
-                         activeTab === 'INVITATIONS' ? `${filteredPeople?.length || 0} invitations` : 
-                         `${TAB_MAP[activeTab]}`}
+                        {activeTab === 'CONNECTIONS' ? `${filteredPeople?.length || 0} connections` :
+                          activeTab === 'INVITATIONS' ? `${filteredPeople?.length || 0} invitations` :
+                            `${TAB_MAP[activeTab]}`}
                       </h2>
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div className="flex items-center gap-1 text-sm text-muted-foreground">

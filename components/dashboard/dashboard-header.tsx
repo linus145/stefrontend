@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Search, Bell, Heart, MessageSquare, Loader2, UserPlus, UserMinus, Home, Briefcase, Users, Newspaper, Network as NetworkIcon, Menu, Settings, User, LogOut, ChevronDown, Wallet } from 'lucide-react';
+import { Search, Bell, Heart, MessageSquare, Loader2, UserPlus, UserMinus, Home, Briefcase, Users, Newspaper, Network as NetworkIcon, Menu, Settings, User, LogOut, ChevronDown, Wallet, Rocket } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 import { ThemeToggle } from './theme-toggle';
@@ -72,17 +72,23 @@ export function DashboardHeader({
 
    return (
       <header className={cn(
-         "fixed top-0 transition-all duration-300 ease-in-out flex items-center justify-between px-4 sm:px-6 lg:px-8 z-40",
-         "h-20 lg:h-16 bg-background/80 backdrop-blur-md border-b border-border",
-         "left-0 right-0",
-         isCollapsed ? "lg:left-20" : "lg:left-60",
-         hasRightSidebar
-            ? (isRightCollapsed ? "xl:right-0" : "xl:right-72")
-            : ""
+         "fixed top-0 left-0 right-0 transition-all duration-300 ease-in-out flex items-center justify-between px-4 sm:px-6 lg:px-8 z-40",
+         "h-20 lg:h-16 bg-background/80 backdrop-blur-md border-b border-border"
       )}>
 
          {/* Left Section: Mobile Menu / Search */}
-         <div className="flex items-center gap-3 lg:flex-1 min-w-0">
+         <div className="flex items-center gap-6 lg:flex-1 min-w-0">
+            {/* Brand Logo */}
+            <div className="flex items-center gap-3 shrink-0">
+               <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary text-primary-foreground shadow-sm hover:scale-105 transition-transform cursor-pointer">
+                  <Rocket className="h-4 w-4" />
+               </div>
+               <div className="hidden sm:block animate-in fade-in slide-in-from-left-2 duration-300">
+                  <h1 className="text-foreground font-semibold text-base leading-tight tracking-tight uppercase">B2LINQ</h1>
+                  <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-[0.2em] opacity-80">Architect</p>
+               </div>
+            </div>
+
             <div className="flex items-center gap-3 lg:hidden">
                <button
                   onClick={onMobileMenuToggle}
@@ -133,6 +139,21 @@ export function DashboardHeader({
                      activeSection === 'network' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
                   )}>Network</span>
                   {activeSection === 'network' && <div className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
+               </button>
+
+               <button
+                  onClick={() => onSectionChange('messages')}
+                  className="relative h-full flex flex-col items-center justify-center px-3 group/tab min-w-[64px]"
+               >
+                  <MessageSquare className={cn(
+                     "w-[20px] h-[20px] mb-1 transition-all group-hover/tab:scale-110",
+                     activeSection === 'messages' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
+                  )} />
+                  <span className={cn(
+                     "text-[10px] font-bold uppercase tracking-tight transition-colors",
+                     activeSection === 'messages' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
+                  )}>Messages</span>
+                  {activeSection === 'messages' && <div className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
                </button>
 
                <button

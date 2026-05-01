@@ -32,6 +32,38 @@ export function Feed({ isCollapsed, isRightCollapsed, onNavigateToProfile }: Fee
     refetchInterval: 5000,
   });
 
+  // Progressive Loading Logic
+  const [visibleCount, setVisibleCount] = useState(5);
+  const [isSimulatingLoad, setIsSimulatingLoad] = useState(false);
+  const loaderRef = useRef<HTMLDivElement>(null);
+
+  const handleLoadMore = React.useCallback(() => {
+    if (isSimulatingLoad || !postsData?.results || visibleCount >= postsData.results.length) return;
+    setIsSimulatingLoad(true);
+    // Simulate natural loading delay
+    setTimeout(() => {
+      setVisibleCount(prev => prev + 5);
+      setIsSimulatingLoad(false);
+    }, 1200);
+  }, [isSimulatingLoad, postsData?.results, visibleCount]);
+
+  React.useEffect(() => {
+    const currentLoader = loaderRef.current;
+    if (!currentLoader) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          handleLoadMore();
+        }
+      },
+      { threshold: 0.1, rootMargin: '100px' }
+    );
+
+    observer.observe(currentLoader);
+    return () => observer.disconnect();
+  }, [handleLoadMore, visibleCount]);
+
   // Like Mutation with Optimistic Updates
   const likeMutation = useMutation({
     mutationFn: postService.toggleLike,
@@ -77,11 +109,8 @@ export function Feed({ isCollapsed, isRightCollapsed, onNavigateToProfile }: Fee
 
   return (
     <div className={cn(
-      "flex-1 min-h-screen min-w-0 bg-background px-4 sm:px-6 lg:px-8 py-6 sm:py-8 transition-all duration-300 ease-in-out",
-      // Mobile: no margins
-      // Desktop: apply left/right margins based on sidebar states
-      isRightCollapsed ? "xl:mr-0" : "xl:mr-72",
-      isCollapsed ? "lg:ml-20" : "lg:ml-60"
+      "flex-1 min-h-screen min-w-0 bg-background transition-all duration-300 ease-in-out",
+      "px-4 sm:px-6 lg:px-8 py-6 sm:py-8"
     )}>
 
       {/* Feed Header */}
@@ -105,9 +134,9 @@ export function Feed({ isCollapsed, isRightCollapsed, onNavigateToProfile }: Fee
           <div className="flex gap-3 sm:gap-4">
             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-muted/50 shrink-0 flex items-center justify-center text-primary font-bold border border-border overflow-hidden shadow-sm transition-all text-sm sm:text-base">
               {user?.profile?.profile_image_url ? (
-                <img 
-                  src={`${getOptimizedImage(user.profile.profile_image_url)}&v=${user.updated_at ? new Date(user.updated_at).getTime() : Date.now()}`} 
-                  alt={user?.first_name || 'User'} 
+                <img
+                  src={`${getOptimizedImage(user.profile.profile_image_url)}&v=${user.updated_at ? new Date(user.updated_at).getTime() : Date.now()}`}
+                  alt={user?.first_name || 'User'}
                   className="w-full h-full object-cover"
                 />
               ) : (
@@ -121,23 +150,21 @@ export function Feed({ isCollapsed, isRightCollapsed, onNavigateToProfile }: Fee
             </div>
           </div>
 
-          <div className="flex items-center justify-between pt-1">
-            <div className="flex items-center gap-0.5 sm:gap-1">
-              <button className="flex items-center gap-1.5 sm:gap-2.5 py-2 px-2 sm:px-3 rounded-xl text-[12px] sm:text-[13px] font-bold text-muted-foreground hover:bg-primary/5 hover:text-primary transition-all group/btn">
-                <ImageIcon className="h-4 w-4 sm:h-5 sm:w-5 text-sky-500 group-hover/btn:scale-110 transition-transform" />
-                <span className="hidden sm:inline">Photo</span>
-              </button>
+          <div className="flex items-center justify-between pt-1 px-2">
+            <button className="flex items-center gap-1.5 sm:gap-2.5 py-2 px-2 sm:px-3 rounded-xl text-[12px] sm:text-[13px] font-bold text-muted-foreground hover:bg-primary/5 hover:text-primary transition-all group/btn">
+              <ImageIcon className="h-4 w-4 sm:h-5 sm:w-5 text-sky-500 group-hover/btn:scale-110 transition-transform" />
+              <span className="hidden sm:inline">Photo</span>
+            </button>
 
-              <button className="flex items-center gap-1.5 sm:gap-2.5 py-2 px-2 sm:px-3 rounded-xl text-[12px] sm:text-[13px] font-bold text-muted-foreground hover:bg-emerald-500/5 hover:text-emerald-600 transition-all group/btn">
-                <BarChart2 className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-500 group-hover/btn:scale-110 transition-transform" />
-                <span className="hidden sm:inline">Poll</span>
-              </button>
+            <button className="flex items-center gap-1.5 sm:gap-2.5 py-2 px-2 sm:px-3 rounded-xl text-[12px] sm:text-[13px] font-bold text-muted-foreground hover:bg-emerald-500/5 hover:text-emerald-600 transition-all group/btn">
+              <BarChart2 className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-500 group-hover/btn:scale-110 transition-transform" />
+              <span className="hidden sm:inline">Poll</span>
+            </button>
 
-              <button className="flex items-center gap-1.5 sm:gap-2.5 py-2 px-2 sm:px-3 rounded-xl text-[12px] sm:text-[13px] font-bold text-muted-foreground hover:bg-indigo-500/5 hover:text-indigo-600 transition-all group/btn">
-                <Rocket className="h-4 w-4 sm:h-5 sm:w-5 text-indigo-500 group-hover/btn:scale-110 transition-transform" />
-                <span className="hidden sm:inline">Launch</span>
-              </button>
-            </div>
+            <button className="flex items-center gap-1.5 sm:gap-2.5 py-2 px-2 sm:px-3 rounded-xl text-[12px] sm:text-[13px] font-bold text-muted-foreground hover:bg-indigo-500/5 hover:text-indigo-600 transition-all group/btn">
+              <Rocket className="h-4 w-4 sm:h-5 sm:w-5 text-indigo-500 group-hover/btn:scale-110 transition-transform" />
+              <span className="hidden sm:inline">Launch</span>
+            </button>
           </div>
         </div>
 
@@ -163,14 +190,41 @@ export function Feed({ isCollapsed, isRightCollapsed, onNavigateToProfile }: Fee
             </div>
           ))
         ) : (
-          postsData?.results.map(post => (
-            <PostCard
-              key={post.id}
-              post={post}
-              onLike={(id) => onLike(id)}
-              onNavigateToProfile={onNavigateToProfile}
-            />
-          ))
+          <>
+            {postsData?.results.slice(0, visibleCount).map((post) => (
+              <PostCard
+                key={post.id}
+                post={post}
+                onLike={(id) => onLike(id)}
+                onNavigateToProfile={onNavigateToProfile}
+              />
+            ))}
+
+            {/* Natural Progressive Loader */}
+            {postsData?.results && visibleCount < postsData.results.length && (
+              <div
+                ref={loaderRef}
+                className="bg-card border border-border/60 rounded-md shadow-sm p-5 flex flex-col gap-4 animate-in fade-in duration-500"
+              >
+                <div className="flex items-center gap-3 opacity-40">
+                  <div className="w-12 h-12 rounded-md bg-muted shrink-0" />
+                  <div className="space-y-2">
+                    <div className="w-24 h-3 bg-muted rounded" />
+                    <div className="w-32 h-2 bg-muted rounded" />
+                  </div>
+                </div>
+                <div className="flex flex-col items-center justify-center py-6 gap-3">
+                  <div className="relative">
+                    <Loader2 className="w-6 h-6 animate-spin text-primary/40" />
+                    <div className="absolute inset-0 bg-primary/5 blur-xl rounded-full animate-pulse" />
+                  </div>
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] opacity-60">
+                    Architecting more insights...
+                  </p>
+                </div>
+              </div>
+            )}
+          </>
         )}
 
         {postsData?.results.length === 0 && (

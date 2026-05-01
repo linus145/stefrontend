@@ -15,17 +15,17 @@ export const MissionSection = ({ principles = [] }: MissionSectionProps) => {
     {
       title: "Efficiency",
       description: "We eliminate the friction in capital allocation through advanced matching algorithms.",
-      icon: "⚡"
+      
     },
     {
       title: "Transparency",
       description: "Every connection on B2linq is backed by verified data and genuine intent.",
-      icon: "💎"
+     
     },
     {
       title: "Velocity",
       description: "Moving at the speed of thought. We help startups go from seed to scale faster.",
-      icon: "🚀"
+      
     }
   ];
 
@@ -39,7 +39,7 @@ export const MissionSection = ({ principles = [] }: MissionSectionProps) => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {displayPrinciples.map((m, i) => (
             <div key={i} className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all">
-              <div className="text-4xl mb-6">{m.icon}</div>
+              {/* <div className="text-4xl mb-6">{m.icon}</div> */}
               <h3 className="text-xl font-semibold text-slate-900 mb-3">{m.title}</h3>
               <p className="text-slate-600 leading-relaxed">{m.description}</p>
             </div>

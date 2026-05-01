@@ -9,12 +9,12 @@ import { useAuth } from '@/hooks/useAuth';
 import { useChat, WsMessage } from '@/hooks/useChat';
 import { format } from 'date-fns';
 
-export function MessagesView({ 
+export function MessagesView({
   isCollapsed,
-  targetUserId 
-}: { 
+  targetUserId
+}: {
   isCollapsed: boolean,
-  targetUserId?: string | null 
+  targetUserId?: string | null
 }) {
   const { user: currentUser } = useAuth();
   const queryClient = useQueryClient();
@@ -163,15 +163,14 @@ export function MessagesView({
 
   return (
     <div className={cn(
-      "flex-1 h-[calc(100vh-64px)] bg-background flex transition-all duration-300 ease-in-out",
-      isCollapsed ? "lg:ml-20" : "lg:ml-60"
+      "flex-1 h-[calc(100vh-64px)] bg-background flex transition-all duration-300 ease-in-out"
     )}>
       {/* Conversations Sidebar - hidden on mobile when a chat is active */}
       <div className={cn(
         "w-full md:w-72 border-r border-border flex flex-col pt-6 bg-sidebar/50 shrink-0",
         activeRoomId ? "hidden md:flex" : "flex"
       )}>
-        <div className="px-4 sm:px-6 mb-6 flex items-center justify-between">
+        <div className="pl-4 sm:pl-5 pr-4 sm:pr-6 mb-6 flex items-center justify-between">
           <h2 className="text-lg sm:text-xl font-semibold text-foreground tracking-tight">Messages</h2>
           <button className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary hover:bg-primary/20 transition-all shadow-sm">
             <Plus className="w-4 h-4" />
@@ -179,7 +178,7 @@ export function MessagesView({
         </div>
 
         {/* Search */}
-        <div className="px-4 sm:px-6 mb-6">
+        <div className="pl-4 sm:pl-5 pr-4 sm:pr-6 mb-6">
           <div className="relative group">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
             <input
@@ -368,27 +367,27 @@ export function MessagesView({
   );
 }
 
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
-function MessageItem({ 
+function MessageItem({
   msgId,
-  isMine, 
-  text, 
-  time, 
+  isMine,
+  text,
+  time,
   avatar,
-  onDelete 
-}: { 
+  onDelete
+}: {
   msgId: string;
-  isMine: boolean; 
-  text: string; 
-  time: string; 
+  isMine: boolean;
+  text: string;
+  time: string;
   avatar?: string;
   onDelete: () => void;
 }) {
@@ -406,7 +405,7 @@ function MessageItem({
         )}>
           {text}
         </div>
-        
+
         {/* Action Menu (Only for own messages) */}
         {isMine && (
           <div className="absolute -left-10 top-1/2 -translate-y-1/2 opacity-0 group-hover/item:opacity-100 transition-opacity hidden sm:block">
@@ -416,8 +415,8 @@ function MessageItem({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-40 bg-card border-border rounded-xl shadow-xl">
                 <DropdownMenuItem onClick={onDelete} className="flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium text-destructive cursor-pointer hover:bg-destructive/10">
-                   <Trash2 className="w-3.5 h-3.5" />
-                   <span>Delete message</span>
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Delete message</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

@@ -12,32 +12,28 @@ export function ThemeToggle() {
     <button
       onClick={toggleTheme}
       className={cn(
-        "relative w-[68px] h-9 rounded-full p-1 transition-all duration-300 ease-in-out border border-border shadow-sm",
-        "bg-muted/50 hover:bg-muted transition-colors overflow-hidden"
+        "relative w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300",
+        "bg-muted/40 hover:bg-muted border border-border/50 shadow-sm group",
+        "hover:scale-105 active:scale-95"
       )}
       aria-label="Toggle theme"
     >
-      {/* Background Icons */}
-      <div className="absolute inset-x-1 inset-y-1 flex items-center justify-between px-1.5 pointer-events-none opacity-40">
-        <Sun className="w-3.5 h-3.5 text-foreground" />
-        <Moon className="w-3.5 h-3.5 text-foreground" />
+      <div className="relative w-5 h-5">
+        <Sun className={cn(
+          "absolute inset-0 w-full h-full text-amber-500 transition-all duration-500",
+          isDark ? "opacity-0 scale-50 rotate-90" : "opacity-100 scale-100 rotate-0"
+        )} />
+        <Moon className={cn(
+          "absolute inset-0 w-full h-full text-primary transition-all duration-500",
+          isDark ? "opacity-100 scale-100 rotate-0" : "opacity-0 scale-50 -rotate-90"
+        )} />
       </div>
-
-      {/* Sliding Pill */}
-      <div 
-        className={cn(
-          "h-7 w-7 rounded-full flex items-center justify-center transition-all duration-500 shadow-md relative z-10",
-          isDark 
-            ? "translate-x-[30px] bg-primary text-primary-foreground shadow-[0_0_15px_rgba(129,140,248,0.4)]" 
-            : "translate-x-0 bg-white text-amber-500 shadow-sm border border-border"
-        )}
-      >
-        {isDark ? (
-          <Moon className="w-4 h-4 fill-current" />
-        ) : (
-          <Sun className="w-4 h-4 fill-current" />
-        )}
-      </div>
+      
+      {/* Subtle Glow Effect */}
+      <div className={cn(
+        "absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity blur-md -z-10",
+        isDark ? "bg-primary/20" : "bg-amber-500/20"
+      )} />
     </button>
   );
 }

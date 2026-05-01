@@ -2,10 +2,12 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Search, Plus, Send, Paperclip, Smile, Phone, Video, Info, Loader2, MessageSquare, ArrowLeft } from 'lucide-react';
+import EmojiPicker, { Theme, EmojiClickData } from 'emoji-picker-react';
 import { cn } from '@/lib/utils';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { chatService, ChatRoom, Message } from '@/services/chat.service';
 import { useAuth } from '@/hooks/useAuth';
+import { useDashboardTheme } from '@/context/DashboardThemeContext';
 import { useChat, WsMessage } from '@/hooks/useChat';
 import { format } from 'date-fns';
 
@@ -17,11 +19,14 @@ export function MessagesView({
   targetUserId?: string | null
 }) {
   const { user: currentUser } = useAuth();
+  const { isDark } = useDashboardTheme();
   const queryClient = useQueryClient();
   const [activeRoomId, setActiveRoomId] = useState<string | null>(null);
   const [isSwitching, setIsSwitching] = useState(false);
   const [messageInput, setMessageInput] = useState('');
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const emojiPickerRef = useRef<HTMLDivElement>(null);
 
   // ─── Initialize chat with target user if provided ───
   useEffect(() => {
@@ -141,6 +146,21 @@ export function MessagesView({
       handleSend();
     }
   };
+
+  const onEmojiClick = (emojiData: EmojiClickData) => {
+    setMessageInput(prev => prev + emojiData.emoji);
+  };
+
+  // Close emoji picker when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target as Node)) {
+        setShowEmojiPicker(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleDeleteMessage = async (messageId: string) => {
     try {
@@ -328,7 +348,7 @@ export function MessagesView({
 
             {/* Chat Input */}
             <div className="p-3 sm:p-6 bg-gradient-to-t from-background via-background to-transparent relative z-10">
-              <div className="max-w-4xl mx-auto flex items-end gap-2 bg-muted/40 border border-border rounded-2xl p-2 sm:p-3 shadow-lg backdrop-blur-xl group-focus-within:border-primary/30 transition-all">
+              <div className="max-w-4xl mx-auto flex items-end gap-2 bg-muted/40 border border-border rounded-lg p-2 sm:p-3 shadow-lg backdrop-blur-xl group-focus-within:border-primary/30 transition-all">
                 <button className="p-2 text-muted-foreground hover:text-primary transition-colors hidden sm:block">
                   <Paperclip className="w-5 h-5 opacity-60" />
                 </button>
@@ -340,9 +360,27 @@ export function MessagesView({
                   className="flex-1 bg-transparent border-none outline-none py-2 text-sm text-foreground placeholder:text-muted-foreground resize-none max-h-32 font-normal"
                   rows={1}
                 />
-                <button className="p-2 text-muted-foreground hover:text-primary transition-colors hidden sm:block">
-                  <Smile className="w-5 h-5 opacity-60" />
-                </button>
+                <div className="relative" ref={emojiPickerRef}>
+                  <button 
+                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                    className={cn("p-2 text-muted-foreground hover:text-primary transition-colors hidden sm:block", showEmojiPicker && "text-primary")}
+                  >
+                    <Smile className="w-5 h-5 opacity-60" />
+                  </button>
+                  {showEmojiPicker && (
+                    <div className="absolute bottom-full right-0 mb-4 z-[100] shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+                      <EmojiPicker
+                        onEmojiClick={onEmojiClick}
+                        theme={isDark ? Theme.DARK : Theme.LIGHT}
+                        width={280}
+                        height={350}
+                        skinTonesDisabled
+                        searchDisabled
+                        previewConfig={{ showPreview: false }}
+                      />
+                    </div>
+                  )}
+                </div>
                 <button
                   onClick={handleSend}
                   disabled={!messageInput.trim()}
@@ -398,7 +436,7 @@ function MessageItem({
       )}
       <div className={cn("flex flex-col relative", isMine ? "items-end" : "items-start")}>
         <div className={cn(
-          "px-3 sm:px-4 py-2.5 sm:py-3 rounded-2xl text-[13px] leading-relaxed shadow-sm font-normal",
+          "px-3 sm:px-4 py-2.5 sm:py-3 rounded-md text-[13px] leading-relaxed shadow-sm font-normal",
           isMine
             ? "bg-primary/10 text-foreground rounded-br-none border border-primary/20"
             : "bg-muted/50 text-foreground border border-border rounded-bl-none"

@@ -1,8 +1,10 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
-import { X, Globe, Image as ImageIcon, Video, FileText, BarChart2, MoreHorizontal, Loader2, Lock, ChevronDown } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { X, Globe, Image as ImageIcon, Video, FileText, BarChart2, MoreHorizontal, Loader2, Lock, ChevronDown, Smile } from 'lucide-react';
+import EmojiPicker, { Theme, EmojiClickData } from 'emoji-picker-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useDashboardTheme } from '@/context/DashboardThemeContext';
 import { getOptimizedImage } from '@/lib/imagekit';
 import { postService } from '@/services/post.service';
 import { uploadService } from '@/services/upload.service';
@@ -19,17 +21,34 @@ interface MobilePostViewProps {
 
 export function MobilePostView({ onClose, onPostSuccess }: MobilePostViewProps) {
   const { user } = useAuth();
+  const { isDark } = useDashboardTheme();
   const [content, setContent] = useState('');
   const [mediaUrl, setMediaUrl] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [isPosting, setIsPosting] = useState(false);
   const [visibility, setVisibility] = useState<'PUBLIC' | 'PRIVATE'>('PUBLIC');
   const [isVisibilityMenuOpen, setIsVisibilityMenuOpen] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const emojiPickerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const charCount = content.length;
   const isOverLimit = charCount > MAX_CHARS;
   const isTooShort = charCount > 0 && charCount < MIN_CHARS;
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target as Node)) {
+        setShowEmojiPicker(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const onEmojiClick = (emojiData: EmojiClickData) => {
+    setContent(prev => prev + emojiData.emoji);
+  };
 
   const handlePost = async () => {
     if ((!content.trim() && !mediaUrl) || isOverLimit || isTooShort || isPosting) {
@@ -219,6 +238,30 @@ export function MobilePostView({ onClose, onPostSuccess }: MobilePostViewProps) 
               <BarChart2 className="w-6 h-6" />
             </div>
           </button>
+
+          <div className="relative" ref={emojiPickerRef}>
+            <button 
+              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+              className={cn("flex flex-col items-center gap-1 hover:text-primary transition-all group", showEmojiPicker && "text-primary")}
+            >
+              <div className={cn("p-2 rounded-full transition-colors", showEmojiPicker && "bg-primary/10")}>
+                <Smile className="w-6 h-6" />
+              </div>
+            </button>
+            {showEmojiPicker && (
+              <div className="fixed bottom-24 left-4 right-4 z-[100] shadow-2xl animate-in slide-in-from-bottom-4 duration-300">
+                <EmojiPicker
+                  onEmojiClick={onEmojiClick}
+                  theme={isDark ? Theme.DARK : Theme.LIGHT}
+                  width="100%"
+                  height={320}
+                  skinTonesDisabled
+                  searchDisabled
+                  previewConfig={{ showPreview: false }}
+                />
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="flex flex-col items-end">

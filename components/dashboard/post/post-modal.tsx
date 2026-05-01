@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -8,8 +8,10 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { ImageIcon, Loader2, X, Globe, Smile, Calendar, Trash2, Lock, ChevronDown } from 'lucide-react';
+import EmojiPicker, { Theme, EmojiClickData } from 'emoji-picker-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
+import { useDashboardTheme } from '@/context/DashboardThemeContext';
 import { cn } from '@/lib/utils';
 import { postService } from '@/services/post.service';
 import { uploadService } from '@/services/upload.service';
@@ -26,13 +28,30 @@ const MIN_CHARS = 100;
 
 export function PostModal({ isOpen, onClose, onPostSuccess }: PostModalProps) {
   const { user } = useAuth();
+  const { isDark } = useDashboardTheme();
   const [content, setContent] = useState('');
   const [mediaUrl, setMediaUrl] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [mediaType, setMediaType] = useState<'image' | 'video' | null>(null);
   const [visibility, setVisibility] = useState<'PUBLIC' | 'PRIVATE'>('PUBLIC');
   const [isVisibilityMenuOpen, setIsVisibilityMenuOpen] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const emojiPickerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target as Node)) {
+        setShowEmojiPicker(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const onEmojiClick = (emojiData: EmojiClickData) => {
+    setContent(prev => prev + emojiData.emoji);
+  };
 
   const charCount = content.length;
   const isOverLimit = charCount > MAX_CHARS;
@@ -160,12 +179,8 @@ export function PostModal({ isOpen, onClose, onPostSuccess }: PostModalProps) {
               className="w-full bg-transparent text-[14px] sm:text-[16px] text-foreground placeholder:text-muted-foreground/50 resize-none outline-none min-h-[120px] sm:min-h-[150px] leading-relaxed"
             />
 
-            <div className="flex justify-between items-center mt-2">
-              <button className="p-2 rounded-full hover:bg-muted/50 text-muted-foreground transition-all">
-                <Smile className="w-5 h-5" />
-              </button>
               <div className={cn(
-                "text-[11px] font-bold tracking-widest transition-colors",
+                "text-[11px] font-bold tracking-widest transition-colors ml-auto",
                 isOverLimit ? "text-destructive" :
                   isTooShort ? "text-orange-500" :
                     "text-muted-foreground opacity-40"
@@ -173,7 +188,6 @@ export function PostModal({ isOpen, onClose, onPostSuccess }: PostModalProps) {
                 {isTooShort && <span className="mr-2 animate-pulse">Needs more detail...</span>}
                 {charCount.toLocaleString()} / {MAX_CHARS.toLocaleString()}
               </div>
-            </div>
           </div>
 
           {/* Media Preview */}
@@ -210,6 +224,29 @@ export function PostModal({ isOpen, onClose, onPostSuccess }: PostModalProps) {
             >
               {isUploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <ImageIcon className="w-5 h-5" />}
             </button>
+
+            <div className="relative" ref={emojiPickerRef}>
+              <button 
+                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                className={cn("w-10 h-10 flex items-center justify-center rounded-md bg-muted/40 text-amber-500 hover:bg-amber-500/10 transition-all active:scale-90", showEmojiPicker && "bg-amber-500/20")}
+                title="Add Emoji"
+              >
+                <Smile className="w-5 h-5" />
+              </button>
+              {showEmojiPicker && (
+                <div className="absolute bottom-full left-0 mb-2 z-[100] shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+                  <EmojiPicker
+                    onEmojiClick={onEmojiClick}
+                    theme={isDark ? Theme.DARK : Theme.LIGHT}
+                    width={280}
+                    height={350}
+                    skinTonesDisabled
+                    searchDisabled
+                    previewConfig={{ showPreview: false }}
+                  />
+                </div>
+              )}
+            </div>
 
             <button className="w-10 h-10 flex items-center justify-center rounded-md bg-muted/40 text-emerald-500 hover:bg-emerald-500/10 transition-all active:scale-90" title="Add Video">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-video"><path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.934a.5.5 0 0 0-.777-.416L16 11" /><rect width="14" height="12" x="2" y="6" rx="2" /></svg>

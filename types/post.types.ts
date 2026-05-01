@@ -8,6 +8,7 @@ export interface Post {
   author_linkedin_url?: string;
   content: string;
   media_url?: string;
+  visibility: 'PUBLIC' | 'PRIVATE';
   likes_count: number;
   comments_count: number;
   user_has_liked: boolean;
@@ -18,4 +19,5 @@ export interface Post {
 export interface PostCreateData {
   content: string;
   media_url?: string;
+  visibility?: 'PUBLIC' | 'PRIVATE';
 }

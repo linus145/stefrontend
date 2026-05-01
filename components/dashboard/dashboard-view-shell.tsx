@@ -18,6 +18,7 @@ import { Briefcase, Newspaper, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { MobileBottomNav } from '@/components/dashboard/mobile-bottom-nav';
 import { MobilePostView } from '@/components/dashboard/post/mobile-post-view';
+import { useQueryClient } from '@tanstack/react-query';
 
 export function DashboardViewShell() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -28,6 +29,7 @@ export function DashboardViewShell() {
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isRightSidebarCollapsed, setIsRightSidebarCollapsed] = useState(false);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -154,7 +156,7 @@ export function DashboardViewShell() {
             onClose={() => handleSectionChange('dashboard')}
             onPostSuccess={() => {
               handleSectionChange('dashboard');
-              // Optionally refresh feed
+              queryClient.invalidateQueries({ queryKey: ['posts', user?.id] });
             }}
           />
         );

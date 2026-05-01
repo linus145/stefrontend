@@ -27,7 +27,7 @@ export function Feed({ isCollapsed, isRightCollapsed, onNavigateToProfile }: Fee
 
   // Fetch Posts
   const { data: postsData, isLoading } = useQuery({
-    queryKey: ['posts'],
+    queryKey: ['posts', user?.id],
     queryFn: () => postService.getPosts(1),
     refetchInterval: 5000,
   });
@@ -68,10 +68,10 @@ export function Feed({ isCollapsed, isRightCollapsed, onNavigateToProfile }: Fee
   const likeMutation = useMutation({
     mutationFn: postService.toggleLike,
     onMutate: async (postId) => {
-      await queryClient.cancelQueries({ queryKey: ['posts'] });
+      await queryClient.cancelQueries({ queryKey: ['posts', user?.id] });
       const previousPosts = queryClient.getQueryData(['posts']);
 
-      queryClient.setQueryData(['posts'], (old: any) => {
+      queryClient.setQueryData(['posts', user?.id], (old: any) => {
         if (!old || !old.results) return old;
         return {
           ...old,
@@ -98,7 +98,7 @@ export function Feed({ isCollapsed, isRightCollapsed, onNavigateToProfile }: Fee
       toast.error('Failed to sync reaction.');
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      queryClient.invalidateQueries({ queryKey: ['posts', user?.id] });
     }
   });
 
@@ -172,7 +172,7 @@ export function Feed({ isCollapsed, isRightCollapsed, onNavigateToProfile }: Fee
         <PostModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          onPostSuccess={() => queryClient.invalidateQueries({ queryKey: ['posts'] })}
+          onPostSuccess={() => queryClient.invalidateQueries({ queryKey: ['posts', user?.id] })}
         />
 
         {/* Feed Posts */}

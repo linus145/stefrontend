@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import { X, Globe, Image as ImageIcon, Video, FileText, BarChart2, MoreHorizontal, Loader2 } from 'lucide-react';
+import { X, Globe, Image as ImageIcon, Video, FileText, BarChart2, MoreHorizontal, Loader2, Lock, ChevronDown } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { getOptimizedImage } from '@/lib/imagekit';
 import { postService } from '@/services/post.service';
@@ -23,6 +23,8 @@ export function MobilePostView({ onClose, onPostSuccess }: MobilePostViewProps) 
   const [mediaUrl, setMediaUrl] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [isPosting, setIsPosting] = useState(false);
+  const [visibility, setVisibility] = useState<'PUBLIC' | 'PRIVATE'>('PUBLIC');
+  const [isVisibilityMenuOpen, setIsVisibilityMenuOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const charCount = content.length;
@@ -37,7 +39,7 @@ export function MobilePostView({ onClose, onPostSuccess }: MobilePostViewProps) 
 
     setIsPosting(true);
     try {
-      await postService.createPost({ content, media_url: mediaUrl });
+      await postService.createPost({ content, media_url: mediaUrl, visibility });
       toast.success('Post created successfully!');
       onPostSuccess();
       onClose();
@@ -107,9 +109,53 @@ export function MobilePostView({ onClose, onPostSuccess }: MobilePostViewProps) 
             </div>
             <div>
               <p className="text-[15px] font-bold text-foreground leading-none mb-1.5">{user?.first_name} {user?.last_name}</p>
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-muted/40 border border-border w-fit group cursor-pointer hover:bg-muted/60 transition-colors">
-                <Globe className="w-3 h-3 text-muted-foreground" />
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">Public</span>
+              <div className="relative">
+                <button 
+                  onClick={() => setIsVisibilityMenuOpen(!isVisibilityMenuOpen)}
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-muted/40 border border-border group active:bg-muted/60 transition-colors"
+                >
+                  {visibility === 'PUBLIC' ? (
+                    <Globe className="w-3 h-3 text-sky-500" />
+                  ) : (
+                    <Lock className="w-3 h-3 text-amber-500" />
+                  )}
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">
+                    {visibility === 'PUBLIC' ? 'Public' : 'Private'}
+                  </span>
+                  <ChevronDown className={cn("w-3 h-3 text-muted-foreground transition-transform", isVisibilityMenuOpen && "rotate-180")} />
+                </button>
+
+                {isVisibilityMenuOpen && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setIsVisibilityMenuOpen(false)} />
+                    <div className="absolute top-full left-0 mt-2 w-56 bg-card border border-border rounded-lg shadow-2xl z-50 py-1 animate-in fade-in slide-in-from-top-2 duration-200">
+                      <button
+                        onClick={() => { setVisibility('PUBLIC'); setIsVisibilityMenuOpen(false); }}
+                        className="w-full flex items-center gap-4 px-4 py-3 hover:bg-muted transition-colors text-left"
+                      >
+                        <div className="w-9 h-9 rounded-full bg-sky-500/10 flex items-center justify-center shrink-0">
+                          <Globe className="w-5 h-5 text-sky-500" />
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-[13px] font-bold text-foreground">Public</span>
+                          <span className="text-[11px] text-muted-foreground">Anyone can see this</span>
+                        </div>
+                      </button>
+                      <button
+                        onClick={() => { setVisibility('PRIVATE'); setIsVisibilityMenuOpen(false); }}
+                        className="w-full flex items-center gap-4 px-4 py-3 hover:bg-muted transition-colors text-left"
+                      >
+                        <div className="w-9 h-9 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0">
+                          <Lock className="w-5 h-5 text-amber-500" />
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-[13px] font-bold text-foreground">Private</span>
+                          <span className="text-[11px] text-muted-foreground">Only you can see this</span>
+                        </div>
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>

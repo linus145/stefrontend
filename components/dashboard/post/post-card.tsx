@@ -12,7 +12,8 @@ import {
   Trash2,
   EyeOff,
   UserX,
-  Flag
+  Flag,
+  Lock
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -48,7 +49,7 @@ export function PostCard({ post, onLike, onNavigateToProfile }: PostCardProps) {
   const deleteMutation = useMutation({
     mutationFn: (postId: string) => postService.deletePost(postId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      queryClient.invalidateQueries({ queryKey: ['posts', user?.id] });
       toast.success('Post deleted successfully.');
     },
     onError: () => {
@@ -88,7 +89,7 @@ export function PostCard({ post, onLike, onNavigateToProfile }: PostCardProps) {
     onSuccess: () => {
       setNewComment('');
       queryClient.invalidateQueries({ queryKey: ['comments', post.id] });
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      queryClient.invalidateQueries({ queryKey: ['posts', user?.id] });
     }
   });
 
@@ -97,6 +98,11 @@ export function PostCard({ post, onLike, onNavigateToProfile }: PostCardProps) {
     if (!newComment.trim()) return;
     commentMutation.mutate({ postId: post.id, content: newComment });
   };
+
+  // Safety Guard: Don't render private posts if the viewer is not the owner
+  if (post.visibility === 'PRIVATE' && !isOwner) {
+    return null;
+  }
 
   return (
     <div className="bg-card border border-border/60 rounded-md shadow-sm transition-all group overflow-hidden hover:shadow-md flex flex-col h-full">
@@ -143,7 +149,14 @@ export function PostCard({ post, onLike, onNavigateToProfile }: PostCardProps) {
               <div className="flex items-center gap-1 text-[10px] text-muted-foreground font-medium mt-0.5 opacity-70">
                 <span>{timeAgo}</span>
                 <span>•</span>
-                <Globe className="w-2.5 h-2.5" />
+                {post.visibility === 'PRIVATE' ? (
+                  <div className="flex items-center gap-1 text-amber-500">
+                    <Lock className="w-2.5 h-2.5" />
+                    <span className="uppercase tracking-tighter font-bold text-[8px]">Private</span>
+                  </div>
+                ) : (
+                  <Globe className="w-2.5 h-2.5" />
+                )}
               </div>
             </div>
           </div>

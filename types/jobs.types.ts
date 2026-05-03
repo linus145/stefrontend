@@ -51,6 +51,14 @@ export type WorkMode = 'REMOTE' | 'ONSITE' | 'HYBRID';
 export type ExperienceLevel = 'ENTRY' | 'MID' | 'SENIOR' | 'LEAD';
 export type JobStatus = 'DRAFT' | 'ACTIVE' | 'CLOSED';
 export type HiringStatus = 'ACTIVELY_HIRING' | 'ACTIVELY_REVIEWING';
+export type SkillCategory = 'IT' | 'NON_IT';
+
+export interface Skill {
+  id: string;
+  name: string;
+  category: SkillCategory;
+  created_at?: string;
+}
 
 export interface JobPost {
   id: string;
@@ -66,6 +74,7 @@ export interface JobPost {
   salary_min: number | null;
   salary_max: number | null;
   currency: string;
+  skills: Skill[];
   skills_required: string[];
   experience_level: ExperienceLevel;
   status: JobStatus;
@@ -87,6 +96,7 @@ export interface JobPostCreatePayload {
   salary_min?: number | null;
   salary_max?: number | null;
   currency?: string;
+  skills?: string[]; // Array of UUIDs
   skills_required?: string[];
   experience_level?: ExperienceLevel;
   status?: JobStatus;

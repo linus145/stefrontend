@@ -8,7 +8,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
-export type RecruiterSection = 'overview' | 'my-jobs' | 'applications' | 'company';
+export type RecruiterSection = 'overview' | 'my-jobs' | 'applications' | 'candidates' | 'company';
+
 
 interface RecruiterSidebarProps {
   isCollapsed: boolean;
@@ -70,44 +71,6 @@ export function RecruiterSidebar({
             </div>
           )}
         </div>
-
-        {/* Navigation */}
-        <nav className="space-y-1.5 px-3">
-          {(!isCollapsed || isMobileOpen) && (
-            <div className="px-3 mb-2">
-              <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Recruitment</p>
-            </div>
-          )}
-
-          <SidebarLink
-            onClick={() => onTabChange('overview')}
-            icon={<LayoutDashboard className="h-4 w-4" />}
-            label="Overview"
-            isCollapsed={isCollapsed && !isMobileOpen}
-            active={activeTab === 'overview'}
-          />
-          <SidebarLink
-            onClick={() => onTabChange('my-jobs')}
-            icon={<Briefcase className="h-4 w-4" />}
-            label="My Jobs"
-            isCollapsed={isCollapsed && !isMobileOpen}
-            active={activeTab === 'my-jobs'}
-          />
-          <SidebarLink
-            onClick={() => onTabChange('applications')}
-            icon={<Users className="h-4 w-4" />}
-            label="Applications"
-            isCollapsed={isCollapsed && !isMobileOpen}
-            active={activeTab === 'applications'}
-          />
-          <SidebarLink
-            onClick={() => onTabChange('company')}
-            icon={<Building2 className="h-4 w-4" />}
-            label="Company Profile"
-            isCollapsed={isCollapsed && !isMobileOpen}
-            active={activeTab === 'company'}
-          />
-        </nav>
       </div>
 
       {/* Bottom Section */}

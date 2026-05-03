@@ -113,7 +113,7 @@ export function MyJobsTab({ isCollapsed, isApproved, onViewApplications }: MyJob
             key={f.value}
             onClick={() => setStatusFilter(f.value)}
             className={cn(
-              "px-4 py-1.5 rounded-full text-xs font-semibold transition-all whitespace-nowrap border",
+              "px-4 py-1.5 rounded-md text-xs font-semibold transition-all whitespace-nowrap border",
               statusFilter === f.value
                 ? "bg-teal-500/10 text-teal-600 border-teal-500/30"
                 : "bg-muted/30 text-muted-foreground border-border hover:bg-muted/50"
@@ -158,11 +158,11 @@ export function MyJobsTab({ isCollapsed, isApproved, onViewApplications }: MyJob
                     <h3 className="text-base font-semibold text-foreground truncate">{job.title}</h3>
                     {job.company?.is_genuine && (
                       <span className="flex items-center gap-1 text-[10px] font-bold text-blue-500 bg-blue-500/10 px-1.5 py-0.5 rounded border border-blue-500/20 uppercase" title="Genuine Company">
-                        <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                        <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" /></svg>
                         Genuine
                       </span>
                     )}
-                    <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-bold uppercase border", getStatusBadge(job.status))}>
+                    <span className={cn("px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase border", getStatusBadge(job.status))}>
                       {job.status}
                     </span>
                   </div>
@@ -182,6 +182,28 @@ export function MyJobsTab({ isCollapsed, isApproved, onViewApplications }: MyJob
                       <Users className="w-3 h-3" /> {job.applications_count} applicant{job.applications_count !== 1 ? 's' : ''}
                     </span>
                   </div>
+
+                  {/* Skills Section */}
+                  {(() => {
+                    const displaySkills = (job.skills && job.skills.length > 0) 
+                      ? job.skills.map(s => s.name) 
+                      : (job.skills_required || []);
+                    
+                    if (displaySkills.length === 0) return null;
+
+                    return (
+                      <div className="flex flex-wrap gap-1.5 mt-3">
+                        {displaySkills.map(skill => (
+                          <span
+                            key={skill}
+                            className="px-2 py-0.5 rounded-sm bg-muted text-[10px] font-semibold text-muted-foreground border border-border"
+                          >
+                            {skill}
+                          </span>
+                        ))}
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 {/* Actions */}

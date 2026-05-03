@@ -1,15 +1,14 @@
 'use client';
-
-import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useState, useMemo } from 'react';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { jobsService } from '@/services/jobs.service';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import {
   ArrowLeft, Loader2, Briefcase, MapPin, Globe, Clock,
-  DollarSign, Tags, ChevronDown
+  DollarSign, Tags, ChevronDown, Check, Search as SearchIcon, X
 } from 'lucide-react';
-import { JobPost, JobPostCreatePayload } from '@/types/jobs.types';
+import { JobPost, JobPostCreatePayload, Skill } from '@/types/jobs.types';
 
 interface PostJobFormProps {
   isCollapsed: boolean;
@@ -51,6 +50,13 @@ const HIRING_STATUS_OPTIONS = [
 export function PostJobForm({ isCollapsed, editJob, onClose, onSuccess }: PostJobFormProps) {
   const isEditing = !!editJob;
 
+  const { data: skillsResponse } = useQuery({
+    queryKey: ['available-skills'],
+    queryFn: () => jobsService.getSkills(),
+  });
+
+  const skills = Array.isArray(skillsResponse?.data) ? skillsResponse.data : [];
+
   const [formData, setFormData] = useState<JobPostCreatePayload>({
     title: editJob?.title || '',
     description: editJob?.description || '',
@@ -60,6 +66,7 @@ export function PostJobForm({ isCollapsed, editJob, onClose, onSuccess }: PostJo
     salary_min: editJob?.salary_min || null,
     salary_max: editJob?.salary_max || null,
     currency: editJob?.currency || 'INR',
+    skills: editJob?.skills?.map(s => s.id) || [],
     skills_required: editJob?.skills_required || [],
     experience_level: editJob?.experience_level || 'ENTRY',
     status: editJob?.status || 'DRAFT',
@@ -67,8 +74,19 @@ export function PostJobForm({ isCollapsed, editJob, onClose, onSuccess }: PostJo
     deadline: editJob?.deadline ? editJob.deadline.split('T')[0] : null,
   });
 
-  const [skillInput, setSkillInput] = useState('');
+  const [skillSearch, setSkillSearch] = useState('');
+  const [showSkillDropdown, setShowSkillDropdown] = useState(false);
   const [errors, setErrors] = useState<Record<string, string[]>>({});
+
+  const toggleSkill = (skillId: string) => {
+    setFormData(prev => {
+      const currentSkills = prev.skills || [];
+      if (currentSkills.includes(skillId)) {
+        return { ...prev, skills: currentSkills.filter(id => id !== skillId) };
+      }
+      return { ...prev, skills: [...currentSkills, skillId] };
+    });
+  };
 
   const createMutation = useMutation({
     mutationFn: (data: JobPostCreatePayload) => jobsService.createJob(data),
@@ -104,18 +122,13 @@ export function PostJobForm({ isCollapsed, editJob, onClose, onSuccess }: PostJo
     if (errors[id]) setErrors(prev => { const n = { ...prev }; delete n[id]; return n; });
   };
 
-  const handleAddSkill = () => {
-    const skill = skillInput.trim();
-    if (skill && !formData.skills_required?.includes(skill)) {
-      setFormData(prev => ({ ...prev, skills_required: [...(prev.skills_required || []), skill] }));
-      setSkillInput('');
-    }
-  };
+  const itSkills = useMemo(() => skills.filter(s => s.category === 'IT' && s.name.toLowerCase().includes(skillSearch.toLowerCase())), [skills, skillSearch]);
+  const nonItSkills = useMemo(() => skills.filter(s => s.category === 'NON_IT' && s.name.toLowerCase().includes(skillSearch.toLowerCase())), [skills, skillSearch]);
 
-  const handleRemoveSkill = (skill: string) => {
+  const handleRemoveSkill = (skillId: string) => {
     setFormData(prev => ({
       ...prev,
-      skills_required: (prev.skills_required || []).filter(s => s !== skill),
+      skills: (prev.skills || []).filter(id => id !== skillId),
     }));
   };
 
@@ -132,8 +145,14 @@ export function PostJobForm({ isCollapsed, editJob, onClose, onSuccess }: PostJo
       return;
     }
 
+    const selectedSkillNames = formData.skills?.map(id => {
+      const s = skills.find(sk => sk.id === id);
+      return s ? s.name : null;
+    }).filter(Boolean) as string[];
+
     const payload: JobPostCreatePayload = {
       ...formData,
+      skills_required: selectedSkillNames, // Sync names for backward compatibility
       salary_min: formData.salary_min ? Number(formData.salary_min) : null,
       salary_max: formData.salary_max ? Number(formData.salary_max) : null,
       deadline: formData.deadline ? new Date(formData.deadline).toISOString() : null,
@@ -267,43 +286,109 @@ export function PostJobForm({ isCollapsed, editJob, onClose, onSuccess }: PostJo
             </FormField>
           </div>
 
-          {/* Skills */}
-          <FormField label="Skills Required" id="skills">
-            <div className="flex gap-2 mb-2">
-              <input
-                value={skillInput}
-                onChange={(e) => setSkillInput(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddSkill(); } }}
-                placeholder="Type a skill and press Enter"
-                className="flex-1 rounded-sm bg-muted/30 border border-border text-foreground px-4 py-2 text-sm focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none placeholder:text-muted-foreground"
-              />
-              <button
-                type="button"
-                onClick={handleAddSkill}
-                className="px-4 py-2 rounded-sm bg-teal-500/10 text-teal-600 text-sm font-semibold hover:bg-teal-500/20 transition-all"
+          {/* Categorized Skills Dropdown */}
+          <FormField label="Skills Required *" id="skills" error={errors.skills}>
+            <div className="relative">
+              <div
+                className={cn(
+                  "w-full rounded-sm bg-muted/30 border border-border px-4 py-2.5 text-sm cursor-pointer flex flex-wrap gap-2 min-h-[45px]",
+                  showSkillDropdown && "ring-1 ring-teal-500 border-teal-500"
+                )}
+                onClick={() => setShowSkillDropdown(!showSkillDropdown)}
               >
-                Add
-              </button>
-            </div>
-            {(formData.skills_required?.length ?? 0) > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {formData.skills_required?.map(skill => (
-                  <span
-                    key={skill}
-                    className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-teal-500/10 text-teal-600 text-xs font-semibold border border-teal-500/20"
-                  >
-                    {skill}
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveSkill(skill)}
-                      className="ml-0.5 hover:text-red-500 transition-colors"
+                {(formData.skills?.length ?? 0) === 0 && (
+                  <span className="text-muted-foreground">Select required skills...</span>
+                )}
+                {formData.skills?.map(skillId => {
+                  const skill = skills.find(s => s.id === skillId);
+                  return skill ? (
+                    <span
+                      key={skillId}
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm bg-teal-500 text-white text-[10px] font-bold uppercase tracking-wider"
+                      onClick={(e) => { e.stopPropagation(); handleRemoveSkill(skillId); }}
                     >
-                      ×
-                    </button>
-                  </span>
-                ))}
+                      {skill.name}
+                      <X className="w-2.5 h-2.5 hover:text-white/80" />
+                    </span>
+                  ) : null;
+                })}
+                <div className="ml-auto">
+                  <ChevronDown className={cn("w-4 h-4 text-muted-foreground transition-transform", showSkillDropdown && "rotate-180")} />
+                </div>
               </div>
-            )}
+
+              {showSkillDropdown && (
+                <div className="absolute z-50 w-full mt-2 bg-card border border-border rounded-sm shadow-xl animate-in fade-in zoom-in-95 duration-200">
+                  <div className="p-3 border-b border-border">
+                    <div className="relative">
+                      <SearchIcon className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                      <input
+                        className="w-full bg-muted/50 border-none pl-8 pr-3 py-1.5 text-xs outline-none rounded-sm"
+                        placeholder="Search skills..."
+                        value={skillSearch}
+                        onChange={(e) => setSkillSearch(e.target.value)}
+                        autoFocus
+                      />
+                    </div>
+                  </div>
+
+                  <div className="max-h-[300px] overflow-y-auto p-2 space-y-4">
+                    {/* IT Skills */}
+                    {itSkills.length > 0 && (
+                      <div>
+                        <p className="px-2 text-[9px] font-black uppercase tracking-[0.2em] text-teal-600 mb-1.5">IT Skills</p>
+                        <div className="space-y-0.5">
+                          {itSkills.map(skill => (
+                            <button
+                              key={skill.id}
+                              type="button"
+                              onClick={() => toggleSkill(skill.id)}
+                              className={cn(
+                                "w-full text-left px-3 py-2 rounded-sm text-xs font-medium transition-colors flex items-center justify-between",
+                                formData.skills?.includes(skill.id) ? "bg-teal-500/10 text-teal-600" : "hover:bg-muted text-foreground/80"
+                              )}
+                            >
+                              {skill.name}
+                              {formData.skills?.includes(skill.id) && <Check className="w-3 h-3" />}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Non-IT Skills */}
+                    {nonItSkills.length > 0 && (
+                      <div>
+                        <p className="px-2 text-[9px] font-black uppercase tracking-[0.2em] text-cyan-600 mb-1.5">Non-IT Skills</p>
+                        <div className="space-y-0.5">
+                          {nonItSkills.map(skill => (
+                            <button
+                              key={skill.id}
+                              type="button"
+                              onClick={() => toggleSkill(skill.id)}
+                              className={cn(
+                                "w-full text-left px-3 py-2 rounded-sm text-xs font-medium transition-colors flex items-center justify-between",
+                                formData.skills?.includes(skill.id) ? "bg-cyan-500/10 text-cyan-600" : "hover:bg-muted text-foreground/80"
+                              )}
+                            >
+                              {skill.name}
+                              {formData.skills?.includes(skill.id) && <Check className="w-3 h-3" />}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {itSkills.length === 0 && nonItSkills.length === 0 && (
+                      <div className="p-4 text-center">
+                        <p className="text-xs text-muted-foreground italic">No skills found.</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+            {showSkillDropdown && <div className="fixed inset-0 z-40" onClick={() => setShowSkillDropdown(false)} />}
           </FormField>
 
           {/* Deadline */}

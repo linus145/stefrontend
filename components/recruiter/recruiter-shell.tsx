@@ -7,8 +7,10 @@ import { RecruiterSidebar, RecruiterSection } from './recruiter-sidebar';
 import { RecruiterHeader } from './recruiter-header';
 import { OverviewTab } from './overview-tab';
 import { MyJobsTab } from './myjobs/my-jobs-tab';
-import { ApplicationsTab } from './applications-tab';
+import { ApplicationsTab } from './jobapplication/applications-tab';
+import { CandidatesTab } from './professional/candidates-tab';
 import { CompanyProfileTab } from './company/company-profile-tab';
+
 import { GlobalLoader } from '@/components/ui/global-loader';
 import { useQuery } from '@tanstack/react-query';
 import { jobsService } from '@/services/jobs.service';
@@ -67,7 +69,10 @@ export function RecruiterShell() {
         return <MyJobsTab isCollapsed={isSidebarCollapsed} isApproved={company.is_approved ?? false} onViewApplications={handleViewApplications} />;
       case 'applications':
         return <ApplicationsTab isCollapsed={isSidebarCollapsed} selectedJobId={selectedJobId} onBack={() => setActiveTab('my-jobs')} />;
+      case 'candidates':
+        return <CandidatesTab isCollapsed={isSidebarCollapsed} />;
       case 'company':
+
         return <CompanyProfileTab isCollapsed={isSidebarCollapsed} company={company} />;
       default:
         return <OverviewTab isCollapsed={isSidebarCollapsed} onNavigate={handleTabChange} />;
@@ -100,6 +105,8 @@ export function RecruiterShell() {
         companyName={company.company_name}
         isApproved={company.is_approved ?? false}
         isGenuine={company.is_genuine ?? false}
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
         onMobileMenuToggle={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
       />
 

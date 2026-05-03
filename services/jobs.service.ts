@@ -9,6 +9,7 @@ import {
   JobPostCreatePayload,
   JobApplication,
   RecruiterDashboardStats,
+  Skill,
 } from '@/types/jobs.types';
 
 export const jobsService = {
@@ -109,5 +110,11 @@ export const jobsService = {
 
   getDashboardStats: (): Promise<BaseAPIResponse<RecruiterDashboardStats>> => {
     return api.get<BaseAPIResponse<RecruiterDashboardStats>>('/jobs/dashboard/stats/');
+  },
+
+  // ─── Skills ───────────────────────────────────────────────────
+  getSkills: (category?: string): Promise<BaseAPIResponse<Skill[]>> => {
+    const query = category ? `?category=${category}` : '';
+    return api.get<BaseAPIResponse<Skill[]>>(`/jobs/skills/${query}`);
   },
 };

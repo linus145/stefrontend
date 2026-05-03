@@ -59,6 +59,30 @@ export function JobCard({ job, isSelected, onClick }: JobCardProps) {
               </span>
             </div>
           </div>
+
+          {/* Skills Preview */}
+          {(() => {
+            const displaySkills = (job.skills && job.skills.length > 0) 
+              ? job.skills.map(s => s.name) 
+              : (job.skills_required || []);
+            
+            if (displaySkills.length === 0) return null;
+
+            return (
+              <div className="mt-3 flex flex-wrap gap-1">
+                {displaySkills.slice(0, 3).map(skill => (
+                  <span key={skill} className="px-1.5 py-0.5 rounded-sm bg-muted text-[10px] font-medium text-muted-foreground border border-border/50">
+                    {skill}
+                  </span>
+                ))}
+                {displaySkills.length > 3 && (
+                  <span className="px-1.5 py-0.5 text-[10px] text-muted-foreground font-medium">
+                    +{displaySkills.length - 3} more
+                  </span>
+                )}
+              </div>
+            );
+          })()}
         </div>
       </div>
     </div>

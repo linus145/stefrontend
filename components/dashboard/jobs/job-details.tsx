@@ -61,14 +61,14 @@ export function JobDetails({ job, applications, onClose, onApply }: JobDetailsPr
         </div>
 
         <div className="flex flex-wrap gap-2 mb-6">
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-emerald-600/30 bg-emerald-500/5 text-emerald-700 text-xs font-semibold">
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-sm border border-emerald-600/30 bg-emerald-500/5 text-emerald-700 text-xs font-semibold">
             <CheckCircle2 className="w-3.5 h-3.5" />
             {job.hiring_status === 'ACTIVELY_HIRING' ? 'Actively hiring' : 'Actively reviewing applicants'}
           </div>
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-border bg-muted/30 text-muted-foreground text-xs font-semibold">
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-sm border border-border bg-muted/30 text-muted-foreground text-xs font-semibold">
             {job.work_mode === 'ONSITE' ? 'On-site' : job.work_mode.toLowerCase()}
           </div>
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-border bg-muted/30 text-muted-foreground text-xs font-semibold">
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-sm border border-border bg-muted/30 text-muted-foreground text-xs font-semibold">
             {job.job_type.replace('_', ' ').toLowerCase()}
           </div>
         </div>
@@ -141,6 +141,31 @@ export function JobDetails({ job, applications, onClose, onApply }: JobDetailsPr
             </div>
           </section>
         )}
+
+        {/* Skills Section */}
+        {(() => {
+          const displaySkills = (job.skills && job.skills.length > 0) 
+            ? job.skills.map(s => s.name) 
+            : (job.skills_required || []);
+          
+          if (displaySkills.length === 0) return null;
+
+          return (
+            <section className="bg-card border border-border/50 rounded-sm p-5 shadow-sm">
+              <h3 className="text-base font-bold text-foreground mb-4 tracking-tight">Required Skills</h3>
+              <div className="flex flex-wrap gap-2">
+                {displaySkills.map(skill => (
+                  <span 
+                    key={skill}
+                    className="px-3 py-1 rounded-sm bg-primary/5 text-primary text-xs font-semibold border border-primary/10"
+                  >
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </section>
+          );
+        })()}
 
         {/* About the Job */}
         <section className="bg-card border border-border/50 rounded-sm p-5 shadow-sm">

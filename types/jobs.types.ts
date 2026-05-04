@@ -77,12 +77,15 @@ export interface JobPost {
   skills: Skill[];
   skills_required: string[];
   experience_level: ExperienceLevel;
+  open_positions: number;
+  department: string;
   status: JobStatus;
   hiring_status: HiringStatus;
   deadline: string | null;
   applications_count: number;
   company_is_genuine?: boolean;
   hr_profile?: CompanyHRProfile;
+  is_ai_generated?: boolean;
   created_at: string;
   updated_at?: string;
 }
@@ -99,6 +102,8 @@ export interface JobPostCreatePayload {
   skills?: string[]; // Array of UUIDs
   skills_required?: string[];
   experience_level?: ExperienceLevel;
+  open_positions?: number;
+  department?: string;
   status?: JobStatus;
   hiring_status?: HiringStatus;
   deadline?: string | null;
@@ -124,6 +129,8 @@ export interface JobApplication {
   resume_url: string;
   cover_letter: string;
   status: ApplicationStatus;
+  ai_score?: number | null;
+  ai_analysis?: string;
   applied_at: string;
   updated_at: string;
 }

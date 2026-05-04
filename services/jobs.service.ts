@@ -98,6 +98,10 @@ export const jobsService = {
     return api.patch<BaseAPIResponse<JobApplication>>(`/jobs/applications/${applicationId}/status/`, { status: newStatus });
   },
 
+  getApplicationDetail: (applicationId: string): Promise<BaseAPIResponse<JobApplication>> => {
+    return api.get<BaseAPIResponse<JobApplication>>(`/jobs/applications/${applicationId}/detail/`);
+  },
+
   getMyApplications: (status?: string): Promise<BaseAPIResponse<JobApplication[]>> => {
     const query = status ? `?status=${status}` : '';
     return api.get<any>(`/jobs/my-applications/${query}`).then(res => {
@@ -116,5 +120,9 @@ export const jobsService = {
   getSkills: (category?: string): Promise<BaseAPIResponse<Skill[]>> => {
     const query = category ? `?category=${category}` : '';
     return api.get<BaseAPIResponse<Skill[]>>(`/jobs/skills/${query}`);
+  },
+
+  analyzeResumes: (jobId: string): Promise<BaseAPIResponse<any>> => {
+    return api.post<BaseAPIResponse<any>>(`/jobs/posts/${jobId}/analyze-resumes/`, {});
   },
 };

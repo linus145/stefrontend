@@ -4,19 +4,10 @@ import React from 'react';
 import { JobPost, JobApplication } from '@/types/jobs.types';
 import { cn } from '@/lib/utils';
 import { 
-  Briefcase, 
-  MapPin, 
-  Clock, 
-  DollarSign, 
-  CheckCircle2, 
-  X, 
-  Users,
-  ExternalLink,
-  Plus,
-  ChevronRight,
-  FileText
+  Briefcase, MapPin, Clock, DollarSign, CheckCircle2, X, Users,
+  ExternalLink, Plus, ChevronRight, FileText, Copy, Check
 } from 'lucide-react';
-
+import { toast } from 'sonner';
 interface JobDetailsProps {
   job: JobPost;
   applications: JobApplication[];
@@ -70,6 +61,17 @@ export function JobDetails({ job, applications, onClose, onApply }: JobDetailsPr
           </div>
           <div className="flex items-center gap-1.5 px-3 py-1 rounded-sm border border-border bg-muted/30 text-muted-foreground text-xs font-semibold">
             {job.job_type.replace('_', ' ').toLowerCase()}
+          </div>
+          <div 
+            className="flex items-center gap-2 px-3 py-1 rounded-sm border border-border bg-muted/10 text-muted-foreground text-[10px] font-mono cursor-pointer hover:bg-muted/20 transition-all"
+            onClick={() => {
+              navigator.clipboard.writeText(job.id);
+              // Simple feedback without local state if possible, or just copy
+              toast.success('Job ID copied');
+            }}
+          >
+            <span className="opacity-60 uppercase font-bold">Job ID:</span> {job.id}
+            <Copy className="w-3 h-3 opacity-50" />
           </div>
         </div>
 

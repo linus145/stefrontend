@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import {
   ArrowLeft, Loader2, Briefcase, MapPin, Globe, Clock,
-  DollarSign, Tags, ChevronDown, Check, Search as SearchIcon, X
+  DollarSign, Tags, ChevronDown, Check, Search as SearchIcon, X, Users
 } from 'lucide-react';
 import { JobPost, JobPostCreatePayload, Skill } from '@/types/jobs.types';
 
@@ -69,11 +69,14 @@ export function PostJobForm({ isCollapsed, editJob, onClose, onSuccess }: PostJo
     skills: editJob?.skills?.map(s => s.id) || [],
     skills_required: editJob?.skills_required || [],
     experience_level: editJob?.experience_level || 'ENTRY',
+    open_positions: editJob?.open_positions || 1,
+    department: editJob?.department || '',
     status: editJob?.status || 'DRAFT',
     hiring_status: editJob?.hiring_status || 'ACTIVELY_HIRING',
     deadline: editJob?.deadline ? editJob.deadline.split('T')[0] : null,
   });
 
+  const [isOpeningModalOpen, setIsOpeningModalOpen] = useState(false);
   const [skillSearch, setSkillSearch] = useState('');
   const [showSkillDropdown, setShowSkillDropdown] = useState(false);
   const [errors, setErrors] = useState<Record<string, string[]>>({});
@@ -180,12 +183,16 @@ export function PostJobForm({ isCollapsed, editJob, onClose, onSuccess }: PostJo
       </button>
 
       <div className="max-w-2xl">
-        <h1 className="text-2xl font-bold text-foreground tracking-tight mb-2">
-          {isEditing ? 'Edit Job Post' : 'Create New Job'}
-        </h1>
-        <p className="text-sm text-muted-foreground mb-8">
-          {isEditing ? 'Update your job listing details.' : 'Fill in the details below to create a new job listing.'}
-        </p>
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground tracking-tight mb-2">
+              {isEditing ? 'Edit Job Post' : 'Create New Job'}
+            </h1>
+            <p className="text-sm text-muted-foreground mb-8">
+              {isEditing ? 'Update your job listing details.' : 'Fill in the details below to create a new job listing.'}
+            </p>
+          </div>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Title */}
@@ -283,6 +290,41 @@ export function PostJobForm({ isCollapsed, editJob, onClose, onSuccess }: PostJo
                 placeholder="INR"
                 className="w-full rounded-sm bg-muted/30 border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none placeholder:text-muted-foreground"
               />
+            </FormField>
+          </div>
+
+          {/* Opening Details - Integrated */}
+          <div className="grid grid-cols-2 gap-4">
+            <FormField label="Open Positions *" id="open_positions" error={errors.open_positions}>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground">
+                  <Users className="h-4 w-4" />
+                </div>
+                <input
+                  id="open_positions"
+                  type="number"
+                  min="1"
+                  disabled={isSubmitting}
+                  value={formData.open_positions}
+                  onChange={(e) => setFormData(prev => ({ ...prev, open_positions: parseInt(e.target.value) || 1 }))}
+                  className="w-full rounded-sm bg-muted/30 border border-border text-foreground pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none placeholder:text-muted-foreground"
+                />
+              </div>
+            </FormField>
+            <FormField label="Department / Role Group" id="department" error={errors.department}>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground">
+                  <Briefcase className="h-4 w-4" />
+                </div>
+                <input
+                  id="department"
+                  disabled={isSubmitting}
+                  value={formData.department}
+                  onChange={handleChange}
+                  placeholder="e.g. Engineering"
+                  className="w-full rounded-sm bg-muted/30 border border-border text-foreground pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none placeholder:text-muted-foreground"
+                />
+              </div>
             </FormField>
           </div>
 
@@ -448,6 +490,7 @@ export function PostJobForm({ isCollapsed, editJob, onClose, onSuccess }: PostJo
           </div>
         </form>
       </div>
+
     </div>
   );
 }

@@ -158,7 +158,7 @@ export function ApplicationsTab({ isCollapsed, selectedJobId, onBack }: Applicat
                 <button 
                   onClick={() => setIsAiPanelOpen(!isAiPanelOpen)}
                   className={cn(
-                    "inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all border",
+                    "inline-flex items-center gap-2 px-3 py-1.5 rounded-sm text-xs font-bold transition-all border",
                     isAiPanelOpen 
                       ? "bg-[#7C3AED] text-white border-[#7C3AED] shadow-lg shadow-[#7C3AED]/20" 
                       : "bg-white text-[#7C3AED] border-[#7C3AED]/20 hover:bg-[#F5F3FF]"

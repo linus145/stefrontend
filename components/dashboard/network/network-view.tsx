@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { networkService, NetworkPerson } from '@/services/network.service';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { DashboardSection } from '@/components/dashboard/left-sidebar';
+import { DashboardSection } from '@/components/dashboard/dashboard-header';
 
 import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
@@ -33,7 +33,7 @@ export function NetworkView({
   isCollapsed,
   onSectionChange
 }: {
-  isCollapsed: boolean,
+  isCollapsed?: boolean,
   onSectionChange: (section: DashboardSection, userId?: string | null) => void
 }) {
   const [activeTab, setActiveTab] = useState<NetworkCategory>('FOUNDER');

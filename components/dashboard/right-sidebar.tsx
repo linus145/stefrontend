@@ -1,6 +1,8 @@
-import { Bell, UserPlus, ArrowUpRight, MoreHorizontal, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Bell, UserPlus, ArrowUpRight, Newspaper, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
+import { newsService, News } from '@/services/news.service';
 
 interface RightSidebarProps {
   isCollapsed: boolean;
@@ -9,6 +11,22 @@ interface RightSidebarProps {
 
 export function RightSidebar({ isCollapsed, onToggle }: RightSidebarProps) {
   const { user } = useAuth();
+  const [trendingNews, setTrendingNews] = useState<News[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTrending = async () => {
+      try {
+        const response = await newsService.getNews(1, 'trending');
+        setTrendingNews(response.results.slice(0, 3));
+      } catch (error) {
+        console.error("Failed to fetch trending news:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (!isCollapsed) fetchTrending();
+  }, [isCollapsed]);
 
   return (
     <aside className={cn(
@@ -30,13 +48,26 @@ export function RightSidebar({ isCollapsed, onToggle }: RightSidebarProps) {
         "flex flex-col h-full transition-all duration-300 overflow-hidden",
         isCollapsed ? "w-0 opacity-0 pointer-events-none" : "w-60 opacity-100"
       )}>
-        {/* Trending Startups */}
+        {/* Trending Ecosystem News */}
         <div className="mb-10">
-          <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-6">Trending Posts</h3>
+          <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-6">Trending News</h3>
           <div className="space-y-6">
-            <TrendingItem label="Vanguard Data" initial="V" role="SEED • FINTECH" />
-            <TrendingItem label="Orbit Logistics" initial="O" role="SERIES A • SC" />
-            <TrendingItem label="Aura Health" initial="A" role="HEALTH" />
+            {loading ? (
+              <div className="flex justify-center py-4">
+                <Loader2 className="w-4 h-4 animate-spin text-muted-foreground/30" />
+              </div>
+            ) : trendingNews.length > 0 ? (
+              trendingNews.map(news => (
+                <TrendingItem 
+                  key={news.id}
+                  label={news.title}
+                  initial={news.title[0]}
+                  role="TRENDING NEWS"
+                />
+              ))
+            ) : (
+              <p className="text-[10px] text-muted-foreground italic">No trending news today.</p>
+            )}
           </div>
         </div>
 
@@ -72,15 +103,15 @@ function TrendingItem({ label, initial, role }: { label: string, initial: string
   return (
     <div className="flex items-center justify-between group cursor-pointer transition-all">
       <div className="flex items-center gap-3">
-        <div className="w-9 h-9 rounded-md bg-muted/60 border border-border flex items-center justify-center text-foreground font-bold text-xs group-hover:border-primary/40 transition-all">
+        <div className="w-9 h-9 rounded-sm bg-[#7C3AED]/10 border border-[#7C3AED]/20 flex items-center justify-center text-[#7C3AED] font-bold text-xs group-hover:border-[#7C3AED]/40 transition-all">
           {initial}
         </div>
-        <div>
-          <p className="text-[13px] font-semibold text-foreground leading-none mb-1">{label}</p>
-          <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-tight opacity-70">{role}</p>
+        <div className="min-w-0 flex-1">
+          <p className="text-[13px] font-semibold text-foreground leading-tight mb-1 truncate">{label}</p>
+          <p className="text-[10px] font-black text-[#7C3AED]/60 uppercase tracking-tighter">{role}</p>
         </div>
       </div>
-      <ArrowUpRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:text-primary transition-all" />
+      <ArrowUpRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:text-[#7C3AED] transition-all shrink-0" />
     </div>
   );
 }
@@ -90,7 +121,7 @@ function NetworkItem({ name, role, avatar }: { name: string, role: string, avata
     <div className="flex items-center justify-between group transition-all">
       <div className="flex items-center gap-3">
         <div className="relative">
-          <img src={avatar} alt={name} className="w-9 h-9 rounded-md border border-border object-cover transition-transform group-hover:scale-105" />
+          <img src={avatar} alt={name} className="w-9 h-9 rounded-sm border border-border object-cover transition-transform group-hover:scale-105" />
           <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 border-2 border-sidebar" />
         </div>
         <div>
@@ -98,7 +129,7 @@ function NetworkItem({ name, role, avatar }: { name: string, role: string, avata
           <p className="text-[10px] font-medium text-muted-foreground truncate max-w-[120px] opacity-70">{role}</p>
         </div>
       </div>
-      <button className="w-8 h-8 rounded-md bg-muted/40 border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/40 transition-all">
+      <button className="w-8 h-8 rounded-sm bg-muted/40 border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/40 transition-all">
         <UserPlus className="h-3.5 w-3.5" />
       </button>
     </div>

@@ -97,8 +97,8 @@ export function ApplicationCard({
           )}
           {app.status === 'HIRED' && (
             <div className="flex items-center gap-2">
-               <button onClick={(e) => { e.stopPropagation(); onContact(app.applicant, true); }} className="p-2 rounded-sm bg-teal-500/10 text-teal-600 hover:bg-teal-500/20 transition-all" title="Send Email"><Mail className="w-4 h-4" /></button>
-               <button onClick={(e) => { e.stopPropagation(); onContact(app.applicant, false); }} className="p-2 rounded-sm bg-teal-500/10 text-teal-600 hover:bg-teal-500/20 transition-all" title="Send Message"><MessageSquare className="w-4 h-4" /></button>
+              <button onClick={(e) => { e.stopPropagation(); onContact(app.applicant, true); }} className="p-2 rounded-sm bg-teal-500/10 text-teal-600 hover:bg-teal-500/20 transition-all" title="Send Email"><Mail className="w-4 h-4" /></button>
+              <button onClick={(e) => { e.stopPropagation(); onContact(app.applicant, false); }} className="p-2 rounded-sm bg-teal-500/10 text-teal-600 hover:bg-teal-500/20 transition-all" title="Send Message"><MessageSquare className="w-4 h-4" /></button>
             </div>
           )}
           <ChevronDown className={cn("w-4 h-4 text-muted-foreground transition-transform ml-2", isExpanded && "rotate-180")} />

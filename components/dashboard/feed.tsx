@@ -13,7 +13,7 @@ import { Post } from '@/types/post.types';
 import { getOptimizedImage } from '@/lib/imagekit';
 
 interface FeedProps {
-  isCollapsed: boolean;
+  isCollapsed?: boolean;
   isRightCollapsed?: boolean;
   onNavigateToProfile: (userId: string) => void;
 }

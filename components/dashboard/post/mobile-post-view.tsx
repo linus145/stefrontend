@@ -22,6 +22,8 @@ interface MobilePostViewProps {
 export function MobilePostView({ onClose, onPostSuccess }: MobilePostViewProps) {
   const { user } = useAuth();
   const { isDark } = useDashboardTheme();
+  const [postType, setPostType] = useState<'POST' | 'NEWS'>('POST');
+  const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [mediaUrl, setMediaUrl] = useState('');
   const [isUploading, setIsUploading] = useState(false);
@@ -56,14 +58,25 @@ export function MobilePostView({ onClose, onPostSuccess }: MobilePostViewProps) 
       return;
     }
 
+    if (postType === 'NEWS' && !title.trim()) {
+      toast.error('News articles require a headline.');
+      return;
+    }
+
     setIsPosting(true);
     try {
-      await postService.createPost({ content, media_url: mediaUrl, visibility });
-      toast.success('Post created successfully!');
+      if (postType === 'NEWS') {
+        const { newsService } = await import('@/services/news.service');
+        await newsService.createNews({ title, content, media_url: mediaUrl });
+      } else {
+        await postService.createPost({ content, media_url: mediaUrl, visibility });
+      }
+      
+      toast.success(`${postType === 'NEWS' ? 'News article' : 'Post'} created successfully!`);
       onPostSuccess();
       onClose();
     } catch (error) {
-      toast.error('Failed to create post. Please try again.');
+      toast.error(`Failed to create ${postType === 'NEWS' ? 'news article' : 'post'}. Please try again.`);
     } finally {
       setIsPosting(false);
     }
@@ -108,9 +121,43 @@ export function MobilePostView({ onClose, onPostSuccess }: MobilePostViewProps) 
         </button>
       </div>
 
+      {/* Post Type Selector */}
+      <div className="flex border-b border-border bg-muted/10 p-1 mx-4 mt-4 rounded-sm">
+        <button
+          onClick={() => setPostType('POST')}
+          className={cn(
+            "flex-1 py-2 text-[10px] font-bold uppercase tracking-wider rounded-sm transition-all",
+            postType === 'POST' ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"
+          )}
+        >
+          General Post
+        </button>
+        <button
+          onClick={() => setPostType('NEWS')}
+          className={cn(
+            "flex-1 py-2 text-[10px] font-bold uppercase tracking-wider rounded-sm transition-all",
+            postType === 'NEWS' ? "bg-[#7C3AED] text-white shadow-sm" : "text-muted-foreground"
+          )}
+        >
+          News Article
+        </button>
+      </div>
+
       {/* Content Area */}
       <div className="flex-1 overflow-y-auto bg-background custom-scrollbar">
         <div className="p-4 sm:p-6 space-y-6">
+          {/* Conditional Title Field for News */}
+          {postType === 'NEWS' && (
+            <div className="animate-in slide-in-from-top-2 duration-300">
+              <input
+                type="text"
+                placeholder="Enter News Headline..."
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="w-full bg-slate-50 dark:bg-slate-900/50 border border-border rounded-sm py-4 px-4 text-lg font-bold focus:outline-none focus:ring-1 focus:ring-[#7C3AED]/20 focus:border-[#7C3AED] transition-all placeholder:text-muted-foreground/30"
+              />
+            </div>
+          )}
           {/* User Identity */}
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-md bg-muted/50 border border-border overflow-hidden shadow-sm">
@@ -185,7 +232,7 @@ export function MobilePostView({ onClose, onPostSuccess }: MobilePostViewProps) 
               autoFocus
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="What's on your architectural mind?"
+              placeholder={postType === 'NEWS' ? "Write the news article content..." : "What's on your architectural mind?"}
               className="w-full bg-transparent border-none outline-none resize-none text-lg sm:text-xl text-foreground placeholder:text-muted-foreground/40 min-h-[200px] leading-relaxed font-normal"
             />
           </div>

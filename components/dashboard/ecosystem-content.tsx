@@ -16,7 +16,7 @@ import { toast } from 'sonner';
 import { Zap } from 'lucide-react';
 
 interface EcosystemContentProps {
-  isCollapsed: boolean;
+  isCollapsed?: boolean;
   userId?: string | null;
 }
 

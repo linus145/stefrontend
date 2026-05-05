@@ -29,6 +29,8 @@ const MIN_CHARS = 100;
 export function PostModal({ isOpen, onClose, onPostSuccess }: PostModalProps) {
   const { user } = useAuth();
   const { isDark } = useDashboardTheme();
+  const [postType, setPostType] = useState<'POST' | 'NEWS'>('POST');
+  const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [mediaUrl, setMediaUrl] = useState('');
   const [isUploading, setIsUploading] = useState(false);
@@ -63,16 +65,28 @@ export function PostModal({ isOpen, onClose, onPostSuccess }: PostModalProps) {
       return;
     }
 
+    if (postType === 'NEWS' && !title.trim()) {
+      toast.error('News articles require a headline.');
+      return;
+    }
+
     try {
-      await postService.createPost({ content, media_url: mediaUrl, visibility });
-      toast.success('Post created successfully!');
+      if (postType === 'NEWS') {
+        const { newsService } = await import('@/services/news.service');
+        await newsService.createNews({ title, content, media_url: mediaUrl });
+      } else {
+        await postService.createPost({ content, media_url: mediaUrl, visibility });
+      }
+      
+      toast.success(`${postType === 'NEWS' ? 'News article' : 'Post'} created successfully!`);
       setContent('');
+      setTitle('');
       setMediaUrl('');
       setMediaType(null);
       onPostSuccess();
       onClose();
     } catch (error) {
-      toast.error('Failed to create post. Please try again.');
+      toast.error(`Failed to create ${postType === 'NEWS' ? 'news article' : 'post'}. Please try again.`);
     }
   };
 
@@ -102,7 +116,45 @@ export function PostModal({ isOpen, onClose, onPostSuccess }: PostModalProps) {
           <DialogTitle className="text-lg font-semibold tracking-tight text-foreground">Create Post</DialogTitle>
         </DialogHeader>
 
+        <div className="px-4 sm:px-6 py-3 bg-muted/20 border-b border-border flex items-center gap-2">
+          <button
+            onClick={() => setPostType('POST')}
+            className={cn(
+              "px-4 py-1.5 rounded-sm text-[11px] font-bold uppercase tracking-wider transition-all border",
+              postType === 'POST' 
+                ? "bg-foreground text-background border-foreground shadow-sm" 
+                : "bg-transparent text-muted-foreground border-transparent hover:bg-muted/50"
+            )}
+          >
+            General Post
+          </button>
+          <button
+            onClick={() => setPostType('NEWS')}
+            className={cn(
+              "px-4 py-1.5 rounded-sm text-[11px] font-bold uppercase tracking-wider transition-all border",
+              postType === 'NEWS' 
+                ? "bg-[#7C3AED] text-white border-[#7C3AED] shadow-sm" 
+                : "bg-transparent text-muted-foreground border-transparent hover:bg-[#7C3AED]/10 hover:text-[#7C3AED]"
+            )}
+          >
+            News Article
+          </button>
+        </div>
+
         <div className="px-4 sm:px-6 py-4 space-y-4 max-h-[60vh] sm:max-h-[70vh] overflow-y-auto custom-scrollbar">
+          {/* Conditional Title Field for News */}
+          {postType === 'NEWS' && (
+            <div className="animate-in slide-in-from-top-2 duration-300">
+              <input
+                type="text"
+                placeholder="Enter News Headline..."
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="w-full bg-slate-50 dark:bg-slate-900/50 border border-border rounded-sm py-3 px-4 text-sm font-bold focus:outline-none focus:ring-1 focus:ring-[#7C3AED]/20 focus:border-[#7C3AED] transition-all placeholder:text-muted-foreground/40"
+              />
+            </div>
+          )}
+
           {/* User Profile Info */}
           <div className="flex items-center gap-3">
              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-muted/50 flex items-center justify-center text-primary font-bold border border-border shadow-sm overflow-hidden text-sm sm:text-base">
@@ -175,7 +227,7 @@ export function PostModal({ isOpen, onClose, onPostSuccess }: PostModalProps) {
               autoFocus
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="What's on your architectural mind?"
+              placeholder={postType === 'NEWS' ? "Write the news article content..." : "What's on your architectural mind?"}
               className="w-full bg-transparent text-[14px] sm:text-[16px] text-foreground placeholder:text-muted-foreground/50 resize-none outline-none min-h-[120px] sm:min-h-[150px] leading-relaxed"
             />
 

@@ -5,7 +5,7 @@ import { JobPost, JobApplication } from '@/types/jobs.types';
 import { cn } from '@/lib/utils';
 import { 
   Briefcase, MapPin, Clock, DollarSign, CheckCircle2, X, Users,
-  ExternalLink, Plus, ChevronRight, FileText, Copy, Check, Loader2
+  ExternalLink, Plus, ChevronRight, FileText, Copy, Check, Loader2, Zap
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -83,8 +83,8 @@ export function JobDetails({ job, applications, onClose, onApply, onEasyApply, i
                 disabled={isApplying}
                 className="px-8 py-2 bg-[#0a66c2] text-white rounded-full text-sm font-bold hover:bg-[#004182] transition-all flex items-center gap-2 shadow-sm disabled:opacity-50"
               >
-                {isApplying ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-                Easy Apply
+                {isApplying ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4 fill-current" />}
+                B2 Apply
               </button>
               <button
                 onClick={onApply}

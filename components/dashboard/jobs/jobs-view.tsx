@@ -9,8 +9,9 @@ import {
   Briefcase, 
   ChevronRight, 
   Search, 
-  Filter,
-  Loader2
+  Zap,
+  Loader2,
+  MoreHorizontal
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -19,9 +20,15 @@ import { JobCard } from './job-card';
 import { ApplicationCard } from './application-card';
 import { JobDetails } from './job-details';
 import { ApplyModal } from './apply-modal';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface JobsViewProps {
-  isCollapsed: boolean;
+  isCollapsed?: boolean;
 }
 
 export function JobsView({ isCollapsed }: JobsViewProps) {
@@ -63,7 +70,7 @@ export function JobsView({ isCollapsed }: JobsViewProps) {
 
   // Mutations
   const applyMutation = useMutation({
-    mutationFn: (data: { jobId: string; resume_url: string; cover_letter: string }) => 
+    mutationFn: (data: { jobId: string; resume_url: string; cover_letter: string }) =>
       jobsService.applyToJob(data.jobId, { resume_url: data.resume_url, cover_letter: data.cover_letter }),
     onSuccess: () => {
       toast.success('Application submitted successfully!');
@@ -100,7 +107,7 @@ export function JobsView({ isCollapsed }: JobsViewProps) {
     applyMutation.mutate({
       jobId: selectedJob.id,
       resume_url: '', // Backend pulls from profile
-      cover_letter: 'Applied via Easy Apply using profile details.'
+      cover_letter: 'Applied via B2 Apply using profile details.'
     });
   };
 
@@ -114,67 +121,51 @@ export function JobsView({ isCollapsed }: JobsViewProps) {
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      {/* Header & Tabs */}
-      <div className="mb-6 flex flex-col gap-6">
-        <div className="flex items-center gap-2 p-1 bg-muted/30 rounded-xl w-fit border border-border/50">
-          <button
-            onClick={() => { setActiveTab('browse'); setSelectedJob(null); }}
-            className={cn(
-              "px-4 py-1.5 rounded-lg text-xs font-bold transition-all",
-              activeTab === 'browse' ? "bg-background text-primary shadow-sm" : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            Browse Jobs
-          </button>
-          <button
-            onClick={() => { setActiveTab('applications'); setSelectedJob(null); }}
-            className={cn(
-              "px-4 py-1.5 rounded-lg text-xs font-bold transition-all",
-              activeTab === 'applications' ? "bg-background text-primary shadow-sm" : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            My Applications
-          </button>
+      {/* Search and Filters Header */}
+      <div className="mb-6 flex flex-col gap-4">
+        <div className="relative w-full">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <input
+            type="text"
+            placeholder="Search jobs, companies, skills..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-12 pr-4 py-3 bg-card border border-border rounded-sm text-[13px] font-medium focus:ring-1 focus:ring-primary/20 focus:border-primary/30 outline-none transition-all shadow-sm"
+          />
         </div>
-
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          {activeTab === 'browse' ? (
-            <>
-              <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <input
-                  type="text"
-                  placeholder="Search jobs, companies, skills..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-muted/30 border border-border rounded-xl text-sm focus:ring-1 focus:ring-primary outline-none transition-all"
-                />
-              </div>
-              <button className="flex items-center gap-2 px-4 py-2 bg-muted/30 border border-border rounded-xl text-sm font-medium hover:bg-muted/50 transition-all">
-                <Filter className="w-4 h-4" />
-                Filters
-              </button>
-            </>
-          ) : (
-            <div className="flex gap-2 overflow-x-auto w-full pb-1">
-              {appStatusOptions.map(opt => (
-                <button
-                  key={opt.value}
-                  onClick={() => setStatusFilter(opt.value)}
-                  className={cn(
-                    "px-4 py-1.5 rounded-full text-xs font-semibold transition-all whitespace-nowrap border",
-                    statusFilter === opt.value
-                      ? "bg-primary/10 text-primary border-primary/30"
-                      : "bg-muted/30 text-muted-foreground border-border hover:bg-muted/50"
-                  )}
+        
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <button className="flex items-center gap-2 px-4 py-2 bg-[#7C3AED] text-white rounded-sm text-[10px] font-bold uppercase tracking-wider whitespace-nowrap shadow-sm">
+            <Zap className="w-3 h-3 fill-current" />
+            B2 Apply
+          </button>
+          {['IT', 'Non-IT', 'Remote'].map((filter) => (
+            <button
+              key={filter}
+              className="px-4 py-2 bg-card border border-border text-[10px] font-bold text-muted-foreground uppercase tracking-wider rounded-sm hover:text-foreground hover:bg-muted/50 transition-all whitespace-nowrap shadow-sm"
+            >
+              {filter}
+            </button>
+          ))}
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger className="p-2 bg-card border border-border text-muted-foreground rounded-sm hover:text-foreground hover:bg-muted/50 transition-all shadow-sm flex items-center justify-center outline-none">
+              <MoreHorizontal className="w-4 h-4" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48 bg-card border-border rounded-sm shadow-xl">
+              {['Full-time', 'Contract', 'Internship', 'Freelance'].map((filter) => (
+                <DropdownMenuItem 
+                  key={filter}
+                  className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-primary focus:text-primary cursor-pointer py-3"
                 >
-                  {opt.label}
-                </button>
+                  {filter}
+                </DropdownMenuItem>
               ))}
-            </div>
-          )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
+
 
       {/* Content Area */}
       <div className="flex-1 flex gap-6 overflow-hidden">
@@ -196,7 +187,7 @@ export function JobsView({ isCollapsed }: JobsViewProps) {
                 {activeTab === 'browse' ? 'No jobs found' : 'No applications yet'}
               </h3>
               <p className="text-muted-foreground text-sm max-w-xs">
-                {activeTab === 'browse' 
+                {activeTab === 'browse'
                   ? "We couldn't find any active job listings matching your criteria."
                   : "You haven't applied to any jobs yet. Start exploring the latest opportunities!"}
               </p>
@@ -209,25 +200,44 @@ export function JobsView({ isCollapsed }: JobsViewProps) {
                   <p className="text-xs text-muted-foreground">Based on your profile, preferences, and activity like applies, searches, and saves</p>
                 </div>
               )}
-              
+
               <div className="flex-1 overflow-y-auto">
                 <div className="grid grid-cols-1">
                   {activeTab === 'browse' ? (
-                    jobs.map((job) => (
-                      <JobCard 
-                        key={job.id} 
-                        job={job} 
-                        isSelected={selectedJob?.id === job.id} 
-                        onClick={() => setSelectedJob(job)} 
-                      />
-                    ))
+                    <div className="flex flex-col">
+                      {jobs.map((job, index) => (
+                        <React.Fragment key={job.id}>
+                          <JobCard 
+                            job={job} 
+                            isSelected={selectedJob?.id === job.id} 
+                            onClick={() => setSelectedJob(job)} 
+                          />
+                          {index === 4 && (
+                            <div className="p-6 bg-muted/10 border-y border-border/50 my-2">
+                              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-4">Recent Searches</p>
+                              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
+                                {['Architect', 'Structural', 'UI Designer', 'PM'].map((query) => (
+                                  <button
+                                    key={query}
+                                    onClick={() => setSearchQuery(query)}
+                                    className="px-4 py-2 rounded-sm bg-card border border-border text-[11px] font-bold text-muted-foreground hover:text-foreground transition-all whitespace-nowrap shadow-sm"
+                                  >
+                                    {query}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </React.Fragment>
+                      ))}
+                    </div>
                   ) : (
                     applications.map((app) => (
-                      <ApplicationCard 
-                        key={app.id} 
-                        application={app} 
-                        isSelected={selectedJob?.id === app.job} 
-                        onClick={() => handleAppClick(app.job)} 
+                      <ApplicationCard
+                        key={app.id}
+                        application={app}
+                        isSelected={selectedJob?.id === app.job}
+                        onClick={() => handleAppClick(app.job)}
                       />
                     ))
                   )}
@@ -250,11 +260,11 @@ export function JobsView({ isCollapsed }: JobsViewProps) {
           selectedJob ? "flex" : "hidden"
         )}>
           {selectedJob ? (
-            <JobDetails 
-              job={selectedJob} 
-              applications={applications} 
-              onClose={() => setSelectedJob(null)} 
-              onApply={() => setIsApplyModalOpen(true)} 
+            <JobDetails
+              job={selectedJob}
+              applications={applications}
+              onClose={() => setSelectedJob(null)}
+              onApply={() => setIsApplyModalOpen(true)}
               onEasyApply={handleEasyApply}
               isApplying={applyMutation.isPending}
             />
@@ -274,7 +284,7 @@ export function JobsView({ isCollapsed }: JobsViewProps) {
 
       {/* Apply Modal */}
       {isApplyModalOpen && selectedJob && (
-        <ApplyModal 
+        <ApplyModal
           job={selectedJob}
           resumeUrl={resumeUrl}
           setResumeUrl={setResumeUrl}

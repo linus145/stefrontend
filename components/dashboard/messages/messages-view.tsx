@@ -15,7 +15,7 @@ export function MessagesView({
   isCollapsed,
   targetUserId
 }: {
-  isCollapsed: boolean,
+  isCollapsed?: boolean,
   targetUserId?: string | null
 }) {
   const { user: currentUser } = useAuth();

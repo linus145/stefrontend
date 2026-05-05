@@ -44,7 +44,7 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
       {/* Header - Inspired by Chat Interface */}
       <div className="relative pt-6 pb-4 px-6 flex items-center justify-between bg-white border-b border-slate-100">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[#F5F3FF] flex items-center justify-center shadow-sm">
+          <div className="w-10 h-10 rounded-sm bg-[#F5F3FF] flex items-center justify-center shadow-sm">
             <Sparkles className="w-5 h-5 text-[#7C3AED]" />
           </div>
           <div>
@@ -94,61 +94,63 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
                     className="animate-in slide-in-from-bottom-2 duration-300"
                     style={{ animationDelay: `${idx * 100}ms` }}
                   >
-                    {/* AI Bubble Style - Exactly like Image */}
+                    {/* AI Bubble Style - Professional Chat Style */}
                     <div 
                       className={cn(
-                        "bg-[#F5F3FF] rounded-[24px] p-5 transition-all cursor-pointer border border-transparent",
-                        isExpanded ? "ring-2 ring-[#7C3AED]/10 border-[#7C3AED]/10" : "hover:border-[#7C3AED]/10"
+                        "bg-slate-50 rounded-sm p-4 transition-all cursor-pointer border border-slate-100",
+                        isExpanded ? "ring-1 ring-[#7C3AED]/20 border-[#7C3AED]/20 bg-white" : "hover:border-slate-200"
                       )}
                       onClick={() => toggleExpand(cand.id)}
                     >
                       <div className="flex items-center gap-2 mb-3">
-                        <Bot className="w-4 h-4 text-[#7C3AED]" />
-                        <span className="text-[11px] font-bold text-[#7C3AED] uppercase tracking-wider">AI Recruiter</span>
+                        <div className="w-6 h-6 rounded-sm bg-[#7C3AED] flex items-center justify-center">
+                          <Bot className="w-3.5 h-3.5 text-white" />
+                        </div>
+                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Assistant</span>
                       </div>
 
                       <div className="space-y-2">
                         <div className="flex justify-between items-center">
-                          <h3 className="text-sm font-bold text-slate-900">{cand.name}</h3>
-                          <div className="text-[10px] font-black text-[#7C3AED] bg-white px-2 py-0.5 rounded-full border border-[#7C3AED]/10">
+                          <h3 className="text-sm font-bold text-slate-900 tracking-tight">{cand.name}</h3>
+                          <div className="text-[10px] font-black text-[#7C3AED] bg-[#F5F3FF] px-2 py-0.5 rounded-sm border border-[#7C3AED]/10">
                             {cand.score}% MATCH
                           </div>
                         </div>
                         
                         <p className={cn(
-                          "text-sm text-slate-700 leading-relaxed font-medium",
+                          "text-[13px] text-slate-600 leading-relaxed font-medium",
                           !isExpanded && "line-clamp-3"
                         )}>
                           {cand.summary}
                         </p>
                       </div>
 
-                      <div className="mt-4 flex justify-center opacity-40">
+                      <div className="mt-3 flex justify-center opacity-30">
                         {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                       </div>
                     </div>
 
-                    {/* Action Buttons - Exactly like Image */}
+                    {/* Action Buttons - Rectangular Style */}
                     {isExpanded && (
-                      <div className="mt-3 space-y-2 animate-in fade-in slide-in-from-top-2 duration-300 px-2">
+                      <div className="mt-2 grid grid-cols-1 gap-1.5 animate-in fade-in slide-in-from-top-1 duration-200">
                         <button 
                           onClick={(e) => {
                             e.stopPropagation();
                             onViewDetails(cand.id);
                           }}
-                          className="w-full flex items-center gap-3 p-3 bg-white border border-slate-200 rounded-xl text-[13px] font-semibold text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm"
+                          className="flex items-center gap-3 p-2.5 bg-white border border-slate-200 rounded-sm text-[12px] font-semibold text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm group"
                         >
-                          <FileText className="w-4 h-4 text-slate-400" />
+                          <FileText className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#7C3AED] transition-colors" />
                           Summarize Candidate
                         </button>
                         
-                        <button className="w-full flex items-center gap-3 p-3 bg-white border border-slate-200 rounded-xl text-[13px] font-semibold text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm">
-                          <Target className="w-4 h-4 text-slate-400" />
+                        <button className="flex items-center gap-3 p-2.5 bg-white border border-slate-200 rounded-sm text-[12px] font-semibold text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm group">
+                          <Target className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#7C3AED] transition-colors" />
                           Check Skill Match
                         </button>
                         
-                        <button className="w-full flex items-center gap-3 p-3 bg-white border border-slate-200 rounded-xl text-[13px] font-semibold text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm">
-                          <MessageSquare className="w-4 h-4 text-slate-400" />
+                        <button className="flex items-center gap-3 p-2.5 bg-white border border-slate-200 rounded-sm text-[12px] font-semibold text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm group">
+                          <MessageSquare className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#7C3AED] transition-colors" />
                           Generate Interview Questions
                         </button>
 
@@ -158,9 +160,9 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
                             setAgentModalOpen(true);
                             setSelectedCandidateName(cand.name);
                           }}
-                          className="w-full flex items-center gap-3 p-3 bg-[#F5F3FF] border border-[#7C3AED]/20 rounded-xl text-[13px] font-bold text-[#7C3AED] hover:bg-[#EDE9FE] transition-all shadow-sm mt-2 group"
+                          className="flex items-center gap-3 p-2.5 bg-[#7C3AED] rounded-sm text-[12px] font-bold text-white hover:bg-[#6D28D9] transition-all shadow-sm mt-1 group"
                         >
-                          <Sparkles className="w-4 h-4 text-[#7C3AED] group-hover:scale-110 transition-transform" />
+                          <Sparkles className="w-3.5 h-3.5 text-white group-hover:scale-110 transition-transform" />
                           Run Agentic Task...
                         </button>
                       </div>
@@ -187,7 +189,7 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
               {historyData.data.map((report: any, idx: number) => (
                 <div 
                   key={report.id}
-                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-all cursor-pointer group"
+                  className="flex items-center gap-3 p-3 rounded-sm hover:bg-slate-50 transition-all cursor-pointer group"
                   onClick={() => {
                     if (onLoadHistoryReport) {
                       onLoadHistoryReport(report.results);
@@ -195,7 +197,7 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
                     }
                   }}
                 >
-                  <div className="w-10 h-10 rounded-full bg-[#F5F3FF] flex items-center justify-center shrink-0 border border-[#7C3AED]/10 group-hover:scale-105 transition-transform">
+                  <div className="w-10 h-10 rounded-sm bg-[#F5F3FF] flex items-center justify-center shrink-0 border border-[#7C3AED]/10 group-hover:scale-105 transition-transform">
                     <BrainCircuit className="w-5 h-5 text-[#7C3AED]" />
                   </div>
                   
@@ -226,17 +228,17 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
         )}
       </div>
 
-      {/* Footer Chat Input - Exactly like Image */}
-      <div className="p-4 border-t border-slate-50 bg-white">
-        <div className="relative">
+      {/* Footer Chat Input - Professional Chat Style */}
+      <div className="p-4 border-t border-slate-100 bg-white">
+        <div className="relative group">
           <input 
             type="text"
-            placeholder="Ask AI anything about this candidate..."
-            className="w-full bg-[#F9FAFB] border border-slate-200 rounded-xl py-3.5 px-4 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/20 focus:border-[#7C3AED] transition-all placeholder:text-slate-400 font-medium"
+            placeholder="Ask anything about the candidates..."
+            className="w-full bg-slate-50 border border-slate-200 rounded-sm py-3 px-4 pr-12 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#7C3AED]/20 focus:border-[#7C3AED] transition-all placeholder:text-slate-400 font-medium"
             disabled={!results}
           />
           <button 
-            className="absolute right-2 top-2 p-1.5 bg-[#7C3AED] text-white rounded-lg hover:bg-[#6D28D9] transition-colors disabled:opacity-30"
+            className="absolute right-2 top-2 p-1.5 bg-[#7C3AED] text-white rounded-sm hover:bg-[#6D28D9] transition-colors disabled:opacity-30 shadow-sm"
             disabled={!results}
           >
             <Send className="w-4 h-4" />

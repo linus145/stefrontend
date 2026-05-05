@@ -36,11 +36,16 @@ export function JobSelector({
           <select
             value={activeJobId || ''}
             onChange={(e) => setActiveJobId(e.target.value || null)}
-            className="w-full rounded-sm bg-muted/30 border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none appearance-none transition-all"
+            className="w-full rounded-sm bg-muted/30 dark:bg-slate-800 border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none appearance-none transition-all cursor-pointer"
+            style={{ colorScheme: 'dark' }}
           >
-            <option value="">-- Choose a job post --</option>
+            <option value="" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100">-- Choose a job post --</option>
             {jobs.map((job: any) => (
-              <option key={job.id} value={job.id}>
+              <option 
+                key={job.id} 
+                value={job.id}
+                className="bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+              >
                 {job.title} ({job.applications_count} applicants)
               </option>
             ))}

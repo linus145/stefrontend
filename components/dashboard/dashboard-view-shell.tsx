@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
-import { LeftSidebar, DashboardSection } from '@/components/dashboard/left-sidebar';
 import { RightSidebar } from '@/components/dashboard/right-sidebar';
 import { Feed } from '@/components/dashboard/feed';
 import { EcosystemContent } from '@/components/dashboard/ecosystem-content';
@@ -12,6 +11,8 @@ import { NetworkView } from '@/components/dashboard/network/network-view';
 import { SettingsView } from '@/components/dashboard/settings/settings-view';
 import { DashboardHeader } from '@/components/dashboard/dashboard-header';
 import { JobsView } from '@/components/dashboard/jobs/jobs-view';
+import { NewsView } from '@/components/dashboard/news/news-view';
+import { NotificationsView } from '@/components/dashboard/notifications/notifications-view';
 import { GlobalLoader } from '@/components/ui/global-loader';
 import { DashboardThemeProvider } from '@/context/DashboardThemeContext';
 import { Briefcase, Newspaper, Users } from 'lucide-react';
@@ -19,12 +20,11 @@ import { cn } from '@/lib/utils';
 import { MobileBottomNav } from '@/components/dashboard/mobile-bottom-nav';
 import { MobilePostView } from '@/components/dashboard/post/mobile-post-view';
 import { useQueryClient } from '@tanstack/react-query';
+import { DashboardSection } from './dashboard-header';
 
 export function DashboardViewShell() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<DashboardSection>('dashboard');
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -58,7 +58,6 @@ export function DashboardViewShell() {
     setIsTransitioning(true);
     setActiveSection(section);
     setSelectedProfileId(userId);
-    setIsMobileSidebarOpen(false); // Close mobile sidebar on nav
     // Artificial delay to make the transition feel intentional and premium
     setTimeout(() => {
       setIsTransitioning(false);
@@ -87,7 +86,7 @@ export function DashboardViewShell() {
 
     switch (activeSection) {
       case 'Profile':
-        return <EcosystemContent isCollapsed={isSidebarCollapsed} userId={selectedProfileId} />;
+        return <EcosystemContent userId={selectedProfileId} />;
       case 'jobs':
         return (
           <div className="flex-1 flex flex-col p-4 sm:p-8 transition-all ease-out">
@@ -114,29 +113,18 @@ export function DashboardViewShell() {
 
             {/* Active Job Listings */}
             <div className="flex-1 min-h-0">
-              <JobsView isCollapsed={isSidebarCollapsed} />
+              <JobsView />
             </div>
           </div>
         );
       case 'news':
-        return (
-          <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-8 animate-in fade-in slide-in-from-bottom-4 duration-1000 transition-all ease-out">
-            <div className="w-24 h-24 rounded-3xl bg-muted/20 border border-dashed border-border/50 flex items-center justify-center mb-8 relative group">
-              <div className="absolute inset-0 bg-sky-500/5 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
-              <Newspaper className="w-10 h-10 text-muted-foreground opacity-20 group-hover:opacity-40 transition-all group-hover:scale-110" />
-            </div>
-            <h3 className="text-2xl font-semibold text-foreground tracking-tight mb-2">No news available</h3>
-            <p className="text-muted-foreground text-sm max-w-xs text-center font-medium leading-relaxed">
-              The ecosystem logic is currently processing new posts. Please check back shortly for verified news.
-            </p>
-          </div>
-        );
+        return <NewsView />;
       case 'messages':
-        return <MessagesView isCollapsed={isSidebarCollapsed} targetUserId={selectedProfileId} />;
+        return <MessagesView targetUserId={selectedProfileId} />;
       case 'network':
-        return <NetworkView isCollapsed={isSidebarCollapsed} onSectionChange={handleSectionChange} />;
+        return <NetworkView onSectionChange={handleSectionChange} />;
       case 'settings':
-        return <SettingsView isCollapsed={isSidebarCollapsed} />;
+        return <SettingsView />;
       case 'hire':
         return (
           <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-8 animate-in fade-in slide-in-from-bottom-4 duration-1000 transition-all ease-out">
@@ -150,6 +138,8 @@ export function DashboardViewShell() {
             </p>
           </div>
         );
+      case 'notifications':
+        return <NotificationsView />;
       case 'create-post':
         return (
           <MobilePostView
@@ -164,7 +154,6 @@ export function DashboardViewShell() {
       default:
         return (
           <Feed
-            isCollapsed={isSidebarCollapsed}
             isRightCollapsed={isRightSidebarCollapsed}
             onNavigateToProfile={handleProfileNavigate}
           />
@@ -175,35 +164,17 @@ export function DashboardViewShell() {
   return (
     <DashboardThemeProvider>
       <div className="flex min-h-screen bg-background selection:bg-primary/20">
-        {/* Mobile sidebar overlay */}
-        {isMobileSidebarOpen && (
-          <div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden animate-in fade-in duration-200"
-            onClick={() => setIsMobileSidebarOpen(false)}
-          />
-        )}
 
-        <LeftSidebar
-          isCollapsed={isSidebarCollapsed}
-          onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-          activeSection={activeSection}
-          onSectionChange={handleSectionChange}
-          isMobileOpen={isMobileSidebarOpen}
-          onMobileClose={() => setIsMobileSidebarOpen(false)}
-        />
 
         <DashboardHeader
-          isCollapsed={isSidebarCollapsed}
           isRightCollapsed={isRightSidebarCollapsed}
           hasRightSidebar={activeSection === 'dashboard'}
           activeSection={activeSection}
           onSectionChange={handleSectionChange}
-          onMobileMenuToggle={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
         />
 
         <div className={cn(
           "flex-1 flex flex-col min-w-0 pt-16 pb-16 lg:pb-0 transition-all duration-300 ease-in-out",
-          isSidebarCollapsed ? "lg:ml-20" : "lg:ml-60",
           activeSection === 'dashboard' && !isRightSidebarCollapsed && "xl:mr-72"
         )}>
           {renderContent()}

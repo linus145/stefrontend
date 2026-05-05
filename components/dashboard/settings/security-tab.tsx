@@ -82,13 +82,13 @@ export function SecurityTab() {
          <p className="text-muted-foreground text-sm font-medium mt-1">Manage your password and secure your account.</p>
       </div>
       
-      <Card className="rounded-lg border-border bg-card shadow-sm p-2 sm:p-4">
+      <Card className="rounded-sm border-border bg-card shadow-sm p-2 sm:p-4">
          <div className="flex flex-col">
             {/* Add mobile number Section */}
             <div className="border-b border-border last:border-0">
                <button 
                   onClick={() => setExpandedSection(prev => prev === 'mobile' ? null : 'mobile')}
-                  className="w-full flex items-center justify-between py-4 px-2 hover:bg-muted/30 rounded-md transition-colors text-left"
+                  className="w-full flex items-center justify-between py-4 px-2 hover:bg-muted/30 rounded-sm transition-colors text-left"
                >
                   <div className="flex items-center gap-3">
                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
@@ -103,18 +103,18 @@ export function SecurityTab() {
                </button>
                
                {expandedSection === 'mobile' && (
-                  <div className="p-4 mx-2 mb-4 bg-muted/20 rounded-lg animate-in fade-in slide-in-from-top-1">
+                  <div className="p-4 mx-2 mb-4 bg-muted/20 rounded-sm animate-in fade-in slide-in-from-top-1">
                      <p className="text-sm text-muted-foreground mb-4">Adding a phone number helps you log in securely and recover your account.</p>
                      <form onSubmit={handleMobileNumberSubmit} className="flex gap-2 max-w-sm">
                         <Input 
                            type="tel" 
                            placeholder="Enter mobile number" 
-                           className="h-10 text-sm bg-background" 
+                           className="h-10 text-sm bg-background rounded-sm" 
                            value={phoneNumber}
                            onChange={(e) => setPhoneNumber(e.target.value)}
                            required
-                        />
-                        <Button type="submit" disabled={isSubmittingMobile} className="h-10 text-xs px-4">
+                         />
+                        <Button type="submit" disabled={isSubmittingMobile} className="h-10 text-xs px-4 rounded-sm">
                            {isSubmittingMobile ? 'Saving...' : 'Add Number'}
                         </Button>
                      </form>
@@ -126,7 +126,7 @@ export function SecurityTab() {
             <div className="border-b border-border last:border-0">
                <button 
                   onClick={() => setExpandedSection(prev => prev === 'password' ? null : 'password')}
-                  className="w-full flex items-center justify-between py-4 px-2 hover:bg-muted/30 rounded-md transition-colors text-left"
+                  className="w-full flex items-center justify-between py-4 px-2 hover:bg-muted/30 rounded-sm transition-colors text-left"
                >
                   <div className="flex items-center gap-3">
                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
@@ -141,7 +141,7 @@ export function SecurityTab() {
                </button>
                
                {expandedSection === 'password' && (
-                  <div className="p-4 sm:p-6 mx-2 mb-4 bg-muted/20 rounded-lg animate-in fade-in slide-in-from-top-1">
+                  <div className="p-4 sm:p-6 mx-2 mb-4 bg-muted/20 rounded-sm animate-in fade-in slide-in-from-top-1">
                      <form onSubmit={handlePasswordChange} className="space-y-4 max-w-md">
                         <div className="space-y-1.5 group">
                            <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest ml-1 transition-colors group-focus-within:text-primary">Current Password</label>
@@ -150,7 +150,7 @@ export function SecurityTab() {
                                  type={showPasswords.old ? "text" : "password"} 
                                  value={passwords.old_password} 
                                  onChange={(e) => setPasswords({...passwords, old_password: e.target.value})} 
-                                 className="h-10 bg-background border-border rounded-lg pr-10 focus:ring-1 focus:ring-primary/40 transition-all shadow-sm text-sm" 
+                                 className="h-10 bg-background border-border rounded-sm pr-10 focus:ring-1 focus:ring-primary/40 transition-all shadow-sm text-sm" 
                                  placeholder="Enter current password"
                                  required
                               />
@@ -170,7 +170,7 @@ export function SecurityTab() {
                                  type={showPasswords.new ? "text" : "password"} 
                                  value={passwords.new_password} 
                                  onChange={(e) => setPasswords({...passwords, new_password: e.target.value})} 
-                                 className="h-10 bg-background border-border rounded-lg pr-10 focus:ring-1 focus:ring-primary/40 transition-all shadow-sm text-sm" 
+                                 className="h-10 bg-background border-border rounded-sm pr-10 focus:ring-1 focus:ring-primary/40 transition-all shadow-sm text-sm" 
                                  placeholder="Enter new password"
                                  required
                               />
@@ -190,7 +190,7 @@ export function SecurityTab() {
                                  type={showPasswords.confirm ? "text" : "password"} 
                                  value={passwords.confirm_password} 
                                  onChange={(e) => setPasswords({...passwords, confirm_password: e.target.value})} 
-                                 className="h-10 bg-background border-border rounded-lg pr-10 focus:ring-1 focus:ring-primary/40 transition-all shadow-sm text-sm" 
+                                 className="h-10 bg-background border-border rounded-sm pr-10 focus:ring-1 focus:ring-primary/40 transition-all shadow-sm text-sm" 
                                  placeholder="Confirm new password"
                                  required
                               />
@@ -206,7 +206,7 @@ export function SecurityTab() {
                         <Button 
                            type="submit" 
                            disabled={isSubmitting} 
-                           className="w-full sm:w-auto rounded-lg bg-primary text-primary-foreground font-semibold text-xs px-6 h-10 shadow-sm hover:translate-y-[-1px] active:scale-95 transition-all mt-4"
+                           className="w-full sm:w-auto rounded-sm bg-primary text-primary-foreground font-semibold text-xs px-6 h-10 shadow-sm hover:translate-y-[-1px] active:scale-95 transition-all mt-4"
                         >
                            {isSubmitting ? 'Updating...' : 'Save password'}
                         </Button>
@@ -219,7 +219,7 @@ export function SecurityTab() {
             <div className="border-b border-border last:border-0">
                <button 
                   onClick={() => setExpandedSection(prev => prev === '2fa' ? null : '2fa')}
-                  className="w-full flex items-center justify-between py-4 px-2 hover:bg-muted/30 rounded-md transition-colors text-left"
+                  className="w-full flex items-center justify-between py-4 px-2 hover:bg-muted/30 rounded-sm transition-colors text-left"
                >
                   <div className="flex items-center gap-3">
                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
@@ -234,14 +234,14 @@ export function SecurityTab() {
                </button>
                
                {expandedSection === '2fa' && (
-                  <div className="p-4 mx-2 mb-4 bg-muted/20 rounded-lg animate-in fade-in slide-in-from-top-1 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="p-4 mx-2 mb-4 bg-muted/20 rounded-sm animate-in fade-in slide-in-from-top-1 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                      <div>
                         <h5 className="text-sm font-semibold text-foreground mb-1 flex items-center gap-2">
                            Status: <span className="text-muted-foreground font-normal">Off</span>
                         </h5>
                         <p className="text-sm text-muted-foreground max-w-md">Two-step verification adds an extra layer of security to your account by asking for a verification code when you sign in.</p>
                      </div>
-                     <Button variant="outline" className="shrink-0 h-10 text-xs rounded-lg">Set up</Button>
+                     <Button variant="outline" className="shrink-0 h-10 text-xs rounded-sm">Set up</Button>
                   </div>
                )}
             </div>

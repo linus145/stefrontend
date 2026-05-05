@@ -6,12 +6,12 @@ import { jobsService } from '@/services/jobs.service';
 import { userService } from '@/services/user.service';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import { ArrowLeft, Loader2, Users, FileText } from 'lucide-react';
+import { ArrowLeft, Loader2, Users, FileText, Sparkles } from 'lucide-react';
 import { JobApplication } from '@/types/jobs.types';
 
 // Modules
 import { ApplicationCard } from './application-card';
-import { AIScreeningPanel } from './ai-screening-panel';
+import { AIScreeningPanel } from '../Aiscreening/ai-screening-panel';
 import { ContactModal } from './contact-modal';
 import { JobSelector } from './job-selector';
 
@@ -136,28 +136,44 @@ export function ApplicationsTab({ isCollapsed, selectedJobId, onBack }: Applicat
   ];
 
   return (
-    <div className={cn(
-      "flex-1 p-4 sm:p-6 lg:p-8 animate-in fade-in slide-in-from-bottom-4 duration-700",
-      isCollapsed ? "lg:ml-20" : "lg:ml-64"
-    )}>
-      {/* Header */}
-      <div className="mb-8">
-        <button
-          onClick={onBack}
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors group"
-        >
-          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-          Back to Jobs
-        </button>
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">Applications</h1>
-            <p className="text-sm text-muted-foreground mt-1 font-medium">
-              Review and manage applicants for your job postings
-            </p>
+    <div className="flex relative w-full h-full overflow-hidden">
+      <div className={cn(
+        "flex-1 p-4 sm:p-6 lg:p-8 animate-in fade-in slide-in-from-bottom-4 duration-700 transition-all duration-500",
+        isCollapsed ? "lg:ml-20" : "lg:ml-64",
+        isAiPanelOpen ? "lg:mr-[480px]" : ""
+      )}>
+        {/* Header */}
+        <div className="mb-8">
+          <button
+            onClick={onBack}
+            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors group"
+          >
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+            Back to Jobs
+          </button>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-4">
+                <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">Applications</h1>
+                <button 
+                  onClick={() => setIsAiPanelOpen(!isAiPanelOpen)}
+                  className={cn(
+                    "inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all border",
+                    isAiPanelOpen 
+                      ? "bg-[#7C3AED] text-white border-[#7C3AED] shadow-lg shadow-[#7C3AED]/20" 
+                      : "bg-white text-[#7C3AED] border-[#7C3AED]/20 hover:bg-[#F5F3FF]"
+                  )}
+                >
+                  <Sparkles className={cn("w-3.5 h-3.5", isAiPanelOpen ? "animate-pulse" : "")} />
+                  AI Screening
+                </button>
+              </div>
+              <p className="text-sm text-muted-foreground mt-1 font-medium">
+                Review and manage applicants for your job postings
+              </p>
+            </div>
           </div>
         </div>
-      </div>
 
       <JobSelector
         activeJobId={activeJobId}
@@ -249,6 +265,10 @@ export function ApplicationsTab({ isCollapsed, selectedJobId, onBack }: Applicat
         onClose={() => setIsAiPanelOpen(false)}
         isLoading={analyzeMutation.isPending}
         results={aiResults}
+        onLoadHistoryReport={(reportResults) => {
+          setAiResults(reportResults);
+          toast.success('Historical report loaded.');
+        }}
         onViewDetails={(id) => {
           setExpandedAppId(id);
           setIsAiPanelOpen(false);
@@ -258,6 +278,7 @@ export function ApplicationsTab({ isCollapsed, selectedJobId, onBack }: Applicat
           }, 100);
         }}
       />
+      </div>
     </div>
   );
 }

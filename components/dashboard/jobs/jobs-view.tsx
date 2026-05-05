@@ -95,6 +95,15 @@ export function JobsView({ isCollapsed }: JobsViewProps) {
     });
   };
 
+  const handleEasyApply = () => {
+    if (!selectedJob) return;
+    applyMutation.mutate({
+      jobId: selectedJob.id,
+      resume_url: '', // Backend pulls from profile
+      cover_letter: 'Applied via Easy Apply using profile details.'
+    });
+  };
+
   const handleAppClick = (appJobId: string) => {
     jobsService.getJobDetail(appJobId).then(res => {
       if (res.status === 'success' && res.data) {
@@ -246,6 +255,8 @@ export function JobsView({ isCollapsed }: JobsViewProps) {
               applications={applications} 
               onClose={() => setSelectedJob(null)} 
               onApply={() => setIsApplyModalOpen(true)} 
+              onEasyApply={handleEasyApply}
+              isApplying={applyMutation.isPending}
             />
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-center p-10 opacity-40">

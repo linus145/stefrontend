@@ -1,3 +1,5 @@
+import { Education, Experience } from './founder.types';
+
 export interface InvestorProfile {
   id: string;
   user_email: string;
@@ -15,6 +17,9 @@ export interface InvestorProfile {
   maximum_investment_range: string;
   linkedin_url: string;
   portfolio_url: string;
+  resume_url?: string;
+  education?: Education[];
+  experience?: Experience[];
   created_at: string;
   updated_at: string;
 }

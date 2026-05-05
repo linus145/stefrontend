@@ -174,7 +174,6 @@ export function EcosystemHero({ user, onUpdate, isOwner = false, activeTab, onTa
         <div className="mt-4">
           <div className="flex items-center gap-2 mb-1">
             <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground tracking-tight">{user.first_name} {user.last_name}</h1>
-            <span className="px-2 py-0.5 rounded-md bg-muted text-muted-foreground text-[10px] font-bold uppercase tracking-wider">{user.role}</span>
           </div>
           <p className="text-sm sm:text-[17px] text-foreground font-medium mb-2 opacity-90">{title}</p>
           

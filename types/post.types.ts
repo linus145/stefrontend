@@ -3,7 +3,8 @@ export interface Post {
   author_id: string;
   author_email: string;
   author_first_name: string;
-  author_role: 'ADMIN' | 'FOUNDER' | 'INVESTOR';
+  author_role: string;
+  author_headline: string;
   author_image_url?: string;
   author_linkedin_url?: string;
   content: string;

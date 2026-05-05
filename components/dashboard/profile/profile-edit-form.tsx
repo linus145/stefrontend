@@ -4,9 +4,10 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { userService } from '@/services/user.service';
 import { toast } from 'sonner';
-import {
-  Loader2, Save, ArrowLeft, User as UserIcon,
-  MapPin, Globe, Shield, ImageIcon
+import { 
+  Loader2, Save, ArrowLeft, User as UserIcon, MapPin, 
+  Globe, Shield, ImageIcon, Plus, Trash2, Briefcase, 
+  GraduationCap, FileText 
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -31,6 +32,9 @@ export function ProfileEditForm({ initialUser }: ProfileEditFormProps) {
     location: initialUser.profile?.location || '',
     profile_image_url: initialUser.profile?.profile_image_url || '',
     banner_image_url: initialUser.profile?.banner_image_url || '',
+    resume_url: (initialUser.profile as any)?.resume_url || '',
+    education: (initialUser.profile as any)?.education || [],
+    experience: (initialUser.profile as any)?.experience || [],
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -44,6 +48,32 @@ export function ProfileEditForm({ initialUser }: ProfileEditFormProps) {
       return;
     }
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleArrayChange = (type: 'education' | 'experience', index: number, field: string, value: string) => {
+    setFormData(prev => {
+      const newArray = [...(prev[type] as any[])];
+      newArray[index] = { ...newArray[index], [field]: value };
+      return { ...prev, [type]: newArray };
+    });
+  };
+
+  const addArrayItem = (type: 'education' | 'experience') => {
+    const newItem = type === 'education' 
+      ? { school: '', degree: '', field_of_study: '', start_date: '', end_date: '', cgpa: '' }
+      : { company: '', position: '', start_date: '', end_date: '', description: '' };
+    
+    setFormData(prev => ({
+      ...prev,
+      [type]: [...(prev[type] as any[]), newItem]
+    }));
+  };
+
+  const removeArrayItem = (type: 'education' | 'experience', index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      [type]: (prev[type] as any[]).filter((_, i) => i !== index)
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -180,7 +210,186 @@ export function ProfileEditForm({ initialUser }: ProfileEditFormProps) {
           </div>
         </div>
 
-        {/* Section 3: Metadata */}
+        {/* Section 3: Experience */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between px-1">
+            <div className="flex items-center gap-2">
+              <Briefcase className="w-4 h-4 text-primary opacity-70" />
+              <h2 className="text-[13px] font-bold uppercase tracking-widest text-foreground opacity-80">Experience</h2>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => addArrayItem('experience')}
+              className="h-8 gap-2 text-[10px] font-bold uppercase tracking-wider"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              Add Experience
+            </Button>
+          </div>
+          <div className="space-y-4">
+            {formData.experience.map((exp: any, idx: number) => (
+              <div key={idx} className="bg-card border border-border rounded-lg p-6 shadow-sm relative group">
+                <button
+                  type="button"
+                  onClick={() => removeArrayItem('experience', idx)}
+                  className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide ml-1">Company</label>
+                    <Input
+                      value={exp.company}
+                      onChange={(e) => handleArrayChange('experience', idx, 'company', e.target.value)}
+                      placeholder="Company Name"
+                      className="h-11 bg-muted/30 border-border rounded-md px-4 text-sm transition-all"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide ml-1">Position</label>
+                    <Input
+                      value={exp.position}
+                      onChange={(e) => handleArrayChange('experience', idx, 'position', e.target.value)}
+                      placeholder="e.g. Senior Software Engineer"
+                      className="h-11 bg-muted/30 border-border rounded-md px-4 text-sm transition-all"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide ml-1">Start Date</label>
+                    <Input
+                      type="date"
+                      value={exp.start_date}
+                      onChange={(e) => handleArrayChange('experience', idx, 'start_date', e.target.value)}
+                      className="h-11 bg-muted/30 border-border rounded-md px-4 text-sm transition-all"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide ml-1">End Date</label>
+                    <Input
+                      type="date"
+                      value={exp.end_date}
+                      onChange={(e) => handleArrayChange('experience', idx, 'end_date', e.target.value)}
+                      className="h-11 bg-muted/30 border-border rounded-md px-4 text-sm transition-all"
+                    />
+                  </div>
+                </div>
+                <div className="mt-6 space-y-2">
+                  <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide ml-1">Description</label>
+                  <Textarea
+                    value={exp.description}
+                    onChange={(e) => handleArrayChange('experience', idx, 'description', e.target.value)}
+                    placeholder="Briefly describe your responsibilities and achievements..."
+                    className="min-h-[100px] bg-muted/30 border-border rounded-md p-4 text-[13px] leading-relaxed resize-none transition-all"
+                  />
+                </div>
+              </div>
+            ))}
+            {formData.experience.length === 0 && (
+              <div className="bg-card/50 border border-border border-dashed rounded-lg p-8 text-center">
+                <p className="text-sm text-muted-foreground">No experience listed yet. Share your professional journey.</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Section 4: Education */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between px-1">
+            <div className="flex items-center gap-2">
+              <GraduationCap className="w-4 h-4 text-primary opacity-70" />
+              <h2 className="text-[13px] font-bold uppercase tracking-widest text-foreground opacity-80">Education</h2>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => addArrayItem('education')}
+              className="h-8 gap-2 text-[10px] font-bold uppercase tracking-wider"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              Add Education
+            </Button>
+          </div>
+          <div className="space-y-4">
+            {formData.education.map((edu: any, idx: number) => (
+              <div key={idx} className="bg-card border border-border rounded-lg p-6 shadow-sm relative group">
+                <button
+                  type="button"
+                  onClick={() => removeArrayItem('education', idx)}
+                  className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide ml-1">School/University</label>
+                    <Input
+                      value={edu.school}
+                      onChange={(e) => handleArrayChange('education', idx, 'school', e.target.value)}
+                      placeholder="University Name"
+                      className="h-11 bg-muted/30 border-border rounded-md px-4 text-sm transition-all"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide ml-1">Degree</label>
+                    <Input
+                      value={edu.degree}
+                      onChange={(e) => handleArrayChange('education', idx, 'degree', e.target.value)}
+                      placeholder="e.g. Bachelor of Technology"
+                      className="h-11 bg-muted/30 border-border rounded-md px-4 text-sm transition-all"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide ml-1">Field of Study</label>
+                    <Input
+                      value={edu.field_of_study}
+                      onChange={(e) => handleArrayChange('education', idx, 'field_of_study', e.target.value)}
+                      placeholder="e.g. Computer Science"
+                      className="h-11 bg-muted/30 border-border rounded-md px-4 text-sm transition-all"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide ml-1">CGPA / Grade</label>
+                    <Input
+                      value={edu.cgpa}
+                      onChange={(e) => handleArrayChange('education', idx, 'cgpa', e.target.value)}
+                      placeholder="e.g. 9.5/10"
+                      className="h-11 bg-muted/30 border-border rounded-md px-4 text-sm transition-all"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide ml-1">Start Date</label>
+                    <Input
+                      type="date"
+                      value={edu.start_date}
+                      onChange={(e) => handleArrayChange('education', idx, 'start_date', e.target.value)}
+                      className="h-11 bg-muted/30 border-border rounded-md px-4 text-sm transition-all"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide ml-1">End Date</label>
+                    <Input
+                      type="date"
+                      value={edu.end_date}
+                      onChange={(e) => handleArrayChange('education', idx, 'end_date', e.target.value)}
+                      className="h-11 bg-muted/30 border-border rounded-md px-4 text-sm transition-all"
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+            {formData.education.length === 0 && (
+              <div className="bg-card/50 border border-border border-dashed rounded-lg p-8 text-center">
+                <p className="text-sm text-muted-foreground">No education listed yet. Share your academic background.</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Section 5: Metadata */}
         <div className="space-y-4">
           <div className="flex items-center gap-2 px-1">
             <Globe className="w-4 h-4 text-primary opacity-50" />
@@ -197,6 +406,19 @@ export function ProfileEditForm({ initialUser }: ProfileEditFormProps) {
                     value={formData.location}
                     onChange={handleChange}
                     placeholder="City, Country"
+                    className="h-11 bg-muted/30 border-border focus:ring-2 focus:ring-primary/20 focus:border-primary/40 rounded-md pl-10 pr-4 text-sm transition-all"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide ml-1">Resume URL</label>
+                <div className="relative">
+                  <FileText className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    name="resume_url"
+                    value={formData.resume_url}
+                    onChange={handleChange}
+                    placeholder="https://drive.google.com/..."
                     className="h-11 bg-muted/30 border-border focus:ring-2 focus:ring-primary/20 focus:border-primary/40 rounded-md pl-10 pr-4 text-sm transition-all"
                   />
                 </div>

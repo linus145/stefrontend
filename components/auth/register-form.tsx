@@ -198,8 +198,15 @@ export function RegisterForm() {
                   className={`w-full rounded-md bg-slate-50 border ${errors.role ? 'border-red-400 ring-1 ring-red-400' : 'border-slate-200'} text-slate-900 pl-10 pr-4 py-2.5 text-sm transition-colors focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none appearance-none`}
                 >
                   <option value="FOUNDER">Founder</option>
+                  <option value="CO_FOUNDER">Co-Founder</option>
                   <option value="INVESTOR">Investor</option>
-                   <option value="MENTOR">Mentor</option>
+                  <option value="MENTOR">Mentor</option>
+                  <option value="SALES">Sales</option>
+                  <option value="MARKETING">Marketing</option>
+                  <option value="ENGINEER">Engineer</option>
+                  <option value="PRODUCT">Product Manager</option>
+                  <option value="DESIGN">Designer</option>
+                  <option value="OPERATIONS">Operations</option>
                 </select>
                 {/* Custom dropdown arrow */}
                 <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">

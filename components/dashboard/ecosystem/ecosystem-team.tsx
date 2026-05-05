@@ -13,7 +13,7 @@ export function EcosystemTeam({ user, isOwner = false }: EcosystemTeamProps) {
   const teamMembers = [
     { 
       name: `${user.first_name} ${user.last_name}`, 
-      role: `${user.role} • ${profile?.headline || 'Member'}`, 
+      role: profile?.headline || (user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1).toLowerCase() : 'Member'), 
       avatar: profile?.profile_image_url || `https://i.pravatar.cc/150?u=${user.id}`
     }
   ];

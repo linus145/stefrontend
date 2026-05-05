@@ -144,7 +144,7 @@ export function PostCard({ post, onLike, onNavigateToProfile }: PostCardProps) {
                 )}
               </div>
               <p className="text-[11px] text-muted-foreground font-semibold leading-tight mt-0.5 max-w-[200px] sm:max-w-[280px] truncate opacity-80">
-                {post.author_role}
+                {post.author_headline}
               </p>
               <div className="flex items-center gap-1 text-[10px] text-muted-foreground font-medium mt-0.5 opacity-70">
                 <span>{timeAgo}</span>
@@ -373,7 +373,7 @@ export function PostCard({ post, onLike, onNavigateToProfile }: PostCardProps) {
                         </div>
                         {/* Sub-headline/Role */}
                         <p className="text-[13px] text-muted-foreground truncate leading-tight mt-0.5">
-                          Professional at STE Platform
+                          {comment.author_headline}
                         </p>
                       </div>
                       

@@ -1,3 +1,20 @@
+export interface Education {
+  school: string;
+  degree: string;
+  field_of_study: string;
+  start_date: string;
+  end_date?: string;
+  cgpa?: string;
+}
+
+export interface Experience {
+  company: string;
+  position: string;
+  start_date: string;
+  end_date?: string;
+  description: string;
+}
+
 export interface FounderProfile {
   id: string;
   user_email: string;
@@ -13,6 +30,9 @@ export interface FounderProfile {
   skills: string[];
   linkedin_url: string;
   portfolio_url: string;
+  resume_url?: string;
+  education?: Education[];
+  experience?: Experience[];
   created_at: string;
   updated_at: string;
 }

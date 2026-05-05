@@ -5,17 +5,20 @@ import { JobPost, JobApplication } from '@/types/jobs.types';
 import { cn } from '@/lib/utils';
 import { 
   Briefcase, MapPin, Clock, DollarSign, CheckCircle2, X, Users,
-  ExternalLink, Plus, ChevronRight, FileText, Copy, Check
+  ExternalLink, Plus, ChevronRight, FileText, Copy, Check, Loader2
 } from 'lucide-react';
 import { toast } from 'sonner';
+
 interface JobDetailsProps {
   job: JobPost;
   applications: JobApplication[];
   onClose: () => void;
   onApply: () => void;
+  onEasyApply: () => void;
+  isApplying?: boolean;
 }
 
-export function JobDetails({ job, applications, onClose, onApply }: JobDetailsProps) {
+export function JobDetails({ job, applications, onClose, onApply, onEasyApply, isApplying = false }: JobDetailsProps) {
   const hasApplied = applications.some(app => app.job === job.id);
 
   return (
@@ -62,17 +65,6 @@ export function JobDetails({ job, applications, onClose, onApply }: JobDetailsPr
           <div className="flex items-center gap-1.5 px-3 py-1 rounded-sm border border-border bg-muted/30 text-muted-foreground text-xs font-semibold">
             {job.job_type.replace('_', ' ').toLowerCase()}
           </div>
-          <div 
-            className="flex items-center gap-2 px-3 py-1 rounded-sm border border-border bg-muted/10 text-muted-foreground text-[10px] font-mono cursor-pointer hover:bg-muted/20 transition-all"
-            onClick={() => {
-              navigator.clipboard.writeText(job.id);
-              // Simple feedback without local state if possible, or just copy
-              toast.success('Job ID copied');
-            }}
-          >
-            <span className="opacity-60 uppercase font-bold">Job ID:</span> {job.id}
-            <Copy className="w-3 h-3 opacity-50" />
-          </div>
         </div>
 
         <div className="flex items-center gap-3">
@@ -85,15 +77,25 @@ export function JobDetails({ job, applications, onClose, onApply }: JobDetailsPr
               Applied
             </button>
           ) : (
-            <button
-              onClick={onApply}
-              className="px-8 py-2 bg-[#0a66c2] text-white rounded-full text-sm font-bold hover:bg-[#004182] transition-all flex items-center gap-2 shadow-sm"
-            >
-              Apply
-              <ExternalLink className="w-4 h-4" />
-            </button>
+            <>
+              <button
+                onClick={onEasyApply}
+                disabled={isApplying}
+                className="px-8 py-2 bg-[#0a66c2] text-white rounded-full text-sm font-bold hover:bg-[#004182] transition-all flex items-center gap-2 shadow-sm disabled:opacity-50"
+              >
+                {isApplying ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                Easy Apply
+              </button>
+              <button
+                onClick={onApply}
+                disabled={isApplying}
+                className="px-8 py-2 border border-[#0a66c2] text-[#0a66c2] rounded-full text-sm font-bold hover:bg-[#0a66c2]/5 transition-all disabled:opacity-50"
+              >
+                Apply
+              </button>
+            </>
           )}
-          <button className="px-8 py-2 border border-[#0a66c2] text-[#0a66c2] rounded-full text-sm font-bold hover:bg-[#0a66c2]/5 transition-all">
+          <button className="hidden sm:block px-8 py-2 border border-muted-foreground text-muted-foreground rounded-full text-sm font-bold hover:bg-muted transition-all">
             Save
           </button>
         </div>

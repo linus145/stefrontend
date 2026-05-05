@@ -146,13 +146,13 @@ export function CandidatesTab({ isCollapsed }: CandidatesTabProps) {
                       <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Position</span>
                       <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
                          <Briefcase className="w-3.5 h-3.5 text-teal-500/70" />
-                         {user.role}
+                         {user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1).toLowerCase() : 'Member'}
                       </span>
                    </div>
                    <div className="flex flex-col gap-1 max-w-sm">
                       <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Headline</span>
                       <span className="text-xs font-medium text-muted-foreground truncate italic">
-                         Professional registered on the Startup Ecosystem
+                         {user.profile?.headline || "Professional registered on the Startup Ecosystem"}
                       </span>
                    </div>
                 </div>

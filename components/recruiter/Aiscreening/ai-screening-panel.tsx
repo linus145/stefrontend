@@ -38,18 +38,18 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
 
   return (
     <div className={cn(
-      "absolute inset-y-0 right-0 w-full sm:w-[480px] bg-white border-l border-slate-200 shadow-2xl z-30 transform transition-transform duration-500 ease-in-out flex flex-col font-sans",
+      "absolute inset-y-0 right-0 w-full sm:w-[480px] bg-[#0B0F19] border-l border-slate-800 shadow-2xl z-30 transform transition-transform duration-500 ease-in-out flex flex-col font-sans",
       isOpen ? "translate-x-0" : "translate-x-full"
     )}>
       {/* Header - Inspired by Chat Interface */}
-      <div className="relative pt-6 pb-4 px-6 flex items-center justify-between bg-white border-b border-slate-100">
+      <div className="relative pt-6 pb-4 px-6 flex items-center justify-between bg-[#0B0F19] border-b border-slate-800">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-sm bg-[#F5F3FF] flex items-center justify-center shadow-sm">
+          <div className="w-10 h-10 rounded-sm bg-[#1a1f2e] flex items-center justify-center shadow-sm border border-[#7C3AED]/20">
             <Sparkles className="w-5 h-5 text-[#7C3AED]" />
           </div>
           <div>
-            <h1 className="text-base font-bold text-slate-800 tracking-tight">Recruitment Copilot</h1>
-            <p className="text-[10px] font-bold text-[#7C3AED] uppercase tracking-widest">
+            <h1 className="text-base font-bold text-white tracking-tight">Recruitment Copilot</h1>
+            <p className="text-[10px] font-bold text-[#8B5CF6] uppercase tracking-widest">
               {activeTab === 'results' ? (isLoading ? "Analyzing..." : "Analysis Ready") : "History"}
             </p>
           </div>
@@ -60,7 +60,7 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
             onClick={() => setActiveTab(activeTab === 'results' ? 'history' : 'results')}
             className={cn(
               "p-2 rounded-lg transition-all",
-              activeTab === 'history' ? "bg-[#F5F3FF] text-[#7C3AED]" : "text-slate-400 hover:bg-slate-50 hover:text-slate-600"
+              activeTab === 'history' ? "bg-[#7C3AED]/10 text-[#7C3AED]" : "text-slate-500 hover:bg-slate-800/50 hover:text-white"
             )}
             title="View History"
           >
@@ -68,7 +68,7 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
           </button>
           <button 
             onClick={onClose}
-            className="p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-600 rounded-lg transition-colors"
+            className="p-2 text-slate-500 hover:bg-slate-800/50 hover:text-white rounded-lg transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -76,7 +76,7 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-6 bg-white scrollbar-hide">
+      <div className="flex-1 overflow-y-auto p-4 space-y-6 bg-[#0B0F19] scrollbar-hide">
         {activeTab === 'results' ? (
           isLoading ? (
             <div className="flex flex-col items-center justify-center h-full space-y-4 opacity-60">
@@ -97,36 +97,36 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
                     {/* AI Bubble Style - Professional Chat Style */}
                     <div 
                       className={cn(
-                        "bg-slate-50 rounded-sm p-4 transition-all cursor-pointer border border-slate-100",
-                        isExpanded ? "ring-1 ring-[#7C3AED]/20 border-[#7C3AED]/20 bg-white" : "hover:border-slate-200"
+                        "bg-[#1a1f2e] rounded-sm p-4 transition-all cursor-pointer border border-slate-800 shadow-sm",
+                        isExpanded ? "border-[#7C3AED]/30 ring-1 ring-[#7C3AED]/10" : "hover:border-slate-700"
                       )}
                       onClick={() => toggleExpand(cand.id)}
                     >
-                      <div className="flex items-center gap-2 mb-3">
-                        <div className="w-6 h-6 rounded-sm bg-[#7C3AED] flex items-center justify-center">
-                          <Bot className="w-3.5 h-3.5 text-white" />
+                      <div className="flex items-center justify-between gap-4 mb-3">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-[14px] font-bold text-white truncate">{cand.name}</h3>
+                          <p className="text-[11px] text-slate-400 font-medium truncate mt-0.5">{cand.reason}</p>
                         </div>
-                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Assistant</span>
-                      </div>
-
-                      <div className="space-y-2">
-                        <div className="flex justify-between items-center">
-                          <h3 className="text-sm font-bold text-slate-900 tracking-tight">{cand.name}</h3>
-                          <div className="text-[10px] font-black text-[#7C3AED] bg-[#F5F3FF] px-2 py-0.5 rounded-sm border border-[#7C3AED]/10">
-                            {cand.score}% MATCH
+                        <div className="flex items-center gap-3 shrink-0">
+                          <div className={cn(
+                            "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider",
+                            idx === 0 ? "bg-emerald-500/10 text-emerald-400" : "bg-blue-500/10 text-blue-400"
+                          )}>
+                            <Target className="w-3 h-3" />
+                            Match {cand.score}%
                           </div>
                         </div>
-                        
-                        <p className={cn(
-                          "text-[13px] text-slate-600 leading-relaxed font-medium",
-                          !isExpanded && "line-clamp-3"
-                        )}>
-                          {cand.summary}
-                        </p>
                       </div>
 
+                      <p className={cn(
+                        "text-[13px] text-slate-300 leading-relaxed font-medium",
+                        !isExpanded && "line-clamp-3"
+                      )}>
+                        {cand.summary || cand.match_analysis}
+                      </p>
+
                       <div className="mt-3 flex justify-center opacity-30">
-                        {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                        {isExpanded ? <ChevronUp className="w-4 h-4 text-white" /> : <ChevronDown className="w-4 h-4 text-white" />}
                       </div>
                     </div>
 
@@ -138,22 +138,12 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
                             e.stopPropagation();
                             onViewDetails(cand.id);
                           }}
-                          className="flex items-center gap-3 p-2.5 bg-white border border-slate-200 rounded-sm text-[12px] font-semibold text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm group"
+                          className="flex items-center gap-3 p-2.5 bg-[#1a1f2e] border border-slate-800 rounded-sm text-[12px] font-semibold text-slate-400 hover:bg-slate-800 hover:text-white transition-all shadow-sm group"
                         >
-                          <FileText className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#7C3AED] transition-colors" />
-                          Summarize Candidate
+                          <FileText className="w-3.5 h-3.5 text-slate-500 group-hover:text-[#7C3AED] transition-colors" />
+                          View Detailed Analysis
                         </button>
                         
-                        <button className="flex items-center gap-3 p-2.5 bg-white border border-slate-200 rounded-sm text-[12px] font-semibold text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm group">
-                          <Target className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#7C3AED] transition-colors" />
-                          Check Skill Match
-                        </button>
-                        
-                        <button className="flex items-center gap-3 p-2.5 bg-white border border-slate-200 rounded-sm text-[12px] font-semibold text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm group">
-                          <MessageSquare className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#7C3AED] transition-colors" />
-                          Generate Interview Questions
-                        </button>
-
                         <button 
                           onClick={(e) => {
                             e.stopPropagation();
@@ -172,9 +162,9 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
               })}
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center h-full text-center px-12 opacity-30">
+            <div className="flex flex-col items-center justify-center h-full text-center px-12 opacity-30 text-white">
               <BrainCircuit className="w-12 h-12 mb-4" />
-              <p className="text-sm font-bold text-slate-900 tracking-tight">Ready to assist your hiring process</p>
+              <p className="text-sm font-bold tracking-tight">Ready to assist your hiring process</p>
             </div>
           )
         ) : (
@@ -189,7 +179,7 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
               {historyData.data.map((report: any, idx: number) => (
                 <div 
                   key={report.id}
-                  className="flex items-center gap-3 p-3 rounded-sm hover:bg-slate-50 transition-all cursor-pointer group"
+                  className="flex items-center gap-3 p-3 rounded-sm hover:bg-slate-800/50 transition-all cursor-pointer group"
                   onClick={() => {
                     if (onLoadHistoryReport) {
                       onLoadHistoryReport(report.results);
@@ -197,25 +187,25 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
                     }
                   }}
                 >
-                  <div className="w-10 h-10 rounded-sm bg-[#F5F3FF] flex items-center justify-center shrink-0 border border-[#7C3AED]/10 group-hover:scale-105 transition-transform">
+                  <div className="w-10 h-10 rounded-sm bg-[#1a1f2e] flex items-center justify-center shrink-0 border border-[#7C3AED]/20 group-hover:scale-105 transition-transform">
                     <BrainCircuit className="w-5 h-5 text-[#7C3AED]" />
                   </div>
                   
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
-                      <h4 className="text-[13px] font-bold text-slate-800 truncate">{report.job_title}</h4>
-                      <span className="text-[10px] font-bold text-slate-400 whitespace-nowrap">
+                      <h4 className="text-[13px] font-bold text-white truncate">{report.job_title}</h4>
+                      <span className="text-[10px] font-bold text-slate-500 whitespace-nowrap">
                         {new Date(report.created_at).toLocaleDateString([], { month: 'short', day: 'numeric' })}
                       </span>
                     </div>
                     <div className="flex items-center gap-2 mt-0.5">
-                      <p className="text-[11px] text-slate-500 truncate font-medium">
+                      <p className="text-[11px] text-slate-400 truncate font-medium">
                         {report.results.total_applicants} candidates • Top {report.results.top_candidates[0]?.score || 0}%
                       </p>
                     </div>
                   </div>
                   
-                  <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-[#7C3AED] transition-colors shrink-0" />
+                  <ChevronRight className="w-4 h-4 text-slate-600 group-hover:text-[#7C3AED] transition-colors shrink-0" />
                 </div>
               ))}
             </div>
@@ -229,12 +219,12 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
       </div>
 
       {/* Footer Chat Input - Professional Chat Style */}
-      <div className="p-4 border-t border-slate-100 bg-white">
+      <div className="p-4 border-t border-slate-800 bg-[#0B0F19]">
         <div className="relative group">
           <input 
             type="text"
             placeholder="Ask anything about the candidates..."
-            className="w-full bg-slate-50 border border-slate-200 rounded-sm py-3 px-4 pr-12 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#7C3AED]/20 focus:border-[#7C3AED] transition-all placeholder:text-slate-400 font-medium"
+            className="w-full bg-[#0F172A]/50 border border-slate-800 rounded-sm py-3 px-4 pr-12 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#7C3AED]/20 focus:border-[#7C3AED] transition-all placeholder:text-slate-600 font-medium text-white"
             disabled={!results}
           />
           <button 

@@ -313,26 +313,29 @@ export function MyJobsTab({ isCollapsed, isApproved, onViewApplications }: MyJob
 
       {/* AI Agent Sidebar */}
       <div className={cn(
-        "fixed right-0 top-16 bottom-0 w-full lg:w-[400px] bg-white border-l border-slate-200 shadow-2xl z-40 transform transition-transform duration-500 ease-in-out flex flex-col font-sans",
+        "fixed right-0 top-16 bottom-0 w-full lg:w-[400px] bg-[#0B0F19] border-l border-slate-800 shadow-2xl z-40 transform transition-transform duration-500 ease-in-out flex flex-col font-sans",
         showAgentModal ? "translate-x-0" : "translate-x-full"
       )}>
-        <div className="p-6 bg-gradient-to-br from-[#F5F3FF] to-white border-b border-slate-100 flex items-center justify-between shrink-0">
+        <div className="p-6 bg-gradient-to-br from-[#1a1f2e] to-[#0B0F19] border-b border-slate-800 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center border border-[#7C3AED]/10">
+            <div className="w-10 h-10 rounded-xl bg-[#0B0F19] shadow-sm flex items-center justify-center border border-[#7C3AED]/20">
               <Bot className="w-5 h-5 text-[#7C3AED]" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-slate-900 tracking-tight">Agentic Task</h3>
-              <p className="text-xs font-semibold text-[#7C3AED] uppercase tracking-wider">Automated Job Posting</p>
+              <h3 className="text-lg font-bold text-white tracking-tight">Agentic Task</h3>
+              <p className="text-xs font-semibold text-[#8B5CF6] uppercase tracking-wider">Automated Job Posting</p>
             </div>
           </div>
-          <button onClick={() => !isAgentRunning && setShowAgentModal(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 hover:bg-slate-100 p-2 rounded-full transition-colors">
+          <button 
+            onClick={() => !isAgentRunning && setShowAgentModal(false)} 
+            className="text-slate-400 hover:text-white bg-slate-800/50 hover:bg-slate-700/50 p-2 rounded-full transition-colors"
+          >
             <X className="w-5 h-5" />
           </button>
         </div>
         
         <div className="p-6 flex-1 flex flex-col space-y-4 overflow-y-auto">
-          <p className="text-sm text-slate-600 font-medium">
+          <p className="text-sm text-slate-400 font-medium leading-relaxed">
             Describe the job you want to post. The AI agent will automatically generate the description, extract skills, determine salary ranges, and publish the job immediately.
           </p>
           
@@ -340,7 +343,7 @@ export function MyJobsTab({ isCollapsed, isApproved, onViewApplications }: MyJob
             value={agentPrompt}
             onChange={(e) => setAgentPrompt(e.target.value)}
             placeholder="e.g., Post a job for a Senior Next.js Developer in San Francisco with 5 years experience..."
-            className="flex-1 min-h-[150px] w-full p-4 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7C3AED] resize-none text-slate-900 placeholder:text-slate-400"
+            className="flex-1 min-h-[150px] w-full p-4 text-sm bg-[#0F172A]/50 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7C3AED] resize-none text-white placeholder:text-slate-600 transition-all"
             disabled={isAgentRunning}
           />
           

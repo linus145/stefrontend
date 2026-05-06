@@ -39,8 +39,11 @@ export interface Message {
 }
 
 export const chatService = {
-  getRooms: () => api.get<{ results: ChatRoom[] }>('/chat/rooms/')
-    .then(res => (res as any)?.results || []),
+  getRooms: (roomType?: 'connection' | 'direct' | 'personal') => {
+    const url = roomType ? `/chat/rooms/?type=${roomType}` : '/chat/rooms/';
+    return api.get<{ results: ChatRoom[] }>(url)
+      .then(res => (res as any)?.results || []);
+  },
   
   initialize1to1: (targetUserId: string) => 
     api.post<ChatRoom>('/chat/rooms/1to1/', { target_user_id: targetUserId }),
@@ -55,4 +58,8 @@ export const chatService = {
 
   deleteMessage: (messageId: string) => 
     api.delete(`/chat/messages/${messageId}/delete/`),
+
+  /** Creates or gets a direct chat room (no connection required) and optionally sends a message */
+  sendDirectMessage: (targetUserId: string, message?: string) =>
+    api.post<ChatRoom>('/chat/rooms/direct/', { target_user_id: targetUserId, message: message || '' }),
 };

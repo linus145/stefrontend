@@ -14,12 +14,12 @@ import { PostJobForm } from '@/components/recruiter/myjobs/post-job-form';
 import { aiAgentService } from '@/services/ai-agents.service';
 
 interface MyJobsTabProps {
-  isCollapsed: boolean;
+
   isApproved: boolean;
   onViewApplications: (jobId: string) => void;
 }
 
-export function MyJobsTab({ isCollapsed, isApproved, onViewApplications }: MyJobsTabProps) {
+export function MyJobsTab({ isApproved, onViewApplications }: MyJobsTabProps) {
   const queryClient = useQueryClient();
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [showPostForm, setShowPostForm] = useState(false);
@@ -98,7 +98,6 @@ export function MyJobsTab({ isCollapsed, isApproved, onViewApplications }: MyJob
   if (showPostForm || editingJob) {
     return (
       <PostJobForm
-        isCollapsed={isCollapsed}
         editJob={editingJob}
         onClose={() => { setShowPostForm(false); setEditingJob(null); }}
         onSuccess={() => {
@@ -114,8 +113,7 @@ export function MyJobsTab({ isCollapsed, isApproved, onViewApplications }: MyJob
   return (
     <div className="flex relative w-full h-full overflow-hidden">
       <div className={cn(
-        "flex-1 p-4 sm:p-6 lg:p-8 animate-in fade-in transition-all duration-500",
-        isCollapsed ? "lg:ml-20" : "lg:ml-64",
+        "flex-1 p-4 lg:p-6 animate-in fade-in transition-all duration-500 lg:ml-0",
         showAgentModal ? "lg:mr-[400px]" : ""
       )}>
       {!isApproved && (
@@ -131,7 +129,7 @@ export function MyJobsTab({ isCollapsed, isApproved, onViewApplications }: MyJob
       )}
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">My Jobs</h1>
           <p className="text-sm text-muted-foreground mt-1 font-medium">{jobs.length} total job postings</p>
@@ -140,7 +138,7 @@ export function MyJobsTab({ isCollapsed, isApproved, onViewApplications }: MyJob
           <button
             onClick={() => isApproved && setShowAgentModal(true)}
             disabled={!isApproved}
-            className="flex items-center gap-2 px-5 py-2.5 bg-[#F5F3FF] border border-[#7C3AED]/20 text-[#7C3AED] text-sm font-bold rounded-sm shadow-sm hover:bg-[#EDE9FE] transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed group"
+            className="flex items-center gap-2 px-5 py-2 bg-[#F5F3FF] border border-[#7C3AED]/20 text-[#7C3AED] text-sm font-bold rounded-sm shadow-sm hover:bg-[#EDE9FE] transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed group"
             title="Let AI post this job for you"
           >
             <Sparkles className="w-4 h-4 text-[#7C3AED] group-hover:scale-110 transition-transform" />
@@ -150,7 +148,7 @@ export function MyJobsTab({ isCollapsed, isApproved, onViewApplications }: MyJob
           <button
             onClick={() => isApproved && setShowPostForm(true)}
             disabled={!isApproved}
-            className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-teal-600 to-cyan-600 text-white text-sm font-semibold rounded-sm shadow-sm hover:shadow-lg hover:from-teal-500 hover:to-cyan-500 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-sm font-semibold rounded-sm shadow-sm hover:shadow-lg hover:from-blue-500 hover:to-cyan-500 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Plus className="w-4 h-4" />
             Post New Job
@@ -159,7 +157,7 @@ export function MyJobsTab({ isCollapsed, isApproved, onViewApplications }: MyJob
       </div>
 
       {/* Status Filters */}
-      <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
+      <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
         {statusFilters.map(f => (
           <button
             key={f.value}
@@ -167,7 +165,7 @@ export function MyJobsTab({ isCollapsed, isApproved, onViewApplications }: MyJob
             className={cn(
               "px-4 py-1.5 rounded-md text-xs font-semibold transition-all whitespace-nowrap border",
               statusFilter === f.value
-                ? "bg-teal-500/10 text-teal-600 border-teal-500/30"
+                ? "bg-blue-500/10 text-blue-600 border-blue-500/30"
                 : "bg-muted/30 text-muted-foreground border-border hover:bg-muted/50"
             )}
           >
@@ -179,7 +177,7 @@ export function MyJobsTab({ isCollapsed, isApproved, onViewApplications }: MyJob
       {/* Jobs List */}
       {isLoading ? (
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-8 h-8 animate-spin text-teal-500" />
+          <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
         </div>
       ) : jobs.length === 0 ? (
         <div className="text-center py-20">
@@ -191,7 +189,7 @@ export function MyJobsTab({ isCollapsed, isApproved, onViewApplications }: MyJob
           <button
             onClick={() => isApproved && setShowPostForm(true)}
             disabled={!isApproved}
-            className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-teal-600 to-cyan-600 text-white text-sm font-semibold rounded-sm hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-sm font-semibold rounded-sm hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Plus className="w-4 h-4" />
             Create Job
@@ -202,7 +200,7 @@ export function MyJobsTab({ isCollapsed, isApproved, onViewApplications }: MyJob
           {jobs.map((job: JobPost) => (
             <div
               key={job.id}
-              className="bg-card border border-border rounded-sm p-5 hover:border-teal-500/20 hover:shadow-sm transition-all group"
+              className="bg-card border border-border rounded-sm p-5 hover:border-blue-500/20 hover:shadow-sm transition-all group"
             >
               <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                 <div className="flex-1 min-w-0">
@@ -228,7 +226,7 @@ export function MyJobsTab({ isCollapsed, isApproved, onViewApplications }: MyJob
                       title="Click to copy Job ID"
                     >
                       <span className="opacity-60">ID:</span> {job.id.slice(0, 8)}...
-                      {copiedId === job.id ? <Check className="w-2.5 h-2.5 text-teal-500" /> : <Copy className="w-2.5 h-2.5 opacity-40 group-hover:opacity-100" />}
+                      {copiedId === job.id ? <Check className="w-2.5 h-2.5 text-blue-500" /> : <Copy className="w-2.5 h-2.5 opacity-40 group-hover:opacity-100" />}
                     </div>
                   </div>
                   <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
@@ -246,7 +244,7 @@ export function MyJobsTab({ isCollapsed, isApproved, onViewApplications }: MyJob
                     <span className="flex items-center gap-1">
                       <Users className="w-3 h-3" /> {job.applications_count} applicant{job.applications_count !== 1 ? 's' : ''}
                     </span>
-                    <span className="flex items-center gap-1 text-teal-600 font-bold">
+                    <span className="flex items-center gap-1 text-blue-600 font-bold">
                       <Plus className="w-3 h-3" /> {job.open_positions} {job.open_positions === 1 ? 'Opening' : 'Openings'}
                     </span>
                     {job.department && (
@@ -283,7 +281,7 @@ export function MyJobsTab({ isCollapsed, isApproved, onViewApplications }: MyJob
                 <div className="flex items-center gap-2 shrink-0">
                   <button
                     onClick={() => onViewApplications(job.id)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm bg-teal-500/10 text-teal-600 text-xs font-semibold hover:bg-teal-500/20 transition-all"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm bg-blue-500/10 text-blue-600 text-xs font-semibold hover:bg-blue-500/20 transition-all"
                   >
                     <Eye className="w-3.5 h-3.5" /> Applications
                   </button>
@@ -313,29 +311,29 @@ export function MyJobsTab({ isCollapsed, isApproved, onViewApplications }: MyJob
 
       {/* AI Agent Sidebar */}
       <div className={cn(
-        "fixed right-0 top-16 bottom-0 w-full lg:w-[400px] bg-[#0B0F19] border-l border-slate-800 shadow-2xl z-40 transform transition-transform duration-500 ease-in-out flex flex-col font-sans",
+        "fixed right-0 top-16 bottom-0 w-full lg:w-[400px] bg-white dark:bg-[#0B0F19] border-l border-border shadow-2xl z-40 transform transition-transform duration-500 ease-in-out flex flex-col font-sans",
         showAgentModal ? "translate-x-0" : "translate-x-full"
       )}>
-        <div className="p-6 bg-gradient-to-br from-[#1a1f2e] to-[#0B0F19] border-b border-slate-800 flex items-center justify-between shrink-0">
+        <div className="p-6 bg-muted/5 border-b border-border flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#0B0F19] shadow-sm flex items-center justify-center border border-[#7C3AED]/20">
+            <div className="w-10 h-10 rounded-xl bg-background shadow-sm flex items-center justify-center border border-[#7C3AED]/20">
               <Bot className="w-5 h-5 text-[#7C3AED]" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-white tracking-tight">Agentic Task</h3>
+              <h3 className="text-lg font-bold text-foreground tracking-tight">Agentic Task</h3>
               <p className="text-xs font-semibold text-[#8B5CF6] uppercase tracking-wider">Automated Job Posting</p>
             </div>
           </div>
           <button 
             onClick={() => !isAgentRunning && setShowAgentModal(false)} 
-            className="text-slate-400 hover:text-white bg-slate-800/50 hover:bg-slate-700/50 p-2 rounded-full transition-colors"
+            className="text-muted-foreground hover:text-foreground bg-muted/50 hover:bg-muted p-2 rounded-full transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
         
         <div className="p-6 flex-1 flex flex-col space-y-4 overflow-y-auto">
-          <p className="text-sm text-slate-400 font-medium leading-relaxed">
+          <p className="text-sm text-muted-foreground font-medium leading-relaxed">
             Describe the job you want to post. The AI agent will automatically generate the description, extract skills, determine salary ranges, and publish the job immediately.
           </p>
           
@@ -343,7 +341,7 @@ export function MyJobsTab({ isCollapsed, isApproved, onViewApplications }: MyJob
             value={agentPrompt}
             onChange={(e) => setAgentPrompt(e.target.value)}
             placeholder="e.g., Post a job for a Senior Next.js Developer in San Francisco with 5 years experience..."
-            className="flex-1 min-h-[150px] w-full p-4 text-sm bg-[#0F172A]/50 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7C3AED] resize-none text-white placeholder:text-slate-600 transition-all"
+            className="flex-1 min-h-[150px] w-full p-4 text-sm bg-muted/20 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7C3AED] resize-none text-foreground placeholder:text-muted-foreground/40 transition-all"
             disabled={isAgentRunning}
           />
           

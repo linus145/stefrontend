@@ -16,12 +16,12 @@ import { ContactModal } from './contact-modal';
 import { JobSelector } from './job-selector';
 
 interface ApplicationsTabProps {
-  isCollapsed: boolean;
+
   selectedJobId: string | null;
   onBack: () => void;
 }
 
-export function ApplicationsTab({ isCollapsed, selectedJobId, onBack }: ApplicationsTabProps) {
+export function ApplicationsTab({ selectedJobId, onBack }: ApplicationsTabProps) {
   const queryClient = useQueryClient();
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [expandedAppId, setExpandedAppId] = useState<string | null>(null);
@@ -138,8 +138,7 @@ export function ApplicationsTab({ isCollapsed, selectedJobId, onBack }: Applicat
   return (
     <div className="flex relative w-full h-full overflow-hidden">
       <div className={cn(
-        "flex-1 p-4 sm:p-6 lg:p-8 animate-in fade-in slide-in-from-bottom-4 duration-700 transition-all duration-500",
-        isCollapsed ? "lg:ml-20" : "lg:ml-64",
+        "flex-1 p-4 sm:p-6 lg:p-8 animate-in fade-in slide-in-from-bottom-4 duration-700 transition-all duration-500 lg:ml-0",
         isAiPanelOpen ? "lg:mr-[480px]" : ""
       )}>
         {/* Header */}
@@ -206,7 +205,7 @@ export function ApplicationsTab({ isCollapsed, selectedJobId, onBack }: Applicat
                 className={cn(
                   "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all whitespace-nowrap border",
                   statusFilter === opt.value
-                    ? "bg-teal-500/10 text-teal-600 border-teal-500/30"
+                    ? "bg-blue-500/10 text-blue-600 border-blue-500/30"
                     : "bg-muted/30 text-muted-foreground border-border hover:bg-muted/50"
                 )}
               >
@@ -219,7 +218,7 @@ export function ApplicationsTab({ isCollapsed, selectedJobId, onBack }: Applicat
           {/* Applications List */}
           {isLoading ? (
             <div className="flex items-center justify-center py-20">
-              <Loader2 className="w-8 h-8 animate-spin text-teal-500" />
+              <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
             </div>
           ) : filteredApplications.length === 0 ? (
             <div className="text-center py-20">

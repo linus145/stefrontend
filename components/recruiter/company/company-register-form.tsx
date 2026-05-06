@@ -118,11 +118,11 @@ export function CompanyRegisterForm() {
       </Link>
 
       <div className="relative w-full rounded-sm bg-card shadow-sm hover:shadow-md transition-shadow border border-border overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-teal-500 via-cyan-500 to-teal-500 opacity-90" />
+        <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-blue-500 via-cyan-500 to-blue-500 opacity-90" />
 
         <div className="p-8">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-sm bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center shadow-sm">
+            <div className="w-10 h-10 rounded-sm bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-sm">
               <Building2 className="w-5 h-5 text-white" />
             </div>
             <div>
@@ -142,7 +142,7 @@ export function CompanyRegisterForm() {
                   <label className="text-[11px] font-semibold text-muted-foreground uppercase" htmlFor="company_email">Company Email *</label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/70" />
-                    <input id="company_email" type="email" value={formData.company_email} onChange={handleChange} placeholder="recruiter@company.com" className={`w-full rounded-sm bg-muted/50 border ${errors.company_email ? 'border-red-400' : 'border-border'} text-foreground pl-10 pr-4 py-2 text-sm focus:ring-1 focus:ring-teal-500 outline-none`} />
+                    <input id="company_email" type="email" value={formData.company_email} onChange={handleChange} placeholder="recruiter@company.com" className={`w-full rounded-sm bg-muted/50 border ${errors.company_email ? 'border-red-400' : 'border-border'} text-foreground pl-10 pr-4 py-2 text-sm focus:ring-1 focus:ring-blue-500 outline-none`} />
                   </div>
                   {errors.company_email && <p className="text-[10px] text-red-500">{errors.company_email[0]}</p>}
                 </div>
@@ -151,7 +151,7 @@ export function CompanyRegisterForm() {
                     <label className="text-[11px] font-semibold text-muted-foreground uppercase" htmlFor="company_password">Password *</label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/70" />
-                      <input id="company_password" type={showPassword ? 'text' : 'password'} value={formData.company_password} onChange={handleChange} placeholder="••••••••" className={`w-full rounded-sm bg-muted/50 border ${errors.company_password ? 'border-red-400' : 'border-border'} text-foreground pl-10 pr-10 py-2 text-sm focus:ring-1 focus:ring-teal-500 outline-none`} />
+                      <input id="company_password" type={showPassword ? 'text' : 'password'} value={formData.company_password} onChange={handleChange} placeholder="••••••••" className={`w-full rounded-sm bg-muted/50 border ${errors.company_password ? 'border-red-400' : 'border-border'} text-foreground pl-10 pr-10 py-2 text-sm focus:ring-1 focus:ring-blue-500 outline-none`} />
                       <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/70 hover:text-foreground">
                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
@@ -161,7 +161,7 @@ export function CompanyRegisterForm() {
                     <label className="text-[11px] font-semibold text-muted-foreground uppercase" htmlFor="confirmPassword">Confirm *</label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/70" />
-                      <input id="confirmPassword" type={showPassword ? 'text' : 'password'} value={formData.confirmPassword} onChange={handleChange} placeholder="••••••••" className={`w-full rounded-sm bg-muted/50 border ${errors.confirmPassword ? 'border-red-400' : 'border-border'} text-foreground pl-10 pr-10 py-2 text-sm focus:ring-1 focus:ring-teal-500 outline-none`} />
+                      <input id="confirmPassword" type={showPassword ? 'text' : 'password'} value={formData.confirmPassword} onChange={handleChange} placeholder="••••••••" className={`w-full rounded-sm bg-muted/50 border ${errors.confirmPassword ? 'border-red-400' : 'border-border'} text-foreground pl-10 pr-10 py-2 text-sm focus:ring-1 focus:ring-blue-500 outline-none`} />
                       <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/70 hover:text-foreground">
                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
@@ -185,7 +185,7 @@ export function CompanyRegisterForm() {
                   value={formData.company_name}
                   onChange={handleChange}
                   placeholder="Acme Technologies"
-                  className={`w-full rounded-sm bg-muted/50 border ${errors.company_name ? 'border-red-400 ring-1 ring-red-400' : 'border-border'} text-foreground pl-10 pr-4 py-2.5 text-sm transition-colors focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none placeholder:text-muted-foreground/70`}
+                  className={`w-full rounded-sm bg-muted/50 border ${errors.company_name ? 'border-red-400 ring-1 ring-red-400' : 'border-border'} text-foreground pl-10 pr-4 py-2.5 text-sm transition-colors focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground/70`}
                 />
               </div>
               {errors.company_name && (
@@ -207,7 +207,7 @@ export function CompanyRegisterForm() {
                   disabled={isSubmitting}
                   value={formData.industry}
                   onChange={handleChange}
-                  className={`w-full rounded-sm bg-muted/50 border ${errors.industry ? 'border-red-400 ring-1 ring-red-400' : 'border-border'} text-foreground pl-10 pr-4 py-2.5 text-sm transition-colors focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none appearance-none`}
+                  className={`w-full rounded-sm bg-muted/50 border ${errors.industry ? 'border-red-400 ring-1 ring-red-400' : 'border-border'} text-foreground pl-10 pr-4 py-2.5 text-sm transition-colors focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none appearance-none`}
                 >
                   <option value="">Select industry</option>
                   {INDUSTRY_OPTIONS.map(opt => (
@@ -238,7 +238,7 @@ export function CompanyRegisterForm() {
                     disabled={isSubmitting}
                     value={formData.company_size}
                     onChange={handleChange}
-                    className="w-full rounded-sm bg-muted/50 border border-border text-foreground pl-10 pr-4 py-2.5 text-sm transition-colors focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none appearance-none"
+                    className="w-full rounded-sm bg-muted/50 border border-border text-foreground pl-10 pr-4 py-2.5 text-sm transition-colors focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none appearance-none"
                   >
                     {SIZE_OPTIONS.map(opt => (
                       <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -263,7 +263,7 @@ export function CompanyRegisterForm() {
                     placeholder="2024"
                     min="1900"
                     max={new Date().getFullYear()}
-                    className="w-full rounded-sm bg-muted/50 border border-border text-foreground pl-10 pr-4 py-2.5 text-sm transition-colors focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none placeholder:text-muted-foreground/70"
+                    className="w-full rounded-sm bg-muted/50 border border-border text-foreground pl-10 pr-4 py-2.5 text-sm transition-colors focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground/70"
                   />
                 </div>
               </div>
@@ -284,7 +284,7 @@ export function CompanyRegisterForm() {
                   value={formData.location}
                   onChange={handleChange}
                   placeholder="Bangalore, India"
-                  className="w-full rounded-sm bg-muted/50 border border-border text-foreground pl-10 pr-4 py-2.5 text-sm transition-colors focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none placeholder:text-muted-foreground/70"
+                  className="w-full rounded-sm bg-muted/50 border border-border text-foreground pl-10 pr-4 py-2.5 text-sm transition-colors focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground/70"
                 />
               </div>
             </div>
@@ -305,7 +305,7 @@ export function CompanyRegisterForm() {
                   value={formData.website}
                   onChange={handleChange}
                   placeholder="https://yourcompany.com"
-                  className="w-full rounded-sm bg-muted/50 border border-border text-foreground pl-10 pr-4 py-2.5 text-sm transition-colors focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none placeholder:text-muted-foreground/70"
+                  className="w-full rounded-sm bg-muted/50 border border-border text-foreground pl-10 pr-4 py-2.5 text-sm transition-colors focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground/70"
                 />
               </div>
             </div>
@@ -322,14 +322,14 @@ export function CompanyRegisterForm() {
                 onChange={handleChange}
                 placeholder="Tell us about your company, mission, and culture..."
                 rows={4}
-                className="w-full rounded-sm bg-muted/50 border border-border text-foreground px-4 py-2.5 text-sm transition-colors focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none placeholder:text-muted-foreground/70 resize-none"
+                className="w-full rounded-sm bg-muted/50 border border-border text-foreground px-4 py-2.5 text-sm transition-colors focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground/70 resize-none"
               />
             </div>
 
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full flex items-center justify-center gap-2 rounded-sm bg-gradient-to-r from-teal-600 to-cyan-600 py-3 text-sm font-semibold text-white shadow-sm hover:shadow-lg hover:from-teal-500 hover:to-cyan-500 transition-all disabled:opacity-70 disabled:cursor-not-allowed mt-2"
+              className="w-full flex items-center justify-center gap-2 rounded-sm bg-gradient-to-r from-blue-600 to-cyan-600 py-3 text-sm font-semibold text-white shadow-sm hover:shadow-lg hover:from-blue-500 hover:to-cyan-500 transition-all disabled:opacity-70 disabled:cursor-not-allowed mt-2"
             >
               {isSubmitting ? (
                 <>
@@ -349,7 +349,7 @@ export function CompanyRegisterForm() {
 
       <div className="mt-6 text-center text-sm text-muted-foreground">
         Already have an account?{' '}
-        <Link href="/recruiter/login" className="font-medium text-foreground hover:text-teal-500 transition-colors">
+        <Link href="/recruiter/login" className="font-medium text-foreground hover:text-blue-500 transition-colors">
           Sign in
         </Link>
       </div>

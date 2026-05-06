@@ -84,6 +84,7 @@ export interface JobPost {
   deadline: string | null;
   applications_count: number;
   company_is_genuine?: boolean;
+  owner_user_id?: string;
   hr_profile?: CompanyHRProfile;
   is_ai_generated?: boolean;
   created_at: string;

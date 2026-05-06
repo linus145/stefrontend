@@ -113,14 +113,14 @@ export function DashboardViewShell() {
 
             {/* Active Job Listings */}
             <div className="flex-1 min-h-0">
-              <JobsView />
+              <JobsView onNavigateToMessages={(userId) => handleSectionChange('messages', userId)} />
             </div>
           </div>
         );
       case 'news':
         return <NewsView />;
       case 'messages':
-        return <MessagesView targetUserId={selectedProfileId} />;
+        return <MessagesView targetUserId={selectedProfileId} roomType="personal" />;
       case 'network':
         return <NetworkView onSectionChange={handleSectionChange} />;
       case 'settings':
@@ -174,8 +174,7 @@ export function DashboardViewShell() {
         />
 
         <div className={cn(
-          "flex-1 flex flex-col min-w-0 pt-16 pb-16 lg:pb-0 transition-all duration-300 ease-in-out",
-          activeSection === 'dashboard' && !isRightSidebarCollapsed && "xl:mr-72"
+          "flex-1 flex flex-col min-w-0 pt-16 pb-16 lg:pb-0"
         )}>
           {renderContent()}
         </div>

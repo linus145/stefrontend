@@ -38,17 +38,17 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
 
   return (
     <div className={cn(
-      "absolute inset-y-0 right-0 w-full sm:w-[480px] bg-[#0B0F19] border-l border-slate-800 shadow-2xl z-30 transform transition-transform duration-500 ease-in-out flex flex-col font-sans",
+      "absolute inset-y-0 right-0 w-full sm:w-[480px] bg-white dark:bg-[#0B0F19] border-l border-border shadow-2xl z-30 transform transition-transform duration-500 ease-in-out flex flex-col font-sans",
       isOpen ? "translate-x-0" : "translate-x-full"
     )}>
       {/* Header - Inspired by Chat Interface */}
-      <div className="relative pt-6 pb-4 px-6 flex items-center justify-between bg-[#0B0F19] border-b border-slate-800">
+      <div className="relative pt-6 pb-4 px-6 flex items-center justify-between bg-white dark:bg-[#0B0F19] border-b border-border">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-sm bg-[#1a1f2e] flex items-center justify-center shadow-sm border border-[#7C3AED]/20">
+          <div className="w-10 h-10 rounded-sm bg-muted/10 flex items-center justify-center shadow-sm border border-[#7C3AED]/20">
             <Sparkles className="w-5 h-5 text-[#7C3AED]" />
           </div>
           <div>
-            <h1 className="text-base font-bold text-white tracking-tight">Recruitment Copilot</h1>
+            <h1 className="text-base font-bold text-foreground tracking-tight">Recruitment Copilot</h1>
             <p className="text-[10px] font-bold text-[#8B5CF6] uppercase tracking-widest">
               {activeTab === 'results' ? (isLoading ? "Analyzing..." : "Analysis Ready") : "History"}
             </p>
@@ -60,7 +60,7 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
             onClick={() => setActiveTab(activeTab === 'results' ? 'history' : 'results')}
             className={cn(
               "p-2 rounded-lg transition-all",
-              activeTab === 'history' ? "bg-[#7C3AED]/10 text-[#7C3AED]" : "text-slate-500 hover:bg-slate-800/50 hover:text-white"
+              activeTab === 'history' ? "bg-[#7C3AED]/10 text-[#7C3AED]" : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
             )}
             title="View History"
           >
@@ -68,7 +68,7 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
           </button>
           <button 
             onClick={onClose}
-            className="p-2 text-slate-500 hover:bg-slate-800/50 hover:text-white rounded-lg transition-colors"
+            className="p-2 text-muted-foreground hover:bg-muted/50 hover:text-foreground rounded-lg transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -76,12 +76,12 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-6 bg-[#0B0F19] scrollbar-hide">
+      <div className="flex-1 overflow-y-auto p-4 space-y-6 bg-white dark:bg-[#0B0F19] scrollbar-hide">
         {activeTab === 'results' ? (
           isLoading ? (
             <div className="flex flex-col items-center justify-center h-full space-y-4 opacity-60">
               <div className="w-10 h-10 border-2 border-[#7C3AED]/20 border-t-[#7C3AED] rounded-full animate-spin" />
-              <p className="text-xs font-semibold text-slate-400 tracking-wide">Processing Resumes...</p>
+              <p className="text-xs font-semibold text-muted-foreground tracking-wide">Processing Resumes...</p>
             </div>
           ) : results ? (
             <div className="space-y-6 pb-24">
@@ -97,15 +97,15 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
                     {/* AI Bubble Style - Professional Chat Style */}
                     <div 
                       className={cn(
-                        "bg-[#1a1f2e] rounded-sm p-4 transition-all cursor-pointer border border-slate-800 shadow-sm",
-                        isExpanded ? "border-[#7C3AED]/30 ring-1 ring-[#7C3AED]/10" : "hover:border-slate-700"
+                        "bg-muted/5 rounded-sm p-4 transition-all cursor-pointer border border-border shadow-sm",
+                        isExpanded ? "border-[#7C3AED]/30 ring-1 ring-[#7C3AED]/10" : "hover:border-border/80"
                       )}
                       onClick={() => toggleExpand(cand.id)}
                     >
                       <div className="flex items-center justify-between gap-4 mb-3">
                         <div className="flex-1 min-w-0">
-                          <h3 className="text-[14px] font-bold text-white truncate">{cand.name}</h3>
-                          <p className="text-[11px] text-slate-400 font-medium truncate mt-0.5">{cand.reason}</p>
+                          <h3 className="text-[14px] font-bold text-foreground truncate">{cand.name}</h3>
+                          <p className="text-[11px] text-muted-foreground font-medium truncate mt-0.5">{cand.reason}</p>
                         </div>
                         <div className="flex items-center gap-3 shrink-0">
                           <div className={cn(
@@ -119,14 +119,14 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
                       </div>
 
                       <p className={cn(
-                        "text-[13px] text-slate-300 leading-relaxed font-medium",
+                        "text-[13px] text-foreground/80 leading-relaxed font-medium",
                         !isExpanded && "line-clamp-3"
                       )}>
                         {cand.summary || cand.match_analysis}
                       </p>
 
                       <div className="mt-3 flex justify-center opacity-30">
-                        {isExpanded ? <ChevronUp className="w-4 h-4 text-white" /> : <ChevronDown className="w-4 h-4 text-white" />}
+                        {isExpanded ? <ChevronUp className="w-4 h-4 text-foreground" /> : <ChevronDown className="w-4 h-4 text-foreground" />}
                       </div>
                     </div>
 
@@ -138,9 +138,9 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
                             e.stopPropagation();
                             onViewDetails(cand.id);
                           }}
-                          className="flex items-center gap-3 p-2.5 bg-[#1a1f2e] border border-slate-800 rounded-sm text-[12px] font-semibold text-slate-400 hover:bg-slate-800 hover:text-white transition-all shadow-sm group"
+                          className="flex items-center gap-3 p-2.5 bg-muted/10 border border-border rounded-sm text-[12px] font-semibold text-muted-foreground hover:bg-muted/20 hover:text-foreground transition-all shadow-sm group"
                         >
-                          <FileText className="w-3.5 h-3.5 text-slate-500 group-hover:text-[#7C3AED] transition-colors" />
+                          <FileText className="w-3.5 h-3.5 text-muted-foreground group-hover:text-[#7C3AED] transition-colors" />
                           View Detailed Analysis
                         </button>
                         
@@ -162,7 +162,7 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
               })}
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center h-full text-center px-12 opacity-30 text-white">
+            <div className="flex flex-col items-center justify-center h-full text-center px-12 opacity-30 text-foreground">
               <BrainCircuit className="w-12 h-12 mb-4" />
               <p className="text-sm font-bold tracking-tight">Ready to assist your hiring process</p>
             </div>
@@ -172,14 +172,14 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
           historyLoading ? (
             <div className="flex flex-col items-center justify-center h-full space-y-4 opacity-60">
               <div className="w-8 h-8 border-2 border-[#7C3AED]/20 border-t-[#7C3AED] rounded-full animate-spin" />
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Loading History...</p>
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Loading History...</p>
             </div>
           ) : historyData?.data && historyData.data.length > 0 ? (
             <div className="space-y-1 pb-20">
               {historyData.data.map((report: any, idx: number) => (
                 <div 
                   key={report.id}
-                  className="flex items-center gap-3 p-3 rounded-sm hover:bg-slate-800/50 transition-all cursor-pointer group"
+                  className="flex items-center gap-3 p-3 rounded-sm hover:bg-muted/10 transition-all cursor-pointer group"
                   onClick={() => {
                     if (onLoadHistoryReport) {
                       onLoadHistoryReport(report.results);
@@ -187,44 +187,44 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
                     }
                   }}
                 >
-                  <div className="w-10 h-10 rounded-sm bg-[#1a1f2e] flex items-center justify-center shrink-0 border border-[#7C3AED]/20 group-hover:scale-105 transition-transform">
+                  <div className="w-10 h-10 rounded-sm bg-muted/10 flex items-center justify-center shrink-0 border border-[#7C3AED]/20 group-hover:scale-105 transition-transform">
                     <BrainCircuit className="w-5 h-5 text-[#7C3AED]" />
                   </div>
                   
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
-                      <h4 className="text-[13px] font-bold text-white truncate">{report.job_title}</h4>
-                      <span className="text-[10px] font-bold text-slate-500 whitespace-nowrap">
+                      <h4 className="text-[13px] font-bold text-foreground truncate">{report.job_title}</h4>
+                      <span className="text-[10px] font-bold text-muted-foreground whitespace-nowrap">
                         {new Date(report.created_at).toLocaleDateString([], { month: 'short', day: 'numeric' })}
                       </span>
                     </div>
                     <div className="flex items-center gap-2 mt-0.5">
-                      <p className="text-[11px] text-slate-400 truncate font-medium">
+                      <p className="text-[11px] text-muted-foreground truncate font-medium">
                         {report.results.total_applicants} candidates • Top {report.results.top_candidates[0]?.score || 0}%
                       </p>
                     </div>
                   </div>
                   
-                  <ChevronRight className="w-4 h-4 text-slate-600 group-hover:text-[#7C3AED] transition-colors shrink-0" />
+                  <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-[#7C3AED] transition-colors shrink-0" />
                 </div>
               ))}
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center h-full text-center px-12 opacity-30">
+            <div className="flex flex-col items-center justify-center h-full text-center px-12 opacity-30 text-foreground">
               <History className="w-12 h-12 mb-4" />
-              <p className="text-sm font-bold text-slate-900 tracking-tight">No screening history yet</p>
+              <p className="text-sm font-bold tracking-tight">No screening history yet</p>
             </div>
           )
         )}
       </div>
 
       {/* Footer Chat Input - Professional Chat Style */}
-      <div className="p-4 border-t border-slate-800 bg-[#0B0F19]">
+      <div className="p-4 border-t border-border bg-white dark:bg-[#0B0F19]">
         <div className="relative group">
           <input 
             type="text"
             placeholder="Ask anything about the candidates..."
-            className="w-full bg-[#0F172A]/50 border border-slate-800 rounded-sm py-3 px-4 pr-12 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#7C3AED]/20 focus:border-[#7C3AED] transition-all placeholder:text-slate-600 font-medium text-white"
+            className="w-full bg-muted/20 border border-border rounded-sm py-3 px-4 pr-12 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#7C3AED]/20 focus:border-[#7C3AED] transition-all placeholder:text-muted-foreground/40 font-medium text-foreground"
             disabled={!results}
           />
           <button 

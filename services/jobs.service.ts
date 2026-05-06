@@ -125,4 +125,24 @@ export const jobsService = {
   analyzeResumes: (jobId: string): Promise<BaseAPIResponse<any>> => {
     return api.post<BaseAPIResponse<any>>(`/jobs/posts/${jobId}/analyze-resumes/`, {});
   },
+
+  // ─── Talent Pipeline ──────────────────────────────────────────
+  saveToPipeline: (talentId: string, notes?: string): Promise<BaseAPIResponse<any>> => {
+    return api.post<BaseAPIResponse<any>>('/jobs/talent-pipeline/save/', { talent_id: talentId, notes });
+  },
+
+  getPipelineTalents: (): Promise<BaseAPIResponse<any[]>> => {
+    return api.get<any>('/jobs/talent-pipeline/').then(res => {
+      const items = res.results || res.data || [];
+      return { status: 'success', message: '', data: items };
+    });
+  },
+
+  updatePipelineStatus: (pipelineId: string, status: string): Promise<BaseAPIResponse<any>> => {
+    return api.patch<BaseAPIResponse<any>>(`/jobs/talent-pipeline/${pipelineId}/`, { status });
+  },
+
+  removeFromPipeline: (pipelineId: string): Promise<BaseAPIResponse<any>> => {
+    return api.delete<BaseAPIResponse<any>>(`/jobs/talent-pipeline/${pipelineId}/`);
+  },
 };

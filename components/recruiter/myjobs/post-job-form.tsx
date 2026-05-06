@@ -11,7 +11,7 @@ import {
 import { JobPost, JobPostCreatePayload, Skill } from '@/types/jobs.types';
 
 interface PostJobFormProps {
-  isCollapsed: boolean;
+
   editJob: JobPost | null;
   onClose: () => void;
   onSuccess: () => void;
@@ -47,7 +47,7 @@ const HIRING_STATUS_OPTIONS = [
   { value: 'ACTIVELY_REVIEWING', label: 'Actively Reviewing' },
 ];
 
-export function PostJobForm({ isCollapsed, editJob, onClose, onSuccess }: PostJobFormProps) {
+export function PostJobForm({ editJob, onClose, onSuccess }: PostJobFormProps) {
   const isEditing = !!editJob;
 
   const { data: skillsResponse } = useQuery({
@@ -170,31 +170,31 @@ export function PostJobForm({ isCollapsed, editJob, onClose, onSuccess }: PostJo
 
   return (
     <div className={cn(
-      "flex-1 p-4 sm:p-6 lg:p-8 animate-in fade-in slide-in-from-bottom-4 duration-700",
-      isCollapsed ? "lg:ml-20" : "lg:ml-64"
+      "flex-1 p-4 lg:p-6 animate-in fade-in slide-in-from-bottom-4 duration-700 lg:ml-0 flex justify-center"
     )}>
-      {/* Back */}
-      <button
+      <div className="w-full max-w-3xl">
+        {/* Back */}
+        <button
         onClick={onClose}
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors group"
+        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors group"
       >
         <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
         Back to My Jobs
       </button>
 
-      <div className="max-w-2xl">
+      <div className="w-full">
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-2xl font-bold text-foreground tracking-tight mb-2">
               {isEditing ? 'Edit Job Post' : 'Create New Job'}
             </h1>
-            <p className="text-sm text-muted-foreground mb-8">
+            <p className="text-sm text-muted-foreground mb-6">
               {isEditing ? 'Update your job listing details.' : 'Fill in the details below to create a new job listing.'}
             </p>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4">
           {/* Title */}
           <FormField label="Job Title *" id="title" error={errors.title}>
             <div className="relative">
@@ -207,7 +207,7 @@ export function PostJobForm({ isCollapsed, editJob, onClose, onSuccess }: PostJo
                 value={formData.title}
                 onChange={handleChange}
                 placeholder="e.g. Senior Frontend Developer"
-                className={cn("w-full rounded-sm bg-muted/30 border text-foreground pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none placeholder:text-muted-foreground transition-colors", errors.title ? 'border-red-400' : 'border-border')}
+                className={cn("w-full rounded-sm bg-muted/30 border text-foreground pl-10 pr-4 py-2 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground transition-colors", errors.title ? 'border-red-400' : 'border-border')}
               />
             </div>
           </FormField>
@@ -221,7 +221,7 @@ export function PostJobForm({ isCollapsed, editJob, onClose, onSuccess }: PostJo
               onChange={handleChange}
               placeholder="Describe the role, responsibilities, and qualifications..."
               rows={6}
-              className={cn("w-full rounded-sm bg-muted/30 border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none placeholder:text-muted-foreground resize-none transition-colors", errors.description ? 'border-red-400' : 'border-border')}
+              className={cn("w-full rounded-sm bg-muted/30 border text-foreground px-4 py-2 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground resize-none transition-colors", errors.description ? 'border-red-400' : 'border-border')}
             />
           </FormField>
 
@@ -251,7 +251,7 @@ export function PostJobForm({ isCollapsed, editJob, onClose, onSuccess }: PostJo
                   value={formData.location}
                   onChange={handleChange}
                   placeholder="Bangalore, India"
-                  className="w-full rounded-sm bg-muted/30 border border-border text-foreground pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none placeholder:text-muted-foreground"
+                  className="w-full rounded-sm bg-muted/30 border border-border text-foreground pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground"
                 />
               </div>
             </FormField>
@@ -267,7 +267,7 @@ export function PostJobForm({ isCollapsed, editJob, onClose, onSuccess }: PostJo
                 value={formData.salary_min ?? ''}
                 onChange={handleChange}
                 placeholder="30000"
-                className="w-full rounded-sm bg-muted/30 border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none placeholder:text-muted-foreground"
+                className="w-full rounded-sm bg-muted/30 border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground"
               />
             </FormField>
             <FormField label="Max Salary" id="salary_max">
@@ -278,7 +278,7 @@ export function PostJobForm({ isCollapsed, editJob, onClose, onSuccess }: PostJo
                 value={formData.salary_max ?? ''}
                 onChange={handleChange}
                 placeholder="80000"
-                className="w-full rounded-sm bg-muted/30 border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none placeholder:text-muted-foreground"
+                className="w-full rounded-sm bg-muted/30 border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground"
               />
             </FormField>
             <FormField label="Currency" id="currency">
@@ -288,7 +288,7 @@ export function PostJobForm({ isCollapsed, editJob, onClose, onSuccess }: PostJo
                 value={formData.currency}
                 onChange={handleChange}
                 placeholder="INR"
-                className="w-full rounded-sm bg-muted/30 border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none placeholder:text-muted-foreground"
+                className="w-full rounded-sm bg-muted/30 border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground"
               />
             </FormField>
           </div>
@@ -307,7 +307,7 @@ export function PostJobForm({ isCollapsed, editJob, onClose, onSuccess }: PostJo
                   disabled={isSubmitting}
                   value={formData.open_positions}
                   onChange={(e) => setFormData(prev => ({ ...prev, open_positions: parseInt(e.target.value) || 1 }))}
-                  className="w-full rounded-sm bg-muted/30 border border-border text-foreground pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none placeholder:text-muted-foreground"
+                  className="w-full rounded-sm bg-muted/30 border border-border text-foreground pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground"
                 />
               </div>
             </FormField>
@@ -322,7 +322,7 @@ export function PostJobForm({ isCollapsed, editJob, onClose, onSuccess }: PostJo
                   value={formData.department}
                   onChange={handleChange}
                   placeholder="e.g. Engineering"
-                  className="w-full rounded-sm bg-muted/30 border border-border text-foreground pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none placeholder:text-muted-foreground"
+                  className="w-full rounded-sm bg-muted/30 border border-border text-foreground pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground"
                 />
               </div>
             </FormField>
@@ -333,8 +333,8 @@ export function PostJobForm({ isCollapsed, editJob, onClose, onSuccess }: PostJo
             <div className="relative">
               <div
                 className={cn(
-                  "w-full rounded-sm bg-muted/30 border border-border px-4 py-2.5 text-sm cursor-pointer flex flex-wrap gap-2 min-h-[45px]",
-                  showSkillDropdown && "ring-1 ring-teal-500 border-teal-500"
+                  "w-full rounded-sm bg-muted/30 border border-border px-4 py-2 text-sm cursor-pointer flex flex-wrap gap-2 min-h-[40px]",
+                  showSkillDropdown && "ring-1 ring-blue-500 border-blue-500"
                 )}
                 onClick={() => setShowSkillDropdown(!showSkillDropdown)}
               >
@@ -346,7 +346,7 @@ export function PostJobForm({ isCollapsed, editJob, onClose, onSuccess }: PostJo
                   return skill ? (
                     <span
                       key={skillId}
-                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm bg-teal-500 text-white text-[10px] font-bold uppercase tracking-wider"
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm bg-blue-500 text-white text-[10px] font-bold uppercase tracking-wider"
                       onClick={(e) => { e.stopPropagation(); handleRemoveSkill(skillId); }}
                     >
                       {skill.name}
@@ -378,7 +378,7 @@ export function PostJobForm({ isCollapsed, editJob, onClose, onSuccess }: PostJo
                     {/* IT Skills */}
                     {itSkills.length > 0 && (
                       <div>
-                        <p className="px-2 text-[9px] font-black uppercase tracking-[0.2em] text-teal-600 mb-1.5">IT Skills</p>
+                        <p className="px-2 text-[9px] font-black uppercase tracking-[0.2em] text-blue-600 mb-1.5">IT Skills</p>
                         <div className="space-y-0.5">
                           {itSkills.map(skill => (
                             <button
@@ -387,7 +387,7 @@ export function PostJobForm({ isCollapsed, editJob, onClose, onSuccess }: PostJo
                               onClick={() => toggleSkill(skill.id)}
                               className={cn(
                                 "w-full text-left px-3 py-2 rounded-sm text-xs font-medium transition-colors flex items-center justify-between",
-                                formData.skills?.includes(skill.id) ? "bg-teal-500/10 text-teal-600" : "hover:bg-muted text-foreground/80"
+                                formData.skills?.includes(skill.id) ? "bg-blue-500/10 text-blue-600" : "hover:bg-muted text-foreground/80"
                               )}
                             >
                               {skill.name}
@@ -441,7 +441,7 @@ export function PostJobForm({ isCollapsed, editJob, onClose, onSuccess }: PostJo
               disabled={isSubmitting}
               value={formData.deadline ?? ''}
               onChange={handleChange}
-              className="w-full rounded-sm bg-muted/30 border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none"
+              className="w-full rounded-sm bg-muted/30 border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none"
             />
           </FormField>
 
@@ -472,14 +472,14 @@ export function PostJobForm({ isCollapsed, editJob, onClose, onSuccess }: PostJo
             <button
               type="button"
               onClick={onClose}
-              className="px-6 py-2.5 rounded-sm border border-border text-sm font-semibold text-muted-foreground hover:bg-muted/50 transition-all"
+              className="px-6 py-2 rounded-sm border border-border text-sm font-semibold text-muted-foreground hover:bg-muted/50 transition-all"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 flex items-center justify-center gap-2 px-6 py-2.5 rounded-sm bg-gradient-to-r from-teal-600 to-cyan-600 text-white text-sm font-semibold shadow-sm hover:shadow-lg transition-all disabled:opacity-70"
+              className="flex-1 flex items-center justify-center gap-2 px-6 py-2 rounded-sm bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-sm font-semibold shadow-sm hover:shadow-lg transition-all disabled:opacity-70"
             >
               {isSubmitting ? (
                 <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</>
@@ -491,6 +491,7 @@ export function PostJobForm({ isCollapsed, editJob, onClose, onSuccess }: PostJo
         </form>
       </div>
 
+      </div>
     </div>
   );
 }
@@ -530,7 +531,7 @@ function SelectField({ id, value, onChange, options, disabled }: {
         disabled={disabled}
         value={value}
         onChange={onChange}
-        className="w-full rounded-sm bg-muted/30 border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none appearance-none"
+        className="w-full rounded-sm bg-muted/30 border border-border text-foreground px-4 py-2 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none appearance-none"
       >
         {options.map(opt => (
           <option key={opt.value} value={opt.value}>{opt.label}</option>

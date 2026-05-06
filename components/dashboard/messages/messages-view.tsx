@@ -13,10 +13,12 @@ import { format } from 'date-fns';
 
 export function MessagesView({
   isCollapsed,
-  targetUserId
+  targetUserId,
+  roomType
 }: {
   isCollapsed?: boolean,
-  targetUserId?: string | null
+  targetUserId?: string | null,
+  roomType?: 'connection' | 'direct' | 'personal'
 }) {
   const { user: currentUser } = useAuth();
   const { isDark } = useDashboardTheme();
@@ -34,22 +36,29 @@ export function MessagesView({
       chatService.initialize1to1(targetUserId)
         .then(room => {
           setActiveRoomId(room.id);
-          queryClient.invalidateQueries({ queryKey: ['chat-rooms'] });
+          queryClient.invalidateQueries({ queryKey: ['chat-rooms', roomType] });
         })
-        .catch(err => {
-          console.error("Failed to initialize chat:", err);
-          toast.error("Could not open chat with this user.");
+        .catch(() => {
+          // Fallback: use direct messaging (no connection required)
+          chatService.sendDirectMessage(targetUserId)
+            .then(room => {
+              setActiveRoomId(room.id);
+              queryClient.invalidateQueries({ queryKey: ['chat-rooms', roomType] });
+            })
+            .catch(err => {
+              console.error("Failed to initialize chat:", err);
+            });
         });
     }
-  }, [targetUserId, queryClient]);
+  }, [targetUserId, queryClient, roomType]);
 
   // ─── Single source-of-truth for displayed messages ───
   const [displayMessages, setDisplayMessages] = useState<Message[]>([]);
 
-  // ─── Fetch chat rooms ───
+  // ─── Fetch chat rooms (filtered by roomType) ───
   const { data: roomsData, isLoading: isLoadingRooms } = useQuery({
-    queryKey: ['chat-rooms'],
-    queryFn: () => chatService.getRooms(),
+    queryKey: ['chat-rooms', roomType],
+    queryFn: () => chatService.getRooms(roomType),
     refetchInterval: 30000, // Refresh room list every 30s for latest-message previews
   });
 
@@ -95,8 +104,8 @@ export function MessagesView({
     });
 
     // Also refresh the room list so sidebar shows the latest message
-    queryClient.invalidateQueries({ queryKey: ['chat-rooms'] });
-  }, [activeRoomId, queryClient]);
+    queryClient.invalidateQueries({ queryKey: ['chat-rooms', roomType] });
+  }, [activeRoomId, queryClient, roomType]);
 
   const { isConnected, sendMessage } = useChat(activeRoomId, handleIncomingMessage);
 

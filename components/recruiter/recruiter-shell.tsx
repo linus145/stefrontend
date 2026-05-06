@@ -3,13 +3,14 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
-import { RecruiterSidebar, RecruiterSection } from './recruiter-sidebar';
+import { RecruiterSection } from './recruiter-sidebar';
 import { RecruiterHeader } from './recruiter-header';
 import { OverviewTab } from './overview-tab';
 import { MyJobsTab } from './myjobs/my-jobs-tab';
 import { ApplicationsTab } from './jobapplication/applications-tab';
 import { CandidatesTab } from './professional/candidates-tab';
 import { CompanyProfileTab } from './company/company-profile-tab';
+import { MessagesView } from '@/components/dashboard/messages/messages-view';
 
 import { GlobalLoader } from '@/components/ui/global-loader';
 import { useQuery } from '@tanstack/react-query';
@@ -19,7 +20,7 @@ export function RecruiterShell() {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<RecruiterSection>('overview');
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
 
@@ -64,23 +65,24 @@ export function RecruiterShell() {
   const renderContent = () => {
     switch (activeTab) {
       case 'overview':
-        return <OverviewTab isCollapsed={isSidebarCollapsed} onNavigate={handleTabChange} />;
+        return <OverviewTab onNavigate={handleTabChange} />;
       case 'my-jobs':
-        return <MyJobsTab isCollapsed={isSidebarCollapsed} isApproved={company.is_approved ?? false} onViewApplications={handleViewApplications} />;
+        return <MyJobsTab isApproved={company.is_approved ?? false} onViewApplications={handleViewApplications} />;
       case 'applications':
-        return <ApplicationsTab isCollapsed={isSidebarCollapsed} selectedJobId={selectedJobId} onBack={() => setActiveTab('my-jobs')} />;
+        return <ApplicationsTab selectedJobId={selectedJobId} onBack={() => setActiveTab('my-jobs')} />;
       case 'candidates':
-        return <CandidatesTab isCollapsed={isSidebarCollapsed} />;
+        return <CandidatesTab />;
       case 'company':
-
-        return <CompanyProfileTab isCollapsed={isSidebarCollapsed} company={company} />;
+        return <CompanyProfileTab company={company} />;
+      case 'messages':
+        return <MessagesView roomType="direct" />;
       default:
-        return <OverviewTab isCollapsed={isSidebarCollapsed} onNavigate={handleTabChange} />;
+        return <OverviewTab onNavigate={handleTabChange} />;
     }
   };
 
   return (
-    <div className="flex min-h-screen bg-background selection:bg-teal-500/20">
+    <div className="flex min-h-screen bg-background selection:bg-blue-500/20">
       {/* Mobile overlay */}
       {isMobileSidebarOpen && (
         <div
@@ -89,19 +91,7 @@ export function RecruiterShell() {
         />
       )}
 
-      <RecruiterSidebar
-        isCollapsed={isSidebarCollapsed}
-        onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-        activeTab={activeTab}
-        onTabChange={handleTabChange}
-        isMobileOpen={isMobileSidebarOpen}
-        onMobileClose={() => setIsMobileSidebarOpen(false)}
-        companyName={company.company_name}
-        companyLogo={company.logo_url}
-      />
-
       <RecruiterHeader
-        isCollapsed={isSidebarCollapsed}
         companyName={company.company_name}
         isApproved={company.is_approved ?? false}
         isGenuine={company.is_genuine ?? false}

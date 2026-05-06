@@ -114,7 +114,7 @@ export function Feed({ isCollapsed, isRightCollapsed, onNavigateToProfile }: Fee
     )}>
 
       {/* Feed Header */}
-      <div className="max-w-3xl mx-auto mb-6 flex items-center justify-between">
+      {/* <div className="max-w-3xl mx-auto mb-6 flex items-center justify-between">
         <div className="flex flex-col">
           <h2 className="text-lg sm:text-xl font-semibold text-foreground tracking-tight">Post Stream</h2>
           <p className="text-[10px] text-sky-500 font-semibold uppercase tracking-[0.2em] flex items-center gap-2">
@@ -122,7 +122,7 @@ export function Feed({ isCollapsed, isRightCollapsed, onNavigateToProfile }: Fee
             Live Network
           </p>
         </div>
-      </div>
+      </div> */}
 
       <div className="max-w-3xl mx-auto space-y-2">
 

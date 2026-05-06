@@ -10,11 +10,10 @@ import {
 import { RecruiterSection } from './recruiter-sidebar';
 
 interface OverviewTabProps {
-  isCollapsed: boolean;
   onNavigate: (tab: RecruiterSection) => void;
 }
 
-export function OverviewTab({ isCollapsed, onNavigate }: OverviewTabProps) {
+export function OverviewTab({ onNavigate }: OverviewTabProps) {
   const { data: statsResponse, isLoading } = useQuery({
     queryKey: ['recruiter-stats'],
     queryFn: jobsService.getDashboardStats,
@@ -25,8 +24,7 @@ export function OverviewTab({ isCollapsed, onNavigate }: OverviewTabProps) {
 
   return (
     <div className={cn(
-      "flex-1 p-4 sm:p-6 lg:p-8 animate-in fade-in slide-in-from-bottom-4 duration-700",
-      isCollapsed ? "lg:ml-20" : "lg:ml-64"
+      "flex-1 p-4 sm:p-6 lg:p-8 animate-in fade-in slide-in-from-bottom-4 duration-700 lg:ml-0"
     )}>
       {/* Welcome Section */}
       <div className="mb-8">
@@ -40,7 +38,7 @@ export function OverviewTab({ isCollapsed, onNavigate }: OverviewTabProps) {
 
       {isLoading ? (
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-8 h-8 animate-spin text-teal-500" />
+          <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
         </div>
       ) : (
         <>
@@ -90,10 +88,10 @@ export function OverviewTab({ isCollapsed, onNavigate }: OverviewTabProps) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <button
               onClick={() => onNavigate('my-jobs')}
-              className="group flex items-center gap-4 p-5 bg-card border border-border rounded-sm hover:border-teal-500/30 hover:bg-teal-500/5 transition-all"
+              className="group flex items-center gap-4 p-5 bg-card border border-border rounded-sm hover:border-blue-500/30 hover:bg-blue-500/5 transition-all"
             >
-              <div className="w-12 h-12 rounded-sm bg-teal-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Plus className="w-5 h-5 text-teal-500" />
+              <div className="w-12 h-12 rounded-sm bg-blue-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Plus className="w-5 h-5 text-blue-500" />
               </div>
               <div className="text-left">
                 <p className="text-sm font-semibold text-foreground">Post a New Job</p>
@@ -131,7 +129,7 @@ function StatCard({ label, value, icon, color }: {
   color: string;
 }) {
   const colorMap: Record<string, string> = {
-    teal: 'bg-teal-500/10 text-teal-600 dark:text-teal-400',
+    teal: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
     emerald: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
     cyan: 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400',
     violet: 'bg-violet-500/10 text-violet-600 dark:text-violet-400',

@@ -16,9 +16,10 @@ interface JobDetailsProps {
   onApply: () => void;
   onEasyApply: () => void;
   isApplying?: boolean;
+  onMessageRecruiter?: (userId: string) => void;
 }
 
-export function JobDetails({ job, applications, onClose, onApply, onEasyApply, isApplying = false }: JobDetailsProps) {
+export function JobDetails({ job, applications, onClose, onApply, onEasyApply, isApplying = false, onMessageRecruiter }: JobDetailsProps) {
   const hasApplied = applications.some(app => app.job === job.id);
 
   return (
@@ -139,7 +140,11 @@ export function JobDetails({ job, applications, onClose, onApply, onEasyApply, i
                 <p className="text-[11px] text-muted-foreground truncate">{job.hr_profile.designation || 'Hiring Manager'}</p>
                 <p className="text-[10px] text-muted-foreground mt-0.5 font-medium uppercase tracking-wider">Job Poster</p>
               </div>
-              <button className="px-5 py-1.5 border border-border rounded-full text-xs font-bold hover:bg-muted transition-all">
+              <button
+                onClick={() => job.owner_user_id && onMessageRecruiter?.(job.owner_user_id)}
+                disabled={!job.owner_user_id}
+                className="px-5 py-1.5 border border-border rounded-full text-xs font-bold hover:bg-muted transition-all disabled:opacity-50"
+              >
                 Message
               </button>
             </div>

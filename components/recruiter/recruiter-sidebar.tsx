@@ -8,7 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
-export type RecruiterSection = 'overview' | 'my-jobs' | 'applications' | 'candidates' | 'company';
+export type RecruiterSection = 'overview' | 'my-jobs' | 'applications' | 'candidates' | 'company' | 'messages';
 
 
 interface RecruiterSidebarProps {
@@ -48,7 +48,7 @@ export function RecruiterSidebar({
       {/* Desktop Collapse Toggle */}
       <button
         onClick={onToggle}
-        className="absolute -right-3 top-20 hidden lg:flex h-6 w-6 items-center justify-center rounded-full bg-surface border border-border text-muted-foreground hover:text-teal-500 transition-all z-50 shadow-sm hover:scale-110 active:scale-95"
+        className="absolute -right-3 top-20 hidden lg:flex h-6 w-6 items-center justify-center rounded-full bg-surface border border-border text-muted-foreground hover:text-blue-500 transition-all z-50 shadow-sm hover:scale-110 active:scale-95"
       >
         {isCollapsed ? <Menu className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
       </button>
@@ -57,7 +57,7 @@ export function RecruiterSidebar({
       <div className="space-y-6 flex-1 overflow-y-auto custom-scrollbar overflow-x-hidden">
         {/* Brand */}
         <div className={cn("px-6 flex items-center gap-3 transition-all", isCollapsed && !isMobileOpen ? "px-5" : "px-6")}>
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-gradient-to-br from-teal-500 to-cyan-600 text-white shadow-sm hover:scale-105 transition-transform cursor-pointer">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-gradient-to-br from-blue-500 to-cyan-600 text-white shadow-sm hover:scale-105 transition-transform cursor-pointer">
             {companyLogo ? (
               <img src={companyLogo} alt="" className="w-full h-full object-cover rounded-md" />
             ) : (
@@ -67,7 +67,7 @@ export function RecruiterSidebar({
           {(!isCollapsed || isMobileOpen) && (
             <div className="animate-in fade-in slide-in-from-left-2 duration-300 min-w-0">
               <h1 className="text-foreground font-semibold text-sm leading-tight tracking-tight truncate">{companyName}</h1>
-              <p className="text-[9px] text-teal-500 font-bold uppercase tracking-[0.2em] opacity-80">Recruiter</p>
+              <p className="text-[9px] text-blue-500 font-bold uppercase tracking-[0.2em] opacity-80">Recruiter</p>
             </div>
           )}
         </div>
@@ -116,14 +116,14 @@ function SidebarLink({ onClick, icon, label, isCollapsed, active = false }: {
       className={cn(
         "w-full flex items-center gap-3 px-3 py-2.5 rounded-sm transition-all group relative overflow-hidden",
         active
-          ? "bg-teal-500/10 text-teal-600 dark:text-teal-400 shadow-sm"
+          ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 shadow-sm"
           : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
         isCollapsed && "justify-center px-0"
       )}
     >
       <div className={cn(
         "transition-all duration-300 shrink-0",
-        active ? "text-teal-600 dark:text-teal-400" : "group-hover:text-teal-500"
+        active ? "text-blue-600 dark:text-blue-400" : "group-hover:text-blue-500"
       )}>
         {icon}
       </div>

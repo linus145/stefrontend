@@ -36,7 +36,7 @@ export function JobSelector({
           <select
             value={activeJobId || ''}
             onChange={(e) => setActiveJobId(e.target.value || null)}
-            className="w-full rounded-sm bg-muted/30 dark:bg-slate-800 border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none appearance-none transition-all cursor-pointer"
+            className="w-full rounded-sm bg-muted/30 dark:bg-slate-800 border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none appearance-none transition-all cursor-pointer"
             style={{ colorScheme: 'dark' }}
           >
             <option value="" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100">-- Choose a job post --</option>
@@ -61,7 +61,7 @@ export function JobSelector({
             </code>
             <button 
               onClick={() => onCopyId(activeJobId)}
-              className="text-muted-foreground hover:text-teal-500 transition-colors"
+              className="text-muted-foreground hover:text-blue-500 transition-colors"
             >
               {copiedId === activeJobId ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
             </button>
@@ -80,7 +80,7 @@ export function JobSelector({
               placeholder="Paste Job UID here..."
               value={manualJobId}
               onChange={(e) => setManualJobId(e.target.value)}
-              className="w-full rounded-sm bg-muted/30 border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-teal-500 outline-none transition-all font-mono"
+              className="w-full rounded-sm bg-muted/30 border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 outline-none transition-all font-mono"
             />
           </div>
           <button

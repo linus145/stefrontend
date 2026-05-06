@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { jobsService } from '@/services/jobs.service';
+import { chatService } from '@/services/chat.service';
 import { JobPost } from '@/types/jobs.types';
 import { cn } from '@/lib/utils';
 import { 
@@ -29,9 +30,10 @@ import {
 
 interface JobsViewProps {
   isCollapsed?: boolean;
+  onNavigateToMessages?: (userId: string) => void;
 }
 
-export function JobsView({ isCollapsed }: JobsViewProps) {
+export function JobsView({ isCollapsed, onNavigateToMessages }: JobsViewProps) {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<'browse' | 'applications'>('browse');
   const [searchQuery, setSearchQuery] = useState('');
@@ -109,6 +111,18 @@ export function JobsView({ isCollapsed }: JobsViewProps) {
       resume_url: '', // Backend pulls from profile
       cover_letter: 'Applied via B2 Apply using profile details.'
     });
+  };
+
+  const handleMessageRecruiter = async (recruiterId: string) => {
+    try {
+      await chatService.sendDirectMessage(recruiterId);
+      if (onNavigateToMessages) {
+        onNavigateToMessages(recruiterId);
+      }
+      toast.success('Chat opened with the hiring team!');
+    } catch (error: any) {
+      toast.error(error?.data?.error || 'Failed to open chat.');
+    }
   };
 
   const handleAppClick = (appJobId: string) => {
@@ -267,6 +281,7 @@ export function JobsView({ isCollapsed }: JobsViewProps) {
               onApply={() => setIsApplyModalOpen(true)}
               onEasyApply={handleEasyApply}
               isApplying={applyMutation.isPending}
+              onMessageRecruiter={handleMessageRecruiter}
             />
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-center p-10 opacity-40">

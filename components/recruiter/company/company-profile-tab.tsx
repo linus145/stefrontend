@@ -12,7 +12,7 @@ import {
 import { CompanyProfile } from '@/types/jobs.types';
 
 interface CompanyProfileTabProps {
-  isCollapsed: boolean;
+
   company: CompanyProfile;
 }
 
@@ -31,7 +31,7 @@ const SIZE_OPTIONS = [
   { value: '500+', label: '500+ employees' },
 ];
 
-export function CompanyProfileTab({ isCollapsed, company }: CompanyProfileTabProps) {
+export function CompanyProfileTab({ company }: CompanyProfileTabProps) {
   const queryClient = useQueryClient();
 
   const [formData, setFormData] = useState({
@@ -70,8 +70,7 @@ export function CompanyProfileTab({ isCollapsed, company }: CompanyProfileTabPro
 
   return (
     <div className={cn(
-      "flex-1 p-4 sm:p-6 lg:p-8 animate-in fade-in slide-in-from-bottom-4 duration-700",
-      isCollapsed ? "lg:ml-20" : "lg:ml-64"
+      "flex-1 p-4 sm:p-6 lg:p-8 animate-in fade-in slide-in-from-bottom-4 duration-700 lg:ml-0"
     )}>
       <div className="mb-8">
         <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">Company Profile</h1>
@@ -83,7 +82,7 @@ export function CompanyProfileTab({ isCollapsed, company }: CompanyProfileTabPro
       {/* Company Preview Card */}
       <div className="bg-card border border-border rounded-sm overflow-hidden mb-8">
         {/* Banner */}
-        <div className="h-32 bg-gradient-to-r from-teal-500/20 via-cyan-500/10 to-teal-500/20 relative">
+        <div className="h-32 bg-gradient-to-r from-blue-500/20 via-cyan-500/10 to-blue-500/20 relative">
           {company.banner_url && (
             <img src={company.banner_url} alt="" className="w-full h-full object-cover" />
           )}
@@ -94,7 +93,7 @@ export function CompanyProfileTab({ isCollapsed, company }: CompanyProfileTabPro
               {company.logo_url ? (
                 <img src={company.logo_url} alt="" className="w-full h-full object-cover" />
               ) : (
-                <Building2 className="w-7 h-7 text-teal-500" />
+                <Building2 className="w-7 h-7 text-blue-500" />
               )}
             </div>
             <div className="pb-1">
@@ -126,7 +125,7 @@ export function CompanyProfileTab({ isCollapsed, company }: CompanyProfileTabPro
                 <Building2 className="h-4 w-4" />
               </div>
               <input id="company_name" value={formData.company_name} onChange={handleChange}
-                className="w-full rounded-sm bg-muted/30 border border-border text-foreground pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none" />
+                className="w-full rounded-sm bg-muted/30 border border-border text-foreground pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none" />
             </div>
           </div>
 
@@ -136,7 +135,7 @@ export function CompanyProfileTab({ isCollapsed, company }: CompanyProfileTabPro
               Industry
             </label>
             <select id="industry" value={formData.industry} onChange={handleChange}
-              className="w-full rounded-sm bg-muted/30 border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none appearance-none">
+              className="w-full rounded-sm bg-muted/30 border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none appearance-none">
               {INDUSTRY_OPTIONS.map(opt => (
                 <option key={opt} value={opt}>{opt}</option>
               ))}
@@ -149,7 +148,7 @@ export function CompanyProfileTab({ isCollapsed, company }: CompanyProfileTabPro
               Company Size
             </label>
             <select id="company_size" value={formData.company_size} onChange={handleChange}
-              className="w-full rounded-sm bg-muted/30 border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none appearance-none">
+              className="w-full rounded-sm bg-muted/30 border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none appearance-none">
               {SIZE_OPTIONS.map(opt => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
               ))}
@@ -167,7 +166,7 @@ export function CompanyProfileTab({ isCollapsed, company }: CompanyProfileTabPro
               </div>
               <input id="founded_year" type="number" value={formData.founded_year} onChange={handleChange}
                 placeholder="2024" min="1900" max={new Date().getFullYear()}
-                className="w-full rounded-sm bg-muted/30 border border-border text-foreground pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none placeholder:text-muted-foreground" />
+                className="w-full rounded-sm bg-muted/30 border border-border text-foreground pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground" />
             </div>
           </div>
 
@@ -181,7 +180,7 @@ export function CompanyProfileTab({ isCollapsed, company }: CompanyProfileTabPro
                 <MapPin className="h-4 w-4" />
               </div>
               <input id="location" value={formData.location} onChange={handleChange} placeholder="Bangalore, India"
-                className="w-full rounded-sm bg-muted/30 border border-border text-foreground pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none placeholder:text-muted-foreground" />
+                className="w-full rounded-sm bg-muted/30 border border-border text-foreground pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground" />
             </div>
           </div>
 
@@ -195,7 +194,7 @@ export function CompanyProfileTab({ isCollapsed, company }: CompanyProfileTabPro
                 <Globe className="h-4 w-4" />
               </div>
               <input id="website" type="url" value={formData.website} onChange={handleChange} placeholder="https://yourcompany.com"
-                className="w-full rounded-sm bg-muted/30 border border-border text-foreground pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none placeholder:text-muted-foreground" />
+                className="w-full rounded-sm bg-muted/30 border border-border text-foreground pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground" />
             </div>
           </div>
         </div>
@@ -207,7 +206,7 @@ export function CompanyProfileTab({ isCollapsed, company }: CompanyProfileTabPro
           </label>
           <textarea id="description" value={formData.description} onChange={handleChange}
             placeholder="Tell us about your company, mission, and culture..." rows={5}
-            className="w-full rounded-sm bg-muted/30 border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none placeholder:text-muted-foreground resize-none" />
+            className="w-full rounded-sm bg-muted/30 border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground resize-none" />
         </div>
 
         {/* Logo + Banner URLs */}
@@ -217,14 +216,14 @@ export function CompanyProfileTab({ isCollapsed, company }: CompanyProfileTabPro
               Logo URL
             </label>
             <input id="logo_url" type="url" value={formData.logo_url} onChange={handleChange} placeholder="https://..."
-              className="w-full rounded-sm bg-muted/30 border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none placeholder:text-muted-foreground" />
+              className="w-full rounded-sm bg-muted/30 border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground" />
           </div>
           <div className="space-y-2">
             <label className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase" htmlFor="banner_url">
               Banner URL
             </label>
             <input id="banner_url" type="url" value={formData.banner_url} onChange={handleChange} placeholder="https://..."
-              className="w-full rounded-sm bg-muted/30 border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none placeholder:text-muted-foreground" />
+              className="w-full rounded-sm bg-muted/30 border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground" />
           </div>
         </div>
 
@@ -232,7 +231,7 @@ export function CompanyProfileTab({ isCollapsed, company }: CompanyProfileTabPro
         <button
           type="submit"
           disabled={updateMutation.isPending}
-          className="flex items-center gap-2 px-8 py-2.5 rounded-sm bg-gradient-to-r from-teal-600 to-cyan-600 text-white text-sm font-semibold shadow-sm hover:shadow-lg transition-all disabled:opacity-70"
+          className="flex items-center gap-2 px-8 py-2.5 rounded-sm bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-sm font-semibold shadow-sm hover:shadow-lg transition-all disabled:opacity-70"
         >
           {updateMutation.isPending ? (
             <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</>
@@ -292,7 +291,7 @@ function HRProfileForm({ companyId, initialHR }: { companyId: string, initialHR?
             HR Full Name
           </label>
           <input id="name" value={formData.name} onChange={handleChange} placeholder="John Doe"
-            className="w-full rounded-sm bg-muted/30 border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none placeholder:text-muted-foreground" />
+            className="w-full rounded-sm bg-muted/30 border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground" />
         </div>
 
         <div className="space-y-2">
@@ -300,7 +299,7 @@ function HRProfileForm({ companyId, initialHR }: { companyId: string, initialHR?
             Designation
           </label>
           <input id="designation" value={formData.designation} onChange={handleChange} placeholder="Senior HR Manager"
-            className="w-full rounded-sm bg-muted/30 border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none placeholder:text-muted-foreground" />
+            className="w-full rounded-sm bg-muted/30 border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground" />
         </div>
 
         <div className="space-y-2">
@@ -308,7 +307,7 @@ function HRProfileForm({ companyId, initialHR }: { companyId: string, initialHR?
             HR Email
           </label>
           <input id="email" type="email" value={formData.email} onChange={handleChange} placeholder="hr@company.com"
-            className="w-full rounded-sm bg-muted/30 border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none placeholder:text-muted-foreground" />
+            className="w-full rounded-sm bg-muted/30 border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground" />
         </div>
 
         <div className="space-y-2">
@@ -316,7 +315,7 @@ function HRProfileForm({ companyId, initialHR }: { companyId: string, initialHR?
             HR Phone
           </label>
           <input id="phone" value={formData.phone} onChange={handleChange} placeholder="+91 98765 43210"
-            className="w-full rounded-sm bg-muted/30 border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none placeholder:text-muted-foreground" />
+            className="w-full rounded-sm bg-muted/30 border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground" />
         </div>
 
         <div className="space-y-2 sm:col-span-2">
@@ -324,14 +323,14 @@ function HRProfileForm({ companyId, initialHR }: { companyId: string, initialHR?
             Profile Image URL
           </label>
           <input id="profile_image_url" type="url" value={formData.profile_image_url} onChange={handleChange} placeholder="https://..."
-            className="w-full rounded-sm bg-muted/30 border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none placeholder:text-muted-foreground" />
+            className="w-full rounded-sm bg-muted/30 border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground" />
         </div>
       </div>
 
       <button
         type="submit"
         disabled={updateHRMutation.isPending}
-        className="flex items-center gap-2 px-8 py-2.5 rounded-sm bg-gradient-to-r from-teal-600 to-cyan-600 text-white text-sm font-semibold shadow-sm hover:shadow-lg transition-all disabled:opacity-70"
+        className="flex items-center gap-2 px-8 py-2.5 rounded-sm bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-sm font-semibold shadow-sm hover:shadow-lg transition-all disabled:opacity-70"
       >
         {updateHRMutation.isPending ? (
           <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</>

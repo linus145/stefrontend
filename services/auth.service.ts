@@ -26,5 +26,13 @@ export const authService = {
   
   googleLogin: (token: string): Promise<BaseAPIResponse<AuthResponsePayload>> => {
     return api.post<BaseAPIResponse<AuthResponsePayload>>('/auth/google-login/', { token });
+  },
+
+  requestOtp: (email: string): Promise<BaseAPIResponse<any>> => {
+    return api.post<BaseAPIResponse<any>>('/auth/request-otp/', { email });
+  },
+
+  verifyOtp: (email: string, otp: string): Promise<BaseAPIResponse<AuthResponsePayload>> => {
+    return api.post<BaseAPIResponse<AuthResponsePayload>>('/auth/verify-otp/', { email, otp });
   }
 };

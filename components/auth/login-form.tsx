@@ -9,10 +9,13 @@ import { ArrowRight, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { GoogleLoginButton } from './google-login-button';
 
 export function LoginForm() {
-  const { login, isAuthenticated, isLoading } = useAuth();
+  const { login, requestOtp, verifyOtp, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [otp, setOtp] = useState('');
+  const [loginMode, setLoginMode] = useState<'password' | 'otp'>('password');
+  const [isOtpSent, setIsOtpSent] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string[]>>({});
@@ -36,31 +39,52 @@ export function LoginForm() {
     setGeneralError(null);
     
     const trimmedEmail = email.trim();
-    const trimmedPassword = password.trim();
 
-    if (!trimmedEmail || !trimmedPassword) {
-      const newErrors: Record<string, string[]> = {};
-      if (!trimmedEmail) newErrors.email = ['Email is required'];
-      if (!trimmedPassword) newErrors.password = ['Password is required'];
-      setErrors(newErrors);
-      toast.error('Required fields are missing', {
-        description: 'Please enter both your email and password to sign in.'
-      });
+    if (!trimmedEmail) {
+      setErrors({ email: ['Email is required'] });
+      toast.error('Required fields are missing');
       return;
     }
-    
+
     setIsSubmitting(true);
     try {
-      await login(email, password);
+      if (loginMode === 'password') {
+        if (!password.trim()) {
+          setErrors({ password: ['Password is required'] });
+          toast.error('Password is required');
+          return;
+        }
+        await login(email, password);
+      } else {
+        if (!isOtpSent) {
+          await requestOtp(email);
+          setIsOtpSent(true);
+        } else {
+          if (!otp.trim()) {
+            toast.error('Please enter the verification code.');
+            return;
+          }
+          await verifyOtp(email, otp);
+        }
+      }
     } catch (error: any) {
-      // Structure: { email: [...], password: [...], detail: "..." }
-      if (error.data && typeof error.data === 'object') {
+      if (error.status === 403 && error.data?.message?.includes('not verified')) {
+        // Auto-switch to OTP mode if account exists but isn't verified
+        setLoginMode('otp');
+        setGeneralError('Email not verified. We have sent a verification code to your email.');
+        try {
+          await requestOtp(email);
+          setIsOtpSent(true);
+        } catch (otpErr: any) {
+          setGeneralError('Failed to send verification code. Please try again.');
+        }
+      } else if (error.data && typeof error.data === 'object') {
         setErrors(error.data);
         if (error.data.detail || error.data.non_field_errors) {
           setGeneralError(error.data.detail || error.data.non_field_errors[0]);
         }
       } else {
-        setGeneralError(error.message || 'Invalid credentials.');
+        setGeneralError(error.message || 'Action failed.');
       }
     } finally {
       setIsSubmitting(false);
@@ -69,18 +93,13 @@ export function LoginForm() {
 
   return (
     <div className="w-full">
-      {/* 
-        The card container matching the image:
-        - Light background (white)
-        - Very subtle slate border
-      */}
       <div className="relative w-full rounded-2xl bg-white shadow-sm hover:shadow-md transition-shadow border border-slate-200 overflow-hidden">
-        
-        {/* The top gradient border effect */}
         <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-indigo-500 to-transparent opacity-80" />
         
         <div className="p-8">
-          <h2 className="text-[17px] font-medium text-slate-900 text-center mb-8">Sign in to your account</h2>
+          <h2 className="text-[17px] font-medium text-slate-900 text-center mb-8">
+            {loginMode === 'password' ? 'Sign in to your account' : 'Verify your account'}
+          </h2>
           
           {generalError && (
             <div className="mb-6 p-3 rounded-lg bg-red-50 border border-red-100 text-red-600 text-xs font-medium animate-in fade-in slide-in-from-top-2 duration-300">
@@ -88,28 +107,19 @@ export function LoginForm() {
             </div>
           )}
 
-          {/* SSO Buttons replication to keep aesthetic mirroring consistent */}
-          <div className="space-y-3 mb-8">
-            {/* <GoogleLoginButton />
+          <div className="flex gap-2 mb-8 p-1 bg-slate-100 rounded-lg">
             <button
-              type="button"
-              className="w-full flex items-center justify-center gap-3 rounded-lg bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors border border-slate-200 shadow-sm"
+              onClick={() => { setLoginMode('password'); setIsOtpSent(false); }}
+              className={`flex-1 py-2 text-[11px] font-bold uppercase tracking-wider rounded-md transition-all ${loginMode === 'password' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
             >
-              <svg className="w-4 h-4 text-slate-900" fill="currentColor" viewBox="0 0 24 24">
-                <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
-              </svg>
-              Continue with GitHub
-            </button> */}
-          </div>
-
-          {/* Divider */}
-          <div className="relative mb-8">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-slate-200"></div>
-            </div>
-            <div className="relative flex justify-center text-[10px] font-bold uppercase tracking-widest text-slate-400">
-              <span className="bg-white px-4">Or continue with</span>
-            </div>
+              Password
+            </button>
+            <button
+              onClick={() => setLoginMode('otp')}
+              className={`flex-1 py-2 text-[11px] font-bold uppercase tracking-wider rounded-md transition-all ${loginMode === 'otp' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            >
+              Email OTP
+            </button>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -125,62 +135,91 @@ export function LoginForm() {
                   id="email"
                   type="email"
                   placeholder="founder@ste.io"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || (loginMode === 'otp' && isOtpSent)}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className={`w-full rounded-md bg-slate-50 border ${errors.email ? 'border-red-400 ring-1 ring-red-400' : 'border-slate-200'} text-slate-900 pl-10 pr-4 py-2.5 text-sm transition-colors focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none placeholder:text-slate-400`}
                 />
               </div>
               {errors.email && (
-                <p className="text-[10px] font-medium text-red-500 mt-1 animate-in fade-in slide-in-from-top-1 duration-200">
+                <p className="text-[10px] font-medium text-red-500 mt-1">
                   {errors.email[0]}
                 </p>
               )}
             </div>
 
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <label className="text-[11px] font-semibold tracking-wider text-slate-600 uppercase" htmlFor="password">
-                  Password
-                </label>
-                <Link href="#" className="text-[12px] text-indigo-600 hover:text-indigo-700 hover:underline transition-all">
-                  Forgot password?
-                </Link>
-              </div>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                  <Lock className="h-4 w-4" />
+            {loginMode === 'password' ? (
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <label className="text-[11px] font-semibold tracking-wider text-slate-600 uppercase" htmlFor="password">
+                    Password
+                  </label>
+                  <Link href="#" className="text-[12px] text-indigo-600 hover:text-indigo-700 hover:underline">
+                    Forgot password?
+                  </Link>
                 </div>
-                <input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="••••••••"
-                  disabled={isSubmitting}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className={`w-full rounded-md bg-slate-50 border ${errors.password ? 'border-red-400 ring-1 ring-red-400' : 'border-slate-200'} text-slate-900 pl-10 pr-10 py-2.5 text-sm transition-colors focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none placeholder:text-slate-400`}
-                />
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                    <Lock className="h-4 w-4" />
+                  </div>
+                  <input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="••••••••"
+                    disabled={isSubmitting}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className={`w-full rounded-md bg-slate-50 border ${errors.password ? 'border-red-400 ring-1 ring-red-400' : 'border-slate-200'} text-slate-900 pl-10 pr-10 py-2.5 text-sm transition-colors focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none placeholder:text-slate-400`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center justify-center text-slate-400 hover:text-slate-600"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+            ) : isOtpSent && (
+              <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                <label className="text-[11px] font-semibold tracking-wider text-slate-600 uppercase" htmlFor="otp">
+                  Verification Code
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                    <Lock className="h-4 w-4" />
+                  </div>
+                  <input
+                    id="otp"
+                    type="text"
+                    placeholder="Enter 6-digit code"
+                    maxLength={6}
+                    disabled={isSubmitting}
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
+                    className="w-full rounded-md bg-slate-50 border border-slate-200 text-slate-900 pl-10 pr-4 py-2.5 text-sm transition-colors focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none placeholder:text-slate-400"
+                  />
+                </div>
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors"
+                  onClick={() => setIsOtpSent(false)}
+                  className="text-[11px] text-indigo-600 font-medium hover:underline"
                 >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  Change email address
                 </button>
               </div>
-              {errors.password && (
-                <p className="text-[10px] font-medium text-red-500 mt-1 animate-in fade-in slide-in-from-top-1 duration-200">
-                  {errors.password[0]}
-                </p>
-              )}
-            </div>
+            )}
 
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full flex items-center justify-center gap-2 rounded-lg bg-indigo-600 py-2.5 text-sm font-semibold text-white shadow-sm hover:shadow-md hover:bg-indigo-700 transition-all disabled:opacity-70 disabled:cursor-not-allowed mt-2"
+              className="w-full flex items-center justify-center gap-2 rounded-lg bg-indigo-600 py-2.5 text-sm font-semibold text-white shadow-sm hover:shadow-md hover:bg-indigo-700 transition-all disabled:opacity-70 mt-2"
             >
-              {isSubmitting ? 'Signing in...' : 'Sign In'}
+              {isSubmitting ? (
+                loginMode === 'password' ? 'Signing in...' : (isOtpSent ? 'Verifying...' : 'Sending...')
+              ) : (
+                loginMode === 'password' ? 'Sign In' : (isOtpSent ? 'Verify & Sign In' : 'Send Code')
+              )}
               {!isSubmitting && <ArrowRight className="h-4 w-4" />}
             </button>
           </form>

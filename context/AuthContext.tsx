@@ -13,6 +13,8 @@ interface AuthContextType {
   isLoading: boolean;
   login: (email: string, password: string, redirectTo?: string) => Promise<void>;
   googleLogin: (token: string, redirectTo?: string) => Promise<void>;
+  requestOtp: (email: string) => Promise<void>;
+  verifyOtp: (email: string, otp: string, redirectTo?: string) => Promise<void>;
   logout: () => Promise<void>;
   fetchProfile: () => Promise<void>;
 }
@@ -75,6 +77,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const requestOtp = async (email: string) => {
+    setIsLoading(true);
+    try {
+      await authService.requestOtp(email);
+      toast.success('Verification code sent to your email.');
+    } catch (error: any) {
+      toast.error('Request Failed', {
+        description: error.response?.data?.message || error.data?.message || error.message || 'Failed to send verification code.'
+      });
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const verifyOtp = async (email: string, otp: string, redirectTo: string = '/dashboard') => {
+    setIsLoading(true);
+    try {
+      const resp = await authService.verifyOtp(email, otp);
+      setUser(resp.data.user);
+      toast.success('Verification successful.');
+      router.replace(redirectTo);
+    } catch (error: any) {
+      toast.error('Verification Failed', {
+        description: error.response?.data?.message || error.data?.message || error.message || 'Invalid verification code.'
+      });
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const logout = async () => {
     setIsLoading(true);
     try {
@@ -128,7 +162,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [pathname, isLoading, user, router]);
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, googleLogin, logout, fetchProfile }}>
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, googleLogin, requestOtp, verifyOtp, logout, fetchProfile }}>
       {children}
     </AuthContext.Provider>
   );

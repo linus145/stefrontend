@@ -6,7 +6,11 @@ import { Newspaper, Clock, TrendingUp, Star, Award, ChevronRight } from 'lucide-
 import { cn } from '@/lib/utils';
 import { getOptimizedImage } from '@/lib/imagekit';
 
-export function NewsView() {
+export interface NewsViewProps {
+  selectedNewsId?: string | null;
+}
+
+export function NewsView({ selectedNewsId }: NewsViewProps) {
   const [news, setNews] = useState<News[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState<'recent' | 'trending' | 'popular' | 'top'>('recent');
@@ -14,9 +18,14 @@ export function NewsView() {
   const fetchNews = async (category: typeof activeCategory) => {
     setLoading(true);
     try {
-      const catParam = category === 'recent' ? undefined : category;
-      const response = await newsService.getNews(1, catParam);
-      setNews(response.results);
+      if (selectedNewsId) {
+        const response = await newsService.getNewsDetail(selectedNewsId);
+        setNews([response]);
+      } else {
+        const catParam = category === 'recent' ? undefined : category;
+        const response = await newsService.getNews(1, catParam);
+        setNews(response.results);
+      }
     } catch (error) {
       console.error("Failed to fetch news:", error);
     } finally {
@@ -26,7 +35,7 @@ export function NewsView() {
 
   useEffect(() => {
     fetchNews(activeCategory);
-  }, [activeCategory]);
+  }, [activeCategory, selectedNewsId]);
 
   const categories = [
     { id: 'recent', label: 'Recent', icon: Clock },
@@ -109,7 +118,7 @@ export function NewsView() {
                   <h3 className="text-xl font-bold text-foreground leading-tight mb-3 group-hover:text-[#7C3AED] transition-colors">
                     {item.title}
                   </h3>
-                  <p className="text-[14px] text-muted-foreground leading-relaxed">
+                  <p className="text-[14px] text-muted-foreground leading-relaxed whitespace-pre-wrap">
                     {item.content}
                   </p>
                 </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Globe, Image as ImageIcon, Video, FileText, BarChart2, MoreHorizontal, Loader2, Lock, ChevronDown, Smile } from 'lucide-react';
+import { X, Globe, Image as ImageIcon, Video, FileText, BarChart2, MoreHorizontal, Loader2, Lock, ChevronDown, Smile, Wand2 } from 'lucide-react';
 import EmojiPicker, { Theme, EmojiClickData } from 'emoji-picker-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useDashboardTheme } from '@/context/DashboardThemeContext';
@@ -52,25 +52,41 @@ export function MobilePostView({ onClose, onPostSuccess }: MobilePostViewProps) 
     setContent(prev => prev + emojiData.emoji);
   };
 
+  const autoFormatContent = () => {
+    if (!content.trim()) return;
+    let formatted = content;
+    formatted = formatted.replace(/([.!?])([a-zA-Z])/g, '$1 $2');
+    formatted = formatted.replace(/([.!?])\s+([a-z])/g, (match, p1, p2) => p1 + ' ' + p2.toUpperCase());
+    formatted = formatted.replace(/([.!?])\s+([A-Z])/g, '$1\n\n$2');
+    formatted = formatted.replace(/([a-zA-Z.!?])\s*(\*\*.*?\*\*)/g, '$1\n\n$2');
+    formatted = formatted.replace(/(\*\*.*?\*\*)\s*([a-zA-Z])/g, '$1\n\n$2');
+    formatted = formatted.replace(/([^\n])\n([-*]|\d+\.) /g, '$1\n\n$2 ');
+    formatted = formatted.replace(/\n{3,}/g, '\n\n');
+    formatted = formatted.charAt(0).toUpperCase() + formatted.slice(1);
+    formatted = formatted.trim();
+    setContent(formatted);
+    toast.success('Formatted!');
+  };
+
   const handlePost = async () => {
     if ((!content.trim() && !mediaUrl) || isOverLimit || isTooShort || isPosting) {
       if (isTooShort) toast.error(`Post is too short. Please provide at least ${MIN_CHARS} characters.`);
       return;
     }
 
-    if (postType === 'NEWS' && !title.trim()) {
+    /* if (postType === 'NEWS' && !title.trim()) {
       toast.error('News articles require a headline.');
       return;
-    }
+    } */
 
     setIsPosting(true);
     try {
-      if (postType === 'NEWS') {
+      /* if (postType === 'NEWS') {
         const { newsService } = await import('@/services/news.service');
         await newsService.createNews({ title, content, media_url: mediaUrl });
-      } else {
+      } else { */
         await postService.createPost({ content, media_url: mediaUrl, visibility });
-      }
+      // }
       
       toast.success(`${postType === 'NEWS' ? 'News article' : 'Post'} created successfully!`);
       onPostSuccess();
@@ -132,7 +148,7 @@ export function MobilePostView({ onClose, onPostSuccess }: MobilePostViewProps) 
         >
           General Post
         </button>
-        <button
+        {/* <button
           onClick={() => setPostType('NEWS')}
           className={cn(
             "flex-1 py-2 text-[10px] font-bold uppercase tracking-wider rounded-sm transition-all",
@@ -140,14 +156,14 @@ export function MobilePostView({ onClose, onPostSuccess }: MobilePostViewProps) 
           )}
         >
           News Article
-        </button>
+        </button> */}
       </div>
 
       {/* Content Area */}
       <div className="flex-1 overflow-y-auto bg-background custom-scrollbar">
         <div className="p-4 sm:p-6 space-y-6">
           {/* Conditional Title Field for News */}
-          {postType === 'NEWS' && (
+          {/* {postType === 'NEWS' && (
             <div className="animate-in slide-in-from-top-2 duration-300">
               <input
                 type="text"
@@ -157,74 +173,84 @@ export function MobilePostView({ onClose, onPostSuccess }: MobilePostViewProps) 
                 className="w-full bg-slate-50 dark:bg-slate-900/50 border border-border rounded-sm py-4 px-4 text-lg font-bold focus:outline-none focus:ring-1 focus:ring-[#7C3AED]/20 focus:border-[#7C3AED] transition-all placeholder:text-muted-foreground/30"
               />
             </div>
-          )}
+          )} */}
           {/* User Identity */}
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-md bg-muted/50 border border-border overflow-hidden shadow-sm">
-              {user?.profile?.profile_image_url ? (
-                <img 
-                  src={`${getOptimizedImage(user.profile.profile_image_url)}&v=${user.updated_at ? new Date(user.updated_at).getTime() : Date.now()}`} 
-                  alt="Profile" 
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-primary font-bold text-lg">
-                  {user?.first_name?.charAt(0) || 'U'}
-                </div>
-              )}
-            </div>
-            <div>
-              <p className="text-[15px] font-bold text-foreground leading-none mb-1.5">{user?.first_name} {user?.last_name}</p>
-              <div className="relative">
-                <button 
-                  onClick={() => setIsVisibilityMenuOpen(!isVisibilityMenuOpen)}
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-muted/40 border border-border group active:bg-muted/60 transition-colors"
-                >
-                  {visibility === 'PUBLIC' ? (
-                    <Globe className="w-3 h-3 text-sky-500" />
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-md bg-muted/50 border border-border overflow-hidden shadow-sm">
+                  {user?.profile?.profile_image_url ? (
+                    <img 
+                      src={`${getOptimizedImage(user.profile.profile_image_url)}&v=${user.updated_at ? new Date(user.updated_at).getTime() : Date.now()}`} 
+                      alt="Profile" 
+                      className="w-full h-full object-cover"
+                    />
                   ) : (
-                    <Lock className="w-3 h-3 text-amber-500" />
-                  )}
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">
-                    {visibility === 'PUBLIC' ? 'Public' : 'Private'}
-                  </span>
-                  <ChevronDown className={cn("w-3 h-3 text-muted-foreground transition-transform", isVisibilityMenuOpen && "rotate-180")} />
-                </button>
-
-                {isVisibilityMenuOpen && (
-                  <>
-                    <div className="fixed inset-0 z-40" onClick={() => setIsVisibilityMenuOpen(false)} />
-                    <div className="absolute top-full left-0 mt-2 w-56 bg-card border border-border rounded-lg shadow-2xl z-50 py-1 animate-in fade-in slide-in-from-top-2 duration-200">
-                      <button
-                        onClick={() => { setVisibility('PUBLIC'); setIsVisibilityMenuOpen(false); }}
-                        className="w-full flex items-center gap-4 px-4 py-3 hover:bg-muted transition-colors text-left"
-                      >
-                        <div className="w-9 h-9 rounded-full bg-sky-500/10 flex items-center justify-center shrink-0">
-                          <Globe className="w-5 h-5 text-sky-500" />
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-[13px] font-bold text-foreground">Public</span>
-                          <span className="text-[11px] text-muted-foreground">Anyone can see this</span>
-                        </div>
-                      </button>
-                      <button
-                        onClick={() => { setVisibility('PRIVATE'); setIsVisibilityMenuOpen(false); }}
-                        className="w-full flex items-center gap-4 px-4 py-3 hover:bg-muted transition-colors text-left"
-                      >
-                        <div className="w-9 h-9 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0">
-                          <Lock className="w-5 h-5 text-amber-500" />
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-[13px] font-bold text-foreground">Private</span>
-                          <span className="text-[11px] text-muted-foreground">Only you can see this</span>
-                        </div>
-                      </button>
+                    <div className="w-full h-full flex items-center justify-center text-primary font-bold text-lg">
+                      {user?.first_name?.charAt(0) || 'U'}
                     </div>
-                  </>
-                )}
+                  )}
+                </div>
+                <div>
+                  <p className="text-[15px] font-bold text-foreground leading-none mb-1.5">{user?.first_name} {user?.last_name}</p>
+                  <div className="relative">
+                    <button 
+                      onClick={() => setIsVisibilityMenuOpen(!isVisibilityMenuOpen)}
+                      className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-muted/40 border border-border group active:bg-muted/60 transition-colors"
+                    >
+                      {visibility === 'PUBLIC' ? (
+                        <Globe className="w-3 h-3 text-sky-500" />
+                      ) : (
+                        <Lock className="w-3 h-3 text-amber-500" />
+                      )}
+                      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">
+                        {visibility === 'PUBLIC' ? 'Public' : 'Private'}
+                      </span>
+                      <ChevronDown className={cn("w-3 h-3 text-muted-foreground transition-transform", isVisibilityMenuOpen && "rotate-180")} />
+                    </button>
+    
+                    {isVisibilityMenuOpen && (
+                      <>
+                        <div className="fixed inset-0 z-40" onClick={() => setIsVisibilityMenuOpen(false)} />
+                        <div className="absolute top-full left-0 mt-2 w-56 bg-card border border-border rounded-lg shadow-2xl z-50 py-1 animate-in fade-in slide-in-from-top-2 duration-200">
+                          <button
+                            onClick={() => { setVisibility('PUBLIC'); setIsVisibilityMenuOpen(false); }}
+                            className="w-full flex items-center gap-4 px-4 py-3 hover:bg-muted transition-colors text-left"
+                          >
+                            <div className="w-9 h-9 rounded-full bg-sky-500/10 flex items-center justify-center shrink-0">
+                              <Globe className="w-5 h-5 text-sky-500" />
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-[13px] font-bold text-foreground">Public</span>
+                              <span className="text-[11px] text-muted-foreground">Anyone can see this</span>
+                            </div>
+                          </button>
+                          <button
+                            onClick={() => { setVisibility('PRIVATE'); setIsVisibilityMenuOpen(false); }}
+                            className="w-full flex items-center gap-4 px-4 py-3 hover:bg-muted transition-colors text-left"
+                          >
+                            <div className="w-9 h-9 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0">
+                              <Lock className="w-5 h-5 text-amber-500" />
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-[13px] font-bold text-foreground">Private</span>
+                              <span className="text-[11px] text-muted-foreground">Only you can see this</span>
+                            </div>
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
               </div>
+
+              <button 
+                onClick={autoFormatContent}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm bg-[#7C3AED]/10 text-[#7C3AED] hover:bg-[#7C3AED]/20 transition-colors text-[10px] font-bold uppercase tracking-wider border border-[#7C3AED]/20 active:scale-95 shadow-sm"
+              >
+                <Wand2 className="w-3 h-3" />
+                Format
+              </button>
             </div>
-          </div>
 
           {/* Text Input */}
           <div className="relative">

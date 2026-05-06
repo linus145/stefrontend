@@ -118,7 +118,7 @@ export function DashboardViewShell() {
           </div>
         );
       case 'news':
-        return <NewsView />;
+        return <NewsView selectedNewsId={selectedProfileId} />;
       case 'messages':
         return <MessagesView targetUserId={selectedProfileId} roomType="personal" />;
       case 'network':
@@ -183,6 +183,7 @@ export function DashboardViewShell() {
           <RightSidebar
             isCollapsed={isRightSidebarCollapsed}
             onToggle={() => setIsRightSidebarCollapsed(!isRightSidebarCollapsed)}
+            onNavigateNews={(newsId) => handleSectionChange('news', newsId)}
           />
         )}
 

@@ -87,7 +87,7 @@ export const useChat = (
 
     socket.onopen = () => {
       if (!isMounted.current) return;
-      console.log('[Chat WS] Connected to room', roomId);
+      // console.log('[Chat WS] Connected to room', roomId);
       setIsConnected(true);
       reconnectAttempt.current = 0;
     };
@@ -105,14 +105,14 @@ export const useChat = (
 
     socket.onclose = (event) => {
       if (!isMounted.current) return;
-      console.log(`[Chat WS] Disconnected. Code: ${event.code}`);
+      // console.log(`[Chat WS] Disconnected. Code: ${event.code}`);
       setIsConnected(false);
       socketRef.current = null;
 
       // Auto-reconnect for abnormal closures
       if (event.code !== 1000 && reconnectAttempt.current < MAX_RECONNECT) {
         const delay = Math.min(1000 * 2 ** reconnectAttempt.current, 30000);
-        console.log(`[Chat WS] Reconnecting in ${delay}ms (attempt ${reconnectAttempt.current + 1})`);
+        // console.log(`[Chat WS] Reconnecting in ${delay}ms (attempt ${reconnectAttempt.current + 1})`);
         reconnectAttempt.current += 1;
         reconnectTimer.current = setTimeout(() => connect(), delay);
       }

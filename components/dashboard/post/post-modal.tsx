@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { ImageIcon, Loader2, X, Globe, Smile, Calendar, Trash2, Lock, ChevronDown } from 'lucide-react';
+import { ImageIcon, Loader2, X, Globe, Smile, Calendar, Trash2, Lock, ChevronDown, Wand2 } from 'lucide-react';
 import EmojiPicker, { Theme, EmojiClickData } from 'emoji-picker-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
@@ -55,6 +55,40 @@ export function PostModal({ isOpen, onClose, onPostSuccess }: PostModalProps) {
     setContent(prev => prev + emojiData.emoji);
   };
 
+  const autoFormatContent = () => {
+    if (!content.trim()) return;
+    
+    let formatted = content;
+    
+    // 1. Fix missing spaces after punctuation (even if next letter is uppercase like "workflows.The")
+    formatted = formatted.replace(/([.!?])([a-zA-Z])/g, '$1 $2');
+    
+    // 2. Capitalize next lowercase letter after punctuation
+    formatted = formatted.replace(/([.!?])\s+([a-z])/g, (match, p1, p2) => p1 + ' ' + p2.toUpperCase());
+
+    // 3. Start every sentence on a new line (paragraph break)
+    formatted = formatted.replace(/([.!?])\s+([A-Z])/g, '$1\n\n$2');
+    
+    // 3. Make sure Markdown bolded headings have paragraph breaks around them
+    formatted = formatted.replace(/([a-zA-Z.!?])\s*(\*\*.*?\*\*)/g, '$1\n\n$2');
+    formatted = formatted.replace(/(\*\*.*?\*\*)\s*([a-zA-Z])/g, '$1\n\n$2');
+    
+    // 4. Format lines starting with -, *, or numbers as lists properly
+    formatted = formatted.replace(/([^\n])\n([-*]|\d+\.) /g, '$1\n\n$2 ');
+
+    // 5. Remove excessive newlines
+    formatted = formatted.replace(/\n{3,}/g, '\n\n');
+
+    // 6. Capitalize very first letter
+    formatted = formatted.charAt(0).toUpperCase() + formatted.slice(1);
+    
+    // 7. Trim
+    formatted = formatted.trim();
+
+    setContent(formatted);
+    toast.success('Text automatically formatted!');
+  };
+
   const charCount = content.length;
   const isOverLimit = charCount > MAX_CHARS;
   const isTooShort = charCount > 0 && charCount < MIN_CHARS;
@@ -71,12 +105,12 @@ export function PostModal({ isOpen, onClose, onPostSuccess }: PostModalProps) {
     }
 
     try {
-      if (postType === 'NEWS') {
+      /* if (postType === 'NEWS') {
         const { newsService } = await import('@/services/news.service');
         await newsService.createNews({ title, content, media_url: mediaUrl });
-      } else {
+      } else { */
         await postService.createPost({ content, media_url: mediaUrl, visibility });
-      }
+      // }
       
       toast.success(`${postType === 'NEWS' ? 'News article' : 'Post'} created successfully!`);
       setContent('');
@@ -128,7 +162,7 @@ export function PostModal({ isOpen, onClose, onPostSuccess }: PostModalProps) {
           >
             General Post
           </button>
-          <button
+          {/* <button
             onClick={() => setPostType('NEWS')}
             className={cn(
               "px-4 py-1.5 rounded-sm text-[11px] font-bold uppercase tracking-wider transition-all border",
@@ -138,12 +172,12 @@ export function PostModal({ isOpen, onClose, onPostSuccess }: PostModalProps) {
             )}
           >
             News Article
-          </button>
+          </button> */}
         </div>
 
         <div className="px-4 sm:px-6 py-4 space-y-4 max-h-[60vh] sm:max-h-[70vh] overflow-y-auto custom-scrollbar">
           {/* Conditional Title Field for News */}
-          {postType === 'NEWS' && (
+          {/* {postType === 'NEWS' && (
             <div className="animate-in slide-in-from-top-2 duration-300">
               <input
                 type="text"
@@ -153,77 +187,85 @@ export function PostModal({ isOpen, onClose, onPostSuccess }: PostModalProps) {
                 className="w-full bg-slate-50 dark:bg-slate-900/50 border border-border rounded-sm py-3 px-4 text-sm font-bold focus:outline-none focus:ring-1 focus:ring-[#7C3AED]/20 focus:border-[#7C3AED] transition-all placeholder:text-muted-foreground/40"
               />
             </div>
-          )}
+          )} */}
 
-          {/* User Profile Info */}
-          <div className="flex items-center gap-3">
-             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-muted/50 flex items-center justify-center text-primary font-bold border border-border shadow-sm overflow-hidden text-sm sm:text-base">
-                {user?.profile?.profile_image_url ? (
-                  <img 
-                    src={`${getOptimizedImage(user.profile.profile_image_url)}&v=${user.updated_at ? new Date(user.updated_at).getTime() : Date.now()}`} 
-                    alt={user?.first_name || 'User'} 
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  user?.first_name ? user.first_name.charAt(0) : 'U'
-                )}
-             </div>
-            <div className="space-y-0.5">
-              <p className="text-[13px] sm:text-[14px] font-bold text-foreground leading-none">{user?.first_name} {user?.last_name}</p>
-              <div className="relative">
-                <button 
-                  onClick={() => setIsVisibilityMenuOpen(!isVisibilityMenuOpen)}
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-muted/40 border border-border hover:bg-muted/60 transition-all group"
-                >
-                  {visibility === 'PUBLIC' ? (
-                    <Globe className="w-3 h-3 text-sky-500" />
+          {/* User Profile Info & Actions */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+               <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-muted/50 flex items-center justify-center text-primary font-bold border border-border shadow-sm overflow-hidden text-sm sm:text-base">
+                  {user?.profile?.profile_image_url ? (
+                    <img 
+                      src={`${getOptimizedImage(user.profile.profile_image_url)}&v=${user.updated_at ? new Date(user.updated_at).getTime() : Date.now()}`} 
+                      alt={user?.first_name || 'User'} 
+                      className="w-full h-full object-cover"
+                    />
                   ) : (
-                    <Lock className="w-3 h-3 text-amber-500" />
+                    user?.first_name ? user.first_name.charAt(0) : 'U'
                   )}
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">
-                    {visibility === 'PUBLIC' ? 'Public' : 'Private'}
-                  </span>
-                  <ChevronDown className={cn("w-3 h-3 text-muted-foreground transition-transform", isVisibilityMenuOpen && "rotate-180")} />
-                </button>
-
-                {isVisibilityMenuOpen && (
-                  <>
-                    <div className="fixed inset-0 z-40" onClick={() => setIsVisibilityMenuOpen(false)} />
-                    <div className="absolute top-full left-0 mt-1 w-48 bg-card border border-border rounded-lg shadow-xl z-50 py-1 animate-in fade-in zoom-in-95 duration-200">
-                      <button
-                        onClick={() => { setVisibility('PUBLIC'); setIsVisibilityMenuOpen(false); }}
-                        className="w-full flex items-center gap-3 px-3 py-2 hover:bg-muted transition-colors text-left"
-                      >
-                        <div className="w-8 h-8 rounded-full bg-sky-500/10 flex items-center justify-center shrink-0">
-                          <Globe className="w-4 h-4 text-sky-500" />
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-[12px] font-bold text-foreground">Public</span>
-                          <span className="text-[10px] text-muted-foreground">Anyone can see this post</span>
-                        </div>
-                      </button>
-                      <button
-                        onClick={() => { setVisibility('PRIVATE'); setIsVisibilityMenuOpen(false); }}
-                        className="w-full flex items-center gap-3 px-3 py-2 hover:bg-muted transition-colors text-left"
-                      >
-                        <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0">
-                          <Lock className="w-4 h-4 text-amber-500" />
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-[12px] font-bold text-foreground">Private</span>
-                          <span className="text-[10px] text-muted-foreground">Only you can see this post</span>
-                        </div>
-                      </button>
-                    </div>
-                  </>
-                )}
+               </div>
+              <div className="space-y-0.5">
+                <p className="text-[13px] sm:text-[14px] font-bold text-foreground leading-none">{user?.first_name} {user?.last_name}</p>
+                <div className="relative">
+                  <button 
+                    onClick={() => setIsVisibilityMenuOpen(!isVisibilityMenuOpen)}
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-muted/40 border border-border hover:bg-muted/60 transition-all group"
+                  >
+                    {visibility === 'PUBLIC' ? (
+                      <Globe className="w-3 h-3 text-sky-500" />
+                    ) : (
+                      <Lock className="w-3 h-3 text-amber-500" />
+                    )}
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">
+                      {visibility === 'PUBLIC' ? 'Public' : 'Private'}
+                    </span>
+                    <ChevronDown className={cn("w-3 h-3 text-muted-foreground transition-transform", isVisibilityMenuOpen && "rotate-180")} />
+                  </button>
+  
+                  {isVisibilityMenuOpen && (
+                    <>
+                      <div className="fixed inset-0 z-40" onClick={() => setIsVisibilityMenuOpen(false)} />
+                      <div className="absolute top-full left-0 mt-1 w-48 bg-card border border-border rounded-lg shadow-xl z-50 py-1 animate-in fade-in zoom-in-95 duration-200">
+                        <button
+                          onClick={() => { setVisibility('PUBLIC'); setIsVisibilityMenuOpen(false); }}
+                          className="w-full flex items-center gap-3 px-3 py-2 hover:bg-muted transition-colors text-left"
+                        >
+                          <div className="w-8 h-8 rounded-full bg-sky-500/10 flex items-center justify-center shrink-0">
+                            <Globe className="w-4 h-4 text-sky-500" />
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-[12px] font-bold text-foreground">Public</span>
+                            <span className="text-[10px] text-muted-foreground">Anyone can see this post</span>
+                          </div>
+                        </button>
+                        <button
+                          onClick={() => { setVisibility('PRIVATE'); setIsVisibilityMenuOpen(false); }}
+                          className="w-full flex items-center gap-3 px-3 py-2 hover:bg-muted transition-colors text-left"
+                        >
+                          <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0">
+                            <Lock className="w-4 h-4 text-amber-500" />
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-[12px] font-bold text-foreground">Private</span>
+                            <span className="text-[10px] text-muted-foreground">Only you can see this post</span>
+                          </div>
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
+
+            <button onClick={autoFormatContent} className="flex items-center gap-2 px-3 py-1.5 rounded-sm bg-[#7C3AED]/10 text-[#7C3AED] hover:bg-[#7C3AED]/20 transition-colors text-xs font-bold uppercase tracking-wider shadow-sm border border-[#7C3AED]/20" title="Auto-Format Content">
+              <Wand2 className="w-3.5 h-3.5" />
+              Auto-Format
+            </button>
           </div>
 
           {/* Text Area */}
           <div className="relative">
             <textarea
+              id="post-textarea"
               autoFocus
               value={content}
               onChange={(e) => setContent(e.target.value)}

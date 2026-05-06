@@ -9,6 +9,7 @@ export interface News {
   author_last_name: string;
   author_image_url?: string;
   title: string;
+  short_title?: string;
   content: string;
   media_url?: string;
   is_popular: boolean;
@@ -20,6 +21,7 @@ export interface News {
 
 export interface NewsCreateData {
   title: string;
+  short_title?: string;
   content: string;
   media_url?: string;
 }

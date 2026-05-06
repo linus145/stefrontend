@@ -370,7 +370,7 @@ export function MessagesView({
                   rows={1}
                 />
                 <div className="relative" ref={emojiPickerRef}>
-                  <button 
+                  <button
                     onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                     className={cn("p-2 text-muted-foreground hover:text-primary transition-colors hidden sm:block", showEmojiPicker && "text-primary")}
                   >

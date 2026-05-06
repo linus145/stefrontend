@@ -21,5 +21,9 @@ export const userService = {
 
   contactUser: (data: { target_user_id: string; message: string; send_email: boolean }): Promise<BaseAPIResponse<any>> => {
     return api.post<BaseAPIResponse<any>>('/auth/contact/', data);
+  },
+
+  bulkContactUsers: (data: { target_user_ids: string[]; message: string }): Promise<BaseAPIResponse<any>> => {
+    return api.post<BaseAPIResponse<any>>('/auth/contact/bulk/', data);
   }
 };

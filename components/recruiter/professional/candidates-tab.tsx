@@ -6,12 +6,13 @@ import { userService } from '@/services/user.service';
 import { jobsService } from '@/services/jobs.service';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import { Users, Sparkles, SlidersHorizontal } from 'lucide-react';
+import { Users, Sparkles, SlidersHorizontal, MessageSquare } from 'lucide-react';
 import { User } from '@/types/user.types';
 import { TalentAISearchPanel } from '../Aiscreening/talent-ai-search-panel';
 
 import { CandidatesFilterSidebar } from './candidates-filter-sidebar';
 import { ContactModal } from './contact-modal';
+import { BulkContactModal } from './bulk-contact-modal';
 import { TalentFeed } from './talent-feed';
 import { TalentPipeline } from './talent-pipeline';
 
@@ -26,8 +27,10 @@ export function CandidatesTab() {
   const [locationInput, setLocationInput] = useState('');
   const [skillInput, setSkillInput] = useState('');
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
   const [message, setMessage] = useState('');
   const [sendEmail, setSendEmail] = useState(true);
+  const [isBulkContactModalOpen, setIsBulkContactModalOpen] = useState(false);
   const [activeSubTab, setActiveSubTab] = useState<'talents' | 'pipeline' | 'settings'>('talents');
   const [isAISearchOpen, setIsAISearchOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(true);
@@ -63,6 +66,20 @@ export function CandidatesTab() {
     },
     onError: (error: any) => {
       toast.error(error?.response?.data?.message || 'Failed to send message.');
+    },
+  });
+
+  const bulkContactMutation = useMutation({
+    mutationFn: (data: { target_user_ids: string[]; message: string }) =>
+      userService.bulkContactUsers(data),
+    onSuccess: () => {
+      toast.success('Bulk messages sent successfully!');
+      setSelectedUsers([]);
+      setMessage('');
+      setIsBulkContactModalOpen(false);
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || 'Failed to send bulk messages.');
     },
   });
 
@@ -126,6 +143,25 @@ export function CandidatesTab() {
     });
   };
 
+  const toggleUserSelection = (user: User) => {
+    setSelectedUsers(prev => {
+      const isSelected = prev.some(u => u.id === user.id);
+      if (isSelected) {
+        return prev.filter(u => u.id !== user.id);
+      } else {
+        return [...prev, user];
+      }
+    });
+  };
+
+  const handleBulkContact = () => {
+    if (selectedUsers.length === 0 || !message.trim()) return;
+    bulkContactMutation.mutate({
+      target_user_ids: selectedUsers.map(u => u.id),
+      message
+    });
+  };
+
   return (
     <div className="flex min-h-screen bg-background">
       <CandidatesFilterSidebar
@@ -168,13 +204,24 @@ export function CandidatesTab() {
               <span className="text-sm font-semibold text-foreground">{totalItems} <span className="text-muted-foreground font-medium">Talents</span></span>
             </div>
           </div>
-          <button
-            onClick={() => setIsAISearchOpen(true)}
-            className="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-2.5 bg-blue-600/80 hover:bg-blue-600 backdrop-blur-md border border-white/20 dark:border-blue-400/20 text-white rounded-sm text-sm font-semibold transition-all shadow-[0_8px_30px_-4px_rgba(59,130,246,0.3)] hover:shadow-[0_8px_30px_-4px_rgba(59,130,246,0.5)] active:scale-95 group"
-          >
-            <Sparkles className="w-4 h-4 group-hover:rotate-12 group-hover:scale-110 transition-transform duration-300" />
-            AI Talent Search
-          </button>
+          <div className="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
+            {selectedUsers.length > 0 && (
+              <button
+                onClick={() => { setMessage(''); setIsBulkContactModalOpen(true); }}
+                className="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-2.5 bg-sky-500/90 hover:bg-sky-500 backdrop-blur-md border border-white/20 dark:border-sky-400/20 text-white rounded-sm text-sm font-semibold transition-all shadow-[0_8px_30px_-4px_rgba(14,165,233,0.3)] hover:shadow-[0_8px_30px_-4px_rgba(14,165,233,0.5)] active:scale-95 group"
+              >
+                <MessageSquare className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
+                Bulk Message ({selectedUsers.length})
+              </button>
+            )}
+            <button
+              onClick={() => setIsAISearchOpen(true)}
+              className="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-2.5 bg-blue-600/80 hover:bg-blue-600 backdrop-blur-md border border-white/20 dark:border-blue-400/20 text-white rounded-sm text-sm font-semibold transition-all shadow-[0_8px_30px_-4px_rgba(59,130,246,0.3)] hover:shadow-[0_8px_30px_-4px_rgba(59,130,246,0.5)] active:scale-95 group"
+            >
+              <Sparkles className="w-4 h-4 group-hover:rotate-12 group-hover:scale-110 transition-transform duration-300" />
+              AI Talent Search
+            </button>
+          </div>
         </div>
 
         {/* Dynamic Sub-Tabs */}
@@ -213,6 +260,8 @@ export function CandidatesTab() {
             saveToPipelineMutation={saveToPipelineMutation}
             setSelectedUser={setSelectedUser}
             setSendEmail={setSendEmail}
+            selectedUsers={selectedUsers}
+            toggleUserSelection={toggleUserSelection}
           />
         ) : activeSubTab === 'pipeline' ? (
           <div className="space-y-6">
@@ -222,6 +271,10 @@ export function CandidatesTab() {
               unsaveFromPipelineMutation={unsaveFromPipelineMutation}
               setSelectedUser={setSelectedUser}
               setSendEmail={setSendEmail}
+              selectedUsers={selectedUsers}
+              toggleUserSelection={toggleUserSelection}
+              setSelectedUsers={setSelectedUsers}
+              onOpenBulkContact={() => { setMessage(''); setIsBulkContactModalOpen(true); }}
             />
           </div>
         ) : (
@@ -252,6 +305,21 @@ export function CandidatesTab() {
           setSendEmail={setSendEmail}
           handleContact={handleContact}
           isPending={contactMutation.isPending}
+        />
+      )}
+
+      {/* Bulk Contact Modal */}
+      {isBulkContactModalOpen && selectedUsers.length > 0 && (
+        <BulkContactModal
+          selectedUsers={selectedUsers}
+          setSelectedUsers={(users) => {
+            setSelectedUsers(users);
+            if (users.length === 0) setIsBulkContactModalOpen(false);
+          }}
+          message={message}
+          setMessage={setMessage}
+          handleBulkContact={handleBulkContact}
+          isPending={bulkContactMutation.isPending}
         />
       )}
     </div>

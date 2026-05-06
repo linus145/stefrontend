@@ -16,12 +16,15 @@ interface TalentFeedProps {
   saveToPipelineMutation: any;
   setSelectedUser: (user: User) => void;
   setSendEmail: (val: boolean) => void;
+  selectedUsers: User[];
+  toggleUserSelection: (user: User) => void;
 }
 
 export function TalentFeed({
   isLoading, paginatedUsers, pipelineMap,
   totalItems, startIndex, itemsPerPage, currentPage, totalPages,
-  handlePageChange, saveToPipelineMutation, setSelectedUser, setSendEmail
+  handlePageChange, saveToPipelineMutation, setSelectedUser, setSendEmail,
+  selectedUsers, toggleUserSelection
 }: TalentFeedProps) {
   if (isLoading) {
     return (
@@ -51,6 +54,15 @@ export function TalentFeed({
             key={user.id}
             className="bg-card border border-border rounded-sm p-4 hover:border-blue-500/30 transition-colors group flex flex-nowrap items-center gap-4 lg:gap-6"
           >
+            <div className="flex items-center pr-2">
+              <input 
+                type="checkbox" 
+                checked={selectedUsers.some(u => u.id === user.id)}
+                onChange={() => toggleUserSelection(user)}
+                className="w-4 h-4 rounded-sm border-border text-blue-500 focus:ring-blue-500/50 cursor-pointer appearance-none border-2 checked:bg-blue-500 checked:border-blue-500 transition-all flex items-center justify-center relative
+                  after:content-[''] after:absolute after:opacity-0 checked:after:opacity-100 after:w-1.5 after:h-2.5 after:border-r-2 after:border-b-2 after:border-white after:rotate-45 after:-mt-0.5"
+              />
+            </div>
             {/* Profile Image & Basic Info */}
             <div className="flex items-center gap-4 flex-[1.5] min-w-0">
               <div className="w-14 h-14 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0 border border-blue-500/10">

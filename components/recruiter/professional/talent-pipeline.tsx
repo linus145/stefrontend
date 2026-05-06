@@ -8,6 +8,10 @@ interface TalentPipelineProps {
   unsaveFromPipelineMutation: any;
   setSelectedUser: (user: User) => void;
   setSendEmail: (val: boolean) => void;
+  selectedUsers: User[];
+  toggleUserSelection: (user: User) => void;
+  setSelectedUsers: (users: User[]) => void;
+  onOpenBulkContact: () => void;
 }
 
 export function TalentPipeline({
@@ -15,7 +19,11 @@ export function TalentPipeline({
   updateStatusMutation,
   unsaveFromPipelineMutation,
   setSelectedUser,
-  setSendEmail
+  setSendEmail,
+  selectedUsers,
+  toggleUserSelection,
+  setSelectedUsers,
+  onOpenBulkContact
 }: TalentPipelineProps) {
   if (!pipelineResponse?.data || pipelineResponse.data.length === 0) {
     return (
@@ -29,13 +37,72 @@ export function TalentPipeline({
     );
   }
 
+  const pipelineTalents = (pipelineResponse.data || []).map((entry: any) => entry.talent);
+  
+  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) {
+      const newSelected = [...selectedUsers];
+      pipelineTalents.forEach((talent: User) => {
+        if (!newSelected.some(u => u.id === talent.id)) {
+          newSelected.push(talent);
+        }
+      });
+      setSelectedUsers(newSelected);
+    } else {
+      const pipelineIds = pipelineTalents.map((t: User) => t.id);
+      setSelectedUsers(selectedUsers.filter(u => !pipelineIds.includes(u.id)));
+    }
+  };
+
+  const isAllSelected = pipelineTalents.length > 0 && pipelineTalents.every((t: User) => selectedUsers.some(u => u.id === t.id));
+
   return (
     <div className="space-y-3">
+      {/* Top Action Bar */}
+      <div className="flex items-center gap-4 py-3 px-4 bg-muted/20 border border-border rounded-sm overflow-x-auto scrollbar-none whitespace-nowrap">
+        <div className="flex items-center pr-2">
+          <input 
+            type="checkbox" 
+            checked={isAllSelected}
+            onChange={handleSelectAll}
+            className="w-4 h-4 rounded-sm border-border text-blue-500 focus:ring-blue-500/50 cursor-pointer appearance-none border-2 checked:bg-blue-500 checked:border-blue-500 transition-all flex items-center justify-center relative
+              after:content-[''] after:absolute after:opacity-0 checked:after:opacity-100 after:w-1.5 after:h-2.5 after:border-r-2 after:border-b-2 after:border-white after:rotate-45 after:-mt-0.5"
+          />
+        </div>
+        {selectedUsers.length > 0 ? (
+          <div className="flex items-center gap-4">
+            <span className="text-xs font-bold text-foreground">{selectedUsers.length} SELECTED</span>
+            <div className="h-4 w-px bg-border" />
+            <button className="text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors opacity-50 cursor-not-allowed">Archive ({selectedUsers.length})</button>
+            <button 
+              onClick={onOpenBulkContact}
+              className="text-xs font-bold text-foreground hover:text-blue-500 transition-colors bg-blue-500/10 px-2 py-1 rounded-sm border border-blue-500/20"
+            >
+              Message ({selectedUsers.length})
+            </button>
+            <button className="text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors opacity-50 cursor-not-allowed">Change stage</button>
+            <button className="text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors opacity-50 cursor-not-allowed">Save to another project ({selectedUsers.length})</button>
+            <button className="text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors opacity-50 cursor-not-allowed">Add note ({selectedUsers.length})</button>
+          </div>
+        ) : (
+          <span className="text-xs font-medium text-muted-foreground">Select talents to perform bulk actions</span>
+        )}
+      </div>
+
       {(pipelineResponse.data as any[]).map((entry) => (
           <div
             key={entry.id}
             className="bg-card border border-border rounded-sm p-4 hover:border-blue-500/30 transition-colors group flex flex-nowrap items-center gap-4 lg:gap-6"
           >
+            <div className="flex items-center pr-2">
+              <input 
+                type="checkbox" 
+                checked={selectedUsers.some(u => u.id === entry.talent.id)}
+                onChange={() => toggleUserSelection(entry.talent)}
+                className="w-4 h-4 rounded-sm border-border text-blue-500 focus:ring-blue-500/50 cursor-pointer appearance-none border-2 checked:bg-blue-500 checked:border-blue-500 transition-all flex items-center justify-center relative
+                  after:content-[''] after:absolute after:opacity-0 checked:after:opacity-100 after:w-1.5 after:h-2.5 after:border-r-2 after:border-b-2 after:border-white after:rotate-45 after:-mt-0.5"
+              />
+            </div>
             <div className="flex items-center gap-4 flex-[1.5] min-w-0">
               <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0 border border-blue-500/10">
                 {entry.talent.profile_image_url ? (

@@ -1,24 +1,32 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Search, Plus, Send, Paperclip, Smile, Phone, Video, Info, Loader2, MessageSquare, ArrowLeft } from 'lucide-react';
-import EmojiPicker, { Theme, EmojiClickData } from 'emoji-picker-react';
+import { Loader2, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { chatService, ChatRoom, Message } from '@/services/chat.service';
 import { useAuth } from '@/hooks/useAuth';
 import { useDashboardTheme } from '@/context/DashboardThemeContext';
 import { useChat, WsMessage } from '@/hooks/useChat';
-import { format } from 'date-fns';
+import { EmojiClickData } from 'emoji-picker-react';
+import { toast } from 'sonner';
+
+// Import extracted components
+import { RoomSidebar } from './room-sidebar';
+import { ChatHeader } from './chat-header';
+import { ChatThread } from './chat-thread';
+import { ChatInput } from './chat-input';
 
 export function MessagesView({
   isCollapsed,
   targetUserId,
-  roomType
+  roomType,
+  chatIntent
 }: {
   isCollapsed?: boolean,
   targetUserId?: string | null,
-  roomType?: 'connection' | 'direct' | 'personal'
+  roomType?: 'connection' | 'direct' | 'personal',
+  chatIntent?: 'connection' | 'direct' | null
 }) {
   const { user: currentUser } = useAuth();
   const { isDark } = useDashboardTheme();
@@ -29,28 +37,6 @@ export function MessagesView({
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const emojiPickerRef = useRef<HTMLDivElement>(null);
-
-  // ─── Initialize chat with target user if provided ───
-  useEffect(() => {
-    if (targetUserId) {
-      chatService.initialize1to1(targetUserId)
-        .then(room => {
-          setActiveRoomId(room.id);
-          queryClient.invalidateQueries({ queryKey: ['chat-rooms', roomType] });
-        })
-        .catch(() => {
-          // Fallback: use direct messaging (no connection required)
-          chatService.sendDirectMessage(targetUserId)
-            .then(room => {
-              setActiveRoomId(room.id);
-              queryClient.invalidateQueries({ queryKey: ['chat-rooms', roomType] });
-            })
-            .catch(err => {
-              console.error("Failed to initialize chat:", err);
-            });
-        });
-    }
-  }, [targetUserId, queryClient, roomType]);
 
   // ─── Single source-of-truth for displayed messages ───
   const [displayMessages, setDisplayMessages] = useState<Message[]>([]);
@@ -63,6 +49,82 @@ export function MessagesView({
   });
 
   const rooms: ChatRoom[] = Array.isArray(roomsData) ? roomsData : [];
+
+  // Track whether we've already resolved a room for this targetUserId
+  const initDoneRef = useRef<string | null>(null);
+
+  // ─── Initialize chat with target user if provided ───
+  // Uses chatIntent to determine which room type to prefer.
+  // Only runs ONCE per unique targetUserId (guarded by initDoneRef).
+  useEffect(() => {
+    if (!targetUserId || isLoadingRooms) return;
+    // Skip if we already resolved this targetUserId
+    if (initDoneRef.current === targetUserId) return;
+
+    // Helper: find existing room by type
+    const findRoom = (type: string) => rooms.find(r =>
+      r.room_type === type &&
+      r.participants_data?.some(p => String(p.id) === String(targetUserId))
+    );
+
+    // If intent is known, search for that room type first
+    if (chatIntent === 'direct') {
+      const directRoom = findRoom('direct');
+      if (directRoom) {
+        initDoneRef.current = targetUserId;
+        setActiveRoomId(directRoom.id);
+        return;
+      }
+    } else if (chatIntent === 'connection') {
+      const connRoom = findRoom('connection');
+      if (connRoom) {
+        initDoneRef.current = targetUserId;
+        setActiveRoomId(connRoom.id);
+        return;
+      }
+    }
+
+    // Fallback: search any room with this user (prefer connection > direct)
+    const anyRoom = findRoom('connection') || findRoom('direct');
+    if (anyRoom) {
+      initDoneRef.current = targetUserId;
+      setActiveRoomId(anyRoom.id);
+      return;
+    }
+
+    // No existing room found — create one based on intent
+    // Mark as done BEFORE the API call to prevent duplicate calls
+    initDoneRef.current = targetUserId;
+
+    if (chatIntent === 'direct') {
+      chatService.sendDirectMessage(targetUserId)
+        .then(room => {
+          setActiveRoomId(room.id);
+          queryClient.invalidateQueries({ queryKey: ['chat-rooms', roomType] });
+        })
+        .catch(err => console.error('Failed to create direct chat:', err));
+    } else {
+      // Default: try connection first, then direct
+      chatService.initialize1to1(targetUserId)
+        .then(room => {
+          setActiveRoomId(room.id);
+          queryClient.invalidateQueries({ queryKey: ['chat-rooms', roomType] });
+        })
+        .catch(() => {
+          chatService.sendDirectMessage(targetUserId)
+            .then(room => {
+              setActiveRoomId(room.id);
+              queryClient.invalidateQueries({ queryKey: ['chat-rooms', roomType] });
+            })
+            .catch(err => console.error('Failed to initialize chat:', err));
+        });
+    }
+  }, [targetUserId, isLoadingRooms, rooms, queryClient, roomType, chatIntent]);
+
+  // Reset the init guard when targetUserId changes
+  useEffect(() => {
+    initDoneRef.current = null;
+  }, [targetUserId]);
 
   // ─── Fetch message history for the active room ───
   const { data: historyData, isLoading: isLoadingHistory } = useQuery({
@@ -126,8 +188,8 @@ export function MessagesView({
   }, [rooms, activeRoomId, isLoadingRooms]);
 
   // ─── Derived data ───
-  const activeRoom = rooms.find((r: ChatRoom) => r.id === activeRoomId);
-  const otherParticipant = activeRoom?.participants_data?.find((p: any) => p.id !== currentUser?.id);
+  const activeRoom = rooms.find((r: ChatRoom) => String(r.id) === String(activeRoomId));
+  const otherParticipant = activeRoom?.participants_data?.find((p: any) => String(p.id) !== String(currentUser?.id));
 
   // ─── Handlers ───
   const handleRoomSwitch = (id: string) => {
@@ -194,80 +256,13 @@ export function MessagesView({
     <div className={cn(
       "flex-1 h-[calc(100vh-64px)] bg-background flex transition-all duration-300 ease-in-out"
     )}>
-      {/* Conversations Sidebar - hidden on mobile when a chat is active */}
-      <div className={cn(
-        "w-full md:w-72 border-r border-border flex flex-col pt-6 bg-sidebar/50 shrink-0",
-        activeRoomId ? "hidden md:flex" : "flex"
-      )}>
-        <div className="pl-4 sm:pl-5 pr-4 sm:pr-6 mb-6 flex items-center justify-between">
-          <h2 className="text-lg sm:text-xl font-semibold text-foreground tracking-tight">Messages</h2>
-          <button className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary hover:bg-primary/20 transition-all shadow-sm">
-            <Plus className="w-4 h-4" />
-          </button>
-        </div>
-
-        {/* Search */}
-        <div className="pl-4 sm:pl-5 pr-4 sm:pr-6 mb-6">
-          <div className="relative group">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-            <input
-              type="text"
-              placeholder="Search..."
-              className="w-full bg-muted/40 border border-border rounded-xl py-2 pl-9 pr-4 text-xs text-foreground placeholder:text-muted-foreground focus:ring-1 focus:ring-primary/20 focus:border-primary/30 outline-none transition-all"
-            />
-          </div>
-        </div>
-
-        {/* Room List */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar px-3 space-y-1">
-          {rooms.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <MessageSquare className="w-8 h-8 text-muted-foreground mb-3 opacity-20" />
-              <p className="text-xs text-muted-foreground max-w-[160px] font-medium leading-relaxed">No conversations yet.</p>
-            </div>
-          ) : (
-            rooms.map((room: ChatRoom) => {
-              const partner = room.participants_data?.find((p: any) => p.id !== currentUser?.id);
-              return (
-                <div
-                  key={room.id}
-                  onClick={() => handleRoomSwitch(room.id)}
-                  className={cn(
-                    "flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all border border-transparent",
-                    activeRoomId === room.id
-                      ? "bg-primary/10 shadow-sm"
-                      : "hover:bg-muted/40"
-                  )}
-                >
-                  <div className="relative shrink-0">
-                    <img
-                      src={partner?.profile?.profile_image_url || `https://ui-avatars.com/api/?name=${partner?.first_name || 'U'}&background=818CF8&color=fff`}
-                      alt={partner?.first_name}
-                      className="w-10 h-10 rounded-xl object-cover border border-border"
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-center mb-0.5">
-                      <h4 className={cn(
-                        "text-[13px] font-semibold truncate tracking-tight",
-                        activeRoomId === room.id ? "text-primary" : "text-foreground"
-                      )}>
-                        {room.is_group ? room.name : `${partner?.first_name || ''} ${partner?.last_name || ''}`.trim() || 'User'}
-                      </h4>
-                      <span className="text-[10px] text-muted-foreground font-medium shrink-0 ml-2">
-                        {room.latest_message ? format(new Date(room.latest_message.created_at), 'HH:mm') : ''}
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-muted-foreground truncate line-clamp-1 font-normal opacity-80">
-                      {room.latest_message?.text || 'No messages yet'}
-                    </p>
-                  </div>
-                </div>
-              );
-            })
-          )}
-        </div>
-      </div>
+      {/* Conversations Sidebar */}
+      <RoomSidebar
+        rooms={rooms}
+        activeRoomId={activeRoomId}
+        currentUser={currentUser}
+        handleRoomSwitch={handleRoomSwitch}
+      />
 
       {/* Main Chat Panel */}
       <div className={cn(
@@ -276,129 +271,33 @@ export function MessagesView({
       )}>
         {activeRoomId && activeRoom ? (
           <>
-            {/* Chat Header */}
-            <div className="px-4 sm:px-8 py-4 border-b border-border flex items-center justify-between bg-background/80 backdrop-blur-md relative z-10">
-              <div className="flex items-center gap-3">
-                {/* Mobile back button */}
-                <button
-                  onClick={handleBackToList}
-                  className="w-9 h-9 flex items-center justify-center rounded-xl border border-border text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all md:hidden"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                </button>
-                <div className="w-10 h-10 rounded-xl overflow-hidden border border-border shadow-sm">
-                  <img
-                    src={otherParticipant?.profile?.profile_image_url || `https://ui-avatars.com/api/?name=${otherParticipant?.first_name || 'U'}&background=818CF8&color=fff`}
-                    alt=""
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-foreground tracking-tight">
-                    {activeRoom?.is_group ? activeRoom.name : `${otherParticipant?.first_name || ''} ${otherParticipant?.last_name || ''}`.trim() || 'User'}
-                  </h3>
-                  <div className="flex items-center gap-1.5">
-                    <span className={cn(
-                      "w-1.5 h-1.5 rounded-full",
-                      isConnected ? "bg-emerald-500 animate-pulse" : "bg-amber-400"
-                    )} />
-                    <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
-                      {isConnected ? 'Online' : 'Reconnecting...'}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 sm:gap-3">
-                <button className="w-9 h-9 hidden sm:flex items-center justify-center rounded-xl border border-border text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all shadow-sm">
-                  <Phone className="w-4 h-4" />
-                </button>
-                <button className="w-9 h-9 hidden sm:flex items-center justify-center rounded-xl border border-border text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all shadow-sm">
-                  <Video className="w-4 h-4" />
-                </button>
-                <button className="w-9 h-9 flex items-center justify-center rounded-xl border border-border text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all shadow-sm">
-                  <Info className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
+            <ChatHeader
+              activeRoom={activeRoom}
+              otherParticipant={otherParticipant}
+              isConnected={isConnected}
+              handleBackToList={handleBackToList}
+            />
 
-            {/* Messages Thread */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-8 space-y-6 relative z-10">
-              {isSwitching || isLoadingHistory ? (
-                <div className="h-full flex items-center justify-center">
-                  <div className="flex flex-col items-center gap-3">
-                    <Loader2 className="w-8 h-8 text-primary animate-spin" />
-                    <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground opacity-50">Loading...</p>
-                  </div>
-                </div>
-              ) : displayMessages.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-center opacity-50">
-                  <div className="w-12 h-12 rounded-2xl bg-muted border border-border flex items-center justify-center text-muted-foreground mb-4">
-                    <Send className="w-6 h-6" />
-                  </div>
-                  <p className="text-sm text-muted-foreground">Start the conversation</p>
-                </div>
-              ) : (
-                <>
-                  {displayMessages.map((msg: Message, idx: number) => (
-                    <MessageItem
-                      key={`${msg.id}-${idx}`}
-                      msgId={msg.id}
-                      isMine={msg.sender === currentUser?.id || msg.sender_data?.id === currentUser?.id}
-                      text={msg.text}
-                      time={format(new Date(msg.created_at), 'HH:mm')}
-                      avatar={msg.sender_data?.profile?.profile_image_url || `https://ui-avatars.com/api/?name=${msg.sender_data?.first_name || 'U'}&background=818CF8&color=fff`}
-                      onDelete={() => handleDeleteMessage(msg.id)}
-                    />
-                  ))}
-                  <div ref={messagesEndRef} />
-                </>
-              )}
-            </div>
+            <ChatThread
+              isSwitching={isSwitching}
+              isLoadingHistory={isLoadingHistory}
+              displayMessages={displayMessages}
+              currentUser={currentUser}
+              handleDeleteMessage={handleDeleteMessage}
+              messagesEndRef={messagesEndRef}
+            />
 
-            {/* Chat Input */}
-            <div className="p-3 sm:p-6 bg-gradient-to-t from-background via-background to-transparent relative z-10">
-              <div className="max-w-4xl mx-auto flex items-end gap-2 bg-muted/40 border border-border rounded-lg p-2 sm:p-3 shadow-lg backdrop-blur-xl group-focus-within:border-primary/30 transition-all">
-                <button className="p-2 text-muted-foreground hover:text-primary transition-colors hidden sm:block">
-                  <Paperclip className="w-5 h-5 opacity-60" />
-                </button>
-                <textarea
-                  value={messageInput}
-                  onChange={(e) => setMessageInput(e.target.value)}
-                  onKeyDown={handleKeyPress}
-                  placeholder="Type a message..."
-                  className="flex-1 bg-transparent border-none outline-none py-2 text-sm text-foreground placeholder:text-muted-foreground resize-none max-h-32 font-normal"
-                  rows={1}
-                />
-                <div className="relative" ref={emojiPickerRef}>
-                  <button
-                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                    className={cn("p-2 text-muted-foreground hover:text-primary transition-colors hidden sm:block", showEmojiPicker && "text-primary")}
-                  >
-                    <Smile className="w-5 h-5 opacity-60" />
-                  </button>
-                  {showEmojiPicker && (
-                    <div className="absolute bottom-full right-0 mb-4 z-[100] shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-                      <EmojiPicker
-                        onEmojiClick={onEmojiClick}
-                        theme={isDark ? Theme.DARK : Theme.LIGHT}
-                        width={250}
-                        height={300}
-                        skinTonesDisabled
-                        searchDisabled
-                        previewConfig={{ showPreview: false }}
-                      />
-                    </div>
-                  )}
-                </div>
-                <button
-                  onClick={handleSend}
-                  disabled={!messageInput.trim()}
-                  className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-primary-foreground shadow-sm hover:opacity-90 active:scale-95 transition-all disabled:opacity-30 shrink-0"
-                >
-                  <Send className="w-4.5 h-4.5" />
-                </button>
-              </div>
-            </div>
+            <ChatInput
+              messageInput={messageInput}
+              setMessageInput={setMessageInput}
+              handleKeyPress={handleKeyPress}
+              handleSend={handleSend}
+              showEmojiPicker={showEmojiPicker}
+              setShowEmojiPicker={setShowEmojiPicker}
+              onEmojiClick={onEmojiClick}
+              isDark={isDark}
+              emojiPickerRef={emojiPickerRef}
+            />
           </>
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
@@ -409,68 +308,6 @@ export function MessagesView({
             <p className="text-sm text-muted-foreground max-w-[240px] leading-relaxed">Select a conversation from the list to start chatting.</p>
           </div>
         )}
-      </div>
-    </div>
-  );
-}
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, Trash2 } from 'lucide-react';
-import { toast } from 'sonner';
-
-function MessageItem({
-  msgId,
-  isMine,
-  text,
-  time,
-  avatar,
-  onDelete
-}: {
-  msgId: string;
-  isMine: boolean;
-  text: string;
-  time: string;
-  avatar?: string;
-  onDelete: () => void;
-}) {
-  return (
-    <div className={cn("flex gap-3 max-w-[90%] sm:max-w-[85%] items-end group/item", isMine ? "ml-auto flex-row-reverse" : "")}>
-      {!isMine && (
-        <img src={avatar} className="w-8 h-8 rounded-lg object-cover shrink-0 border border-border shadow-sm" alt="" />
-      )}
-      <div className={cn("flex flex-col relative", isMine ? "items-end" : "items-start")}>
-        <div className={cn(
-          "px-3 sm:px-4 py-2.5 sm:py-3 rounded-md text-[13px] leading-relaxed shadow-sm font-normal",
-          isMine
-            ? "bg-primary/10 text-foreground rounded-br-none border border-primary/20"
-            : "bg-muted/50 text-foreground border border-border rounded-bl-none"
-        )}>
-          {text}
-        </div>
-
-        {/* Action Menu (Only for own messages) */}
-        {isMine && (
-          <div className="absolute -left-10 top-1/2 -translate-y-1/2 opacity-0 group-hover/item:opacity-100 transition-opacity hidden sm:block">
-            <DropdownMenu>
-              <DropdownMenuTrigger className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-muted/80 text-muted-foreground outline-none transition-all">
-                <MoreHorizontal className="w-4 h-4" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-40 bg-card border-border rounded-xl shadow-xl">
-                <DropdownMenuItem onClick={onDelete} className="flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium text-destructive cursor-pointer hover:bg-destructive/10">
-                  <Trash2 className="w-3.5 h-3.5" />
-                  <span>Delete message</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        )}
-
-        <span className="text-[10px] font-medium text-muted-foreground opacity-50 mt-1.5 px-1">{time}</span>
       </div>
     </div>
   );

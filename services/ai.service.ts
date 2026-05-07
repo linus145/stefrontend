@@ -5,6 +5,9 @@ export interface AIScreeningReport {
   job_id: string;
   job_title: string;
   results: {
+    status?: string;
+    count?: number;
+    report_id?: string;
     processed_count: number;
     total_applicants: number;
     top_candidates: Array<{
@@ -24,5 +27,13 @@ export interface AIScreeningReport {
 export const aiService = {
   getScreeningHistory: (): Promise<{ data: AIScreeningReport[] }> => {
     return api.get<{ data: AIScreeningReport[] }>('/ai/screening/history/');
+  },
+
+  analyzeResumes: (jobId: string): Promise<any> => {
+    return api.post(`/ai/screening/analyze/${jobId}/`, {});
+  },
+
+  deleteScreeningReport: (reportId: string): Promise<any> => {
+    return api.delete(`/ai/screening/report/${reportId}/`);
   }
 };

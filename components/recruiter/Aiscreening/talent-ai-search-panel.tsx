@@ -190,9 +190,11 @@ export function TalentAISearchPanel({ isOpen, onClose, onSearchResults }: Talent
                     </div>
                   ) : (
                     <div className="w-full space-y-4 animate-in fade-in">
-                      <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-sm p-4">
-                         <p className="text-xs text-emerald-600 dark:text-emerald-400 font-bold mb-1">Agent Reasoning</p>
-                         <p className="text-[13px] font-medium text-foreground/80 leading-relaxed">{msg.content}</p>
+                      <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-sm p-4">
+                         <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-3">Agent Reasoning</p>
+                         <p className="text-[13px] font-medium text-foreground/80 leading-relaxed tracking-tight italic">
+                           "{msg.content}"
+                         </p>
                       </div>
                       
                       {msg.candidates !== undefined && (
@@ -201,16 +203,16 @@ export function TalentAISearchPanel({ isOpen, onClose, onSearchResults }: Talent
                             Top Matches ({msg.count})
                           </p>
                           
-                          <div className="space-y-3 pb-2">
-                            {msg.candidates.map((candidate: any) => (
-                              <div key={candidate.id} className="p-3 bg-muted/20 border border-border rounded-sm hover:border-blue-500/30 transition-all cursor-pointer shadow-sm">
-                                <div className="flex justify-between items-start mb-1">
-                                  <h4 className="text-[13px] font-bold text-foreground">{candidate.name}</h4>
-                                  <span className="text-[9px] font-bold px-2 py-0.5 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-full uppercase tracking-wider">{candidate.role}</span>
-                                </div>
-                                <p className="text-[11px] text-muted-foreground font-medium">{candidate.email}</p>
-                              </div>
-                            ))}
+                          <div className="space-y-2 pb-2">
+                             {msg.candidates.map((candidate: any) => (
+                               <div key={candidate.id} className="p-3.5 bg-muted/20 border border-border rounded-sm hover:border-blue-500/30 transition-all cursor-pointer shadow-sm group/cand">
+                                 <div className="flex justify-between items-start mb-1">
+                                   <h4 className="text-[12px] font-black text-foreground uppercase tracking-tight group-hover/cand:text-blue-500 transition-colors">{candidate.name}</h4>
+                                   <span className="text-[9px] font-black px-2 py-0.5 bg-blue-500/10 text-blue-500 rounded-sm uppercase tracking-widest">{candidate.role}</span>
+                                 </div>
+                                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{candidate.email}</p>
+                               </div>
+                             ))}
                             {msg.candidates.length === 0 && (
                               <p className="text-xs text-muted-foreground text-center py-4">No matching candidates found.</p>
                             )}

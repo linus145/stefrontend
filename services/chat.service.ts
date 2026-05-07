@@ -9,6 +9,9 @@ export interface ChatParticipant {
   profile?: {
     profile_image_url?: string;
     headline?: string;
+    company_name?: string; // Added for HR/Recruiter identification
+    hr_name?: string;
+    hr_designation?: string;
   };
 }
 
@@ -23,6 +26,7 @@ export interface ChatRoom {
   id: string;
   name: string | null;
   is_group: boolean;
+  room_type?: 'connection' | 'direct' | 'personal'; // Added to distinguish chat types
   participants_data: ChatParticipant[];
   latest_message: LatestMessage | null;
   updated_at: string;

@@ -36,8 +36,8 @@ export function ContactModal({
                <UserIcon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-foreground tracking-tight">Connect with {selectedApplicant.first_name}</h2>
-              <p className="text-[10px] text-blue-600 dark:text-blue-400 uppercase tracking-[0.15em] font-bold mt-0.5">{selectedApplicant.email}</p>
+              <h2 className="text-[12px] font-bold text-slate-900 dark:text-white uppercase tracking-wider leading-none mb-1.5">Outreach to {selectedApplicant.first_name}</h2>
+              <p className="text-[9px] font-semibold text-blue-500/80 dark:text-blue-400/80 uppercase tracking-widest">{selectedApplicant.email}</p>
             </div>
           </div>
           <button
@@ -53,14 +53,14 @@ export function ContactModal({
         <div className="p-6 pt-5 space-y-6">
           {/* Message Input */}
           <div className="space-y-3">
-            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] flex items-center gap-2">
-               <MessageSquare className="w-3 h-3" /> Professional Message
+            <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+               <MessageSquare className="w-3 h-3 opacity-70" /> Communication Template
             </label>
             <textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder={`Hi ${selectedApplicant.first_name}, congratulations on getting hired! I'd like to discuss the next steps...`}
-              className="w-full min-h-[160px] rounded-md bg-muted/30 border border-border p-5 text-sm text-foreground focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/30 outline-none resize-none transition-all placeholder:text-muted-foreground/40 font-medium leading-relaxed"
+              placeholder={`Write your message to ${selectedApplicant.first_name}...`}
+              className="w-full min-h-[160px] rounded-sm bg-muted/20 border border-border/50 p-5 text-[13px] text-foreground focus:ring-1 focus:ring-blue-500/20 focus:border-blue-500/30 outline-none resize-none transition-all placeholder:text-muted-foreground/30 font-medium leading-relaxed tracking-tight"
             />
           </div>
 
@@ -83,8 +83,8 @@ export function ContactModal({
                  </svg>
               </div>
             </div>
-            <label htmlFor="sendEmailApp" className="text-[13px] font-semibold text-foreground/70 group-hover:text-foreground cursor-pointer flex items-center gap-2 select-none transition-colors">
-              <Mail className="w-4 h-4 text-blue-600/70 dark:text-blue-400/70" /> Send automated email notification
+            <label htmlFor="sendEmailApp" className="text-[10px] font-bold text-slate-500 uppercase tracking-widest group-hover:text-blue-500 cursor-pointer flex items-center gap-2 select-none transition-colors">
+              <Mail className="w-3.5 h-3.5 opacity-70" /> Also notify via official email
             </label>
           </div>
         </div>
@@ -100,16 +100,16 @@ export function ContactModal({
           <button
             disabled={!message.trim() || isPending}
             onClick={onSend}
-            className="group relative inline-flex items-center gap-2.5 px-8 py-3 rounded-md bg-blue-500 text-white text-[11px] font-bold uppercase tracking-[0.15em] hover:bg-blue-600 disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all shadow-[0_8px_20px_-6px_rgba(20,184,166,0.3)] overflow-hidden"
+            className="group relative inline-flex items-center gap-2.5 px-10 py-3 rounded-sm bg-blue-600 text-white text-[10px] font-bold uppercase tracking-widest hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 transition-all shadow-lg shadow-blue-500/10 overflow-hidden"
           >
             {isPending ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin" /> Processing...
+                <Loader2 className="w-3.5 h-3.5 animate-spin" /> Transmitting...
               </>
             ) : (
               <>
-                <Send className="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300" /> 
-                <span>Send Outreach</span>
+                <Send className="w-3 h-3 opacity-90" /> 
+                <span>Dispatch Outreach</span>
               </>
             )}
           </button>

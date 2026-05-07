@@ -41,6 +41,7 @@ export function JobsView({ isCollapsed, onNavigateToMessages }: JobsViewProps) {
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
   const [resumeUrl, setResumeUrl] = useState('');
   const [coverLetter, setCoverLetter] = useState('');
+  const [expectedSalary, setExpectedSalary] = useState('');
 
   const [statusFilter, setStatusFilter] = useState('');
 
@@ -79,6 +80,7 @@ export function JobsView({ isCollapsed, onNavigateToMessages }: JobsViewProps) {
       setIsApplyModalOpen(false);
       setResumeUrl('');
       setCoverLetter('');
+      setExpectedSalary('');
       queryClient.invalidateQueries({ queryKey: ['my-applications'] });
       queryClient.invalidateQueries({ queryKey: ['public-jobs'] });
     },
@@ -95,12 +97,17 @@ export function JobsView({ isCollapsed, onNavigateToMessages }: JobsViewProps) {
   });
 
   const handleApply = (e: React.FormEvent) => {
-    e.preventDefault();
     if (!selectedJob) return;
+    
+    // Include expected salary in cover letter for backend
+    const finalCoverLetter = expectedSalary 
+      ? `[Expected Salary: $${expectedSalary}/mo]\n\n${coverLetter}`
+      : coverLetter;
+
     applyMutation.mutate({
       jobId: selectedJob.id,
       resume_url: resumeUrl,
-      cover_letter: coverLetter
+      cover_letter: finalCoverLetter
     });
   };
 
@@ -305,6 +312,8 @@ export function JobsView({ isCollapsed, onNavigateToMessages }: JobsViewProps) {
           setResumeUrl={setResumeUrl}
           coverLetter={coverLetter}
           setCoverLetter={setCoverLetter}
+          expectedSalary={expectedSalary}
+          setExpectedSalary={setExpectedSalary}
           isPending={applyMutation.isPending}
           onClose={() => setIsApplyModalOpen(false)}
           onSubmit={handleApply}

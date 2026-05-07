@@ -16,7 +16,7 @@ interface DashboardHeaderProps {
    isRightCollapsed?: boolean;
    hasRightSidebar?: boolean;
    activeSection: DashboardSection;
-   onSectionChange: (section: DashboardSection, userId?: string | null) => void;
+   onSectionChange: (section: DashboardSection, userId?: string | null, intent?: 'connection' | 'direct') => void;
    onMobileMenuToggle?: () => void;
 }
 

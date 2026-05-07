@@ -27,6 +27,7 @@ export function DashboardViewShell() {
   const router = useRouter();
   const [activeSection, setActiveSection] = useState<DashboardSection>('dashboard');
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+  const [chatIntent, setChatIntent] = useState<'connection' | 'direct' | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isRightSidebarCollapsed, setIsRightSidebarCollapsed] = useState(false);
   const queryClient = useQueryClient();
@@ -53,11 +54,12 @@ export function DashboardViewShell() {
   }, [isLoading, isAuthenticated]);
 
   // Close mobile sidebar on navigation
-  const handleSectionChange = (section: DashboardSection, userId: string | null = null) => {
+  const handleSectionChange = (section: DashboardSection, userId: string | null = null, intent?: 'connection' | 'direct') => {
     if (section === activeSection && userId === selectedProfileId) return;
     setIsTransitioning(true);
     setActiveSection(section);
     setSelectedProfileId(userId);
+    setChatIntent(intent || null);
     // Artificial delay to make the transition feel intentional and premium
     setTimeout(() => {
       setIsTransitioning(false);
@@ -113,14 +115,14 @@ export function DashboardViewShell() {
 
             {/* Active Job Listings */}
             <div className="flex-1 min-h-0">
-              <JobsView onNavigateToMessages={(userId) => handleSectionChange('messages', userId)} />
+              <JobsView onNavigateToMessages={(userId) => handleSectionChange('messages', userId, 'direct')} />
             </div>
           </div>
         );
       case 'news':
         return <NewsView selectedNewsId={selectedProfileId} />;
       case 'messages':
-        return <MessagesView targetUserId={selectedProfileId} roomType="personal" />;
+        return <MessagesView targetUserId={selectedProfileId} roomType="personal" chatIntent={chatIntent} />;
       case 'network':
         return <NetworkView onSectionChange={handleSectionChange} />;
       case 'settings':

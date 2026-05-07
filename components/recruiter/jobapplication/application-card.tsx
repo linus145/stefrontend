@@ -78,7 +78,25 @@ export function ApplicationCard({
         </div>
 
         {/* Quick status actions + chevron */}
+        {/* Action Symbols */}
         <div className="flex items-center gap-1.5 shrink-0">
+          <button 
+            onClick={(e) => { e.stopPropagation(); onContact(app.applicant, true); }} 
+            className="p-2 rounded-sm bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 transition-all" 
+            title="Send Email"
+          >
+            <Mail className="w-4 h-4" />
+          </button>
+          <button 
+            onClick={(e) => { e.stopPropagation(); onContact(app.applicant, false); }} 
+            className="p-2 rounded-sm bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 transition-all" 
+            title="Send Message"
+          >
+            <MessageSquare className="w-4 h-4" />
+          </button>
+
+          <div className="w-px h-4 bg-border mx-1" />
+
           {app.status === 'PENDING' && (
             <>
               <button onClick={(e) => { e.stopPropagation(); onUpdateStatus(app.id, 'REVIEWED'); }} className="p-2 rounded-sm bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 transition-all" title="Mark as Reviewed"><Eye className="w-4 h-4" /></button>
@@ -93,13 +111,7 @@ export function ApplicationCard({
             </>
           )}
           {app.status === 'SHORTLISTED' && (
-            <button onClick={(e) => { e.stopPropagation(); onUpdateStatus(app.id, 'HIRED'); }} className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm bg-emerald-500/10 text-emerald-600 text-xs font-semibold hover:bg-emerald-500/20 transition-all"><CheckCircle className="w-3.5 h-3.5" /> Hire</button>
-          )}
-          {app.status === 'HIRED' && (
-            <div className="flex items-center gap-2">
-              <button onClick={(e) => { e.stopPropagation(); onContact(app.applicant, true); }} className="p-2 rounded-sm bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 transition-all" title="Send Email"><Mail className="w-4 h-4" /></button>
-              <button onClick={(e) => { e.stopPropagation(); onContact(app.applicant, false); }} className="p-2 rounded-sm bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 transition-all" title="Send Message"><MessageSquare className="w-4 h-4" /></button>
-            </div>
+            <button onClick={(e) => { e.stopPropagation(); onUpdateStatus(app.id, 'HIRED'); }} className="p-2 rounded-sm bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 transition-all" title="Hire"><CheckCircle className="w-4 h-4" /></button>
           )}
           <ChevronDown className={cn("w-4 h-4 text-muted-foreground transition-transform ml-2", isExpanded && "rotate-180")} />
         </div>
@@ -165,46 +177,7 @@ export function ApplicationCard({
 
             {/* Right column: AI Analysis + Actions */}
             <div className="space-y-5">
-              {/* AI Analysis */}
-              {app.ai_score !== null && app.ai_score !== undefined ? (
-                <div className="p-4 rounded-sm bg-violet-600/5 border border-violet-600/10 relative overflow-hidden">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="p-1 rounded-sm bg-violet-600 text-white"><BrainCircuit className="w-3.5 h-3.5" /></div>
-                    <h4 className="text-[10px] font-bold text-violet-600 uppercase tracking-widest">AI Evaluation</h4>
-                  </div>
-                  <div className="flex items-end gap-2 mb-3">
-                    <span className={cn("text-3xl font-black leading-none", getAIScoreColor(app.ai_score))}>{app.ai_score}</span>
-                    <span className="text-[10px] font-bold text-violet-600/60 uppercase pb-0.5">Match</span>
-                  </div>
-                  {app.ai_analysis && (
-                    <p className="text-[11px] text-foreground/70 leading-relaxed italic border-l-2 border-violet-600/20 pl-3 line-clamp-4">
-                      {app.ai_analysis}
-                    </p>
-                  )}
-                </div>
-              ) : (
-                <div className="p-4 rounded-sm bg-muted/20 border border-border/50 flex items-center gap-3">
-                  <BrainCircuit className="w-5 h-5 text-muted-foreground/30" />
-                  <p className="text-xs text-muted-foreground italic">Not yet screened by AI</p>
-                </div>
-              )}
-
-              {/* Quick Actions */}
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => onContact(app.applicant, true)}
-                  className="flex items-center justify-center gap-2 px-3 py-2.5 bg-blue-600 text-white text-xs font-bold rounded-sm hover:bg-blue-700 transition-all active:scale-95"
-                >
-                  <Mail className="w-3.5 h-3.5" /> Message
-                </button>
-                <button
-                  disabled={app.status === 'SHORTLISTED' || isUpdatePending}
-                  onClick={() => onUpdateStatus(app.id, 'SHORTLISTED')}
-                  className="flex items-center justify-center gap-2 px-3 py-2.5 bg-foreground text-background text-xs font-bold rounded-sm hover:opacity-90 transition-all active:scale-95 disabled:opacity-50"
-                >
-                  <CheckCircle className="w-3.5 h-3.5" /> Shortlist
-                </button>
-              </div>
+              {/* This column is now mostly empty/reserved as actions moved to top row */}
             </div>
           </div>
         </div>

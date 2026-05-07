@@ -122,9 +122,6 @@ export const jobsService = {
     return api.get<BaseAPIResponse<Skill[]>>(`/jobs/skills/${query}`);
   },
 
-  analyzeResumes: (jobId: string): Promise<BaseAPIResponse<any>> => {
-    return api.post<BaseAPIResponse<any>>(`/jobs/posts/${jobId}/analyze-resumes/`, {});
-  },
 
   // ─── Talent Pipeline ──────────────────────────────────────────
   saveToPipeline: (talentId: string, notes?: string): Promise<BaseAPIResponse<any>> => {

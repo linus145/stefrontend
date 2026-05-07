@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { jobsService } from '@/services/jobs.service';
+import { aiService } from '@/services/ai.service';
 import { userService } from '@/services/user.service';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -62,7 +63,7 @@ export function ApplicationsTab({ selectedJobId, onBack }: ApplicationsTabProps)
     mutationFn: (jobId: string) => {
       setAiResults(null);
       setIsAiPanelOpen(true);
-      return jobsService.analyzeResumes(jobId);
+      return aiService.analyzeResumes(jobId);
     },
     onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: ['job-applications'] });
@@ -266,7 +267,8 @@ export function ApplicationsTab({ selectedJobId, onBack }: ApplicationsTabProps)
         results={aiResults}
         onLoadHistoryReport={(reportResults) => {
           setAiResults(reportResults);
-          toast.success('Historical report loaded.');
+          queryClient.invalidateQueries({ queryKey: ['job-applications'] });
+          toast.success('AI Screening results loaded.');
         }}
         onViewDetails={(id) => {
           setExpandedAppId(id);

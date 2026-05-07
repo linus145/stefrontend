@@ -34,7 +34,7 @@ export function NetworkView({
   onSectionChange
 }: {
   isCollapsed?: boolean,
-  onSectionChange: (section: DashboardSection, userId?: string | null) => void
+  onSectionChange: (section: DashboardSection, userId?: string | null, intent?: 'connection' | 'direct') => void
 }) {
   const [activeTab, setActiveTab] = useState<NetworkCategory>('FOUNDER');
   const [searchQuery, setSearchQuery] = useState('');
@@ -49,7 +49,8 @@ export function NetworkView({
       if (activeTab === 'INVITATIONS') {
         return networkService.getInvitations().then(res => res);
       }
-      return networkService.getPeople(activeTab, false);
+      // Use true to exclude existing connections in discovery tabs
+      return networkService.getPeople(activeTab, true);
     },
   });
 
@@ -103,6 +104,14 @@ export function NetworkView({
 
   const filteredPeople = people?.filter((person: NetworkPerson) => {
     if (person.id === currentUser?.id) return false;
+
+    // Fix: If we are in a discovery tab (FOUNDER, INVESTOR, MENTOR), 
+    // hide anyone we are already connected to (ACCEPTED).
+    // They should only show up in the CONNECTIONS tab.
+    if (['FOUNDER', 'INVESTOR', 'MENTOR'].includes(activeTab)) {
+      if (person.connection_info?.status === 'ACCEPTED') return false;
+    }
+
     const matchesSearch = searchQuery === '' ||
       `${person.first_name} ${person.last_name}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (person.profile?.headline?.toLowerCase() || '').includes(searchQuery.toLowerCase());
@@ -114,34 +123,33 @@ export function NetworkView({
       "flex-1 min-h-screen bg-background px-4 sm:px-6 lg:px-8 py-6 sm:py-10 transition-all duration-300 ease-in-out"
     )}>
       <div className="max-w-6xl mx-auto">
-        <div className="flex flex-col gap-4 sm:gap-6 mb-8 sm:mb-12">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-semibold text-foreground tracking-tight mb-1">Network</h1>
-            <p className="text-muted-foreground text-xs sm:text-sm font-medium">Connect with the top 1% of the startup ecosystem.</p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="relative group flex-1 sm:flex-none">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-              <input
-                type="text"
-                placeholder="Search individuals..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-muted/40 border border-border rounded-xl py-2.5 pl-10 pr-4 text-[13px] text-foreground placeholder:text-muted-foreground focus:ring-1 focus:ring-primary/20 focus:border-primary/30 outline-none transition-all w-full sm:w-64 shadow-sm"
-              />
-            </div>
-            <Button variant="ghost" size="icon" className="rounded-xl border border-border bg-muted/40 text-muted-foreground hover:text-foreground shadow-sm shrink-0">
-              <Filter className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
 
         {/* Layout: Sidebar Tabs + Content */}
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as NetworkCategory)} className="w-full">
+          {/* Mobile Tab Scroller (Attached LinkedIn Style) */}
+          <div className="lg:hidden flex overflow-x-auto scrollbar-none bg-border border-x border-t border-border">
+            {(Object.keys(TAB_MAP) as NetworkCategory[]).map((tab) => {
+              const isActive = activeTab === tab;
+              return (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={cn(
+                    "px-6 py-3.5 text-[13px] font-medium whitespace-nowrap transition-all flex-1 text-center border-r border-border last:border-r-0",
+                    isActive
+                      ? "bg-[#0a66c2] text-white"
+                      : "bg-card text-muted-foreground hover:bg-muted"
+                  )}
+                >
+                  {TAB_MAP[tab]}
+                </button>
+              );
+            })}
+          </div>
+
           <div className="flex flex-col lg:flex-row gap-6">
-            {/* Left Sidebar: Tab Selection */}
-            <div className="lg:w-72 shrink-0">
+            {/* Left Sidebar: Tab Selection (Hidden on Mobile) */}
+            <div className="hidden lg:block lg:w-72 shrink-0">
               <div className="bg-card border border-border/40 rounded-sm overflow-hidden shadow-sm sticky top-24">
                 <div className="px-5 py-4 border-b border-border/40 flex items-center justify-between">
                   <h2 className="text-sm font-semibold text-foreground tracking-tight">Manage my network</h2>
@@ -196,45 +204,84 @@ export function NetworkView({
                   <p className="text-muted-foreground text-[10px] font-bold uppercase tracking-[0.3em] animate-pulse">Syncing ecosystem...</p>
                 </div>
               ) : (
-                <TabsContent value={activeTab} className="mt-0">
-                  <div className="bg-card border border-border/50 rounded-sm overflow-hidden shadow-sm">
-                    {/* Header */}
-                    <div className="p-4 sm:p-6 border-b border-border/50">
-                      <h2 className="text-xl font-normal text-foreground mb-4">
-                        {activeTab === 'CONNECTIONS' ? `${filteredPeople?.length || 0} connections` :
-                          activeTab === 'INVITATIONS' ? `${filteredPeople?.length || 0} invitations` :
-                            `${TAB_MAP[activeTab]}`}
-                      </h2>
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                          Sort by:
-                          <button className="font-medium text-foreground hover:underline flex items-center gap-1">
-                            Recently added
-                            <ChevronDown className="w-4 h-4" />
-                          </button>
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                            <input
-                              type="text"
-                              placeholder="Search by name"
-                              value={searchQuery}
-                              onChange={(e) => setSearchQuery(e.target.value)}
-                              className="pl-10 pr-4 py-1.5 bg-card border border-border rounded-md text-sm w-full sm:w-64 focus:ring-1 focus:ring-primary outline-none"
-                            />
+                <TabsContent value={activeTab} className="mt-0 outline-none">
+                  {/* Mobile Header */}
+                  <div className="mb-3 flex items-center justify-between lg:hidden">
+                    <h2 className="text-sm font-semibold text-foreground tracking-tight">
+                      {activeTab === 'CONNECTIONS' ? `My Connections (${filteredPeople?.length || 0})` :
+                        activeTab === 'INVITATIONS' ? `Invitations (${filteredPeople?.length || 0})` :
+                          `${TAB_MAP[activeTab]} Network (${filteredPeople?.length || 0})`}
+                    </h2>
+                  </div>
+
+                  {/* Desktop Header */}
+                  <div className="hidden lg:flex mb-4 items-center justify-between">
+                    <h2 className="text-lg font-bold text-foreground tracking-tight">
+                      {activeTab === 'CONNECTIONS' ? `My Connections (${filteredPeople?.length || 0})` :
+                        activeTab === 'INVITATIONS' ? `Invitations (${filteredPeople?.length || 0})` :
+                          `${TAB_MAP[activeTab]} Network (${filteredPeople?.length || 0})`}
+                    </h2>
+                  </div>
+
+                  {/* ── Mobile: 2-Column Card Grid ── */}
+                  <div className="grid grid-cols-2 gap-3 lg:hidden">
+                    {filteredPeople?.map((person: NetworkPerson) => {
+                      const status = person.connection_info?.status;
+                      const isIncoming = person.connection_info?.is_incoming;
+                      const connectionId = person.connection_info?.id;
+                      return (
+                        <div key={person.id} className="bg-card flex flex-col items-center p-4 relative group hover:bg-muted/5 transition-all duration-300 border border-border/50 rounded-sm">
+                          <div className="relative mb-3">
+                            <Avatar 
+                              className="w-16 h-16 border-2 border-background shadow-sm cursor-pointer" 
+                              onClick={() => onSectionChange('Profile', person.id)}
+                            >
+                              <AvatarImage src={person.profile?.profile_image_url} className="object-cover" />
+                              <AvatarFallback className="text-xl font-bold bg-muted/20">{person.first_name[0]}</AvatarFallback>
+                            </Avatar>
+                          </div>
+                          <div className="min-w-0 mb-4 text-center">
+                            <h3 
+                              className="text-sm font-bold text-foreground hover:text-[#0a66c2] cursor-pointer transition-colors leading-tight line-clamp-1" 
+                              onClick={() => onSectionChange('Profile', person.id)}
+                            >
+                              {person.first_name} {person.last_name}
+                            </h3>
+                            <p className="text-[11px] text-muted-foreground mt-1 line-clamp-2 h-8 leading-tight">
+                              {person.profile?.headline || person.role}
+                            </p>
+                          </div>
+                          <div className="w-full mt-auto">
+                            {status === 'ACCEPTED' ? (
+                              <Button onClick={() => onSectionChange('messages', person.id, 'connection')} className="w-full rounded-full bg-[#0a66c2] text-white font-bold text-xs hover:bg-[#004182] h-8">Message</Button>
+                            ) : status === 'PENDING' ? (
+                              isIncoming ? (
+                                <div className="flex flex-col gap-1.5">
+                                  <Button onClick={() => respondMutation.mutate({ id: connectionId!, status: 'ACCEPTED' })} className="w-full rounded-full bg-[#0a66c2] text-white font-bold text-xs h-8">Accept</Button>
+                                  <Button variant="outline" onClick={() => respondMutation.mutate({ id: connectionId!, status: 'REJECTED' })} className="w-full rounded-full border-muted-foreground text-muted-foreground font-bold text-xs h-8">Ignore</Button>
+                                </div>
+                              ) : (
+                                <Button disabled className="w-full rounded-full border-muted border text-muted-foreground font-bold text-xs h-8 bg-transparent">Pending</Button>
+                              )
+                            ) : (
+                              <Button onClick={() => connectMutation.mutate(person.id)} disabled={connectMutation.isPending} className="w-full rounded-full bg-[#0a66c2] text-white font-bold text-xs hover:bg-[#004182] h-8 transition-all flex items-center justify-center gap-2 group/btn">
+                                {connectMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <UserPlus className="w-4 h-4 transition-transform group-hover/btn:scale-110" />}
+                                Connect
+                              </Button>
+                            )}
                           </div>
                         </div>
-                      </div>
-                    </div>
+                      );
+                    })}
+                  </div>
 
-                    {/* Unified List */}
+                  {/* ── Desktop: Original List Layout ── */}
+                  <div className="hidden lg:block bg-card border border-border/50 rounded-sm overflow-hidden shadow-sm">
                     <div className="divide-y divide-border/50">
                       {filteredPeople?.map((person: NetworkPerson) => {
                         const status = person.connection_info?.status;
                         const isIncoming = person.connection_info?.is_incoming;
                         const connectionId = person.connection_info?.id;
-
                         return (
                           <div key={person.id} className="p-4 sm:p-6 flex items-start gap-4 hover:bg-muted/5 transition-colors group">
                             <div className="relative cursor-pointer" onClick={() => onSectionChange('Profile', person.id)}>
@@ -243,7 +290,6 @@ export function NetworkView({
                                 <AvatarFallback className="text-lg">{person.first_name[0]}</AvatarFallback>
                               </Avatar>
                             </div>
-
                             <div className="flex-1 min-w-0">
                               <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                                 <div className="min-w-0 cursor-pointer" onClick={() => onSectionChange('Profile', person.id)}>
@@ -264,17 +310,10 @@ export function NetworkView({
                                     </div>
                                   </div>
                                 </div>
-
                                 <div className="flex items-center gap-3">
                                   {status === 'ACCEPTED' ? (
                                     <>
-                                      <Button
-                                        variant="outline"
-                                        onClick={() => onSectionChange('messages', person.id)}
-                                        className="rounded-full border-[#0a66c2] text-[#0a66c2] font-bold text-sm hover:bg-[#0a66c2]/5 h-9 px-6"
-                                      >
-                                        Message
-                                      </Button>
+                                      <Button variant="default" onClick={() => onSectionChange('messages', person.id, 'connection')} className="rounded-full bg-[#0a66c2] text-white font-bold text-sm hover:bg-[#004182] h-9 px-6">Message</Button>
                                       <DropdownMenu>
                                         <DropdownMenuTrigger className="flex items-center justify-center size-9 text-muted-foreground rounded-full hover:bg-muted transition-colors outline-none">
                                           <MoreHorizontal className="w-5 h-5" />
@@ -292,35 +331,15 @@ export function NetworkView({
                                   ) : status === 'PENDING' ? (
                                     isIncoming ? (
                                       <div className="flex items-center gap-2">
-                                        <Button
-                                          onClick={() => respondMutation.mutate({ id: connectionId!, status: 'ACCEPTED' })}
-                                          className="rounded-full bg-[#0a66c2] text-white font-bold text-sm h-9 px-6"
-                                        >
-                                          Accept
-                                        </Button>
-                                        <Button
-                                          variant="outline"
-                                          onClick={() => respondMutation.mutate({ id: connectionId!, status: 'REJECTED' })}
-                                          className="rounded-full border-muted-foreground text-muted-foreground font-bold text-sm h-9 px-6"
-                                        >
-                                          Ignore
-                                        </Button>
+                                        <Button onClick={() => respondMutation.mutate({ id: connectionId!, status: 'ACCEPTED' })} className="rounded-full bg-[#0a66c2] text-white font-bold text-sm h-9 px-6">Accept</Button>
+                                        <Button variant="outline" onClick={() => respondMutation.mutate({ id: connectionId!, status: 'REJECTED' })} className="rounded-full border-muted-foreground text-muted-foreground font-bold text-sm h-9 px-6">Ignore</Button>
                                       </div>
                                     ) : (
-                                      <Button
-                                        disabled
-                                        className="rounded-full border-muted border text-muted-foreground font-bold text-sm h-9 px-6 bg-transparent"
-                                      >
-                                        Pending
-                                      </Button>
+                                      <Button disabled className="rounded-full border-muted border text-muted-foreground font-bold text-sm h-9 px-6 bg-transparent">Pending</Button>
                                     )
                                   ) : (
-                                    <Button
-                                      onClick={() => connectMutation.mutate(person.id)}
-                                      disabled={connectMutation.isPending}
-                                      className="rounded-full border-[#0a66c2] text-[#0a66c2] border-2 font-bold text-sm hover:bg-[#0a66c2]/5 h-9 px-8 transition-all"
-                                    >
-                                      {connectMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin mr-2" /> : <UserPlus className="w-4 h-4 mr-2" />}
+                                    <Button onClick={() => connectMutation.mutate(person.id)} disabled={connectMutation.isPending} className="rounded-full bg-[#0a66c2] text-white font-bold text-sm hover:bg-[#004182] hover:shadow-lg shadow-md shadow-[#0a66c2]/20 h-9 px-8 transition-all flex items-center justify-center gap-2 group">
+                                      {connectMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <UserPlus className="w-4 h-4 transition-transform group-hover:scale-110" />}
                                       Connect
                                     </Button>
                                   )}
@@ -330,18 +349,36 @@ export function NetworkView({
                           </div>
                         );
                       })}
-
-                      {!isLoading && filteredPeople?.length === 0 && (
-                        <div className="p-20 text-center">
-                          <Search className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-20" />
-                          <h3 className="text-foreground font-semibold">No results found</h3>
-                          <p className="text-muted-foreground text-sm">Try adjusting your filters or search query.</p>
-                        </div>
-                      )}
                     </div>
                   </div>
-                </TabsContent>
-              )}
+
+                      {!isLoading && filteredPeople?.length === 0 && (
+                        <div className="p-20 text-center animate-in fade-in zoom-in-95 duration-300">
+                          <div className="w-20 h-20 rounded-full bg-muted/20 flex items-center justify-center mx-auto mb-6">
+                            <Users className="w-10 h-10 text-muted-foreground opacity-30" />
+                          </div>
+                          <h3 className="text-lg font-bold text-foreground mb-2">
+                            {activeTab === 'CONNECTIONS' ? "No connections made yet" :
+                              activeTab === 'INVITATIONS' ? "No pending invitations" :
+                                "No results found"}
+                          </h3>
+                          <p className="text-muted-foreground text-sm max-w-xs mx-auto mb-8">
+                            {activeTab === 'CONNECTIONS'
+                              ? "Start building your network by connecting with founders, investors, and mentors in the ecosystem."
+                              : "Explore the community to find people you may know or want to collaborate with."}
+                          </p>
+                          {activeTab === 'CONNECTIONS' && (
+                            <Button
+                              onClick={() => setActiveTab('FOUNDER')}
+                              className="rounded-full bg-primary text-primary-foreground font-bold px-8"
+                            >
+                              Discover People
+                            </Button>
+                          )}
+                        </div>
+                      )}
+                  </TabsContent>
+                )}
             </div>
           </div>
         </Tabs>

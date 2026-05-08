@@ -112,7 +112,7 @@ export interface JobPostCreatePayload {
 
 // ─── Job Applications ───────────────────────────────────────────
 
-export type ApplicationStatus = 'PENDING' | 'REVIEWED' | 'SHORTLISTED' | 'REJECTED' | 'HIRED';
+export type ApplicationStatus = 'PENDING' | 'REVIEWED' | 'SHORTLISTED' | 'INTERVIEW' | 'REJECTED' | 'HIRED';
 
 export interface ApplicantMini {
   id: string;

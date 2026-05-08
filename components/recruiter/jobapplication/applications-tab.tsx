@@ -132,6 +132,7 @@ export function ApplicationsTab({ selectedJobId, onBack }: ApplicationsTabProps)
     { label: 'Pending', value: 'PENDING', color: 'bg-amber-500' },
     { label: 'Reviewed', value: 'REVIEWED', color: 'bg-blue-500' },
     { label: 'Shortlisted', value: 'SHORTLISTED', color: 'bg-cyan-500' },
+    { label: 'Interview', value: 'INTERVIEW', color: 'bg-purple-500' },
     { label: 'Hired', value: 'HIRED', color: 'bg-emerald-500' },
     { label: 'Rejected', value: 'REJECTED', color: 'bg-red-500' },
   ];
@@ -143,49 +144,49 @@ export function ApplicationsTab({ selectedJobId, onBack }: ApplicationsTabProps)
         isAiPanelOpen ? "lg:mr-[480px]" : ""
       )}>
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-6">
           <button
             onClick={onBack}
-            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors group"
+            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-3 transition-colors group"
           >
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
             Back to Jobs
           </button>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <div className="flex items-center gap-4">
-                <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">Applications</h1>
-                <button 
-                  onClick={() => setIsAiPanelOpen(!isAiPanelOpen)}
-                  className={cn(
-                    "inline-flex items-center gap-2 px-3 py-1.5 rounded-sm text-xs font-bold transition-all border",
-                    isAiPanelOpen 
-                      ? "bg-[#7C3AED] text-white border-[#7C3AED] shadow-lg shadow-[#7C3AED]/20" 
-                      : "bg-white text-[#7C3AED] border-[#7C3AED]/20 hover:bg-[#F5F3FF]"
-                  )}
-                >
-                  <Sparkles className={cn("w-3.5 h-3.5", isAiPanelOpen ? "animate-pulse" : "")} />
-                  AI Screening
-                </button>
-              </div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">Applications</h1>
               <p className="text-sm text-muted-foreground mt-1 font-medium">
                 Review and manage applicants for your job postings
               </p>
             </div>
+            <button 
+              onClick={() => setIsAiPanelOpen(!isAiPanelOpen)}
+              className={cn(
+                "inline-flex items-center gap-2 px-4 py-2 rounded-sm text-xs font-bold transition-all border shrink-0",
+                isAiPanelOpen 
+                  ? "bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-600/20" 
+                  : "bg-white text-blue-600 border-blue-600/20 hover:bg-blue-50"
+              )}
+            >
+              <Sparkles className={cn("w-3.5 h-3.5", isAiPanelOpen ? "animate-pulse" : "")} />
+              AI Screening
+            </button>
           </div>
         </div>
 
-      <JobSelector
-        activeJobId={activeJobId}
-        setActiveJobId={(id) => { setActiveJobId(id); setStatusFilter(''); }}
-        jobs={jobs}
-        copiedId={copiedId}
-        onCopyId={handleCopyId}
-        manualJobId={manualJobId}
-        setManualJobId={setManualJobId}
-        onAnalyze={(id) => analyzeMutation.mutate(id)}
-        isAnalyzePending={analyzeMutation.isPending}
-      />
+      <div className="mb-4">
+        <JobSelector
+          activeJobId={activeJobId}
+          setActiveJobId={(id) => { setActiveJobId(id); setStatusFilter(''); }}
+          jobs={jobs}
+          copiedId={copiedId}
+          onCopyId={handleCopyId}
+          manualJobId={manualJobId}
+          setManualJobId={setManualJobId}
+          onAnalyze={(id) => analyzeMutation.mutate(id)}
+          isAnalyzePending={analyzeMutation.isPending}
+        />
+      </div>
 
       {!activeJobId ? (
         <div className="text-center py-20">
@@ -198,7 +199,7 @@ export function ApplicationsTab({ selectedJobId, onBack }: ApplicationsTabProps)
       ) : (
         <>
           {/* Status Filters */}
-          <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
+          <div className="flex gap-2 mb-4 overflow-x-auto pb-1 no-scrollbar">
             {statusOptions.map(opt => (
               <button
                 key={opt.value}

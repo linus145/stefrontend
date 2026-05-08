@@ -35,7 +35,10 @@ axiosInstance.interceptors.response.use(
     const isAuthEndpoint =
       originalRequest.url?.includes('auth/login') ||
       originalRequest.url?.includes('auth/token/refresh') ||
-      originalRequest.url?.includes('auth/register');
+      originalRequest.url?.includes('auth/register') ||
+      originalRequest.url?.includes('exam-login') ||
+      originalRequest.url?.includes('exam-submit') ||
+      originalRequest.url?.includes('exam-complete');
 
     if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
       // If a refresh is already in progress, queue this request

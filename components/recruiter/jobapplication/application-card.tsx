@@ -32,6 +32,7 @@ export function ApplicationCard({
       PENDING: 'bg-amber-500/10 text-amber-600 border-amber-500/20',
       REVIEWED: 'bg-blue-500/10 text-blue-600 border-blue-500/20',
       SHORTLISTED: 'bg-cyan-500/10 text-cyan-600 border-cyan-500/20',
+      INTERVIEW: 'bg-purple-500/10 text-purple-600 border-purple-500/20',
       HIRED: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20',
       REJECTED: 'bg-red-500/10 text-red-500 border-red-500/20',
     };
@@ -127,18 +128,19 @@ export function ApplicationCard({
               <div>
                 <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-2">Change Status</h4>
                 <div className="flex flex-wrap gap-1.5">
-                  {(['PENDING', 'REVIEWED', 'SHORTLISTED', 'HIRED', 'REJECTED'] as ApplicationStatus[]).map(s => (
+                  {(['PENDING', 'REVIEWED', 'SHORTLISTED', 'INTERVIEW', 'HIRED', 'REJECTED'] as ApplicationStatus[]).map(s => (
                     <button
                       key={s}
                       disabled={app.status === s || isUpdatePending}
                       onClick={() => onUpdateStatus(app.id, s)}
                       className={cn(
-                        "px-2.5 py-1 rounded-sm text-[10px] font-bold uppercase border transition-all",
+                        "px-2.5 py-1 rounded-sm text-[10px] font-bold uppercase border transition-all flex items-center gap-1.5",
                         app.status === s
                           ? cn(getStatusColor(s), "ring-2 ring-offset-1 ring-offset-background")
                           : "bg-muted/30 text-muted-foreground border-border hover:opacity-80 disabled:opacity-30"
                       )}
                     >
+                      {s === 'INTERVIEW' && <BrainCircuit className="w-3 h-3" />}
                       {s}
                     </button>
                   ))}

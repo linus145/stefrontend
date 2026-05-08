@@ -1,6 +1,7 @@
 'use client';
 
-import { Menu, Bell, Building2, MessageSquare } from 'lucide-react';
+import { useState } from 'react';
+import { Menu, Bell, Building2, MessageSquare, ChevronDown, ExternalLink, LayoutGrid } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ThemeToggle } from '@/components/dashboard/theme-toggle';
 import Link from 'next/link';
@@ -31,6 +32,8 @@ export function RecruiterHeader({
   onTabChange,
   onMobileMenuToggle
 }: RecruiterHeaderProps) {
+  const [showMore, setShowMore] = useState(false);
+
   return (
     <header className={cn(
       "fixed top-0 transition-all duration-300 ease-in-out flex items-center justify-between px-4 sm:px-6 lg:px-8 z-40",
@@ -73,22 +76,73 @@ export function RecruiterHeader({
       </div>
 
       {/* Middle: Navigation Tabs (LinkedIn Style) */}
-      <nav className="flex items-center gap-1 overflow-x-auto no-scrollbar mask-fade-edges">
-        {NAVIGATION_ITEMS.map((item) => (
+      <div className="flex items-center gap-1 h-full min-w-0 flex-1 justify-center">
+        <nav className="flex items-center gap-1 overflow-x-auto no-scrollbar mask-fade-edges h-full">
+          {NAVIGATION_ITEMS.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => onTabChange(item.id)}
+              className={cn(
+                "relative px-4 h-full text-[13px] font-medium transition-all hover:text-blue-500 shrink-0",
+                activeTab === item.id
+                  ? "text-blue-500 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-blue-500"
+                  : "text-muted-foreground"
+              )}
+            >
+              {item.label}
+            </button>
+          ))}
+        </nav>
+
+        {/* More Dropdown (Moved outside nav to avoid clipping by overflow-x-auto) */}
+        <div className="relative h-full flex items-center shrink-0">
           <button
-            key={item.id}
-            onClick={() => onTabChange(item.id)}
+            onClick={() => setShowMore(!showMore)}
+            onBlur={() => setTimeout(() => setShowMore(false), 200)}
             className={cn(
-              "relative px-4 py-5 text-[13px] font-medium transition-all hover:text-blue-500 shrink-0",
-              activeTab === item.id
-                ? "text-blue-500 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-blue-500"
-                : "text-muted-foreground"
+              "flex items-center gap-1.5 px-4 h-full text-[13px] font-medium transition-all hover:text-blue-500 shrink-0 text-muted-foreground",
+              showMore && "text-blue-500"
             )}
           >
-            {item.label}
+            More
+            <ChevronDown className={cn("w-4 h-4 transition-transform duration-200", showMore && "rotate-180")} />
           </button>
-        ))}
-      </nav>
+
+          {showMore && (
+            <div className="absolute top-[calc(100%-4px)] right-0 w-56 p-2 bg-card border border-border rounded-sm shadow-xl z-50 animate-in fade-in slide-in-from-top-2">
+              <a
+                href="/recruiter/AIInterviews"
+                target="_blank"
+                rel="noopener noreferrer"
+                onMouseDown={(e) => e.preventDefault()} // Prevent blur before click
+                onClick={() => setShowMore(false)}
+                className="flex items-center justify-between px-3 py-2.5 rounded-sm hover:bg-muted group transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-3">
+                  <LayoutGrid className="w-4 h-4 text-muted-foreground group-hover:text-blue-500" />
+                  <span className="text-[13px] font-medium">Interview Pipeline</span>
+                </div>
+                <ExternalLink className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+              </a>
+
+              <a
+                href="/recruiter/hr-tools"
+                target="_blank"
+                rel="noopener noreferrer"
+                onMouseDown={(e) => e.preventDefault()} // Prevent blur before click
+                onClick={() => setShowMore(false)}
+                className="flex items-center justify-between px-3 py-2.5 rounded-sm hover:bg-muted group transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-3">
+                  <Building2 className="w-4 h-4 text-muted-foreground group-hover:text-emerald-500" />
+                  <span className="text-[13px] font-medium">HR Tool</span>
+                </div>
+                <ExternalLink className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+              </a>
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* Right: Actions */}
       <div className="flex items-center gap-3 sm:gap-5">

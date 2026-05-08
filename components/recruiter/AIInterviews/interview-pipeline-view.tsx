@@ -34,7 +34,7 @@ export function InterviewPipelineView({ onConfigure }: InterviewPipelineViewProp
     refetchOnWindowFocus: true,
   });
 
-  const sessions: InterviewSession[] = sessionsResponse?.data || [];
+  const sessions: InterviewSession[] = Array.isArray(sessionsResponse?.data) ? sessionsResponse.data : [];
 
   const filteredSessions = sessions.filter(s => {
     const matchesSearch = s.candidate_name.toLowerCase().includes(searchQuery.toLowerCase()) || 

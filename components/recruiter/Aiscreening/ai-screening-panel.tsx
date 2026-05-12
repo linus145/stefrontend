@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { aiService } from '@/services/ai.service';
-import { 
+import {
   X, Sparkles, ChevronDown, ChevronUp, ChevronRight,
   Bot, FileText, Target, MessageSquare, Send,
   Search, BrainCircuit, History, AlertCircle, Zap, CheckCircle2, Trash2
@@ -76,13 +76,37 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
     }
   });
 
+  // Listen for agent-screening-complete events to auto-load results after backend agent finishes
+  useEffect(() => {
+    const handleAgentComplete = (e: any) => {
+      const jobId = e.detail?.jobId;
+      console.log('[AIScreeningPanel] Agent screening complete event received for job:', jobId);
+
+      // Refetch history to pick up the newly created report
+      refetchHistory().then((result) => {
+        if (result.data?.data && onLoadHistoryReport) {
+          const latestReport = result.data.data.find((r: any) =>
+            r.results?.job_id === jobId && r.results?.status === 'completed'
+          );
+          if (latestReport) {
+            console.log('[AIScreeningPanel] Found completed report, loading results...');
+            onLoadHistoryReport(latestReport.results);
+            toast.success('AI Screening results loaded from agent.');
+          }
+        }
+      });
+    };
+    window.addEventListener('agent-screening-complete', handleAgentComplete);
+    return () => window.removeEventListener('agent-screening-complete', handleAgentComplete);
+  }, [refetchHistory, onLoadHistoryReport]);
+
   // Effect to handle automatic loading of finished reports
   useEffect(() => {
     if (results?.status === 'processing' && historyData?.data) {
       // Find the specific report we are waiting for, or the latest completed one for this job
       const currentReportId = results.report_id;
-      const targetReport = historyData.data.find((r: any) => 
-        (currentReportId && r.id === currentReportId) || 
+      const targetReport = historyData.data.find((r: any) =>
+        (currentReportId && r.id === currentReportId) ||
         (!currentReportId && r.job_id === results.job_id && r.results.status === 'completed')
       );
 
@@ -119,7 +143,7 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
         </div>
 
         <div className="flex items-center gap-2">
-          <button 
+          <button
             onClick={() => setActiveTab(activeTab === 'results' ? 'history' : 'results')}
             className={cn(
               "p-2 rounded-lg transition-all",
@@ -129,7 +153,7 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
           >
             <History className="w-5 h-5" />
           </button>
-          <button 
+          <button
             onClick={onClose}
             className="p-2 text-muted-foreground hover:bg-muted/50 hover:text-foreground rounded-lg transition-colors"
           >
@@ -151,7 +175,7 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
                   <div className="space-y-2">
                     <p className="text-sm font-black text-slate-900 dark:text-white tracking-tight uppercase">Connection Interrupted</p>
                     <p className="text-xs text-slate-500 font-medium">The server is unreachable. Please check your connection.</p>
-                    <button 
+                    <button
                       onClick={() => refetchHistory()}
                       className="mt-4 px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-md text-[10px] font-black uppercase tracking-widest hover:bg-slate-200 transition-colors"
                     >
@@ -168,7 +192,7 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
                   <div className="space-y-2">
                     <p className="text-sm font-black text-slate-900 dark:text-white tracking-tight uppercase">AI Engine Processing</p>
                     <p className="text-xs text-slate-500 font-medium leading-relaxed">
-                      We are analyzing the resumes in the background. 
+                      We are analyzing the resumes in the background.
                       This usually takes 15-30 seconds per resume.
                     </p>
                     <div className="pt-4 space-y-3">
@@ -176,10 +200,10 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
                         <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-ping" />
                         Auto-refreshing ({processingTime}s)
                       </span>
-                      
+
                       {processingTime > 30 && (
                         <div className="pt-2 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                          <button 
+                          <button
                             onClick={onRestartAnalysis}
                             className="px-6 py-2 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest rounded-md shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 transition-all transform active:scale-95"
                           >
@@ -198,15 +222,15 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
               {results.top_candidates.map((cand: any, idx: number) => {
                 const isExpanded = expandedId === cand.id;
                 const ai = cand.analysis?.recruiter_view;
-                
+
                 return (
-                  <div 
+                  <div
                     key={cand.id || idx}
                     className="animate-in slide-in-from-bottom-2 duration-300"
                     style={{ animationDelay: `${idx * 100}ms` }}
                   >
                     {/* AI Intelligence Card */}
-                    <div 
+                    <div
                       className={cn(
                         "bg-white dark:bg-[#111827] rounded-lg p-5 transition-all cursor-pointer border shadow-sm relative overflow-hidden group",
                         isExpanded ? "border-[#7C3AED] ring-1 ring-[#7C3AED]/10" : "border-slate-200 dark:border-slate-800 hover:border-[#7C3AED]/40"
@@ -244,7 +268,7 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
                             )}
                           </div>
                         </div>
-                        
+
                         <div className="flex flex-col items-end shrink-0">
                           <div className="text-[20px] font-black text-slate-900 dark:text-white leading-none">
                             {cand.score}<span className="text-[12px] opacity-30">%</span>
@@ -266,7 +290,7 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
                       {/* Structured Insights (Always show a preview if not expanded?) */}
                       {isExpanded && ai && (
                         <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800 animate-in fade-in duration-500">
-                          
+
                           {/* Strengths & Concerns */}
                           <div className="grid grid-cols-1 gap-4">
                             {ai.strengths?.length > 0 && (
@@ -362,7 +386,7 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
                     {/* Action Buttons */}
                     {isExpanded && (
                       <div className="mt-2 grid grid-cols-2 gap-2 animate-in fade-in slide-in-from-top-1 duration-200">
-                        <button 
+                        <button
                           onClick={(e) => {
                             e.stopPropagation();
                             onViewDetails(cand.id);
@@ -372,8 +396,8 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
                           <FileText className="w-3.5 h-3.5" />
                           Full Profile
                         </button>
-                        
-                        <button 
+
+                        <button
                           onClick={(e) => {
                             e.stopPropagation();
                             setAgentModalOpen(true);
@@ -406,7 +430,7 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
           ) : historyData?.data && historyData.data.length > 0 ? (
             <div className="space-y-2 pb-20">
               {historyData.data.map((report: any, idx: number) => (
-                <div 
+                <div
                   key={report.id}
                   className="flex items-center gap-3 p-3 rounded-sm border border-border/50 hover:border-[#7C3AED]/30 hover:bg-muted/5 transition-all cursor-pointer group"
                   onClick={() => {
@@ -419,7 +443,7 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
                   <div className="w-10 h-10 rounded-sm bg-muted/10 flex items-center justify-center shrink-0 border border-[#7C3AED]/20 group-hover:scale-105 transition-transform">
                     <BrainCircuit className="w-5 h-5 text-[#7C3AED]" />
                   </div>
-                  
+
                   <div className="flex-1 min-w-0">
                     <h4 className="text-[13px] font-bold text-foreground truncate">{report.job_title}</h4>
                     <div className="flex items-center gap-2 mt-0.5">
@@ -431,8 +455,8 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
                       </span>
                     </div>
                   </div>
-                  
-                  
+
+
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -458,13 +482,13 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
       {/* Footer Chat Input - Professional Chat Style */}
       <div className="p-4 border-t border-border bg-white dark:bg-[#0B0F19]">
         <div className="relative group">
-          <input 
+          <input
             type="text"
             placeholder="Ask anything about the candidates..."
             className="w-full bg-muted/20 border border-border rounded-sm py-3 px-4 pr-12 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#7C3AED]/20 focus:border-[#7C3AED] transition-all placeholder:text-muted-foreground/40 font-medium text-foreground"
             disabled={!results}
           />
-          <button 
+          <button
             className="absolute right-2 top-2 p-1.5 bg-[#7C3AED] text-white rounded-sm hover:bg-[#6D28D9] transition-colors disabled:opacity-30 shadow-sm"
             disabled={!results}
           >
@@ -473,9 +497,9 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
         </div>
       </div>
 
-      <AgentTaskModal 
-        isOpen={agentModalOpen} 
-        onClose={() => setAgentModalOpen(false)} 
+      <AgentTaskModal
+        isOpen={agentModalOpen}
+        onClose={() => setAgentModalOpen(false)}
         candidateName={selectedCandidateName}
       />
     </div>

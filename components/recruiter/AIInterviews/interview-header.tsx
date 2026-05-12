@@ -8,7 +8,8 @@ import {
   Calendar,
   Settings2,
   Users2,
-  PieChart
+  PieChart,
+  ClipboardCheck
 } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
@@ -24,6 +25,7 @@ export function AIInterviewsHeader({ companyName, activeSection, onSectionChange
   const navItems = [
     { id: 'pipeline', label: 'Pipeline', icon: Users2 },
     { id: 'configuration', label: 'Configuration', icon: BrainCircuit },
+    { id: 'evaluation', label: 'Evaluation', icon: ClipboardCheck },
     { id: 'scheduling', label: 'Scheduling', icon: Calendar },
     { id: 'analytics', label: 'Insights', icon: PieChart },
     { id: 'settings', label: 'Settings', icon: Settings2 },

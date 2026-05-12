@@ -67,4 +67,9 @@ export const aiInterviewsService = {
   regenerateRoundQuestions: async (roundId: string, count?: number) => {
     return api.post<any>(`/AIrounds/round/${roundId}/regenerate/`, { count });
   },
+  
+  // Trigger AI evaluation for a session
+  evaluateSession: async (sessionId: string, force: boolean = false) => {
+    return api.post<any>(`/AIrounds/session/${sessionId}/evaluate/`, { force });
+  },
 };

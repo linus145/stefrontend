@@ -94,8 +94,11 @@ export const jobsService = {
     });
   },
 
-  updateApplicationStatus: (applicationId: string, newStatus: string): Promise<BaseAPIResponse<JobApplication>> => {
-    return api.patch<BaseAPIResponse<JobApplication>>(`/jobs/applications/${applicationId}/status/`, { status: newStatus });
+  updateApplicationStatus: (applicationId: string, status: string, employmentType?: string): Promise<BaseAPIResponse<JobApplication>> => {
+    return api.patch<BaseAPIResponse<JobApplication>>(`/jobs/applications/${applicationId}/status/`, { 
+      status,
+      employment_type: employmentType 
+    });
   },
 
   getApplicationDetail: (applicationId: string): Promise<BaseAPIResponse<JobApplication>> => {
@@ -120,6 +123,10 @@ export const jobsService = {
   getSkills: (category?: string): Promise<BaseAPIResponse<Skill[]>> => {
     const query = category ? `?category=${category}` : '';
     return api.get<BaseAPIResponse<Skill[]>>(`/jobs/skills/${query}`);
+  },
+
+  createSkill: (data: { name: string; category: string }): Promise<BaseAPIResponse<Skill>> => {
+    return api.post<BaseAPIResponse<Skill>>('/jobs/skills/', data);
   },
 
 

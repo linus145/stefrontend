@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import { ChevronDown, Copy, Check, Loader2, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -26,6 +27,21 @@ export function JobSelector({
   onAnalyze,
   isAnalyzePending
 }: JobSelectorProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Listen for agent-driven screen triggers that bypass React state
+  useEffect(() => {
+    const handleAgentScreen = (e: any) => {
+      const jobId = e.detail?.jobId;
+      if (jobId) {
+        setManualJobId(jobId);
+        onAnalyze(jobId);
+      }
+    };
+    window.addEventListener('agent-trigger-screen', handleAgentScreen);
+    return () => window.removeEventListener('agent-trigger-screen', handleAgentScreen);
+  }, [onAnalyze, setManualJobId]);
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
       <div>
@@ -76,7 +92,9 @@ export function JobSelector({
         <div className="flex gap-2">
           <div className="relative flex-1">
             <input
+              ref={inputRef}
               type="text"
+              data-agent="manual-job-uid-input"
               placeholder="Paste Job UID here..."
               value={manualJobId}
               onChange={(e) => setManualJobId(e.target.value)}
@@ -84,6 +102,7 @@ export function JobSelector({
             />
           </div>
           <button
+            data-agent="manual-screen-button"
             onClick={() => manualJobId && onAnalyze(manualJobId)}
             disabled={isAnalyzePending || !manualJobId}
             className="px-4 py-2.5 bg-foreground text-background text-xs font-bold rounded-sm hover:opacity-90 disabled:opacity-50 transition-all flex items-center gap-2"

@@ -6,7 +6,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { AIInterviewsHeader } from './interview-header';
 import { InterviewPipelineView } from './interview-pipeline-view';
-import { InterviewConfigView } from './interview-config-view';
+import { InterviewConfigView } from './configuration/interview-config-view';
+import { EvaluationView } from './evaluation/evaluation-view';
 import { GlobalLoader } from '@/components/ui/global-loader';
 import { useQuery } from '@tanstack/react-query';
 import { jobsService } from '@/services/jobs.service';
@@ -53,6 +54,40 @@ export function AIInterviewsShell() {
 
   const company = companyCheck.data.company!;
 
+  const renderContent = () => {
+    switch (activeSection) {
+      case 'pipeline':
+        return (
+          <InterviewPipelineView 
+            onConfigure={handleConfigureCandidate} 
+            onSectionChange={setActiveSection}
+          />
+        );
+      case 'configuration':
+        return (
+          <InterviewConfigView
+            initialApplicationId={configInitialAppId}
+            initialSessionId={configInitialSessionId}
+            onBack={() => { 
+              setActiveSection('pipeline'); 
+              setConfigInitialSessionId(undefined); 
+            }}
+          />
+        );
+      case 'evaluation':
+        return <EvaluationView />;
+      default:
+        return (
+          <div className="flex flex-col items-center justify-center h-full opacity-50 space-y-4">
+            <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center border border-border">
+              <Settings2 className="w-8 h-8" />
+            </div>
+            <p className="text-sm font-medium tracking-tight">The {activeSection} module is under deployment.</p>
+          </div>
+        );
+    }
+  };
+
   return (
     <div className="flex min-h-screen bg-background selection:bg-blue-500/20">
       <AIInterviewsHeader
@@ -63,22 +98,7 @@ export function AIInterviewsShell() {
 
       <main className="flex-1 flex flex-col min-w-0 pt-16">
         <div className="flex-1 custom-scrollbar">
-          {activeSection === 'pipeline' ? (
-            <InterviewPipelineView onConfigure={handleConfigureCandidate} />
-          ) : activeSection === 'configuration' ? (
-            <InterviewConfigView
-              initialApplicationId={configInitialAppId}
-              initialSessionId={configInitialSessionId}
-              onBack={() => { setActiveSection('pipeline'); setConfigInitialSessionId(undefined); }}
-            />
-          ) : (
-            <div className="flex flex-col items-center justify-center h-full opacity-50 space-y-4">
-              <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center border border-border">
-                <Settings2 className="w-8 h-8" />
-              </div>
-              <p className="text-sm font-medium tracking-tight">The {activeSection} module is under deployment.</p>
-            </div>
-          )}
+          {renderContent()}
         </div>
       </main>
     </div>

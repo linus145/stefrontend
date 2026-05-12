@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import { aiInterviewsService } from '@/services/ai-interviews.service';
 import { jobsService } from '@/services/jobs.service';
 import { useQuery } from '@tanstack/react-query';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, BrainCircuit } from 'lucide-react';
 
 type RoundType = 'TECHNICAL' | 'CODING' | 'HR' | 'BEHAVIORAL' | 'SYSTEM_DESIGN';
 
@@ -20,7 +20,7 @@ interface RoundConfig {
   programming_language: string;
   max_questions: number;
   timer_seconds: number;
-  questions?: { text: string, marks: number }[];
+  questions?: { text: string; marks: number; ideal_answer?: string }[];
 }
 
 interface InterviewConfigViewProps {
@@ -41,6 +41,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
   const [selectedJobId, setSelectedJobId] = useState('');
   const [selectedApplicationIds, setSelectedApplicationIds] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [rounds, setRounds] = useState<RoundConfig[]>([
     { id: '1', title: 'TECHNICAL_SCREENING', type: 'TECHNICAL', difficulty: 'MID', question_format: 'TEXT', programming_language: '', max_questions: 5, timer_seconds: 600, questions: [] }
   ]);
@@ -193,6 +194,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
     }
 
     const toastId = toast.loading("AI is analyzing resume and architecting questions...");
+    setIsGenerating(true);
 
     try {
       const response = await aiInterviewsService.generateQuestions({
@@ -206,7 +208,13 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
       });
 
       if (response.status === 'success' && response.data?.questions?.length > 0) {
-        updateRound(roundId, { questions: response.data.questions.map((q: string) => ({ text: q, marks: 10 })) });
+        updateRound(roundId, { 
+          questions: response.data.questions.map((q: any) => ({ 
+            text: typeof q === 'object' ? q.question : q, 
+            ideal_answer: typeof q === 'object' ? q.ideal_answer : undefined,
+            marks: 10 
+          })) 
+        });
         toast.success(`AI generated ${response.data.questions.length} questions.`, { id: toastId });
       } else if (response.status === 'error') {
         toast.error(response.message || "AI failed to generate questions.", { id: toastId });
@@ -216,6 +224,8 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
     } catch (error: any) {
       const msg = error?.data?.message || error?.message || "AI engine encountered an error. Check your API key.";
       toast.error(msg, { id: toastId });
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -238,7 +248,11 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
             programming_language,
             max_questions,
             timer_seconds,
-            questions: questions || []
+            questions: questions?.map(q => ({
+              text: q.text,
+              marks: q.marks,
+              ideal_answer: q.ideal_answer
+            })) || []
           }))
         });
 
@@ -376,9 +390,9 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
               <div className="bg-muted/10 border border-border rounded-sm p-8 space-y-8">
                 <h4 className="text-xs font-semibold text-muted-foreground opacity-70">Workspace Summary</h4>
                 <div className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium opacity-50">Target Job</span>
-                    <span className="text-sm font-bold truncate max-w-[150px]">{selectedJobId ? jobs.find(j => j.id === selectedJobId)?.title : 'Undefined'}</span>
+                  <div className="flex items-center justify-between gap-4">
+                    <span className="text-xs font-medium opacity-50 shrink-0">Target Job</span>
+                    <span className="text-sm font-bold text-right">{selectedJobId ? jobs.find(j => j.id === selectedJobId)?.title : 'Undefined'}</span>
                   </div>
                   <div className="flex items-center justify-between border-t border-border pt-6">
                     <span className="text-xs font-medium opacity-50">Volume</span>
@@ -387,6 +401,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                   <button
                     disabled={!selectedJobId || selectedApplicationIds.length === 0}
                     onClick={() => setStep(2)}
+                    data-agent="proceed-to-architecture-button"
                     className="w-full mt-6 bg-blue-600 text-white py-4 rounded-sm font-bold text-sm hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-30 flex items-center justify-center"
                   >
                     Proceed to Architecture
@@ -433,6 +448,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                           type="checkbox"
                           className="sr-only"
                           checked={selectedApplicationIds.includes(app.id)}
+                          data-agent="candidate-selection-checkbox"
                           onChange={() => {
                             if (selectedApplicationIds.includes(app.id)) {
                               setSelectedApplicationIds(selectedApplicationIds.filter(id => id !== app.id));
@@ -516,6 +532,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                         <select
                           value={round.title}
                           onChange={(e) => updateRound(round.id, { title: e.target.value })}
+                          data-agent="round-designation-select"
                           className="w-full bg-muted/10 border border-border rounded-sm py-3 px-4 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-blue-600 transition-all appearance-none"
                         >
                           <option value="" disabled>Select Round Type</option>
@@ -621,6 +638,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                             </button>
                             <button
                               onClick={() => handleGenerateQuestions(round.id)}
+                              data-agent="generate-questions-ai-button"
                               className="px-4 py-1.5 rounded-sm bg-blue-600 text-white text-[11px] font-bold hover:bg-blue-700 transition-all flex items-center gap-2"
                             >
                               <Sparkles className="w-3.5 h-3.5" />
@@ -637,20 +655,43 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                           ) : (
                             round.questions?.map((q, idx) => (
                               <div key={idx} className="relative group flex gap-3 items-start">
-                                <div className="flex-1">
-                                  <textarea
-                                    value={typeof q === 'string' ? q : q.text}
-                                    onChange={(e) => {
-                                      const newQuestions = [...(round.questions || [])] as any[];
-                                      const current = newQuestions[idx];
-                                      newQuestions[idx] = typeof current === 'string'
-                                        ? { text: e.target.value, marks: 10 }
-                                        : { ...current, text: e.target.value };
-                                      updateRound(round.id, { questions: newQuestions });
-                                    }}
-                                    placeholder="Type your question here..."
-                                    className="w-full bg-muted/10 border border-border rounded-sm py-4 px-4 text-xs font-medium focus:outline-none focus:ring-1 focus:ring-blue-600 transition-all min-h-[80px]"
-                                  />
+                                <div className="flex-1 space-y-4">
+                                  <div>
+                                    <label className="text-[10px] font-bold text-muted-foreground block mb-1 uppercase tracking-wider opacity-60">Question</label>
+                                    <textarea
+                                      value={typeof q === 'string' ? q : q.text}
+                                      onChange={(e) => {
+                                        const newQuestions = [...(round.questions || [])] as any[];
+                                        const current = newQuestions[idx];
+                                        newQuestions[idx] = typeof current === 'string'
+                                          ? { text: e.target.value, marks: 10 }
+                                          : { ...current, text: e.target.value };
+                                        updateRound(round.id, { questions: newQuestions });
+                                      }}
+                                      placeholder="Type your question here..."
+                                      className="w-full bg-muted/10 border border-border rounded-sm py-3 px-4 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-blue-600 transition-all min-h-[60px]"
+                                    />
+                                  </div>
+                                  
+                                  <div>
+                                    <label className="text-[10px] font-bold text-blue-600 block mb-1 uppercase tracking-wider opacity-60 flex items-center gap-2">
+                                      <BrainCircuit className="w-3 h-3" />
+                                      AI Generated Ideal Answer
+                                    </label>
+                                    <textarea
+                                      value={typeof q === 'object' ? q.ideal_answer : ''}
+                                      onChange={(e) => {
+                                        const newQuestions = [...(round.questions || [])] as any[];
+                                        const current = newQuestions[idx];
+                                        if (typeof current === 'object') {
+                                          newQuestions[idx] = { ...current, ideal_answer: e.target.value };
+                                          updateRound(round.id, { questions: newQuestions });
+                                        }
+                                      }}
+                                      placeholder="AI will generate an ideal answer to compare against..."
+                                      className="w-full bg-blue-600/[0.03] border border-blue-600/10 rounded-sm py-3 px-4 text-xs font-medium italic focus:outline-none focus:ring-1 focus:ring-blue-600 transition-all min-h-[60px]"
+                                    />
+                                  </div>
                                 </div>
                                 <div className="w-20 shrink-0">
                                   <label className="text-[10px] font-bold text-muted-foreground block mb-1">Marks</label>
@@ -694,28 +735,52 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                 <div>
                   <h3 className="text-xs font-semibold text-muted-foreground opacity-70 mb-6">Dispatch Protocol</h3>
                   <div className="space-y-6">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold opacity-50">Target Job</span>
-                      <span className="text-sm font-bold truncate max-w-[120px]">{jobs.find(j => j.id === selectedJobId)?.title}</span>
+                    <div className="flex items-center justify-between gap-4">
+                      <span className="text-[10px] font-bold opacity-50 shrink-0">Target Job</span>
+                      <span className="text-sm font-bold text-right">{jobs.find(j => j.id === selectedJobId)?.title}</span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] font-bold opacity-50">Candidates</span>
                       <span className="text-sm font-bold">{selectedApplicationIds.length} Targets</span>
                     </div>
+
+                    <div className="border-t border-border pt-6 space-y-4">
+                      <p className="text-[10px] font-bold opacity-50">Rounds Overview</p>
+                      {rounds.map((r, i) => {
+                        const roundMarks = r.questions?.reduce((acc, q: any) => acc + (typeof q === 'string' ? 10 : (q.marks || 0)), 0) || 0;
+                        return (
+                          <div key={r.id} className="flex items-center justify-between group">
+                            <div className="flex items-center gap-2">
+                              <span className="w-4 h-4 rounded-full bg-muted border border-border flex items-center justify-center text-[8px] font-bold text-muted-foreground">{i + 1}</span>
+                              <span className="text-[11px] font-bold text-foreground truncate max-w-[180px]">{r.title || `Round ${i+1}`}</span>
+                            </div>
+                            <span className="text-[11px] font-bold text-blue-600">{roundMarks} pts</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+
                     <div className="flex items-center justify-between border-t border-border pt-6">
                       <span className="text-[10px] font-bold opacity-50">Total Duration</span>
-                      <span className="text-sm font-bold">{Math.floor(rounds.reduce((acc, r) => acc + r.timer_seconds, 0) / 60)} Minutes</span>
+                      <span className="text-sm font-bold">{Math.floor(rounds.reduce((acc, r) => acc + r.timer_seconds, 0) / 60)} Min</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold opacity-50">Total Potential Score</span>
+                      <span className="text-sm font-bold text-blue-600">
+                        {rounds.reduce((totalAcc, r) => totalAcc + (r.questions?.reduce((acc, q: any) => acc + (typeof q === 'string' ? 10 : (q.marks || 0)), 0) || 0), 0)} Marks
+                      </span>
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-3">
                   <button
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || isGenerating}
                     onClick={handleConfigure}
+                    data-agent="dispatch-interviews-button"
                     className="w-full py-5 rounded-sm bg-blue-600 text-white font-bold text-sm shadow-2xl shadow-blue-600/20 hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-30 flex items-center justify-center"
                   >
-                    {isSubmitting ? 'Dispatching Agents...' : 'Dispatch AI Agents'}
+                    {isSubmitting ? 'Dispatching Agents...' : isGenerating ? 'Generating...' : 'Dispatch AI Agents'}
                   </button>
                   <button
                     onClick={() => setStep(1)}

@@ -49,8 +49,8 @@ export function ApplicationsTab({ selectedJobId, onBack }: ApplicationsTabProps)
 
   // Mutations
   const updateStatusMutation = useMutation({
-    mutationFn: ({ appId, status }: { appId: string; status: string }) =>
-      jobsService.updateApplicationStatus(appId, status),
+    mutationFn: ({ appId, status, employmentType }: { appId: string; status: string; employmentType?: string }) =>
+      jobsService.updateApplicationStatus(appId, status, employmentType),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['job-applications'] });
       queryClient.invalidateQueries({ queryKey: ['recruiter-stats'] });
@@ -240,7 +240,7 @@ export function ApplicationsTab({ selectedJobId, onBack }: ApplicationsTabProps)
                   app={app}
                   isExpanded={expandedAppId === app.id}
                   onToggleExpand={() => setExpandedAppId(expandedAppId === app.id ? null : app.id)}
-                  onUpdateStatus={(id, status) => updateStatusMutation.mutate({ appId: id, status })}
+                  onUpdateStatus={(id, status, employmentType) => updateStatusMutation.mutate({ appId: id, status, employmentType })}
                   onContact={handleOpenContactModal}
                   isUpdatePending={updateStatusMutation.isPending}
                 />

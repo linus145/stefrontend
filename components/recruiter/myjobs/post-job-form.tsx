@@ -1,12 +1,12 @@
 'use client';
 import { useState, useMemo } from 'react';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { jobsService } from '@/services/jobs.service';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import {
   ArrowLeft, Loader2, Briefcase, MapPin, Globe, Clock,
-  DollarSign, Tags, ChevronDown, Check, Search as SearchIcon, X, Users
+  DollarSign, Tags, ChevronDown, Check, Search as SearchIcon, X, Users, Plus
 } from 'lucide-react';
 import { JobPost, JobPostCreatePayload, Skill } from '@/types/jobs.types';
 
@@ -49,6 +49,7 @@ const HIRING_STATUS_OPTIONS = [
 
 export function PostJobForm({ editJob, onClose, onSuccess }: PostJobFormProps) {
   const isEditing = !!editJob;
+  const queryClient = useQueryClient();
 
   const { data: skillsResponse } = useQuery({
     queryKey: ['available-skills'],
@@ -67,7 +68,9 @@ export function PostJobForm({ editJob, onClose, onSuccess }: PostJobFormProps) {
     salary_max: editJob?.salary_max || null,
     currency: editJob?.currency || 'INR',
     skills: editJob?.skills?.map(s => s.id) || [],
-    skills_required: editJob?.skills_required || [],
+    skills_required: editJob?.skills_required?.filter(
+      name => !editJob.skills?.some(s => s.name === name)
+    ) || [],
     experience_level: editJob?.experience_level || 'ENTRY',
     open_positions: editJob?.open_positions || 1,
     department: editJob?.department || '',
@@ -117,6 +120,22 @@ export function PostJobForm({ editJob, onClose, onSuccess }: PostJobFormProps) {
     },
   });
 
+  const createSkillMutation = useMutation({
+    mutationFn: (skillName: string) => jobsService.createSkill({ name: skillName, category: 'IT' }),
+    onSuccess: (response) => {
+      const newSkill = response.data;
+      if (newSkill) {
+        setFormData(prev => ({
+          ...prev,
+          skills: [...(prev.skills || []), newSkill.id]
+        }));
+        queryClient.invalidateQueries({ queryKey: ['available-skills'] });
+        toast.success(`Skill "${newSkill.name}" added to database!`);
+      }
+    },
+    onError: () => toast.error('Failed to create new skill.'),
+  });
+
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -155,7 +174,7 @@ export function PostJobForm({ editJob, onClose, onSuccess }: PostJobFormProps) {
 
     const payload: JobPostCreatePayload = {
       ...formData,
-      skills_required: selectedSkillNames, // Sync names for backward compatibility
+      skills_required: [...selectedSkillNames, ...(formData.skills_required || [])], // Merge predefined and custom skills
       salary_min: formData.salary_min ? Number(formData.salary_min) : null,
       salary_max: formData.salary_max ? Number(formData.salary_max) : null,
       deadline: formData.deadline ? new Date(formData.deadline).toISOString() : null,
@@ -201,14 +220,15 @@ export function PostJobForm({ editJob, onClose, onSuccess }: PostJobFormProps) {
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground">
                 <Briefcase className="h-4 w-4" />
               </div>
-              <input
-                id="title"
-                disabled={isSubmitting}
-                value={formData.title}
-                onChange={handleChange}
-                placeholder="e.g. Senior Frontend Developer"
-                className={cn("w-full rounded-sm bg-muted/30 border text-foreground pl-10 pr-4 py-2 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground transition-colors", errors.title ? 'border-red-400' : 'border-border')}
-              />
+                <input
+                  id="title"
+                  disabled={isSubmitting}
+                  value={formData.title}
+                  onChange={handleChange}
+                  data-agent="job-title-input"
+                  placeholder="e.g. Senior Frontend Developer"
+                  className={cn("w-full rounded-sm bg-background border text-foreground pl-10 pr-4 py-2 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground transition-colors", errors.title ? 'border-red-400' : 'border-border')}
+                />
             </div>
           </FormField>
 
@@ -219,9 +239,10 @@ export function PostJobForm({ editJob, onClose, onSuccess }: PostJobFormProps) {
               disabled={isSubmitting}
               value={formData.description}
               onChange={handleChange}
+              data-agent="job-description-input"
               placeholder="Describe the role, responsibilities, and qualifications..."
               rows={6}
-              className={cn("w-full rounded-sm bg-muted/30 border text-foreground px-4 py-2 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground resize-none transition-colors", errors.description ? 'border-red-400' : 'border-border')}
+              className={cn("w-full rounded-sm bg-background border text-foreground px-4 py-2 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground resize-none transition-colors", errors.description ? 'border-red-400' : 'border-border')}
             />
           </FormField>
 
@@ -251,7 +272,7 @@ export function PostJobForm({ editJob, onClose, onSuccess }: PostJobFormProps) {
                   value={formData.location}
                   onChange={handleChange}
                   placeholder="Bangalore, India"
-                  className="w-full rounded-sm bg-muted/30 border border-border text-foreground pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground"
+                  className="w-full rounded-sm bg-background border border-border text-foreground pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground"
                 />
               </div>
             </FormField>
@@ -267,7 +288,7 @@ export function PostJobForm({ editJob, onClose, onSuccess }: PostJobFormProps) {
                 value={formData.salary_min ?? ''}
                 onChange={handleChange}
                 placeholder="30000"
-                className="w-full rounded-sm bg-muted/30 border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground"
+                className="w-full rounded-sm bg-background border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground"
               />
             </FormField>
             <FormField label="Max Salary" id="salary_max">
@@ -278,7 +299,7 @@ export function PostJobForm({ editJob, onClose, onSuccess }: PostJobFormProps) {
                 value={formData.salary_max ?? ''}
                 onChange={handleChange}
                 placeholder="80000"
-                className="w-full rounded-sm bg-muted/30 border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground"
+                className="w-full rounded-sm bg-background border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground"
               />
             </FormField>
             <FormField label="Currency" id="currency">
@@ -288,7 +309,7 @@ export function PostJobForm({ editJob, onClose, onSuccess }: PostJobFormProps) {
                 value={formData.currency}
                 onChange={handleChange}
                 placeholder="INR"
-                className="w-full rounded-sm bg-muted/30 border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground"
+                className="w-full rounded-sm bg-background border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground"
               />
             </FormField>
           </div>
@@ -307,7 +328,7 @@ export function PostJobForm({ editJob, onClose, onSuccess }: PostJobFormProps) {
                   disabled={isSubmitting}
                   value={formData.open_positions}
                   onChange={(e) => setFormData(prev => ({ ...prev, open_positions: parseInt(e.target.value) || 1 }))}
-                  className="w-full rounded-sm bg-muted/30 border border-border text-foreground pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground"
+                  className="w-full rounded-sm bg-background border border-border text-foreground pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground"
                 />
               </div>
             </FormField>
@@ -322,7 +343,7 @@ export function PostJobForm({ editJob, onClose, onSuccess }: PostJobFormProps) {
                   value={formData.department}
                   onChange={handleChange}
                   placeholder="e.g. Engineering"
-                  className="w-full rounded-sm bg-muted/30 border border-border text-foreground pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground"
+                  className="w-full rounded-sm bg-background border border-border text-foreground pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground"
                 />
               </div>
             </FormField>
@@ -332,8 +353,9 @@ export function PostJobForm({ editJob, onClose, onSuccess }: PostJobFormProps) {
           <FormField label="Skills Required *" id="skills" error={errors.skills}>
             <div className="relative">
               <div
+                data-agent="skills-dropdown-trigger"
                 className={cn(
-                  "w-full rounded-sm bg-muted/30 border border-border px-4 py-2 text-sm cursor-pointer flex flex-wrap gap-2 min-h-[40px]",
+                  "w-full rounded-[2px] bg-background border border-border px-4 py-2 text-sm cursor-pointer flex flex-wrap gap-2 min-h-[40px]",
                   showSkillDropdown && "ring-1 ring-blue-500 border-blue-500"
                 )}
                 onClick={() => setShowSkillDropdown(!showSkillDropdown)}
@@ -346,7 +368,7 @@ export function PostJobForm({ editJob, onClose, onSuccess }: PostJobFormProps) {
                   return skill ? (
                     <span
                       key={skillId}
-                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm bg-blue-500 text-white text-[10px] font-bold uppercase tracking-wider"
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-[2px] bg-blue-500 text-white text-[10px] font-bold uppercase tracking-wider"
                       onClick={(e) => { e.stopPropagation(); handleRemoveSkill(skillId); }}
                     >
                       {skill.name}
@@ -354,6 +376,22 @@ export function PostJobForm({ editJob, onClose, onSuccess }: PostJobFormProps) {
                     </span>
                   ) : null;
                 })}
+                {formData.skills_required?.map((skillName, idx) => (
+                  <span
+                    key={`custom-${idx}`}
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-[2px] bg-emerald-500 text-white text-[10px] font-bold uppercase tracking-wider"
+                    onClick={(e) => { 
+                      e.stopPropagation(); 
+                      setFormData(prev => ({
+                        ...prev,
+                        skills_required: (prev.skills_required || []).filter(s => s !== skillName)
+                      }));
+                    }}
+                  >
+                    {skillName}
+                    <X className="w-2.5 h-2.5 hover:text-white/80" />
+                  </span>
+                ))}
                 <div className="ml-auto">
                   <ChevronDown className={cn("w-4 h-4 text-muted-foreground transition-transform", showSkillDropdown && "rotate-180")} />
                 </div>
@@ -365,7 +403,8 @@ export function PostJobForm({ editJob, onClose, onSuccess }: PostJobFormProps) {
                     <div className="relative">
                       <SearchIcon className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
                       <input
-                        className="w-full bg-muted/50 border-none pl-8 pr-3 py-1.5 text-xs outline-none rounded-sm"
+                        data-agent="skills-search-input"
+                        className="w-full bg-background border border-border pl-8 pr-3 py-1.5 text-xs outline-none rounded-sm text-foreground placeholder:text-muted-foreground"
                         placeholder="Search skills..."
                         value={skillSearch}
                         onChange={(e) => setSkillSearch(e.target.value)}
@@ -375,6 +414,32 @@ export function PostJobForm({ editJob, onClose, onSuccess }: PostJobFormProps) {
                   </div>
 
                   <div className="max-h-[300px] overflow-y-auto p-2 space-y-4">
+                    {/* Custom Skill Option */}
+                    {skillSearch.trim() && (
+                      <div className="px-2 pb-2 border-b border-border mb-2">
+                        <button
+                          type="button"
+                          disabled={createSkillMutation.isPending}
+                          onClick={() => {
+                            const newSkill = skillSearch.trim();
+                            if (newSkill) {
+                              createSkillMutation.mutate(newSkill);
+                              setSkillSearch('');
+                            }
+                          }}
+                          data-agent="add-custom-skill-button"
+                          className="w-full flex items-center gap-2 px-3 py-2 rounded-[2px] bg-blue-500/5 text-blue-600 text-xs font-bold hover:bg-blue-500/10 transition-all border border-blue-500/20 disabled:opacity-50"
+                        >
+                          {createSkillMutation.isPending ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <Plus className="w-3.5 h-3.5" />
+                          )}
+                          {createSkillMutation.isPending ? 'Saving Skill...' : `Add Custom Skill: "${skillSearch}"`}
+                        </button>
+                      </div>
+                    )}
+
                     {/* IT Skills */}
                     {itSkills.length > 0 && (
                       <div>
@@ -386,7 +451,7 @@ export function PostJobForm({ editJob, onClose, onSuccess }: PostJobFormProps) {
                               type="button"
                               onClick={() => toggleSkill(skill.id)}
                               className={cn(
-                                "w-full text-left px-3 py-2 rounded-sm text-xs font-medium transition-colors flex items-center justify-between",
+                                "w-full text-left px-3 py-2 rounded-[2px] text-xs font-medium transition-colors flex items-center justify-between",
                                 formData.skills?.includes(skill.id) ? "bg-blue-500/10 text-blue-600" : "hover:bg-muted text-foreground/80"
                               )}
                             >
@@ -409,7 +474,7 @@ export function PostJobForm({ editJob, onClose, onSuccess }: PostJobFormProps) {
                               type="button"
                               onClick={() => toggleSkill(skill.id)}
                               className={cn(
-                                "w-full text-left px-3 py-2 rounded-sm text-xs font-medium transition-colors flex items-center justify-between",
+                                "w-full text-left px-3 py-2 rounded-[2px] text-xs font-medium transition-colors flex items-center justify-between",
                                 formData.skills?.includes(skill.id) ? "bg-cyan-500/10 text-cyan-600" : "hover:bg-muted text-foreground/80"
                               )}
                             >
@@ -441,7 +506,7 @@ export function PostJobForm({ editJob, onClose, onSuccess }: PostJobFormProps) {
               disabled={isSubmitting}
               value={formData.deadline ?? ''}
               onChange={handleChange}
-              className="w-full rounded-sm bg-muted/30 border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              className="w-full rounded-sm bg-background border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none"
             />
           </FormField>
 
@@ -479,6 +544,7 @@ export function PostJobForm({ editJob, onClose, onSuccess }: PostJobFormProps) {
             <button
               type="submit"
               disabled={isSubmitting}
+              data-agent="submit-job-button"
               className="flex-1 flex items-center justify-center gap-2 px-6 py-2 rounded-sm bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-sm font-semibold shadow-sm hover:shadow-lg transition-all disabled:opacity-70"
             >
               {isSubmitting ? (
@@ -531,10 +597,10 @@ function SelectField({ id, value, onChange, options, disabled }: {
         disabled={disabled}
         value={value}
         onChange={onChange}
-        className="w-full rounded-sm bg-muted/30 border border-border text-foreground px-4 py-2 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none appearance-none"
+        className="w-full rounded-sm bg-background border border-border text-foreground px-4 py-2 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none appearance-none transition-colors"
       >
         {options.map(opt => (
-          <option key={opt.value} value={opt.value}>{opt.label}</option>
+          <option key={opt.value} value={opt.value} className="bg-background text-foreground">{opt.label}</option>
         ))}
       </select>
       <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-muted-foreground">

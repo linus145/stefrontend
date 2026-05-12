@@ -1,6 +1,6 @@
 'use client';
 
-import { User as UserIcon, Mail, Clock, BrainCircuit, Eye, CheckCircle, XCircle, ChevronDown, FileText, ArrowRight, MessageSquare } from 'lucide-react';
+import { User as UserIcon, Mail, Clock, BrainCircuit, Eye, CheckCircle, XCircle, ChevronDown, FileText, ArrowRight, MessageSquare, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { JobApplication, ApplicationStatus } from '@/types/jobs.types';
 
@@ -8,7 +8,7 @@ interface ApplicationCardProps {
   app: JobApplication;
   isExpanded: boolean;
   onToggleExpand: () => void;
-  onUpdateStatus: (appId: string, status: string) => void;
+  onUpdateStatus: (appId: string, status: string, employmentType?: string) => void;
   onContact: (applicant: any, sendEmail: boolean) => void;
   isUpdatePending: boolean;
 }
@@ -46,9 +46,9 @@ export function ApplicationCard({
         onClick={onToggleExpand}
       >
         {/* Avatar */}
-        <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0">
+        <div className="w-10 h-10 rounded-sm bg-blue-500/10 flex items-center justify-center shrink-0">
           {app.applicant.profile_image_url ? (
-            <img src={app.applicant.profile_image_url} alt="" className="w-full h-full rounded-full object-cover" />
+            <img src={app.applicant.profile_image_url} alt="" className="w-full h-full rounded-sm object-cover" />
           ) : (
             <UserIcon className="w-5 h-5 text-blue-600" />
           )}
@@ -59,7 +59,7 @@ export function ApplicationCard({
             <h4 className="text-sm font-semibold text-foreground">
               {app.applicant.first_name} {app.applicant.last_name}
             </h4>
-            <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-bold uppercase border", getStatusColor(app.status))}>
+            <span className={cn("px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase border", getStatusColor(app.status))}>
               {app.status}
             </span>
           </div>
@@ -81,16 +81,16 @@ export function ApplicationCard({
         {/* Quick status actions + chevron */}
         {/* Action Symbols */}
         <div className="flex items-center gap-1.5 shrink-0">
-          <button 
-            onClick={(e) => { e.stopPropagation(); onContact(app.applicant, true); }} 
-            className="p-2 rounded-sm bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 transition-all" 
+          <button
+            onClick={(e) => { e.stopPropagation(); onContact(app.applicant, true); }}
+            className="p-2 rounded-sm bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 transition-all"
             title="Send Email"
           >
             <Mail className="w-4 h-4" />
           </button>
-          <button 
-            onClick={(e) => { e.stopPropagation(); onContact(app.applicant, false); }} 
-            className="p-2 rounded-sm bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 transition-all" 
+          <button
+            onClick={(e) => { e.stopPropagation(); onContact(app.applicant, false); }}
+            className="p-2 rounded-sm bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 transition-all"
             title="Send Message"
           >
             <MessageSquare className="w-4 h-4" />
@@ -140,7 +140,6 @@ export function ApplicationCard({
                           : "bg-muted/30 text-muted-foreground border-border hover:opacity-80 disabled:opacity-30"
                       )}
                     >
-                      {s === 'INTERVIEW' && <BrainCircuit className="w-3 h-3" />}
                       {s}
                     </button>
                   ))}

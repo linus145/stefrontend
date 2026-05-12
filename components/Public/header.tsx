@@ -25,10 +25,11 @@ export function Header() {
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
-          <Link href="#features" className="hover:text-slate-900 transition-colors">Platform</Link>
-          <Link href="#startups" className="hover:text-slate-900 transition-colors">Startups</Link>
-          <Link href="#investors" className="hover:text-slate-900 transition-colors">Investors</Link>
-          <Link href="#community" className="hover:text-slate-900 transition-colors">Community</Link>
+          <Link href="/" className="hover:text-slate-900 transition-colors">Home</Link>
+          <Link href="/aboutus" className="hover:text-slate-900 transition-colors">About Us</Link>
+          <Link href="/blogs" className="hover:text-slate-900 transition-colors">Blog</Link>
+          <Link href="/careers" className="hover:text-slate-900 transition-colors">Careers</Link>
+          <Link href="/contactus" className="hover:text-slate-900 transition-colors">Contact</Link>
         </nav>
 
         {/* Auth CTA */}
@@ -57,17 +58,20 @@ export function Header() {
       {isMobileMenuOpen && (
         <div className="md:hidden border-t border-slate-200 bg-white/95 backdrop-blur-xl animate-in slide-in-from-top-2 fade-in duration-200">
           <nav className="flex flex-col px-6 py-4 space-y-1">
-            <Link href="#features" onClick={() => setIsMobileMenuOpen(false)} className="py-3 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors border-b border-slate-100">
-              Platform
+            <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="py-3 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors border-b border-slate-100">
+              Home
             </Link>
-            <Link href="#startups" onClick={() => setIsMobileMenuOpen(false)} className="py-3 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors border-b border-slate-100">
-              Startups
+            <Link href="/aboutus" onClick={() => setIsMobileMenuOpen(false)} className="py-3 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors border-b border-slate-100">
+              About Us
             </Link>
-            <Link href="#investors" onClick={() => setIsMobileMenuOpen(false)} className="py-3 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors border-b border-slate-100">
-              Investors
+            <Link href="/blogs" onClick={() => setIsMobileMenuOpen(false)} className="py-3 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors border-b border-slate-100">
+              Blog
             </Link>
-            <Link href="#community" onClick={() => setIsMobileMenuOpen(false)} className="py-3 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
-              Community
+            <Link href="/careers" onClick={() => setIsMobileMenuOpen(false)} className="py-3 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors border-b border-slate-100">
+              Careers
+            </Link>
+            <Link href="/contactus" onClick={() => setIsMobileMenuOpen(false)} className="py-3 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
+              Contact
             </Link>
           </nav>
           <div className="flex flex-col gap-3 px-6 pb-6 pt-2">

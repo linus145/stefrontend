@@ -69,7 +69,7 @@
   --input: #E2E8F0;
   --ring: #6366F1;
   --radius: 1rem;
-  
+
   --sidebar: #FFFFFF;
   --sidebar-foreground: #475569;
   --sidebar-primary: #6366F1;
@@ -101,7 +101,7 @@
   --border: #1F2937;
   --input: #1F2937;
   --ring: #818CF8;
-  
+
   --sidebar: #111827;
   --sidebar-foreground: #9CA3AF;
   --sidebar-primary: #818CF8;
@@ -136,12 +136,15 @@
   scrollbar-width: thin;
   scrollbar-color: hsl(var(--muted)) transparent;
 }
+
 .custom-scrollbar::-webkit-scrollbar {
   width: 4px;
 }
+
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
+
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background-color: hsl(var(--muted));
   border-radius: 9999px;
@@ -149,7 +152,10 @@
 
 /* Prevent zoom on input focus for iOS */
 @media screen and (max-width: 768px) {
-  input, select, textarea {
+
+  input,
+  select,
+  textarea {
     font-size: 16px !important;
   }
 }
@@ -162,7 +168,8 @@
 }
 
 /* Prevent text selection on nav elements for mobile */
-nav button, nav a {
+nav button,
+nav a {
   -webkit-tap-highlight-color: transparent;
   user-select: none;
 }
@@ -171,6 +178,7 @@ nav button, nav a {
 .scrollbar-none::-webkit-scrollbar {
   display: none;
 }
+
 .scrollbar-none {
   -ms-overflow-style: none;
   scrollbar-width: none;

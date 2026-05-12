@@ -72,7 +72,7 @@ export function JobDetails({ job, applications, onClose, onApply, onEasyApply, i
           {hasApplied ? (
             <button
               disabled
-              className="px-8 py-2 bg-emerald-600/10 text-emerald-700 rounded-full text-sm font-bold border border-emerald-600/20 flex items-center justify-center gap-2"
+              className="px-8 py-2 bg-emerald-600/10 text-emerald-700 rounded-sm text-sm font-bold border border-emerald-600/20 flex items-center justify-center gap-2"
             >
               <CheckCircle2 className="w-4 h-4" />
               Applied
@@ -82,7 +82,7 @@ export function JobDetails({ job, applications, onClose, onApply, onEasyApply, i
               <button
                 onClick={onEasyApply}
                 disabled={isApplying}
-                className="px-8 py-2 bg-[#0a66c2] text-white rounded-full text-sm font-bold hover:bg-[#004182] transition-all flex items-center gap-2 shadow-sm disabled:opacity-50"
+                className="px-8 py-2 bg-[#0a66c2] text-white rounded-sm text-sm font-bold hover:bg-[#004182] transition-all flex items-center gap-2 shadow-sm disabled:opacity-50"
               >
                 {isApplying ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4 fill-current" />}
                 B2 Apply
@@ -90,13 +90,13 @@ export function JobDetails({ job, applications, onClose, onApply, onEasyApply, i
               <button
                 onClick={onApply}
                 disabled={isApplying}
-                className="px-8 py-2 border border-[#0a66c2] text-[#0a66c2] rounded-full text-sm font-bold hover:bg-[#0a66c2]/5 transition-all disabled:opacity-50"
+                className="px-8 py-2 border border-[#0a66c2] text-[#0a66c2] rounded-sm text-sm font-bold hover:bg-[#0a66c2]/5 transition-all disabled:opacity-50"
               >
                 Apply
               </button>
             </>
           )}
-          <button className="hidden sm:block px-8 py-2 border border-muted-foreground text-muted-foreground rounded-full text-sm font-bold hover:bg-muted transition-all">
+          <button className="hidden sm:block px-8 py-2 border border-muted-foreground text-muted-foreground rounded-sm text-sm font-bold hover:bg-muted transition-all">
             Save
           </button>
         </div>
@@ -143,7 +143,7 @@ export function JobDetails({ job, applications, onClose, onApply, onEasyApply, i
               <button
                 onClick={() => job.owner_user_id && onMessageRecruiter?.(job.owner_user_id)}
                 disabled={!job.owner_user_id}
-                className="px-5 py-1.5 border border-border rounded-full text-xs font-bold hover:bg-muted transition-all disabled:opacity-50"
+                className="px-5 py-1.5 border border-border rounded-sm text-xs font-bold hover:bg-muted transition-all disabled:opacity-50"
               >
                 Message
               </button>
@@ -199,7 +199,7 @@ export function JobDetails({ job, applications, onClose, onApply, onEasyApply, i
               <h4 className="text-[13px] font-bold text-foreground hover:underline cursor-pointer">{job.company_name}</h4>
               <p className="text-[11px] text-muted-foreground">530,783 followers</p>
             </div>
-            <button className="flex items-center gap-1.5 px-5 py-1.5 border border-[#0a66c2] text-[#0a66c2] rounded-full text-xs font-bold hover:bg-[#0a66c2]/5 transition-all">
+            <button className="flex items-center gap-1.5 px-5 py-1.5 border border-[#0a66c2] text-[#0a66c2] rounded-sm text-xs font-bold hover:bg-[#0a66c2]/5 transition-all">
               <Plus className="w-3.5 h-3.5" />
               Follow
             </button>

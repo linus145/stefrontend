@@ -22,20 +22,20 @@ export function Footer() {
           <div className="space-y-4">
             <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">Ecosystem</h4>
             <ul className="space-y-2 text-sm text-slate-600">
-              <li><Link href="#" className="hover:text-indigo-600 transition-colors">For Founders</Link></li>
-              <li><Link href="#" className="hover:text-indigo-600 transition-colors">For Investors</Link></li>
-              <li><Link href="#" className="hover:text-indigo-600 transition-colors">Startup Directory</Link></li>
-              <li><Link href="#" className="hover:text-indigo-600 transition-colors">Funding Analytics</Link></li>
+              <li><Link href="#features" className="hover:text-indigo-600 transition-colors">Platform</Link></li>
+              <li><Link href="#startups" className="hover:text-indigo-600 transition-colors">Startups</Link></li>
+              <li><Link href="#investors" className="hover:text-indigo-600 transition-colors">Investors</Link></li>
+              <li><Link href="#community" className="hover:text-indigo-600 transition-colors">Community</Link></li>
             </ul>
           </div>
 
           <div className="space-y-4">
-            <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">Company</h4>
+            <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">Resources</h4>
             <ul className="space-y-2 text-sm text-slate-600">
-              <li><Link href="/aboutus" className="hover:text-indigo-600 transition-colors">About Us</Link></li>
-              <li><Link href="/careers" className="hover:text-indigo-600 transition-colors">Careers</Link></li>
-              <li><Link href="/blogs" className="hover:text-indigo-600 transition-colors">Blog</Link></li>
-              <li><Link href="/contactus" className="hover:text-indigo-600 transition-colors">Contact</Link></li>
+              <li><Link href="#" className="hover:text-indigo-600 transition-colors">Documentation</Link></li>
+              <li><Link href="#" className="hover:text-indigo-600 transition-colors">Help Center</Link></li>
+              <li><Link href="#" className="hover:text-indigo-600 transition-colors">Partner Program</Link></li>
+              <li><Link href="#" className="hover:text-indigo-600 transition-colors">API Status</Link></li>
             </ul>
           </div>
 

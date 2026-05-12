@@ -1,15 +1,8 @@
-import { Metadata } from 'next';
 import { DashboardThemeProvider } from '@/context/DashboardThemeContext';
-
-export const metadata: Metadata = {
-  title: 'Recruiter Dashboard | B2linq',
-  description: 'Manage your job postings, applications, and hiring pipeline.',
-};
-
 import { AgentButton } from '@/components/agent/AgentButton';
 import { AgentSidebar } from '@/components/agent/AgentSidebar';
 
-export default function RecruiterLayout({
+export default function HRToolsLayout({
   children,
 }: {
   children: React.ReactNode;

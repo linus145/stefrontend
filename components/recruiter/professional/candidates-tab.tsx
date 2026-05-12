@@ -169,6 +169,7 @@ export function CandidatesTab() {
     <div className="flex min-h-screen bg-background">
       <CandidatesFilterSidebar
         isOpen={isFilterOpen}
+        onClose={() => setIsFilterOpen(false)}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         jobTitles={jobTitles}

@@ -82,11 +82,13 @@ export function RecruiterHeader({
             <button
               key={item.id}
               onClick={() => onTabChange(item.id)}
+              data-agent={`nav-tab-${item.id}`}
               className={cn(
-                "relative px-4 h-full text-[13px] font-medium transition-all hover:text-blue-500 shrink-0",
+                "relative px-4 h-full text-[13px] font-medium transition-all hover:text-blue-500 shrink-0 flex items-center justify-center",
                 activeTab === item.id
                   ? "text-blue-500 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-blue-500"
-                  : "text-muted-foreground"
+                  : "text-muted-foreground",
+                item.id === 'company' && "hidden lg:inline-flex"
               )}
             >
               {item.label}
@@ -98,7 +100,7 @@ export function RecruiterHeader({
         <div className="relative h-full flex items-center shrink-0">
           <button
             onClick={() => setShowMore(!showMore)}
-            onBlur={() => setTimeout(() => setShowMore(false), 200)}
+            data-agent="nav-more-button"
             className={cn(
               "flex items-center gap-1.5 px-4 h-full text-[13px] font-medium transition-all hover:text-blue-500 shrink-0 text-muted-foreground",
               showMore && "text-blue-500"
@@ -110,12 +112,23 @@ export function RecruiterHeader({
 
           {showMore && (
             <div className="absolute top-[calc(100%-4px)] right-0 w-56 p-2 bg-card border border-border rounded-sm shadow-xl z-50 animate-in fade-in slide-in-from-top-2">
+              {/* Company Profile - Mobile Only */}
+              <button
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => { onTabChange('company'); setShowMore(false); }}
+                className="flex lg:hidden items-center justify-between w-full px-3 py-2.5 rounded-sm hover:bg-muted group transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-3">
+                  <Building2 className="w-4 h-4 text-muted-foreground group-hover:text-blue-500" />
+                  <span className="text-[13px] font-medium text-foreground">Company Profile</span>
+                </div>
+              </button>
               <a
                 href="/recruiter/AIInterviews"
                 target="_blank"
                 rel="noopener noreferrer"
                 onMouseDown={(e) => e.preventDefault()} // Prevent blur before click
-                onClick={() => setShowMore(false)}
+                data-agent="nav-link-interview-pipeline"
                 className="flex items-center justify-between px-3 py-2.5 rounded-sm hover:bg-muted group transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-3">
@@ -126,11 +139,10 @@ export function RecruiterHeader({
               </a>
 
               <a
-                href="/recruiter/hr-tools"
+                href="/Hrtools"
                 target="_blank"
                 rel="noopener noreferrer"
-                onMouseDown={(e) => e.preventDefault()} // Prevent blur before click
-                onClick={() => setShowMore(false)}
+                onMouseDown={(e) => e.preventDefault()}
                 className="flex items-center justify-between px-3 py-2.5 rounded-sm hover:bg-muted group transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-3">

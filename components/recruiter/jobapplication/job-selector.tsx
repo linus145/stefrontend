@@ -43,7 +43,7 @@ export function JobSelector({
   }, [onAnalyze, setManualJobId]);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
       <div>
         <label className="text-[11px] font-bold tracking-wider text-muted-foreground uppercase mb-2 block">
           Select Active Job

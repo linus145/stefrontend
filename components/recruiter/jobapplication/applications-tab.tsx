@@ -144,17 +144,17 @@ export function ApplicationsTab({ selectedJobId, onBack }: ApplicationsTabProps)
         isAiPanelOpen ? "lg:mr-[480px]" : ""
       )}>
         {/* Header */}
-        <div className="mb-6">
+        <div className="mb-2">
           <button
             onClick={onBack}
-            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-3 transition-colors group"
+            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-1 transition-colors group"
           >
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
             Back to Jobs
           </button>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">Applications</h1>
+              <h1 className="text-lg sm:text-xl font-bold text-foreground tracking-tight">Applications</h1>
               <p className="text-sm text-muted-foreground mt-1 font-medium">
                 Review and manage applicants for your job postings
               </p>
@@ -174,7 +174,7 @@ export function ApplicationsTab({ selectedJobId, onBack }: ApplicationsTabProps)
           </div>
         </div>
 
-      <div className="mb-4">
+      <div className="mb-2">
         <JobSelector
           activeJobId={activeJobId}
           setActiveJobId={(id) => { setActiveJobId(id); setStatusFilter(''); }}

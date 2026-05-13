@@ -5,7 +5,7 @@ export function Footer() {
     <footer className="w-full border-t border-slate-200 bg-slate-50 pt-16 pb-8">
       <div className="mx-auto max-w-7xl px-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
-          
+
           {/* Brand Col */}
           <div className="col-span-1 md:col-span-1 space-y-4">
             <Link href="/" className="inline-block">
@@ -14,7 +14,7 @@ export function Footer() {
               </span>
             </Link>
             <p className="text-sm text-slate-500 leading-relaxed">
-              ENTER THE ETHER. Connecting founders, investors, and ideas securely across a unified startup ecosystem architecture.
+              The Agentic Operating System for Modern Hiring. Autonomous AI agents orchestrating the future of work.
             </p>
           </div>
 
@@ -52,7 +52,7 @@ export function Footer() {
 
         <div className="flex flex-col md:flex-row items-center justify-between border-t border-slate-200 pt-8">
           <p className="text-xs text-slate-500">
-            &copy; {new Date().getFullYear()} Startup Ecosystem Platform. All rights reserved.
+            &copy; {new Date().getFullYear()} B2Linq AI Infrastructure. All rights reserved.
           </p>
           <div className="flex items-center gap-4 mt-4 md:mt-0 text-slate-500">
             <Link href="#" className="hover:text-slate-900 transition-colors">Twitter</Link>

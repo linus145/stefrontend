@@ -12,7 +12,7 @@ export function Header() {
     <header className="fixed top-0 left-0 right-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur-xl transition-all">
       <div className="absolute inset-0 top-0 h-[1px] w-full bg-gradient-to-r from-transparent via-indigo-200 to-transparent" />
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
-        
+
         {/* Brand */}
         <Link href="/" className="flex items-center gap-2 group">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 border border-indigo-100 shadow-sm group-hover:shadow-md transition-all">
@@ -51,7 +51,7 @@ export function Header() {
             {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
-        
+
       </div>
 
       {/* Mobile Menu Dropdown */}

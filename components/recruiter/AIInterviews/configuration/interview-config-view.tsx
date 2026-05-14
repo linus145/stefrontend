@@ -16,6 +16,7 @@ interface RoundConfig {
   title: string;
   type: RoundType;
   difficulty: 'ENTRY' | 'MID' | 'SENIOR' | 'LEAD';
+  round_category: 'CODING' | 'NON_CODING';
   question_format: string;
   programming_language: string;
   max_questions: number;
@@ -33,6 +34,7 @@ interface InterviewConfigViewProps {
 const DEFAULT_ROUNDS = [{ label: "Technical Screening", value: "TECHNICAL_SCREENING" }];
 const DEFAULT_TIERS = [{ label: "Technical Screen", value: "TECHNICAL" }];
 const DEFAULT_LEVELS = [{ label: "Mid Level", value: "MID" }];
+const DEFAULT_CATEGORIES = [{ label: "Non-Coding", value: "NON_CODING" }, { label: "Coding", value: "CODING" }];
 const DEFAULT_FORMATS = [{ label: "Text / Typing Answer", value: "TEXT" }];
 const DEFAULT_LANGS = [{ label: "Python", value: "PYTHON" }];
 
@@ -43,7 +45,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [rounds, setRounds] = useState<RoundConfig[]>([
-    { id: '1', title: 'TECHNICAL_SCREENING', type: 'TECHNICAL', difficulty: 'MID', question_format: 'TEXT', programming_language: '', max_questions: 5, timer_seconds: 600, questions: [] }
+    { id: '1', title: 'TECHNICAL_SCREENING', type: 'TECHNICAL', difficulty: 'MID', round_category: 'NON_CODING', question_format: 'TEXT', programming_language: '', max_questions: 5, timer_seconds: 600, questions: [] }
   ]);
 
   // Fetch recruiter's jobs
@@ -131,15 +133,20 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
           // Pre-fill rounds from existing session
           if (detail.rounds && detail.rounds.length > 0) {
             setRounds(detail.rounds.map((rnd: any, idx: number) => ({
-              id: String(idx + 1),
+              id: rnd.id || String(idx + 1),
               title: rnd.designation || 'TECHNICAL_SCREENING',
               type: (rnd.strategy_tier || 'TECHNICAL') as RoundType,
               difficulty: rnd.difficulty || 'MID',
+              round_category: rnd.round_category || 'NON_CODING',
               question_format: rnd.question_format || 'TEXT',
               programming_language: rnd.programming_language || '',
               max_questions: rnd.max_questions || 5,
               timer_seconds: rnd.timer_seconds || 600,
-              questions: rnd.questions?.map((q: any) => ({ text: q.question_text || q.text || q, marks: q.marks || 10 })) || [],
+              questions: rnd.questions?.map((q: any) => ({ 
+                text: q.question_text || q.text || q, 
+                marks: q.marks || 10,
+                ideal_answer: q.ideal_answer 
+              })) || [],
             })));
           }
           // Auto-select the candidate if we have it from initialApplicationId
@@ -162,6 +169,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
       title: '',
       type: 'TECHNICAL',
       difficulty: 'MID',
+      round_category: 'NON_CODING',
       question_format: 'TEXT',
       programming_language: '',
       max_questions: 5,
@@ -202,18 +210,19 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
         type: round.type,
         designation: round.title,
         difficulty: round.difficulty,
+        round_category: round.round_category,
         question_format: round.question_format,
         programming_language: round.programming_language,
         count: round.max_questions
       });
 
       if (response.status === 'success' && response.data?.questions?.length > 0) {
-        updateRound(roundId, { 
-          questions: response.data.questions.map((q: any) => ({ 
-            text: typeof q === 'object' ? q.question : q, 
+        updateRound(roundId, {
+          questions: response.data.questions.map((q: any) => ({
+            text: typeof q === 'object' ? q.question : q,
             ideal_answer: typeof q === 'object' ? q.ideal_answer : undefined,
-            marks: 10 
-          })) 
+            marks: 10
+          }))
         });
         toast.success(`AI generated ${response.data.questions.length} questions.`, { id: toastId });
       } else if (response.status === 'error') {
@@ -240,10 +249,11 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
       for (const appId of selectedApplicationIds) {
         const response = await aiInterviewsService.configureInterview({
           job_application_id: appId,
-          rounds: rounds.map(({ title, type, difficulty, question_format, programming_language, max_questions, timer_seconds, questions }) => ({
+          rounds: rounds.map(({ title, type, difficulty, round_category, question_format, programming_language, max_questions, timer_seconds, questions }) => ({
             title,
             type,
             difficulty,
+            round_category,
             question_format,
             programming_language,
             max_questions,
@@ -377,6 +387,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                           refetchSessions();
                           toast.info("Pipeline synchronized with latest job data.");
                         }}
+                        data-agent="sync-pipeline-button"
                         className="px-6 py-2 bg-blue-600 text-white text-[10px] font-bold rounded-sm hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20"
                       >
                         Sync
@@ -392,7 +403,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                 <div className="space-y-6">
                   <div className="flex items-center justify-between gap-4">
                     <span className="text-xs font-medium opacity-50 shrink-0">Target Job</span>
-                    <span className="text-sm font-bold text-right">{selectedJobId ? jobs.find(j => j.id === selectedJobId)?.title : 'Undefined'}</span>
+                    <span className="text-sm font-bold text-right" data-agent="target-job-title">{selectedJobId ? jobs.find(j => j.id === selectedJobId)?.title : 'Undefined'}</span>
                   </div>
                   <div className="flex items-center justify-between border-t border-border pt-6">
                     <span className="text-xs font-medium opacity-50">Volume</span>
@@ -437,6 +448,8 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                     applications.map((app: any) => (
                       <label
                         key={app.id}
+                        data-agent="candidate-card"
+                        data-candidate-name={`${app.applicant.first_name} ${app.applicant.last_name}`}
                         className={cn(
                           "relative group p-6 rounded-sm border cursor-pointer transition-all hover:shadow-lg",
                           selectedApplicationIds.includes(app.id)
@@ -500,6 +513,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                 <h3 className="text-xs font-semibold text-muted-foreground opacity-70">Architecture</h3>
                 <button
                   onClick={addRound}
+                  data-agent="add-round-button"
                   className="px-4 py-2 rounded-sm border border-blue-600 text-blue-600 text-[10px] font-bold hover:bg-blue-600 hover:text-white transition-all shadow-sm"
                 >
                   Add
@@ -532,7 +546,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                         <select
                           value={round.title}
                           onChange={(e) => updateRound(round.id, { title: e.target.value })}
-                          data-agent="round-designation-select"
+                          data-agent={`round-designation-select-${index}`}
                           className="w-full bg-muted/10 border border-border rounded-sm py-3 px-4 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-blue-600 transition-all appearance-none"
                         >
                           <option value="" disabled>Select Round Type</option>
@@ -542,15 +556,17 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                         </select>
                       </div>
 
+
                       <div className="space-y-2">
-                        <label className="text-[13px] font-semibold text-foreground">Strategy Tier</label>
+                        <label className="text-[13px] font-semibold text-foreground">Type</label>
                         <select
-                          value={round.type}
-                          onChange={(e) => updateRound(round.id, { type: e.target.value as RoundType })}
+                          value={round.round_category}
+                          onChange={(e) => updateRound(round.id, { round_category: e.target.value as any })}
+                          data-agent={`round-category-select-${index}`}
                           className="w-full bg-muted/10 border border-border rounded-sm py-3 px-4 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-blue-600 transition-all appearance-none"
                         >
-                          {metadata.strategy_tiers.map((t: any) => (
-                            <option key={t.value} value={t.value}>{t.label}</option>
+                          {(metadata.round_categories || DEFAULT_CATEGORIES).map((c: any) => (
+                            <option key={c.value} value={c.value}>{c.label}</option>
                           ))}
                         </select>
                       </div>
@@ -560,6 +576,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                         <select
                           value={round.difficulty}
                           onChange={(e) => updateRound(round.id, { difficulty: e.target.value as any })}
+                          data-agent={`evaluation-depth-select-${index}`}
                           className="w-full bg-muted/10 border border-border rounded-sm py-3 px-4 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-blue-600 transition-all appearance-none"
                         >
                           {metadata.difficulty_levels.map((l: any) => (
@@ -573,6 +590,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                         <select
                           value={round.question_format}
                           onChange={(e) => updateRound(round.id, { question_format: e.target.value })}
+                          data-agent={`question-format-select-${index}`}
                           className="w-full bg-muted/10 border border-border rounded-sm py-3 px-4 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-blue-600 transition-all appearance-none"
                         >
                           {metadata.question_formats.map((f: any) => (
@@ -587,6 +605,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                           <select
                             value={round.programming_language}
                             onChange={(e) => updateRound(round.id, { programming_language: e.target.value })}
+                            data-agent={`programming-language-select-${index}`}
                             className="w-full bg-muted/10 border border-border rounded-sm py-3 px-4 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-blue-600 transition-all appearance-none"
                           >
                             <option value="">Auto-detect</option>
@@ -603,6 +622,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                           type="number"
                           value={round.max_questions}
                           onChange={(e) => updateRound(round.id, { max_questions: parseInt(e.target.value) })}
+                          data-agent={`question-count-input-${index}`}
                           className="w-full bg-muted/10 border border-border rounded-sm py-3 px-4 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-blue-600 transition-all"
                         />
                       </div>
@@ -613,6 +633,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                           type="number"
                           value={round.timer_seconds}
                           onChange={(e) => updateRound(round.id, { timer_seconds: parseInt(e.target.value) })}
+                          data-agent={`allocated-time-input-${index}`}
                           className="w-full bg-muted/10 border border-border rounded-sm py-3 px-4 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-blue-600 transition-all"
                         />
                       </div>
@@ -632,13 +653,14 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                                 const newQuestions = [...(round.questions || []), { text: '', marks: 10 }];
                                 updateRound(round.id, { questions: newQuestions });
                               }}
+                              data-agent={`add-question-button-${index}`}
                               className="px-4 py-1.5 rounded-sm border border-border bg-card text-[11px] font-bold hover:bg-muted transition-all"
                             >
                               + Add Question
                             </button>
                             <button
                               onClick={() => handleGenerateQuestions(round.id)}
-                              data-agent="generate-questions-ai-button"
+                              data-agent={`generate-questions-ai-button-${index}`}
                               className="px-4 py-1.5 rounded-sm bg-blue-600 text-white text-[11px] font-bold hover:bg-blue-700 transition-all flex items-center gap-2"
                             >
                               <Sparkles className="w-3.5 h-3.5" />
@@ -669,10 +691,11 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                                         updateRound(round.id, { questions: newQuestions });
                                       }}
                                       placeholder="Type your question here..."
+                                      data-agent="question-text-textarea"
                                       className="w-full bg-muted/10 border border-border rounded-sm py-3 px-4 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-blue-600 transition-all min-h-[60px]"
                                     />
                                   </div>
-                                  
+
                                   <div>
                                     <label className="text-[10px] font-bold text-blue-600 block mb-1 uppercase tracking-wider opacity-60 flex items-center gap-2">
                                       <BrainCircuit className="w-3 h-3" />
@@ -689,6 +712,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                                         }
                                       }}
                                       placeholder="AI will generate an ideal answer to compare against..."
+                                      data-agent="ideal-answer-textarea"
                                       className="w-full bg-blue-600/[0.03] border border-blue-600/10 rounded-sm py-3 px-4 text-xs font-medium italic focus:outline-none focus:ring-1 focus:ring-blue-600 transition-all min-h-[60px]"
                                     />
                                   </div>
@@ -707,6 +731,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                                         : { ...current, marks: newMarks };
                                       updateRound(round.id, { questions: newQuestions });
                                     }}
+                                    data-agent="marks-input"
                                     className="w-full bg-muted/10 border border-border rounded-sm py-3 px-3 text-xs font-bold text-center focus:outline-none focus:ring-1 focus:ring-blue-600 transition-all"
                                   />
                                 </div>
@@ -752,7 +777,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                           <div key={r.id} className="flex items-center justify-between group">
                             <div className="flex items-center gap-2">
                               <span className="w-4 h-4 rounded-full bg-muted border border-border flex items-center justify-center text-[8px] font-bold text-muted-foreground">{i + 1}</span>
-                              <span className="text-[11px] font-bold text-foreground truncate max-w-[180px]">{r.title || `Round ${i+1}`}</span>
+                              <span className="text-[11px] font-bold text-foreground truncate max-w-[180px]">{r.title || `Round ${i + 1}`}</span>
                             </div>
                             <span className="text-[11px] font-bold text-blue-600">{roundMarks} pts</span>
                           </div>
@@ -775,7 +800,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
 
                 <div className="space-y-3">
                   <button
-                    disabled={isSubmitting || isGenerating}
+                    disabled={isSubmitting || isGenerating || rounds.some(r => !r.questions || r.questions.length === 0)}
                     onClick={handleConfigure}
                     data-agent="dispatch-interviews-button"
                     className="w-full py-5 rounded-sm bg-blue-600 text-white font-bold text-sm shadow-2xl shadow-blue-600/20 hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-30 flex items-center justify-center"
@@ -887,6 +912,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
               <div className="flex items-center gap-4">
                 <button
                   onClick={onBack}
+                  data-agent="return-to-pipeline-button"
                   className="px-12 py-4 rounded-sm bg-blue-600 text-white font-bold text-sm shadow-xl shadow-blue-600/20 hover:bg-blue-700 transition-all active:scale-95"
                 >
                   Return to Pipeline
@@ -894,6 +920,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                 <a
                   href="/interview/exam"
                   target="_blank"
+                  data-agent="open-exam-portal-button"
                   className="px-8 py-4 rounded-sm border border-border text-sm font-bold hover:bg-muted transition-all active:scale-95"
                 >
                   Open Exam Portal →

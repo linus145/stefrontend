@@ -161,6 +161,7 @@ export function ApplicationsTab({ selectedJobId, onBack }: ApplicationsTabProps)
             </div>
             <button 
               onClick={() => setIsAiPanelOpen(!isAiPanelOpen)}
+              data-agent="ai-screening-button"
               className={cn(
                 "inline-flex items-center gap-2 px-4 py-2 rounded-sm text-xs font-bold transition-all border shrink-0",
                 isAiPanelOpen 

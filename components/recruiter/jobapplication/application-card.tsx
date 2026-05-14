@@ -100,19 +100,61 @@ export function ApplicationCard({
 
           {app.status === 'PENDING' && (
             <>
-              <button onClick={(e) => { e.stopPropagation(); onUpdateStatus(app.id, 'REVIEWED'); }} className="p-2 rounded-sm bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 transition-all" title="Mark as Reviewed"><Eye className="w-4 h-4" /></button>
-              <button onClick={(e) => { e.stopPropagation(); onUpdateStatus(app.id, 'SHORTLISTED'); }} className="p-2 rounded-sm bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 transition-all" title="Shortlist"><CheckCircle className="w-4 h-4" /></button>
-              <button onClick={(e) => { e.stopPropagation(); onUpdateStatus(app.id, 'REJECTED'); }} className="p-2 rounded-sm bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-all" title="Reject"><XCircle className="w-4 h-4" /></button>
+              <button 
+                onClick={(e) => { e.stopPropagation(); onUpdateStatus(app.id, 'REVIEWED'); }} 
+                data-agent="mark-reviewed"
+                className="p-2 rounded-sm bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 transition-all" 
+                title="Mark as Reviewed"
+              >
+                <Eye className="w-4 h-4" />
+              </button>
+              <button 
+                onClick={(e) => { e.stopPropagation(); onUpdateStatus(app.id, 'SHORTLISTED'); }} 
+                data-agent="mark-shortlisted"
+                className="p-2 rounded-sm bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 transition-all" 
+                title="Shortlist"
+              >
+                <CheckCircle className="w-4 h-4" />
+              </button>
+              <button 
+                onClick={(e) => { e.stopPropagation(); onUpdateStatus(app.id, 'REJECTED'); }} 
+                data-agent="mark-rejected"
+                className="p-2 rounded-sm bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-all" 
+                title="Reject"
+              >
+                <XCircle className="w-4 h-4" />
+              </button>
             </>
           )}
           {app.status === 'REVIEWED' && (
             <>
-              <button onClick={(e) => { e.stopPropagation(); onUpdateStatus(app.id, 'SHORTLISTED'); }} className="p-2 rounded-sm bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 transition-all" title="Shortlist"><CheckCircle className="w-4 h-4" /></button>
-              <button onClick={(e) => { e.stopPropagation(); onUpdateStatus(app.id, 'REJECTED'); }} className="p-2 rounded-sm bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-all" title="Reject"><XCircle className="w-4 h-4" /></button>
+              <button 
+                onClick={(e) => { e.stopPropagation(); onUpdateStatus(app.id, 'SHORTLISTED'); }} 
+                data-agent="mark-shortlisted"
+                className="p-2 rounded-sm bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 transition-all" 
+                title="Shortlist"
+              >
+                <CheckCircle className="w-4 h-4" />
+              </button>
+              <button 
+                onClick={(e) => { e.stopPropagation(); onUpdateStatus(app.id, 'REJECTED'); }} 
+                data-agent="mark-rejected"
+                className="p-2 rounded-sm bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-all" 
+                title="Reject"
+              >
+                <XCircle className="w-4 h-4" />
+              </button>
             </>
           )}
           {app.status === 'SHORTLISTED' && (
-            <button onClick={(e) => { e.stopPropagation(); onUpdateStatus(app.id, 'HIRED'); }} className="p-2 rounded-sm bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 transition-all" title="Hire"><CheckCircle className="w-4 h-4" /></button>
+            <button 
+              onClick={(e) => { e.stopPropagation(); onUpdateStatus(app.id, 'HIRED'); }} 
+              data-agent="mark-hired"
+              className="p-2 rounded-sm bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 transition-all" 
+              title="Hire"
+            >
+              <CheckCircle className="w-4 h-4" />
+            </button>
           )}
           <ChevronDown className={cn("w-4 h-4 text-muted-foreground transition-transform ml-2", isExpanded && "rotate-180")} />
         </div>
@@ -133,6 +175,7 @@ export function ApplicationCard({
                       key={s}
                       disabled={app.status === s || isUpdatePending}
                       onClick={() => onUpdateStatus(app.id, s)}
+                      data-agent={`mark-status-${s.toLowerCase()}`}
                       className={cn(
                         "px-2.5 py-1 rounded-sm text-[10px] font-bold uppercase border transition-all flex items-center gap-1.5",
                         app.status === s

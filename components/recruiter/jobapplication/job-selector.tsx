@@ -57,12 +57,12 @@ export function JobSelector({
           >
             <option value="" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100">-- Choose a job post --</option>
             {jobs.map((job: any) => (
-              <option 
-                key={job.id} 
+              <option
+                key={job.id}
                 value={job.id}
                 className="bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
               >
-                {job.title} ({job.applications_count} applicants)
+                {job.title} ({job.applications_count} applicants) [{job.status}]
               </option>
             ))}
           </select>
@@ -75,7 +75,7 @@ export function JobSelector({
             <code className="text-[10px] bg-muted px-2 py-1 rounded text-muted-foreground font-mono">
               ID: {activeJobId}
             </code>
-            <button 
+            <button
               onClick={() => onCopyId(activeJobId)}
               className="text-muted-foreground hover:text-blue-500 transition-colors"
             >

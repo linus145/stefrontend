@@ -5,11 +5,11 @@ import { hrmsService } from '@/services/hrms.service';
 import { jobsService } from '@/services/jobs.service';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, Search, Mail, Phone, MapPin, MoreHorizontal, UserPlus, RefreshCw } from 'lucide-react';
+import { Plus, Search, Mail, Phone, MapPin, MoreHorizontal, UserPlus, RefreshCw, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -17,14 +17,26 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { User, BrainCircuit } from 'lucide-react';
 
 export function EmployeesTab() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('ALL');
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
 
   const { data: employees, isLoading } = useQuery({
     queryKey: ['employees', search, filter],
@@ -53,6 +65,25 @@ export function EmployeesTab() {
     },
     onError: () => toast.error('Failed to update employment type')
   });
+
+  const deleteEmployeeMutation = useMutation({
+    mutationFn: (id: string) => hrmsService.deleteEmployee(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['employees'] });
+      toast.success('Employee removed successfully');
+      setDeleteTarget(null);
+    },
+    onError: () => {
+      toast.error('Failed to remove employee');
+      setDeleteTarget(null);
+    }
+  });
+
+  const handleDeleteConfirm = useCallback(() => {
+    if (deleteTarget) {
+      deleteEmployeeMutation.mutate(deleteTarget.id);
+    }
+  }, [deleteTarget]);
 
   const renderSkeletons = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -179,6 +210,13 @@ export function EmployeesTab() {
                         <DropdownMenuItem className="text-xs font-semibold py-2 cursor-pointer focus:bg-[#0a66c2]/10 focus:text-[#0a66c2] transition-colors rounded-none">
                           <BrainCircuit className="mr-2 h-3.5 w-3.5 opacity-60" /> Interview
                         </DropdownMenuItem>
+                        <DropdownMenuSeparator className="bg-border/40" />
+                        <DropdownMenuItem
+                          onClick={() => setDeleteTarget({ id: employee.id, name: `${employee.first_name} ${employee.last_name}` })}
+                          className="text-xs font-semibold py-2 cursor-pointer text-red-600 focus:bg-red-50 focus:text-red-700 transition-colors rounded-none"
+                        >
+                          <Trash2 className="mr-2 h-3.5 w-3.5 opacity-60" /> Delete
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
@@ -232,6 +270,30 @@ export function EmployeesTab() {
           ))}
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent className="rounded-sm border-border/50 bg-card/95 backdrop-blur-xl shadow-2xl max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-lg font-bold tracking-tight">Remove Employee</AlertDialogTitle>
+            <AlertDialogDescription className="text-sm text-muted-foreground leading-relaxed">
+              Are you sure you want to remove <span className="font-semibold text-foreground">{deleteTarget?.name}</span> from the directory? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2">
+            <AlertDialogCancel className="rounded-sm text-xs font-semibold h-9 px-5 border-border/60 hover:bg-muted/50">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              disabled={deleteEmployeeMutation.isPending}
+              className="rounded-sm text-xs font-semibold h-9 px-5 bg-red-600 text-white hover:bg-red-700 shadow-lg shadow-red-500/20 transition-all"
+            >
+              {deleteEmployeeMutation.isPending ? 'Removing...' : 'Remove Employee'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

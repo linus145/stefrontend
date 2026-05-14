@@ -34,7 +34,16 @@ export const aiInterviewsService = {
   },
 
   // Generate a pool of questions for configuration
-  generateQuestions: async (data: { application_id: string; type: string; designation: string; difficulty: string; question_format: string; programming_language: string; count: number }) => {
+  generateQuestions: async (data: { 
+    application_id: string; 
+    type: string; 
+    designation: string; 
+    difficulty: string; 
+    round_category: string;
+    question_format: string; 
+    programming_language: string; 
+    count: number 
+  }) => {
     return api.post<any>('/AIrounds/generate-questions/', data);
   },
 
@@ -68,8 +77,18 @@ export const aiInterviewsService = {
     return api.post<any>(`/AIrounds/round/${roundId}/regenerate/`, { count });
   },
   
-  // Trigger AI evaluation for a session
+  // Trigger AI evaluation for a session (aggregates scores only, no AI calls)
   evaluateSession: async (sessionId: string, force: boolean = false) => {
     return api.post<any>(`/AIrounds/session/${sessionId}/evaluate/`, { force });
+  },
+
+  // Evaluate a single question with AI (fast, no timeout risk)
+  evaluateQuestion: async (questionId: string, force: boolean = false) => {
+    return api.post<any>(`/AIrounds/question/${questionId}/evaluate/`, { force });
+  },
+
+  // Delete an interview session permanently
+  deleteSession: async (sessionId: string) => {
+    return api.delete<any>(`/AIrounds/session/${sessionId}/delete/`);
   },
 };

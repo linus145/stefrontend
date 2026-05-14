@@ -87,8 +87,12 @@ export function MyJobsTab({ isApproved, onViewApplications }: MyJobsTabProps) {
         onSuccess={() => {
           setShowPostForm(false);
           setEditingJob(null);
+          // Invalidate everything related to jobs for immediate sync across tabs
           queryClient.invalidateQueries({ queryKey: ['recruiter-jobs'] });
           queryClient.invalidateQueries({ queryKey: ['recruiter-stats'] });
+          queryClient.invalidateQueries({ queryKey: ['job-applications'] });
+          queryClient.invalidateQueries({ queryKey: ['screening-history'] });
+          queryClient.invalidateQueries({ queryKey: ['recruiter-sessions'] });
         }}
       />
     );

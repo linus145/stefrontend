@@ -14,6 +14,7 @@ interface LLMAction {
   wait_after_ms?: number;
   description?: string;
   thinking?: string;
+  options?: string[];
   error?: string;
 }
 
@@ -58,11 +59,9 @@ export class AgentController {
     this.stream = AgentRealtimeStream.getInstance();
     this.observer = StateObserver.getInstance();
     
-    // Auto-resume persisted plan if exists
-    setTimeout(() => this.loadPersistedPlan(), 1000);
-
-    // Check for cross-tab continuation (e.g., Tab 1 opened AI Interviews in Tab 2)
-    setTimeout(() => this.checkCrossTabContinuation(), 2500);
+    this.loadLLMContext();
+    this.checkCrossTabContinuation();
+    this.loadPersistedPlan();
 
     // Sync across tabs
     if (typeof window !== 'undefined') {
@@ -91,6 +90,7 @@ export class AgentController {
    * (interview config in Tab 2) or explicit interview commands.
    */
   private shouldUseLLM(goal: string): boolean {
+    if (!goal) return false;
     const lower = goal.toLowerCase();
 
     // UUID goals → ALWAYS use legacy plan (screening → open tab → handover)
@@ -103,6 +103,7 @@ export class AgentController {
       'configure', 'reconfigure',
       'orchestrate', 'dispatch',
       'autonomous interview', 'interview setup',
+      'pipeline', 'candidate', 'architecture'
     ];
     return llmKeywords.some(kw => lower.includes(kw));
   }
@@ -128,19 +129,54 @@ export class AgentController {
     } else {
       this._isLLMMode = false;
       this.stream.emit('status', `Planning goal: ${goal}`);
-      this.currentPlan = await this.planner.generatePlan(goal);
+      const plan = await this.planner.generatePlan(goal);
+      
+      if (!this.isRunning) return; // Stop if user cancelled during planning
+      
+      this.currentPlan = plan;
       this.memory.remember('decision', { goal, plan: this.currentPlan });
       this.persistPlan();
       this.executePlan();
     }
   }
 
+  public stopAgent() {
+    this.isRunning = false;
+    localStorage.removeItem('agent_llm_context'); // Clear memory on manual stop
+    this.stream.emit('task_failed', { task: { description: 'Manual Stop' }, error: 'Execution terminated' });
+  }
+
+  public async resumeAgent() {
+    if (this.isRunning) return;
+    
+    // Safety check: if no state exists, we can't resume
+    if (!this.llmGoal && !this.currentPlan) {
+      this.stream.emit('status', `⚠️ No active task found to resume.`);
+      return;
+    }
+
+    this.isRunning = true;
+
+    if (this._isLLMMode && this.llmGoal) {
+      this.stream.emit('status', `🔄 Resuming AI-powered autonomous agent...`);
+      await this.runLLMLoop(this.llmGoal, undefined, true);
+    } else if (this.currentPlan) {
+      this.stream.emit('status', `🔄 Resuming planned execution...`);
+      this.executePlan();
+    } else {
+      this.stream.emit('status', `⚠️ Resume failed: state inconsistent.`);
+      this.isRunning = false;
+    }
+  }
+
   // ── LLM-Powered Observe → Think → Act Loop ──────────────────
 
-  private async runLLMLoop(goal: string, userResponse?: string) {
+  private async runLLMLoop(goal: string, userResponse?: string, isResume: boolean = false) {
     this.llmGoal = goal;
-    this.llmIteration = 0;
-    this.llmActionHistory = [];
+    if (!isResume) {
+      this.llmIteration = 0;
+      this.llmActionHistory = [];
+    }
 
     try {
       while (this.isRunning && this.llmIteration < AgentController.MAX_LLM_ITERATIONS) {
@@ -148,19 +184,21 @@ export class AgentController {
         this.stream.emit('status', `Iteration ${this.llmIteration}/${AgentController.MAX_LLM_ITERATIONS} — Observing page...`);
 
         // Small delay to let page settle after last action
-        await this.wait(1200);
-
+        await this.wait(800);
+ 
         // 1. OBSERVE — capture current page state
         const pageState = this.observer.capture();
         this.stream.emit('status', `📸 Captured ${pageState.visible_elements.length} elements | ${pageState.active_step || pageState.url}`);
 
         // 2. THINK — ask backend LLM for next action
+        if (!this.isRunning) break; // STOP CHECK: Before thinking
         this.stream.emit('status', `🧠 Analyzing with AI...`);
 
         let action: LLMAction;
         try {
           action = await api.post<LLMAction>('/autonomousagent1/llm/think/', {
             goal: this.llmGoal,
+            original_goal: this.originalGoal,
             page_state: pageState,
             action_history: this.llmActionHistory.slice(-10),
             iteration: this.llmIteration,
@@ -182,6 +220,7 @@ export class AgentController {
         // 3. CHECK — is the goal complete?
         if (action.action_type === 'done') {
           this.stream.emit('goal_complete', this.llmGoal);
+          localStorage.removeItem('agent_llm_context'); // Clear memory on completion
           break;
         }
 
@@ -193,7 +232,10 @@ export class AgentController {
 
           // Dispatch event so the sidebar shows the question
           window.dispatchEvent(new CustomEvent('agent-ask-user', {
-            detail: { message: action.value || 'I need more information.' }
+            detail: { 
+              message: action.value || 'I need more information.',
+              options: action.options || []
+            }
           }));
 
           // Wait for user response (poll every 500ms, max 5 min)
@@ -216,6 +258,8 @@ export class AgentController {
             continue; // Go back to THINK with user's response
           } else {
             this.stream.emit('status', `⏱️ No response received. Stopping.`);
+            this.isRunning = false;
+            this.stream.emit('task_failed', { task: { description: 'Waiting for Input' }, error: 'Execution terminated' });
             break;
           }
         }
@@ -223,6 +267,9 @@ export class AgentController {
         // 5. ACT — execute the action via DOM executor
         const description = action.description || action.action_type;
         this.stream.emit('action_start', { type: action.action_type, selector: action.selector || '', description });
+        
+        if (!this.isRunning) break; // STOP CHECK: Before execution
+
         this.stream.emit('status', `⚡ Executing: ${description}`);
 
         let success = true;
@@ -240,8 +287,23 @@ export class AgentController {
           ...(success ? {} : { error: 'Action failed' }),
         });
 
+        // AUTO-STOP: If we just returned to the pipeline page after a full flow, STOP.
+        // This prevents the agent from looping after a successful dispatch + return.
+        const currentUrl = window.location.href;
+        const isOnPipeline = currentUrl.includes('/AIInterviews') || currentUrl.includes('/recruiter/AIInterviews');
+        const hasReturnedToPipeline = this.llmActionHistory.some(
+          a => a.selector === 'return-to-pipeline-button' && a.action_type === 'click'
+        );
+        
+        if (isOnPipeline && hasReturnedToPipeline && this.llmIteration > 3) {
+          this.stream.emit('status', `✅ Full flow completed. Returned to pipeline. Stopping.`);
+          this.stream.emit('goal_complete', this.llmGoal);
+          localStorage.removeItem('agent_llm_context');
+          break;
+        }
+
         // Wait after action
-        const waitTime = action.wait_after_ms || 2000;
+        const waitTime = action.wait_after_ms || 1000;
         if (waitTime > 0) {
           await this.wait(waitTime);
         }
@@ -277,7 +339,7 @@ export class AgentController {
 
       case 'select':
         if (!action.selector || action.value === undefined) throw new Error('No selector/value for select');
-        await this.executor.execute({ type: 'type', selector: action.selector, value: action.value });
+        await this.executor.execute({ type: 'select', selector: action.selector, value: action.value });
         break;
 
       case 'scroll':
@@ -290,20 +352,70 @@ export class AgentController {
 
       case 'open_new_tab':
         if (!action.value) throw new Error('No URL for open_new_tab');
-        // In LLM mode, navigate in SAME tab so the observe loop sees the new page
-        window.location.href = action.value;
-        await this.wait(3000); // Wait for page load
+        
+        // Save continuation for the NEW tab to pick up
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('agent_cross_tab_continuation', JSON.stringify({
+            goal: this.llmGoal, // Keep the current goal
+            timestamp: Date.now(),
+            sourceUrl: window.location.href,
+          }));
+        }
+
+        window.open(action.value, '_blank');
+        this.stream.emit('status', 'Handing over execution to new tab...');
+        this.isRunning = false; // Stop in current tab
         break;
 
       case 'navigate':
         if (!action.value) throw new Error('No path for navigate');
-        // Same-tab navigation
+        this.persistLLMContext();
         window.location.href = action.value;
-        await this.wait(3000); // Wait for page load
         break;
 
       default:
         console.warn(`[AgentController] Unknown LLM action type: ${action.action_type}`);
+    }
+  }
+
+  private persistLLMContext() {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem('agent_llm_context', JSON.stringify({
+      goal: this.llmGoal,
+      originalGoal: this.originalGoal,
+      history: this.llmActionHistory,
+      timestamp: Date.now()
+    }));
+  }
+
+  private loadLLMContext() {
+    if (typeof window === 'undefined') return;
+    const data = localStorage.getItem('agent_llm_context');
+    if (!data) return;
+
+    try {
+      const context = JSON.parse(data);
+      const age = Date.now() - (context.timestamp || 0);
+
+      // Only pick up if it's very fresh (less than 30s)
+      if (age < 30000) {
+        this.originalGoal = context.originalGoal || context.goal;
+        this.llmActionHistory = context.history || [];
+        localStorage.removeItem('agent_llm_context'); // Clear it so we don't loop
+        
+        this.stream.emit('status', `🔄 Resuming autonomous goal: ${this.originalGoal}`);
+        setTimeout(() => {
+          if (!this.isRunning) {
+            this.isRunning = true;
+            this._isLLMMode = true;
+            this.runLLMLoop(context.goal);
+          }
+        }, 1000);
+      } else {
+        localStorage.removeItem('agent_llm_context');
+      }
+    } catch (e) {
+      localStorage.removeItem('agent_llm_context');
     }
   }
 
@@ -351,9 +463,9 @@ export class AgentController {
         return;
       }
 
-      // Only pick up if we're on a different page than the source
-      if (continuation.sourceUrl && window.location.href === continuation.sourceUrl) {
-        // console.log('[AgentController] Same page as source, ignoring continuation');
+      // Allow same-page continuation if it's very recent (less than 30s) to handle reloads
+      if (continuation.sourceUrl && window.location.href === continuation.sourceUrl && age > 30000) {
+        // console.log('[AgentController] Same page as source and not a fresh reload, ignoring');
         return;
       }
 
@@ -370,7 +482,7 @@ export class AgentController {
           this._isLLMMode = true;
           this.runLLMLoop(continuation.goal);
         }
-      }, 3000);
+      }, 1000);
 
     } catch (e) {
       // console.error('[AgentController] Failed to parse cross-tab continuation:', e);
@@ -423,10 +535,15 @@ export class AgentController {
         const startIndex = task.currentActionIndex || 0;
         
         for (let i = startIndex; i < task.actions.length; i++) {
+          if (!this.isRunning) return; // Immediate stop check
+
           const action = task.actions[i];
           task.currentActionIndex = i;
           
           this.stream.emit('action_start', action);
+          
+          if (!this.isRunning) break; // Check before executing
+          
           await this.executor.execute(action);
           this.memory.remember('action', action);
           this.stream.emit('action_complete', action);
@@ -442,7 +559,16 @@ export class AgentController {
 
           if (action.type === 'open_new_tab') {
             // Save a continuation goal for the new tab to pick up
-            const continuationGoal = `Continue the interview configuration workflow. The agent just navigated to the AI Interviews page. Look at the pipeline, find the candidate's Configure or Reconfigure button, and proceed with the interview setup.`;
+            const continuationGoal = `You are now in the Interview Pipeline. 
+1. Click 'Sync Pipeline' (data-agent="sync-pipeline-button") first.
+2. Observe the candidates (data-agent="candidate-name") and their roles.
+3. ASK THE USER: "Which candidate would you like to configure the interview for?"
+4. Wait for the user's response. Once identified, click the 'Configure' or 'Reconfigure' button (data-agent="configure-interview-button") for that specific candidate.
+5. In the Architecture step, read the job title (data-agent="target-job-title").
+6. Based on the job title and seniority (e.g., 'Senior', 'Frontend', 'Backend'), autonomously select the most appropriate interview rounds. Add them using the 'Add' button (data-agent="add-round-button") and configure them (Strategy, Depth, Format).
+7. If the user mentioned a specific number of rounds or types, respect those instructions first.
+8. If unsure about the perfect round types for this specific role, ASK THE USER for advice.
+9. Be fast, precise, and professional.`;
             if (typeof window !== 'undefined') {
               localStorage.setItem('agent_cross_tab_continuation', JSON.stringify({
                 goal: continuationGoal,
@@ -455,7 +581,7 @@ export class AgentController {
             task.currentActionIndex = i + 1;
             task.status = 'paused';
             this.persistPlan();
-            this.stream.emit('status', 'Handing over execution to new tab...');
+            this.stream.emit('status', 'Continuing execution on new page...');
             this.isRunning = false;
             return;
           }

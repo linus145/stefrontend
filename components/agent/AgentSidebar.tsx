@@ -14,8 +14,10 @@ export const AgentSidebar: React.FC = () => {
   const [logs, setLogs] = useState<{ id: string; message: string; type: string }[]>([]);
   const [tasks, setTasks] = useState<AgentTask[]>([]);
   const [status, setStatus] = useState('Idle');
+  const [isRunning, setIsRunning] = useState(false);
   const [isWaitingForInput, setIsWaitingForInput] = useState(false);
   const [lastQuestion, setLastQuestion] = useState('');
+  const [availableOptions, setAvailableOptions] = useState<string[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -39,6 +41,7 @@ export const AgentSidebar: React.FC = () => {
 
     stream.on('task_start', (task: AgentTask) => {
       setTasks(prev => [...prev, task]);
+      setIsRunning(true);
       addLog(`Starting task: ${task.description}`, 'task');
     });
 
@@ -48,12 +51,18 @@ export const AgentSidebar: React.FC = () => {
 
     stream.on('goal_complete', (goal: string) => {
       setStatus('Goal Completed');
+      setIsRunning(false);
       addLog(`Successfully completed goal: ${goal}`, 'success');
     });
 
     stream.on('task_failed', ({ task, error }: any) => {
-      setStatus('Error');
-      addLog(`Task failed: ${task.description} - ${error}`, 'error');
+      setStatus(error === 'Execution terminated' ? 'Stopped' : 'Error');
+      setIsRunning(false);
+      if (error === 'Execution terminated') {
+        addLog(error, 'error');
+      } else {
+        addLog(`Task failed: ${task.description} - ${error}`, 'error');
+      }
     });
 
     stream.on('task_paused', (task: AgentTask) => {
@@ -64,6 +73,7 @@ export const AgentSidebar: React.FC = () => {
     const handleAskUser = (e: any) => {
       setIsWaitingForInput(true);
       setLastQuestion(e.detail.message);
+      setAvailableOptions(e.detail.options || []);
       addLog(`AGENT QUESTION: ${e.detail.message}`, 'task');
       AgentUIController.getInstance().openSidebar(); // Ensure sidebar is open
     };
@@ -85,22 +95,35 @@ export const AgentSidebar: React.FC = () => {
     setLogs(prev => [...prev, { id: Math.random().toString(36).substr(2, 9), message, type }]);
   };
 
-  const handleStart = () => {
-    if (!goal.trim()) return;
+  const handleStart = (overrideGoal?: string) => {
+    const finalGoal = overrideGoal || goal;
+    if (!finalGoal.trim()) return;
     
     if (isWaitingForInput) {
       // If we were waiting for input, the new goal is actually the answer
-      const answer = goal;
+      const answer = finalGoal;
       addLog(`USER ANSWER: ${answer}`, 'info');
       setIsWaitingForInput(false);
       setLastQuestion('');
+      setAvailableOptions([]);
 
       const controller = AgentController.getInstance();
       controller.sendPlaywrightResponse(answer);
     } else {
-      AgentController.getInstance().startGoal(goal);
+      setIsRunning(true);
+      AgentController.getInstance().startGoal(finalGoal);
     }
     setGoal('');
+  };
+
+  const handleStop = () => {
+    AgentController.getInstance().stopAgent();
+    setIsRunning(false);
+  };
+
+  const handleResume = () => {
+    AgentController.getInstance().resumeAgent();
+    setIsRunning(true);
   };
 
   return (
@@ -188,7 +211,30 @@ export const AgentSidebar: React.FC = () => {
 
           {/* Goal Input */}
           <div className="space-y-2">
-            <label className="text-[11px] font-bold text-foreground/80">Set autonomous goal</label>
+            <div className="flex justify-between items-center">
+              <label className="text-[11px] font-bold text-foreground/80">Set autonomous goal</label>
+              {availableOptions.length > 0 && isWaitingForInput && (
+                <span className="text-[10px] font-bold text-blue-500 animate-pulse">Select an option below</span>
+              )}
+            </div>
+            
+            {availableOptions.length > 0 && isWaitingForInput && (
+              <div className="flex flex-wrap gap-2 pb-1">
+                {availableOptions.map((opt, i) => (
+                  <button
+                    key={i}
+                    onClick={() => handleStart(opt)}
+                    className="px-3 py-1.5 bg-blue-600/10 text-blue-600 border border-blue-600/20 rounded-sm text-[10px] font-bold hover:bg-blue-600 hover:text-white transition-all shadow-sm flex items-center gap-2 group/opt"
+                  >
+                    <div className="w-3 h-3 rounded-full border border-current flex items-center justify-center">
+                       <div className="w-1.5 h-1.5 bg-current rounded-full opacity-0 group-hover/opt:opacity-100 transition-opacity" />
+                    </div>
+                    {opt}
+                  </button>
+                ))}
+              </div>
+            )}
+
             <div className="relative group">
             <textarea
                 value={goal}
@@ -205,8 +251,27 @@ export const AgentSidebar: React.FC = () => {
                   }
                 }}
               />
+              {isRunning && (
+                <button
+                  onClick={handleStop}
+                  className="absolute bottom-3 right-12 p-2 bg-red-600/10 text-red-600 hover:bg-red-600 hover:text-white rounded-sm transition-all shadow-xl active:scale-95 animate-in slide-in-from-right-2 duration-300"
+                  title="Stop Agent"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" /></svg>
+                </button>
+              )}
+              {!isRunning && status === 'Stopped' && (
+                <button
+                  onClick={handleResume}
+                  className="absolute bottom-3 right-12 p-2 bg-blue-600/10 text-blue-600 hover:bg-blue-600 hover:text-white rounded-sm transition-all shadow-xl active:scale-95 animate-in slide-in-from-right-2 duration-300 flex items-center gap-1.5"
+                  title="Continue Agent"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m5 3 14 9-14 9V3z"/></svg>
+                  <span className="text-[10px] font-bold">CONTINUE</span>
+                </button>
+              )}
               <button
-                onClick={handleStart}
+                onClick={() => handleStart()}
                 disabled={!goal.trim()}
                 className="absolute bottom-3 right-3 p-2 bg-foreground text-background hover:bg-blue-500 hover:text-white rounded-sm transition-all shadow-xl disabled:opacity-20 disabled:cursor-not-allowed active:scale-95"
               >

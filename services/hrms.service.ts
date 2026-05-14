@@ -22,6 +22,9 @@ export const hrmsService = {
   updateEmployee: (id: string, data: any): Promise<BaseAPIResponse<any>> => 
     api.patch<any>(`/employees/employees/${id}/`, data).then(res => ({ status: 'success', message: '', data: res })),
 
+  deleteEmployee: (id: string): Promise<void> => 
+    api.delete<any>(`/employees/employees/${id}/`),
+
   // Attendance
   getAttendance: (params?: any): Promise<BaseAPIResponse<PaginatedResponse<any>>> => 
     api.get<any>('/attendance/records/', { params }).then(res => ({ status: 'success', message: '', data: res })),

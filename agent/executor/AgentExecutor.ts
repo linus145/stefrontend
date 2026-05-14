@@ -33,9 +33,7 @@ export class AgentExecutor {
           return await this.handleType(action.selector, String(action.value));
         case 'open_new_tab':
           if (!action.value) throw new Error('open_new_tab requires a value (url)');
-          // console.log(`[AgentExecutor] Executing open_new_tab to ${action.value}`);
           window.open(action.value, '_blank');
-          await this.handleWait(1000);
           break;
         case 'navigate':
           if (!action.path) throw new Error('Path is required for navigate action');
@@ -246,8 +244,22 @@ export class AgentExecutor {
         // console.log(`[AgentExecutor] Stored job UID for screen trigger: ${value}`);
       }
     } else if (element instanceof HTMLSelectElement) {
-      element.value = value;
+      const nativeSelectValueSetter = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value')?.set;
+      nativeSelectValueSetter?.call(element, value);
+      
+      if (element.value !== value) {
+        const option = Array.from(element.options).find(o => 
+          o.text.toLowerCase().trim() === value.toLowerCase().trim() ||
+          o.value.toLowerCase().trim() === value.toLowerCase().trim()
+        );
+        if (option) {
+          nativeSelectValueSetter?.call(element, option.value);
+        }
+      }
+
+      element.dispatchEvent(new Event('input', { bubbles: true }));
       element.dispatchEvent(new Event('change', { bubbles: true }));
+      element.dispatchEvent(new Event('blur', { bubbles: true }));
     } else {
       throw new Error(`Element not found or not an input/select: ${selector}`);
     }
@@ -311,10 +323,38 @@ export class AgentExecutor {
     }
 
     // Priority: data-agent, data-agent-group, data-agent-role, then standard selectors
-    let element = document.querySelector(`[data-agent="${selector}"]`);
-    if (!element) element = document.querySelector(`[data-agent-group="${selector}"]`);
-    if (!element) element = document.querySelector(`[data-agent-role="${selector}"]`);
-    if (!element) element = document.querySelector(selector);
-    return element;
+    try {
+      // First, try exact match
+      let element = document.querySelector(`[data-agent="${selector}"]`);
+      if (element) return element;
+
+      // Handle INDEXED selectors: e.g., "configure-interview-button-1"
+      // The StateObserver generates virtual indices for duplicate data-agent values.
+      // Pattern: "base-selector-N" where N is the 1-based duplicate index
+      // (first element has no suffix, second = -1, third = -2, etc.)
+      const indexMatch = selector.match(/^(.+)-(\d+)$/);
+      if (indexMatch) {
+        const baseSelector = indexMatch[1];
+        const nthIndex = parseInt(indexMatch[2], 10); // e.g., 1 = second element
+        
+        // Check if the base selector has data-agent matches
+        const allMatches = document.querySelectorAll(`[data-agent="${baseSelector}"]`);
+        if (allMatches.length > nthIndex) {
+          return allMatches[nthIndex]; // 0-based: index 1 = second element
+        }
+        
+        // Also try the full selector as data-agent in case it's a real attribute
+        element = document.querySelector(`[data-agent="${selector}"]`);
+        if (element) return element;
+      }
+
+      if (!element) element = document.querySelector(`[data-agent-group="${selector}"]`);
+      if (!element) element = document.querySelector(`[data-agent-role="${selector}"]`);
+      if (!element) element = document.querySelector(selector);
+      return element;
+    } catch (e) {
+      // console.warn(`[AgentExecutor] Invalid selector: ${selector}`, e);
+      return null;
+    }
   }
 }

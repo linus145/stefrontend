@@ -98,6 +98,8 @@ export function PostJobForm({ editJob, onClose, onSuccess }: PostJobFormProps) {
     mutationFn: (data: JobPostCreatePayload) => jobsService.createJob(data),
     onSuccess: () => {
       toast.success('Job posted successfully!');
+      queryClient.invalidateQueries({ queryKey: ['recruiter-jobs'] });
+      queryClient.invalidateQueries({ queryKey: ['recruiter-stats'] });
       onSuccess();
     },
     onError: (error: any) => {
@@ -111,6 +113,10 @@ export function PostJobForm({ editJob, onClose, onSuccess }: PostJobFormProps) {
     mutationFn: (data: Partial<JobPostCreatePayload>) => jobsService.updateJob(editJob!.id, data),
     onSuccess: () => {
       toast.success('Job updated successfully!');
+      queryClient.invalidateQueries({ queryKey: ['recruiter-jobs'] });
+      queryClient.invalidateQueries({ queryKey: ['recruiter-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['job-applications'] });
+      queryClient.invalidateQueries({ queryKey: ['screening-history'] });
       onSuccess();
     },
     onError: (error: any) => {

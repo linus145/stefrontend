@@ -14,7 +14,8 @@ import {
   RefreshCw,
   CheckCircle2,
   Timer,
-  CalendarDays
+  CalendarDays,
+  Trash2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -59,6 +60,15 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
       toast.success('Interview rescheduled successfully');
     },
     onError: () => toast.error('Failed to reschedule interview')
+  });
+
+  const deleteSessionMutation = useMutation({
+    mutationFn: (sessionId: string) => aiInterviewsService.deleteSession(sessionId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ai-interview-sessions'] });
+      toast.success('Interview session deleted permanently');
+    },
+    onError: () => toast.error('Failed to delete session'),
   });
 
   const sessions: InterviewSession[] = Array.isArray(sessionsResponse?.data) ? sessionsResponse.data : [];
@@ -113,7 +123,7 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
       <tr key={session.id} className="border-b border-border/50 last:border-0 group hover:bg-muted/5 transition-colors">
         {/* Candidate */}
         <td className="pl-6 pr-4 py-4">
-          <p className="text-xs font-bold truncate max-w-[200px]">{session.candidate_name}</p>
+          <p className="text-xs font-bold truncate max-w-[200px]" data-agent="candidate-name">{session.candidate_name}</p>
           <p className="text-[10px] text-muted-foreground mt-0.5">{new Date(session.created_at).toLocaleDateString()}</p>
         </td>
         {/* Role */}
@@ -195,6 +205,20 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
                 </button>
               </>
             )}
+
+            {/* Permanent Delete Button */}
+            <button
+              onClick={() => {
+                if (window.confirm('Are you sure you want to delete this interview session permanently? This action cannot be undone.')) {
+                  deleteSessionMutation.mutate(session.id);
+                }
+              }}
+              disabled={deleteSessionMutation.isPending}
+              className="w-8 h-8 flex items-center justify-center rounded-sm bg-red-600/5 text-red-600 hover:bg-red-600 hover:text-white transition-all active:scale-95 border border-red-600/10 disabled:opacity-50"
+              title="Delete Session Permanently"
+            >
+              <Trash2 className={cn("w-3.5 h-3.5", deleteSessionMutation.isPending && "animate-spin")} />
+            </button>
           </div>
         </td>
       </tr>

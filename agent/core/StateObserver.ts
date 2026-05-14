@@ -12,6 +12,29 @@
  * uses Gemini to decide the next action.
  */
 
+export interface RoundSnapshot {
+  index: number;
+  designation: string;
+  designation_label: string;
+  strategy_tier: string;
+  difficulty: string;
+  question_format: string;
+  question_count: number;
+  timer_seconds: number;
+  has_questions: boolean;
+  questions_preview: string[];  // First 3 question texts for context
+}
+
+export interface PipelineCandidate {
+  index: number;
+  candidate_name: string;
+  job_title: string;
+  status: string;
+  rounds_count: string;
+  is_orchestrated: boolean;  // true = Reconfigure, false = Configure
+  has_exam_credentials: boolean;
+}
+
 export interface PageState {
   url: string;
   title: string;
@@ -19,6 +42,8 @@ export interface PageState {
   has_modal: boolean;
   toasts: string[];
   visible_elements: VisibleElement[];
+  existing_rounds: RoundSnapshot[];  // Structured round data for the LLM
+  pipeline_candidates: PipelineCandidate[];  // All candidates in the pipeline table
 }
 
 export interface VisibleElement {
@@ -29,6 +54,9 @@ export interface VisibleElement {
   type: string;        // input type or element role
   value: string;       // current value for inputs
   placeholder: string; // placeholder text
+  checked?: boolean;    // For checkboxes and radio buttons
+  selected?: boolean;   // For options
+  options?: { value: string; text: string }[]; // For select elements
 }
 
 export class StateObserver {
@@ -55,6 +83,8 @@ export class StateObserver {
       has_modal: this.detectModal(),
       toasts: this.captureToasts(),
       visible_elements: this.captureVisibleElements(),
+      existing_rounds: this.captureExistingRounds(),
+      pipeline_candidates: this.capturePipelineCandidates(),
     };
   }
 
@@ -64,17 +94,25 @@ export class StateObserver {
   private captureVisibleElements(): VisibleElement[] {
     const elements: VisibleElement[] = [];
     const seen = new Set<string>();
+    const agentCounts = new Map<string, number>();  // Track duplicate data-agent counts
 
     // 1. All data-agent elements (highest priority)
+    // IMPORTANT: Allow duplicates with auto-indexing (e.g., candidate-name, candidate-name-1, etc.)
     document.querySelectorAll('[data-agent]').forEach((el) => {
       const rect = el.getBoundingClientRect();
       if (rect.height === 0 || rect.width === 0) return; // Skip hidden elements
       
-      const agent = el.getAttribute('data-agent') || '';
-      if (seen.has(agent)) return;
-      seen.has(agent);
+      const baseAgent = el.getAttribute('data-agent') || '';
       
-      elements.push({
+      // Handle duplicate data-agent values by appending index
+      let agent = baseAgent;
+      const count = agentCounts.get(baseAgent) || 0;
+      if (count > 0) {
+        agent = `${baseAgent}-${count}`;  // e.g., candidate-name-1, candidate-name-2
+      }
+      agentCounts.set(baseAgent, count + 1);
+      
+      const elementData: VisibleElement = {
         tag: el.tagName.toLowerCase(),
         data_agent: agent,
         text: (el.textContent || '').trim().substring(0, 120),
@@ -82,7 +120,16 @@ export class StateObserver {
         type: el.getAttribute('type') || el.getAttribute('role') || '',
         value: (el as HTMLInputElement).value || '',
         placeholder: el.getAttribute('placeholder') || '',
-      });
+        checked: (el as HTMLInputElement).checked || false,
+      };
+
+      // Capture options for select elements with data-agent
+      if (el.tagName.toLowerCase() === 'select') {
+        elementData.text = (el as HTMLSelectElement).selectedOptions?.[0]?.text || '';
+        elementData.options = Array.from((el as HTMLSelectElement).options).map(o => ({ value: o.value, text: o.text }));
+      }
+
+      elements.push(elementData);
       seen.add(agent);
     });
 
@@ -134,6 +181,11 @@ export class StateObserver {
         type: el.getAttribute('type') || el.tagName.toLowerCase(),
         value: (el as HTMLInputElement).value || '',
         placeholder: el.getAttribute('placeholder') || '',
+        checked: (el as HTMLInputElement).checked || false,
+        selected: (el as HTMLOptionElement).selected || false,
+        options: el.tagName.toLowerCase() === 'select' 
+          ? Array.from((el as HTMLSelectElement).options).map(o => ({ value: o.value, text: o.text }))
+          : undefined
       });
       seen.add(key);
     });
@@ -161,7 +213,102 @@ export class StateObserver {
       seen.add(key);
     });
 
-    return elements.slice(0, 40); // Limit to 40 elements to keep payload reasonable
+    return elements.slice(0, 80); // Increased to 80 to capture all pipeline + round elements
+  }
+
+  /**
+   * Capture structured data about ALL candidates in the pipeline table.
+   * This ensures the LLM sees every single candidate, not just the first.
+   */
+  private capturePipelineCandidates(): PipelineCandidate[] {
+    const candidates: PipelineCandidate[] = [];
+    
+    // Find all table rows in the pipeline
+    const rows = document.querySelectorAll('tbody tr');
+    rows.forEach((row, index) => {
+      const nameEl = row.querySelector('[data-agent="candidate-name"]');
+      if (!nameEl) return; // Skip non-candidate rows (loading skeletons, empty state)
+      
+      const candidateName = nameEl.textContent?.trim() || 'Unknown';
+      
+      // Get job title from the next cell
+      const cells = row.querySelectorAll('td');
+      const jobTitle = cells[1]?.textContent?.trim() || '';
+      const statusText = cells[2]?.textContent?.trim() || '';
+      const roundsCount = cells[3]?.textContent?.trim() || '0';
+      
+      // Check the action button to determine if orchestrated
+      const configButton = row.querySelector('[data-agent="configure-interview-button"]');
+      const buttonText = configButton?.textContent?.trim() || '';
+      const isOrchestrated = buttonText.toLowerCase() === 'reconfigure';
+      
+      // Check for exam credentials
+      const hasExamCreds = !!row.querySelector('.font-mono');
+      
+      candidates.push({
+        index,
+        candidate_name: candidateName,
+        job_title: jobTitle,
+        status: statusText,
+        rounds_count: roundsCount,
+        is_orchestrated: isOrchestrated,
+        has_exam_credentials: hasExamCreds,
+      });
+    });
+
+    return candidates;
+  }
+
+  /**
+   * Capture structured data about existing interview rounds.
+   * This gives the LLM a clear picture of what rounds already exist,
+   * their configuration, and whether they have questions.
+   */
+  private captureExistingRounds(): RoundSnapshot[] {
+    const rounds: RoundSnapshot[] = [];
+    let index = 0;
+
+    while (true) {
+      const designationSelect = document.querySelector(`[data-agent="round-designation-select-${index}"]`) as HTMLSelectElement;
+      if (!designationSelect) break; // No more rounds
+
+      const strategySelect = document.querySelector(`[data-agent="strategy-tier-select-${index}"]`) as HTMLSelectElement;
+      const difficultySelect = document.querySelector(`[data-agent="evaluation-depth-select-${index}"]`) as HTMLSelectElement;
+      const formatSelect = document.querySelector(`[data-agent="question-format-select-${index}"]`) as HTMLSelectElement;
+      const countInput = document.querySelector(`[data-agent="question-count-input-${index}"]`) as HTMLInputElement;
+      const timerInput = document.querySelector(`[data-agent="allocated-time-input-${index}"]`) as HTMLInputElement;
+
+      // Count questions for this round: look for question textareas within the round's container
+      const roundContainer = designationSelect.closest('[class*="rounded-sm border"]');
+      const questionTextareas = roundContainer
+        ? roundContainer.querySelectorAll('[data-agent="question-text-textarea"]')
+        : [];
+      
+      const questionsPreview: string[] = [];
+      questionTextareas.forEach((textarea, i) => {
+        if (i < 3) { // Only first 3 for preview
+          const text = (textarea as HTMLTextAreaElement).value?.trim();
+          if (text) questionsPreview.push(text.substring(0, 100));
+        }
+      });
+
+      rounds.push({
+        index,
+        designation: designationSelect.value || '',
+        designation_label: designationSelect.selectedOptions?.[0]?.text || '',
+        strategy_tier: strategySelect?.value || '',
+        difficulty: difficultySelect?.value || '',
+        question_format: formatSelect?.value || '',
+        question_count: questionTextareas.length,
+        timer_seconds: parseInt(timerInput?.value || '600'),
+        has_questions: questionTextareas.length > 0,
+        questions_preview: questionsPreview,
+      });
+
+      index++;
+    }
+
+    return rounds;
   }
 
   /**

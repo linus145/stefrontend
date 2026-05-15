@@ -6,15 +6,23 @@ import { AgentUIController } from '@/agent/ui/AgentUIController';
 
 export const AgentButton: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [externalPanelOpen, setExternalPanelOpen] = useState(false);
 
   useEffect(() => {
     const handleToggle = (e: any) => setSidebarOpen(e.detail.isVisible);
+    const handleExternalToggle = (e: any) => setExternalPanelOpen(e.detail.isOpen);
+
     window.addEventListener('agent-ui-toggle', handleToggle);
-    return () => window.removeEventListener('agent-ui-toggle', handleToggle);
+    window.addEventListener('external-panel-toggle', handleExternalToggle);
+
+    return () => {
+      window.removeEventListener('agent-ui-toggle', handleToggle);
+      window.removeEventListener('external-panel-toggle', handleExternalToggle);
+    };
   }, []);
 
-  // Hide the button entirely when sidebar is open
-  if (sidebarOpen) return null;
+  // Hide the button entirely when agent sidebar OR any external panel is open
+  if (sidebarOpen || externalPanelOpen) return null;
 
   return (
     <button

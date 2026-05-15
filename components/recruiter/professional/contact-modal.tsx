@@ -1,6 +1,7 @@
 import { User } from '@/types/user.types';
 import { User as UserIcon, X, MessageSquare, Mail, Loader2, Send } from 'lucide-react';
-import React from 'react';
+import React, { useEffect } from 'react';
+import { AgentUIController } from '@/agent/ui/AgentUIController';
 
 interface ContactModalProps {
   selectedUser: User;
@@ -19,6 +20,14 @@ export function ContactModal({
   sendEmail, setSendEmail,
   handleContact, isPending
 }: ContactModalProps) {
+  // Sync visibility with AgentUIController
+  useEffect(() => {
+    AgentUIController.getInstance().setExternalPanelOpen(true);
+    return () => {
+      AgentUIController.getInstance().setExternalPanelOpen(false);
+    };
+  }, []);
+
   return (
     <>
       <div className="fixed inset-0 z-[90] bg-background/20 backdrop-blur-sm sm:hidden" onClick={() => setSelectedUser(null)} />

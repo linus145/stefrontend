@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { aiAgentService } from '@/services/ai-agents.service';
+import { AgentUIController } from '@/agent/ui/AgentUIController';
 
 interface TalentAISearchPanelProps {
   isOpen: boolean;
@@ -18,6 +19,17 @@ export function TalentAISearchPanel({ isOpen, onClose, onSearchResults }: Talent
   const [activeTab, setActiveTab] = useState<'chat' | 'history'>('chat');
   const [query, setQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
+
+  // Sync visibility with AgentUIController
+  useEffect(() => {
+    AgentUIController.getInstance().setExternalPanelOpen(isOpen);
+    // Cleanup when component unmounts if it was open
+    return () => {
+      if (isOpen) {
+        AgentUIController.getInstance().setExternalPanelOpen(false);
+      }
+    };
+  }, [isOpen]);
   
   type ChatMessage = {
     id: string;

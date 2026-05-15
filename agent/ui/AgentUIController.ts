@@ -1,7 +1,7 @@
-
 export class AgentUIController {
   private static instance: AgentUIController;
   private isVisible: boolean = false;
+  private isExternalOpen: boolean = false;
 
   private constructor() {}
 
@@ -22,13 +22,17 @@ export class AgentUIController {
     this.updateUI(goal);
   }
 
+  public setExternalPanelOpen(isOpen: boolean) {
+    this.isExternalOpen = isOpen;
+    const event = new CustomEvent('external-panel-toggle', { detail: { isOpen } });
+    window.dispatchEvent(event);
+  }
+
   public showNotification(message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info') {
     console.log(`[AgentUI] Notification: ${message} (${type})`);
-    // This would trigger a toast or a custom notification UI
   }
 
   private updateUI(goal?: string) {
-    // This would communicate with the React components to update the visibility
     const event = new CustomEvent('agent-ui-toggle', { detail: { isVisible: this.isVisible, goal } });
     window.dispatchEvent(event);
   }

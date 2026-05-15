@@ -1,6 +1,7 @@
 import { User } from '@/types/user.types';
 import { Users, X, MessageSquare, Loader2, Send } from 'lucide-react';
-import React from 'react';
+import React, { useEffect } from 'react';
+import { AgentUIController } from '@/agent/ui/AgentUIController';
 
 interface BulkContactModalProps {
   selectedUsers: User[];
@@ -16,6 +17,14 @@ export function BulkContactModal({
   message, setMessage,
   handleBulkContact, isPending
 }: BulkContactModalProps) {
+  // Sync visibility with AgentUIController
+  useEffect(() => {
+    AgentUIController.getInstance().setExternalPanelOpen(true);
+    return () => {
+      AgentUIController.getInstance().setExternalPanelOpen(false);
+    };
+  }, []);
+
   return (
     <>
       {/* Backdrop overlay for mobile, optional but good for focus */}

@@ -92,10 +92,10 @@ export function DashboardViewShell() {
       case 'jobs':
         return (
           <div className="flex-1 flex flex-col p-4 sm:p-8 transition-all ease-out">
-            {/* Recruiter CTA Banner */}
+            {/* Recruiter CTA Banner - Hidden on mobile for cleaner UX */}
             <a
               href="/recruiter/register"
-              className="group relative mb-8 w-full rounded-sm overflow-hidden border border-black bg-muted/20 hover:bg-muted/40 transition-all"
+              className="hidden md:block group relative mb-8 w-full rounded-sm overflow-hidden border border-black bg-muted/20 hover:bg-muted/40 transition-all"
             >
               <div className="flex items-center justify-between px-6 py-5">
                 <div className="flex items-center gap-4">
@@ -115,7 +115,11 @@ export function DashboardViewShell() {
 
             {/* Active Job Listings */}
             <div className="flex-1 min-h-0">
-              <JobsView onNavigateToMessages={(userId) => handleSectionChange('messages', userId, 'direct')} />
+              <JobsView 
+                initialSearch={selectedProfileId?.includes('-') ? null : selectedProfileId}
+                initialJobId={selectedProfileId?.includes('-') ? selectedProfileId : null}
+                onNavigateToMessages={(userId) => handleSectionChange('messages', userId, 'direct')} 
+              />
             </div>
           </div>
         );

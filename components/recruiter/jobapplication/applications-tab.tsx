@@ -123,7 +123,7 @@ export function ApplicationsTab({ selectedJobId, onBack }: ApplicationsTabProps)
   // Data mapping
   const jobs = Array.isArray(jobsResponse?.data) ? jobsResponse.data : [];
   const allApplications = Array.isArray(applicationsResponse?.data) ? applicationsResponse.data : [];
-  const filteredApplications = statusFilter 
+  const filteredApplications = statusFilter
     ? allApplications.filter(app => app.status === statusFilter)
     : allApplications;
 
@@ -159,13 +159,13 @@ export function ApplicationsTab({ selectedJobId, onBack }: ApplicationsTabProps)
                 Review and manage applicants for your job postings
               </p>
             </div>
-            <button 
+            <button
               onClick={() => setIsAiPanelOpen(!isAiPanelOpen)}
               data-agent="ai-screening-button"
               className={cn(
                 "inline-flex items-center gap-2 px-4 py-2 rounded-sm text-xs font-bold transition-all border shrink-0",
-                isAiPanelOpen 
-                  ? "bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-600/20" 
+                isAiPanelOpen
+                  ? "bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-600/20"
                   : "bg-white text-blue-600 border-blue-600/20 hover:bg-blue-50"
               )}
             >
@@ -175,112 +175,112 @@ export function ApplicationsTab({ selectedJobId, onBack }: ApplicationsTabProps)
           </div>
         </div>
 
-      <div className="mb-2">
-        <JobSelector
-          activeJobId={activeJobId}
-          setActiveJobId={(id) => { setActiveJobId(id); setStatusFilter(''); }}
-          jobs={jobs}
-          copiedId={copiedId}
-          onCopyId={handleCopyId}
-          manualJobId={manualJobId}
-          setManualJobId={setManualJobId}
-          onAnalyze={(id) => analyzeMutation.mutate(id)}
-          isAnalyzePending={analyzeMutation.isPending}
-        />
-      </div>
-
-      {!activeJobId ? (
-        <div className="text-center py-20">
-          <div className="w-20 h-20 rounded-sm bg-muted/20 border border-dashed border-border/50 flex items-center justify-center mx-auto mb-6">
-            <Users className="w-8 h-8 text-muted-foreground opacity-30" />
-          </div>
-          <h3 className="text-lg font-semibold text-foreground mb-2">Select a job</h3>
-          <p className="text-sm text-muted-foreground">Choose a job posting above to view its applications.</p>
+        <div className="mb-2">
+          <JobSelector
+            activeJobId={activeJobId}
+            setActiveJobId={(id) => { setActiveJobId(id); setStatusFilter(''); }}
+            jobs={jobs}
+            copiedId={copiedId}
+            onCopyId={handleCopyId}
+            manualJobId={manualJobId}
+            setManualJobId={setManualJobId}
+            onAnalyze={(id) => analyzeMutation.mutate(id)}
+            isAnalyzePending={analyzeMutation.isPending}
+          />
         </div>
-      ) : (
-        <>
-          {/* Status Filters */}
-          <div className="flex gap-2 mb-4 overflow-x-auto pb-1 no-scrollbar">
-            {statusOptions.map(opt => (
-              <button
-                key={opt.value}
-                onClick={() => setStatusFilter(opt.value)}
-                className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all whitespace-nowrap border",
-                  statusFilter === opt.value
-                    ? "bg-blue-500/10 text-blue-600 border-blue-500/30"
-                    : "bg-muted/30 text-muted-foreground border-border hover:bg-muted/50"
-                )}
-              >
-                {opt.color && <div className={cn("w-1.5 h-1.5 rounded-full", opt.color)} />}
-                {opt.label} ({opt.value ? allApplications.filter(a => a.status === opt.value).length : allApplications.length})
-              </button>
-            ))}
-          </div>
 
-          {/* Applications List */}
-          {isLoading ? (
-            <div className="flex items-center justify-center py-20">
-              <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+        {!activeJobId ? (
+          <div className="text-center py-20">
+            <div className="w-20 h-20 rounded-sm bg-muted/20 border border-dashed border-border/50 flex items-center justify-center mx-auto mb-6">
+              <Users className="w-8 h-8 text-muted-foreground opacity-30" />
             </div>
-          ) : filteredApplications.length === 0 ? (
-            <div className="text-center py-20">
-              <div className="w-20 h-20 rounded-sm bg-muted/20 border border-dashed border-border/50 flex items-center justify-center mx-auto mb-6">
-                <FileText className="w-8 h-8 text-muted-foreground opacity-30" />
-              </div>
-              <h3 className="text-lg font-semibold text-foreground mb-2">No applications yet</h3>
-              <p className="text-sm text-muted-foreground">
-                {statusFilter ? `No ${statusFilter.toLowerCase()} applications found.` : 'Applications will appear here once people apply.'}
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {filteredApplications.map((app: JobApplication) => (
-                <ApplicationCard
-                  key={app.id}
-                  app={app}
-                  isExpanded={expandedAppId === app.id}
-                  onToggleExpand={() => setExpandedAppId(expandedAppId === app.id ? null : app.id)}
-                  onUpdateStatus={(id, status, employmentType) => updateStatusMutation.mutate({ appId: id, status, employmentType })}
-                  onContact={handleOpenContactModal}
-                  isUpdatePending={updateStatusMutation.isPending}
-                />
+            <h3 className="text-lg font-semibold text-foreground mb-2">Select a job</h3>
+            <p className="text-sm text-muted-foreground">Choose a job posting above to view its applications.</p>
+          </div>
+        ) : (
+          <>
+            {/* Status Filters */}
+            <div className="flex gap-2 mb-4 overflow-x-auto pb-1 no-scrollbar">
+              {statusOptions.map(opt => (
+                <button
+                  key={opt.value}
+                  onClick={() => setStatusFilter(opt.value)}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all whitespace-nowrap border",
+                    statusFilter === opt.value
+                      ? "bg-blue-500/10 text-blue-600 border-blue-500/30"
+                      : "bg-muted/30 text-muted-foreground border-border hover:bg-muted/50"
+                  )}
+                >
+                  {opt.color && <div className={cn("w-1.5 h-1.5 rounded-full", opt.color)} />}
+                  {opt.label} ({opt.value ? allApplications.filter(a => a.status === opt.value).length : allApplications.length})
+                </button>
               ))}
             </div>
-          )}
-        </>
-      )}
 
-      <ContactModal
-        selectedApplicant={selectedApplicant}
-        message={message}
-        setMessage={setMessage}
-        sendEmail={sendEmail}
-        setSendEmail={setSendEmail}
-        onClose={() => setSelectedApplicant(null)}
-        onSend={handleContact}
-        isPending={contactMutation.isPending}
-      />
+            {/* Applications List */}
+            {isLoading ? (
+              <div className="flex items-center justify-center py-20">
+                <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+              </div>
+            ) : filteredApplications.length === 0 ? (
+              <div className="text-center py-20">
+                <div className="w-20 h-20 rounded-sm bg-muted/20 border border-dashed border-border/50 flex items-center justify-center mx-auto mb-6">
+                  <FileText className="w-8 h-8 text-muted-foreground opacity-30" />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">No applications yet</h3>
+                <p className="text-sm text-muted-foreground">
+                  {statusFilter ? `No ${statusFilter.toLowerCase()} applications found.` : 'Applications will appear here once people apply.'}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {filteredApplications.map((app: JobApplication) => (
+                  <ApplicationCard
+                    key={app.id}
+                    app={app}
+                    isExpanded={expandedAppId === app.id}
+                    onToggleExpand={() => setExpandedAppId(expandedAppId === app.id ? null : app.id)}
+                    onUpdateStatus={(id, status, employmentType) => updateStatusMutation.mutate({ appId: id, status, employmentType })}
+                    onContact={handleOpenContactModal}
+                    isUpdatePending={updateStatusMutation.isPending}
+                  />
+                ))}
+              </div>
+            )}
+          </>
+        )}
 
-      <AIScreeningPanel
-        isOpen={isAiPanelOpen}
-        onClose={() => setIsAiPanelOpen(false)}
-        isLoading={analyzeMutation.isPending}
-        results={aiResults}
-        onLoadHistoryReport={(reportResults) => {
-          setAiResults(reportResults);
-          queryClient.invalidateQueries({ queryKey: ['job-applications'] });
-          toast.success('AI Screening results loaded.');
-        }}
-        onViewDetails={(id) => {
-          setExpandedAppId(id);
-          setIsAiPanelOpen(false);
-          // Scroll to the card
-          setTimeout(() => {
-            document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          }, 100);
-        }}
-      />
+        <ContactModal
+          selectedApplicant={selectedApplicant}
+          message={message}
+          setMessage={setMessage}
+          sendEmail={sendEmail}
+          setSendEmail={setSendEmail}
+          onClose={() => setSelectedApplicant(null)}
+          onSend={handleContact}
+          isPending={contactMutation.isPending}
+        />
+
+        <AIScreeningPanel
+          isOpen={isAiPanelOpen}
+          onClose={() => setIsAiPanelOpen(false)}
+          isLoading={analyzeMutation.isPending}
+          results={aiResults}
+          onLoadHistoryReport={(reportResults) => {
+            setAiResults(reportResults);
+            queryClient.invalidateQueries({ queryKey: ['job-applications'] });
+            toast.success('AI Screening results loaded.');
+          }}
+          onViewDetails={(id) => {
+            setExpandedAppId(id);
+            setIsAiPanelOpen(false);
+            // Scroll to the card
+            setTimeout(() => {
+              document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+          }}
+        />
       </div>
     </div>
   );

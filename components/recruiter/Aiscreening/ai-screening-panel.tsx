@@ -11,6 +11,7 @@ import {
 import { cn } from '@/lib/utils';
 import { AgentTaskModal } from '../aiagents/AgentTaskModal';
 import { toast } from 'sonner';
+import { AgentUIController } from '@/agent/ui/AgentUIController';
 
 
 interface AIScreeningPanelProps {
@@ -30,6 +31,16 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
   const [isAutoRefreshing, setIsAutoRefreshing] = useState(false);
   const [processingTime, setProcessingTime] = useState(0);
   const queryClient = useQueryClient();
+
+  // Sync visibility with AgentUIController
+  useEffect(() => {
+    AgentUIController.getInstance().setExternalPanelOpen(isOpen);
+    return () => {
+      if (isOpen) {
+        AgentUIController.getInstance().setExternalPanelOpen(false);
+      }
+    };
+  }, [isOpen]);
 
   // Timer to track how long we've been processing
   useEffect(() => {

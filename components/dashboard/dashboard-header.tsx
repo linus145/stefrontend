@@ -12,6 +12,8 @@ import { api } from '@/lib/api';
 export type DashboardSection = 'dashboard' | 'Profile' | 'messages' | 'network' | 'settings' | 'jobs' | 'news' | 'hire' | 'create-post' | 'notifications';
 import { getOptimizedImage } from '@/lib/imagekit';
 
+import { GlobalSearch } from './global-search';
+
 interface DashboardHeaderProps {
    isRightCollapsed?: boolean;
    hasRightSidebar?: boolean;
@@ -216,15 +218,7 @@ export function DashboardHeader({
                      </div>
                   </div>
 
-
-                  <div className="hidden lg:flex items-center relative group/search h-9 w-48 xl:w-64 min-w-0 flex-shrink lg:ml-6">
-                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within/search:text-primary transition-colors" />
-                     <input
-                        type="text"
-                        placeholder="Search the network..."
-                        className="w-full h-full bg-muted/50 border border-border rounded-md pl-10 pr-4 text-[13px] text-foreground placeholder:text-muted-foreground focus:ring-1 focus:ring-primary/20 focus:border-primary/30 outline-none transition-all min-w-0"
-                     />
-                  </div>
+                  <GlobalSearch onSectionChange={onSectionChange} />
                </div>
 
                {/* Center Section: Navigation Tabs — truly centered */}

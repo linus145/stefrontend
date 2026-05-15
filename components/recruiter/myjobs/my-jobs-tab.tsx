@@ -314,7 +314,7 @@ export function MyJobsTab({ isApproved, onViewApplications }: MyJobsTabProps) {
                 </DialogDescription>
               </DialogHeader>
             </div>
-            
+
             <div className="mt-8 flex flex-col sm:flex-row items-center gap-2">
               <Button
                 variant="outline"

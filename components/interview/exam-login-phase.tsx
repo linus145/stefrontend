@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Toaster } from 'sonner';
 
 interface ExamLoginPhaseProps {
   username: string;
@@ -18,7 +17,6 @@ export function ExamLoginPhase({
 }: ExamLoginPhaseProps) {
   return (
     <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-4">
-      <Toaster position="top-center" />
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

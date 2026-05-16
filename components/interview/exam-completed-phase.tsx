@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Toaster } from 'sonner';
 import { ExamData } from '@/types/exam-types';
 
 interface ExamCompletedPhaseProps {
@@ -16,7 +15,6 @@ export function ExamCompletedPhase({
 }: ExamCompletedPhaseProps) {
   return (
     <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-4">
-      <Toaster position="top-center" />
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}

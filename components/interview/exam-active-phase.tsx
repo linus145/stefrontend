@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Toaster } from 'sonner';
 import { ShieldAlertIcon } from 'lucide-react';
 import { ExamData } from '@/types/exam-types';
 import { SurveillanceOverlay } from './proctoring/surveillance-overlay';
@@ -37,7 +36,6 @@ export function ExamActivePhase({
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <Toaster position="top-center" />
 
       {/* Top Bar */}
       <div className="sticky top-0 z-50 bg-card/95 backdrop-blur-xl border-b border-border shadow-sm">

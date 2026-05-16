@@ -2,9 +2,20 @@
 
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShieldAlertIcon } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import { ShieldAlertIcon, TerminalIcon } from 'lucide-react';
 import { ExamData } from '@/types/exam-types';
-import { SurveillanceOverlay } from './proctoring/surveillance-overlay';
+import { SurveillanceOverlay } from '../proctoring/surveillance-overlay';
+
+// Import CodeEditor with SSR disabled to prevent hydration issues with Monaco
+const CodeEditor = dynamic(() => import('./code-editor').then(mod => mod.CodeEditor), {
+  ssr: false,
+  loading: () => (
+    <div className="h-[500px] w-full bg-slate-900 animate-pulse rounded-sm flex items-center justify-center">
+      <span className="text-xs text-muted-foreground font-bold tracking-widest uppercase">Initializing IDE...</span>
+    </div>
+  )
+});
 
 interface ExamActivePhaseProps {
   examData: ExamData | null;
@@ -88,8 +99,8 @@ export function ExamActivePhase({
                   key={rnd.id}
                   onClick={() => { setActiveRoundIndex(rIdx); setActiveQuestionIndex(0); }}
                   className={`w-full text-left px-4 py-3 rounded-sm border transition-all ${isActive
-                      ? 'bg-primary/10 border-primary/30 text-foreground shadow-sm'
-                      : 'bg-card/40 border-border text-muted-foreground hover:border-border/80'
+                    ? 'bg-primary/10 border-primary/30 text-foreground shadow-sm'
+                    : 'bg-card/40 border-border text-muted-foreground hover:border-border/80'
                     }`}
                 >
                   <p className="text-xs font-bold">{rnd.designation_display}</p>
@@ -127,10 +138,10 @@ export function ExamActivePhase({
                       key={q.id}
                       onClick={() => setActiveQuestionIndex(qIdx)}
                       className={`w-9 h-9 rounded-sm text-xs font-bold transition-all ${isCurrent
-                          ? 'bg-primary text-primary-foreground shadow-sm ring-2 ring-primary/20 ring-offset-2 ring-offset-background'
-                          : isAnswered
-                            ? 'bg-primary/10 text-primary border border-primary/30'
-                            : 'bg-secondary text-muted-foreground border border-border hover:border-border/80'
+                        ? 'bg-primary text-primary-foreground shadow-sm ring-2 ring-primary/20 ring-offset-2 ring-offset-background'
+                        : isAnswered
+                          ? 'bg-primary/10 text-primary border border-primary/30'
+                          : 'bg-secondary text-muted-foreground border border-border hover:border-border/80'
                         }`}
                     >
                       {qIdx + 1}
@@ -164,8 +175,8 @@ export function ExamActivePhase({
                                 <label
                                   key={i}
                                   className={`flex items-center gap-3 p-3 rounded-sm border cursor-pointer transition-all ${answers[currentQuestion.id] === opt.label
-                                      ? 'bg-primary/10 border-primary/40 text-foreground shadow-sm'
-                                      : 'bg-secondary/40 border-border text-muted-foreground hover:border-border/80'
+                                    ? 'bg-primary/10 border-primary/40 text-foreground shadow-sm'
+                                    : 'bg-secondary/40 border-border text-muted-foreground hover:border-border/80'
                                     }`}
                                 >
                                   <input
@@ -175,9 +186,8 @@ export function ExamActivePhase({
                                     onChange={() => setAnswers(prev => ({ ...prev, [currentQuestion.id]: opt.label }))}
                                     className="sr-only"
                                   />
-                                  <span className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                                    answers[currentQuestion.id] === opt.label ? 'border-primary' : 'border-muted-foreground/30'
-                                  }`}>
+                                  <span className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 ${answers[currentQuestion.id] === opt.label ? 'border-primary' : 'border-muted-foreground/30'
+                                    }`}>
                                     {answers[currentQuestion.id] === opt.label && (
                                       <span className="w-3 h-3 rounded-full bg-primary" />
                                     )}
@@ -189,21 +199,39 @@ export function ExamActivePhase({
                           )}
                         </div>
                       </div>
-                    </div>
-
                     {/* Answer Area */}
-                    {(currentQuestion.question_type === 'TEXT' || currentQuestion.question_type === 'CODE') && (
+                    {currentQuestion.question_type === 'TEXT' && 
+                     currentRound.question_format !== 'CODE' && 
+                     !currentRound.designation_display.toLowerCase().includes('coding') && (
                       <div className="p-8">
                         <label className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold block mb-3">
-                          {currentQuestion.question_type === 'CODE' ? 'Your Code' : 'Your Answer'}
+                          Your Answer
                         </label>
                         <textarea
                           value={answers[currentQuestion.id] ?? currentQuestion.candidate_answer ?? ''}
                           onChange={(e) => setAnswers(prev => ({ ...prev, [currentQuestion.id]: e.target.value }))}
-                          placeholder={currentQuestion.question_type === 'CODE' ? 'Write your code here...' : 'Type your answer here...'}
-                          className={`w-full bg-background border border-input rounded-sm py-4 px-5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring transition-all resize-none shadow-sm ${currentQuestion.question_type === 'CODE' ? 'font-mono text-xs min-h-[250px]' : 'min-h-[150px]'
-                            }`}
+                          placeholder="Type your answer here..."
+                          className="w-full bg-background border border-input rounded-sm py-4 px-5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring transition-all resize-none shadow-sm min-h-[150px]"
                         />
+                      </div>
+                    )}
+
+                    {(currentQuestion.question_type === 'CODE' || 
+                      currentRound.question_format === 'CODE' || 
+                      currentRound.designation_display.toLowerCase().includes('coding')) && (
+                      <div className="p-8">
+                        <label className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold block mb-3">
+                          Coding Environment ({currentRound.programming_language || 'Python'})
+                        </label>
+                        <CodeEditor 
+                          initialValue={answers[currentQuestion.id] ?? currentQuestion.candidate_answer ?? ''}
+                          language={currentRound.programming_language || 'python'}
+                          onChange={(val) => setAnswers(prev => ({ ...prev, [currentQuestion.id]: val || '' }))}
+                        />
+                        <p className="mt-4 text-[10px] text-muted-foreground italic flex items-center gap-2">
+                          <TerminalIcon size={10} />
+                          Note: You can run your code multiple times to verify the output before saving.
+                        </p>
                       </div>
                     )}
 
@@ -239,7 +267,8 @@ export function ExamActivePhase({
                         {submitting === currentQuestion.id ? 'Saving...' : currentQuestion.candidate_answer ? 'Update Answer' : 'Save Answer'}
                       </button>
                     </div>
-                  </motion.div>
+                  </div>
+                </motion.div>
                 )}
               </AnimatePresence>
             </div>
@@ -283,9 +312,9 @@ export function ExamActivePhase({
       </AnimatePresence>
 
       {/* AI Surveillance Overlay */}
-      <SurveillanceOverlay 
-        isActive={true} 
-        onViolation={logViolation} 
+      <SurveillanceOverlay
+        isActive={true}
+        onViolation={logViolation}
       />
 
       {/* CSS Security & Privacy Shield */}

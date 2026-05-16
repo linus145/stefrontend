@@ -12,7 +12,8 @@ import {
   ChevronLeft,
   ChevronRight,
   LayoutDashboard,
-  CreditCard
+  CreditCard,
+  UserCheck
 } from 'lucide-react';
 import { HRSection } from './hr-header';
 
@@ -23,6 +24,7 @@ interface HRSidebarProps {
 
 const NAVIGATION_ITEMS: { id: HRSection; label: string; icon: any }[] = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { id: 'onboarding', label: 'Onboarding', icon: UserCheck },
   { id: 'employees', label: 'Employees', icon: Users },
   { id: 'attendance', label: 'Attendance', icon: Calendar },
   { id: 'leave', label: 'Leave', icon: FileText },

@@ -133,7 +133,6 @@ export function ApplicationsTab({ selectedJobId, onBack }: ApplicationsTabProps)
     { label: 'Reviewed', value: 'REVIEWED', color: 'bg-blue-500' },
     { label: 'Shortlisted', value: 'SHORTLISTED', color: 'bg-cyan-500' },
     { label: 'Interview', value: 'INTERVIEW', color: 'bg-purple-500' },
-    { label: 'Hired', value: 'HIRED', color: 'bg-emerald-500' },
     { label: 'Rejected', value: 'REJECTED', color: 'bg-red-500' },
   ];
 

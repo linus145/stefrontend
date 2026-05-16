@@ -5,7 +5,7 @@ import { hrmsService } from '@/services/hrms.service';
 import { jobsService } from '@/services/jobs.service';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, Search, Mail, Phone, MapPin, MoreHorizontal, UserPlus, RefreshCw, Trash2, Calendar, User, BrainCircuit } from 'lucide-react';
+import { Plus, Search, Mail, Phone, MapPin, MoreHorizontal, UserPlus, RefreshCw, Trash2, UserCheck, Calendar } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
@@ -30,36 +30,47 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { AddEmployeeModal } from './add-employee-modal';
+import { User, BrainCircuit } from 'lucide-react';
 
-export function EmployeesTab() {
+export function OnboardingTab() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState('ALL');
   const [ordering, setOrdering] = useState('-created_at');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
-  
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [activateTarget, setActivateTarget] = useState<{ id: string; name: string } | null>(null);
 
   const { data: employees, isLoading } = useQuery({
-    queryKey: ['employees', search, filter, ordering, startDate, endDate],
+    queryKey: ['onboarding-employees', search, ordering, startDate, endDate],
     queryFn: () => hrmsService.getEmployees({ 
       search, 
-      status: 'ACTIVE',
-      employment_type: filter === 'ALL' ? undefined : filter,
+      status: 'ON_BOARDING',
       ordering,
       joining_date__gte: startDate || undefined,
       joining_date__lte: endDate || undefined
     }),
   });
 
+  const activateEmployeeMutation = useMutation({
+    mutationFn: (id: string) => hrmsService.updateEmployee(id, { status: 'ACTIVE' }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['onboarding-employees'] });
+      queryClient.invalidateQueries({ queryKey: ['employees'] });
+      toast.success('Successfully added to Employees directory');
+      setActivateTarget(null);
+    },
+    onError: () => {
+      toast.error('Failed to add to employees');
+      setActivateTarget(null);
+    }
+  });
+
   const rescheduleMutation = useMutation({
     mutationFn: (applicationId: string) =>
       jobsService.updateApplicationStatus(applicationId, 'INTERVIEW'),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['employees'] });
+      queryClient.invalidateQueries({ queryKey: ['onboarding-employees'] });
       toast.success('Candidate moved back to Recruitment Pipeline');
     },
     onError: () => toast.error('Failed to move candidate back')
@@ -69,6 +80,7 @@ export function EmployeesTab() {
     mutationFn: ({ id, employment_type }: { id: string; employment_type: string }) =>
       hrmsService.updateEmployee(id, { employment_type }),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['onboarding-employees'] });
       queryClient.invalidateQueries({ queryKey: ['employees'] });
       toast.success('Employment type updated manually');
     },
@@ -78,6 +90,7 @@ export function EmployeesTab() {
   const deleteEmployeeMutation = useMutation({
     mutationFn: (id: string) => hrmsService.deleteEmployee(id),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['onboarding-employees'] });
       queryClient.invalidateQueries({ queryKey: ['employees'] });
       toast.success('Employee removed successfully');
       setDeleteTarget(null);
@@ -93,6 +106,12 @@ export function EmployeesTab() {
       deleteEmployeeMutation.mutate(deleteTarget.id);
     }
   }, [deleteTarget]);
+
+  const handleActivateConfirm = useCallback(() => {
+    if (activateTarget) {
+      activateEmployeeMutation.mutate(activateTarget.id);
+    }
+  }, [activateTarget]);
 
   const renderSkeletons = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -119,7 +138,7 @@ export function EmployeesTab() {
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
       <div>
-        <h2 className="text-xl font-bold tracking-tight">Employee Directory</h2>
+        <h2 className="text-xl font-bold tracking-tight">Onboarding Pipeline</h2>
       </div>
 
       <div className="flex flex-col md:flex-row items-center justify-between gap-4">
@@ -133,7 +152,7 @@ export function EmployeesTab() {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-
+          
           <div className="flex items-center gap-2">
             <div className="relative w-36">
               <span className="absolute -top-2.5 left-2 bg-white px-1 text-[10px] font-bold text-muted-foreground z-10">Start Date</span>
@@ -158,46 +177,8 @@ export function EmployeesTab() {
         </div>
 
         <div className="flex items-center gap-3 w-full md:w-auto">
-          <div className="flex items-center bg-muted/40 p-1 rounded-sm border border-border/30 h-10">
-            {[
-              { label: 'All', value: 'ALL' },
-              { label: 'Permanent', value: 'FULL_TIME' },
-              { label: 'Contract', value: 'CONTRACT' },
-            ].map((item) => (
-              <button
-                key={item.value}
-                onClick={() => setFilter(item.value)}
-                className={cn(
-                  "px-5 py-1.5 rounded-sm text-[11px] font-bold transition-all active:scale-95 whitespace-nowrap h-full flex items-center",
-                  filter === item.value
-                    ? "bg-white text-[#0a66c2] shadow-sm border border-border/20"
-                    : "text-muted-foreground hover:text-foreground hover:bg-white/30"
-                )}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
-
           <DropdownMenu>
-            <DropdownMenuTrigger className="h-10 px-4 flex items-center justify-center rounded-sm text-[11px] font-bold border border-border bg-white hover:bg-blue-50/30 text-muted-foreground transition-all outline-none shadow-sm">
-              More <MoreHorizontal className="ml-2 h-3.5 w-3.5" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="rounded-sm border-border/50 bg-card/95 backdrop-blur-md shadow-xl min-w-[160px]">
-              <DropdownMenuItem onClick={() => setFilter('INTERN')} className="text-xs font-semibold py-2.5 cursor-pointer focus:bg-[#0a66c2]/10 focus:text-[#0a66c2]">
-                Interns
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setFilter('ON_LEAVE')} className="text-xs font-semibold py-2.5 cursor-pointer focus:bg-[#0a66c2]/10 focus:text-[#0a66c2]">
-                On Leave
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setFilter('TERMINATED')} className="text-xs font-semibold py-2.5 cursor-pointer focus:bg-[#0a66c2]/10 focus:text-[#0a66c2]">
-                Terminated
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger className="h-10 px-4 flex items-center justify-center gap-2 rounded-sm text-[11px] font-bold border border-border bg-white hover:bg-blue-50/30 text-muted-foreground transition-all outline-none whitespace-nowrap shadow-sm">
+            <DropdownMenuTrigger className="h-10 px-4 flex items-center justify-center gap-2 rounded-sm text-[11px] font-bold border border-border/60 bg-white hover:bg-blue-50/30 text-muted-foreground transition-all outline-none whitespace-nowrap shadow-sm">
               <Calendar className="h-3.5 w-3.5 text-[#0a66c2]" />
               {ordering === '-created_at' ? 'Newest' : 'Oldest'}
             </DropdownMenuTrigger>
@@ -216,10 +197,6 @@ export function EmployeesTab() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-
-          <Button onClick={() => setIsAddModalOpen(true)} className="bg-[#0a66c2] text-white hover:bg-[#004182] shadow-sm rounded-sm text-[11px] font-semibold px-4 h-10 transition-all whitespace-nowrap">
-            <UserPlus className="mr-2 h-3.5 w-3.5" /> Add Employee
-          </Button>
         </div>
       </div>
 
@@ -246,7 +223,7 @@ export function EmployeesTab() {
                       <button
                         onClick={() => rescheduleMutation.mutate(employee.job_application)}
                         className="w-8 h-8 flex items-center justify-center rounded-sm bg-purple-600/5 text-purple-600 hover:bg-purple-600 hover:text-white transition-all active:scale-95 border border-purple-600/10"
-                        title="Reschedule Interview"
+                        title="Move back to Recruitment"
                       >
                         <RefreshCw className={cn("h-3.5 w-3.5", rescheduleMutation.isPending && "animate-spin")} />
                       </button>
@@ -294,28 +271,12 @@ export function EmployeesTab() {
                     </Badge>
                   </div>
 
-                  {/* Manual Type Change Buttons */}
-                  <div className="flex gap-2">
-                    {[
-                      { label: 'Perm', value: 'FULL_TIME' },
-                      { label: 'Contr', value: 'CONTRACT' },
-                      { label: 'Intern', value: 'INTERN' },
-                    ].map(type => (
-                      <button
-                        key={type.value}
-                        disabled={employee.employment_type === type.value || updateEmployeeMutation.isPending}
-                        onClick={() => updateEmployeeMutation.mutate({ id: employee.id, employment_type: type.value })}
-                        className={cn(
-                          "flex-1 py-2 rounded-sm text-[11px] font-bold border transition-all active:scale-95 shadow-sm",
-                          employee.employment_type === type.value
-                            ? "bg-[#0a66c2] text-white border-[#0a66c2] shadow-md"
-                            : "bg-white hover:bg-blue-50/50 border-border text-muted-foreground hover:text-[#0a66c2] hover:border-[#0a66c2]/40"
-                        )}
-                      >
-                        {type.label}
-                      </button>
-                    ))}
-                  </div>
+                  <Button 
+                    onClick={() => setActivateTarget({ id: employee.id, name: `${employee.first_name} ${employee.last_name}` })}
+                    className="w-full bg-[#0a66c2]/10 hover:bg-[#0a66c2]/20 text-[#0a66c2] border border-[#0a66c2]/20 shadow-none font-bold tracking-wide transition-all h-9 text-xs rounded-sm"
+                  >
+                    <UserCheck className="mr-2 h-4 w-4" /> Add to Employees
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -347,10 +308,29 @@ export function EmployeesTab() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <AddEmployeeModal 
-        open={isAddModalOpen} 
-        onOpenChange={setIsAddModalOpen} 
-      />
+      {/* Activate Employee Dialog */}
+      <AlertDialog open={!!activateTarget} onOpenChange={(open) => !open && setActivateTarget(null)}>
+        <AlertDialogContent className="rounded-sm border-[#0a66c2]/20 bg-card/95 backdrop-blur-xl shadow-2xl shadow-blue-500/10 max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-lg font-bold tracking-tight text-[#0a66c2]">Add to Employees</AlertDialogTitle>
+            <AlertDialogDescription className="text-sm text-muted-foreground leading-relaxed">
+              Are you sure you want to finalize onboarding and move <span className="font-semibold text-foreground">{activateTarget?.name}</span> to the main Employee Directory?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2">
+            <AlertDialogCancel className="rounded-sm text-xs font-semibold h-9 px-5 border-border/60 hover:bg-muted/50">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleActivateConfirm}
+              disabled={activateEmployeeMutation.isPending}
+              className="rounded-sm text-xs font-semibold h-9 px-5 bg-[#0a66c2] text-white hover:bg-[#004182] shadow-lg shadow-blue-500/20 transition-all"
+            >
+              {activateEmployeeMutation.isPending ? 'Adding...' : 'Yes, Add to Employees'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

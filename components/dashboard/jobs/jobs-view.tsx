@@ -92,7 +92,7 @@ export function JobsView({ isCollapsed, onNavigateToMessages, initialSearch, ini
     { label: 'Pending', value: 'PENDING' },
     { label: 'Reviewed', value: 'REVIEWED' },
     { label: 'Shortlisted', value: 'SHORTLISTED' },
-    { label: 'Hired', value: 'HIRED' },
+    { label: 'Onboarded', value: 'ONBOARDED' },
     { label: 'Rejected', value: 'REJECTED' },
   ];
 

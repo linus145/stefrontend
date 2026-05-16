@@ -13,6 +13,7 @@ import { jobsService } from '@/services/jobs.service';
 // Lazy load tabs to keep main bundle small
 const DashboardTab = React.lazy(() => import('@/components/hrtool/tabs/dashboard/dashboard-tab').then(m => ({ default: m.DashboardTab })));
 const EmployeesTab = React.lazy(() => import('@/components/hrtool/tabs/employees/employees-tab').then(m => ({ default: m.EmployeesTab })));
+const OnboardingTab = React.lazy(() => import('@/components/hrtool/tabs/onboarding/onboarding-tab').then(m => ({ default: m.OnboardingTab })));
 const AttendanceTab = React.lazy(() => import('@/components/hrtool/tabs/attendence/attendance-tab').then(m => ({ default: m.AttendanceTab })));
 const LeaveTab = React.lazy(() => import('@/components/hrtool/tabs/leaves/leave-tab').then(m => ({ default: m.LeaveTab })));
 const PayrollTab = React.lazy(() => import('@/components/hrtool/tabs/payroll/payroll-tab').then(m => ({ default: m.PayrollTab })));
@@ -50,6 +51,7 @@ export function HRShell() {
     return (
       <React.Suspense fallback={<LocalLoader />}>
         {activeTab === 'dashboard' && <DashboardTab />}
+        {activeTab === 'onboarding' && <OnboardingTab />}
         {activeTab === 'employees' && <EmployeesTab />}
         {activeTab === 'attendance' && <AttendanceTab />}
         {activeTab === 'leave' && <LeaveTab />}

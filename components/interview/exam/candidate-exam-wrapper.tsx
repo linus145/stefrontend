@@ -4,9 +4,9 @@ import { useState, useCallback } from 'react';
 import { toast, Toaster } from 'sonner';
 import axios from 'axios';
 import { ExamData } from '@/types/exam-types';
-import { ExamLoginPhase } from '@/components/interview/exam-login-phase';
-import { ExamCompletedPhase } from '@/components/interview/exam-completed-phase';
-import { ExamActivePhase } from '@/components/interview/exam-active-phase';
+import { ExamLoginPhase } from '@/components/interview/exam/exam-login-phase';
+import { ExamCompletedPhase } from '@/components/interview/exam/exam-completed-phase';
+import { ExamActivePhase } from '@/components/interview/exam/exam-active-phase';
 import { useProctoring } from '@/hooks/use-proctoring';
 
 // Standalone axios for candidate exam — NO JWT auth, NO token refresh

@@ -84,7 +84,8 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
   // Stats calculation
   const stats = {
     total: sessions.length,
-    pending: sessions.filter(s => s.status.toLowerCase() !== 'completed').length,
+    active: sessions.filter(s => ['pending', 'active', 'started'].includes(s.status.toLowerCase())).length,
+    evaluating: sessions.filter(s => s.status.toLowerCase() === 'evaluating').length,
     completed: sessions.filter(s => s.status.toLowerCase() === 'completed').length
   };
 
@@ -123,29 +124,29 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
     return filteredSessions.map((session) => (
       <tr key={session.id} className="border-b border-border/50 last:border-0 group hover:bg-muted/5 transition-colors">
         {/* Candidate */}
-        <td className="pl-6 pr-4 py-4">
+        <td className="pl-6 pr-4 py-3">
           <p className="text-xs font-bold truncate max-w-[200px]" data-agent="candidate-name">{session.candidate_name}</p>
           <p className="text-[10px] text-muted-foreground mt-0.5">{new Date(session.created_at).toLocaleDateString()}</p>
         </td>
         {/* Role */}
-        <td className="px-4 py-4">
+        <td className="px-4 py-3">
           <p className="text-xs font-semibold truncate max-w-[160px]">{session.job_title}</p>
         </td>
         {/* Status */}
-        <td className="px-4 py-4">
+        <td className="px-4 py-3">
           <span className={cn(
-            "inline-flex px-2.5 py-1 rounded-sm text-[9px] font-bold capitalize border whitespace-nowrap",
+            "inline-flex px-2 py-0.5 rounded-sm text-[9px] font-bold capitalize border whitespace-nowrap",
             getStatusStyle(session.status)
           )}>
             {session.status.toLowerCase().replace(/_/g, ' ')}
           </span>
         </td>
         {/* Rounds */}
-        <td className="px-4 py-4 text-center">
+        <td className="px-4 py-3 text-center">
           <span className="text-xs font-bold">{session.rounds_count}</span>
         </td>
         {/* Exam Access */}
-        <td className="px-4 py-4">
+        <td className="px-4 py-3">
           {session.exam_credentials ? (
             <div className="flex items-center gap-3">
               <div className="min-w-0">
@@ -171,7 +172,7 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
           )}
         </td>
         {/* Action */}
-        <td className="pl-4 pr-6 py-4 text-right">
+        <td className="pl-4 pr-6 py-3 text-right">
           <div className="flex items-center justify-end gap-2">
             <button
               onClick={() => onConfigure(session.application_id, session.is_orchestrated ? session.id : undefined)}
@@ -241,8 +242,7 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
       {/* Header with Search & Filter */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Interview Pipeline</h2>
-          <p className="text-sm text-muted-foreground mt-1">Monitor and manage your AI-driven interview cycles.</p>
+          <h2 className="text-xl font-bold tracking-tight">Interview Pipeline</h2>
         </div>
 
         <div className="flex flex-wrap items-center gap-4">
@@ -256,15 +256,15 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
             Sync Pipeline
           </button>
 
-          <div className="relative w-full sm:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground opacity-50" />
+          <div className="relative w-full sm:w-72">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-blue-600" />
             <input 
               type="text" 
-              placeholder="Search candidate..."
+              placeholder="Search candidate or role..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               data-agent="pipeline-search-input"
-              className="w-full bg-muted/50 border-border rounded-sm py-2 pl-9 pr-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-600/20 transition-all"
+              className="w-full bg-background border border-border rounded-sm py-2 pl-9 pr-3 text-xs font-medium focus:outline-none focus:ring-1 focus:ring-blue-600/50 shadow-sm transition-all"
             />
           </div>
 
@@ -286,32 +286,41 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <div className="bg-card border border-border p-6 rounded-sm shadow-sm flex items-center gap-4">
-          <div className="w-10 h-10 rounded-full bg-blue-600/10 text-blue-600 flex items-center justify-center">
-            <Users2 className="w-5 h-5" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-card border border-border p-4 rounded-sm shadow-sm flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-blue-600/10 text-blue-600 flex items-center justify-center">
+            <Users2 className="w-4 h-4" />
           </div>
           <div>
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Total Sessions</p>
-            <h4 className="text-xl font-bold mt-1">{stats.total}</h4>
+            <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Total Sessions</p>
+            <h4 className="text-lg font-bold mt-0.5">{stats.total}</h4>
           </div>
         </div>
-        <div className="bg-card border border-border p-6 rounded-sm shadow-sm flex items-center gap-4">
-          <div className="w-10 h-10 rounded-full bg-amber-600/10 text-amber-600 flex items-center justify-center">
-            <Timer className="w-5 h-5" />
+        <div className="bg-card border border-border p-4 rounded-sm shadow-sm flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-amber-600/10 text-amber-600 flex items-center justify-center">
+            <Timer className="w-4 h-4" />
           </div>
           <div>
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Active Interviews</p>
-            <h4 className="text-xl font-bold mt-1">{stats.pending}</h4>
+            <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Interviewing</p>
+            <h4 className="text-lg font-bold mt-0.5">{stats.active}</h4>
           </div>
         </div>
-        <div className="bg-card border border-border p-6 rounded-sm shadow-sm flex items-center gap-4">
-          <div className="w-10 h-10 rounded-full bg-emerald-600/10 text-emerald-600 flex items-center justify-center">
-            <CheckCircle2 className="w-5 h-5" />
+        <div className="bg-card border border-border p-4 rounded-sm shadow-sm flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center">
+            <BrainCircuit className="w-4 h-4" />
           </div>
           <div>
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Evaluated</p>
-            <h4 className="text-xl font-bold mt-1">{stats.completed}</h4>
+            <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Evaluating</p>
+            <h4 className="text-lg font-bold mt-0.5">{stats.evaluating}</h4>
+          </div>
+        </div>
+        <div className="bg-card border border-border p-4 rounded-sm shadow-sm flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-emerald-600/10 text-emerald-600 flex items-center justify-center">
+            <CheckCircle2 className="w-4 h-4" />
+          </div>
+          <div>
+            <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Completed</p>
+            <h4 className="text-lg font-bold mt-0.5">{stats.completed}</h4>
           </div>
         </div>
       </div>

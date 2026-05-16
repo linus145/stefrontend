@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { ThemeToggle } from '@/components/dashboard/theme-toggle';
 import Link from 'next/link';
 
-export type HRSection = 'dashboard' | 'employees' | 'attendance' | 'leave' | 'payroll' | 'performance' | 'organization';
+export type HRSection = 'dashboard' | 'employees' | 'onboarding' | 'attendance' | 'leave' | 'payroll' | 'performance' | 'organization';
 
 interface HRHeaderProps {
   companyName: string;

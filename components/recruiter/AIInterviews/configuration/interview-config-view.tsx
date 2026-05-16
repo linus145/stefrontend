@@ -325,13 +325,13 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
   return (
     <div className="p-6 lg:p-12 max-w-7xl mx-auto">
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12 border-b border-border pb-10">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 border-b border-border pb-6">
         <div>
-          <h1 className="text-4xl font-bold tracking-tight">Configuration Workspace</h1>
-          <p className="text-sm font-medium text-blue-600 mt-2 opacity-80">Architect multi-round AI agents and security protocols</p>
+          <h1 className="text-xl font-bold tracking-tight">Configuration workspace</h1>
+          <p className="text-[11px] font-medium text-blue-600 mt-1 opacity-80">Architect multi-round AI agents & security</p>
         </div>
 
-        <div className="flex items-center gap-12">
+        <div className="flex items-center gap-8">
           {[
             { n: 1, label: 'Candidates' },
             { n: 2, label: 'Architecture' },
@@ -342,21 +342,21 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
               onClick={() => step > s.n && setStep(s.n)}
               disabled={step <= s.n && step !== s.n}
               className={cn(
-                "flex items-center gap-3 transition-all relative group",
+                "flex items-center gap-2.5 transition-all relative group",
                 step === s.n ? "opacity-100" : "opacity-40 hover:opacity-100"
               )}
             >
               <span className={cn(
-                "w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold border transition-all",
+                "w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold border transition-all",
                 step === s.n ? "bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-600/20" : "border-border"
               )}>
                 {s.n}
               </span>
-              <span className="text-[13px] font-semibold tracking-tight">{s.label}</span>
+              <span className="text-[11px] font-bold tracking-tight">{s.label}</span>
               {step === s.n && (
                 <motion.div
                   layoutId="activeStep"
-                  className="absolute -bottom-10 left-0 right-0 h-0.5 bg-blue-600"
+                  className="absolute -bottom-6 left-0 right-0 h-0.5 bg-blue-600"
                 />
               )}
             </button>
@@ -365,9 +365,9 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
 
         <button
           onClick={onBack}
-          className="px-6 py-2 rounded-sm border border-border text-xs font-semibold hover:bg-muted transition-all"
+          className="px-4 py-1.5 rounded-sm border border-border text-[10px] font-bold hover:bg-muted transition-all active:scale-95"
         >
-          Back to Pipeline
+          Back
         </button>
       </div>
 
@@ -391,25 +391,25 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                     ))
                   ) : filteredJobs.length > 0 ? (
                     filteredJobs.map((job: any) => (
-                      <button
-                        key={job.id}
-                        onClick={() => {
-                          setSelectedJobId(job.id);
-                          setSelectedApplicationIds([]);
-                        }}
-                        className={cn(
-                          "p-6 rounded-sm border text-left transition-all hover:shadow-lg relative overflow-hidden group",
-                          selectedJobId === job.id
-                            ? "bg-blue-600 border-blue-600 text-white shadow-xl shadow-blue-600/10"
-                            : "bg-card border-border hover:border-blue-600/30"
-                        )}
-                      >
-                        <div className="relative z-10">
-                          <p className={cn("text-[13px] font-bold truncate", selectedJobId === job.id ? "text-white" : "text-foreground")}>{job.title}</p>
-                          <p className={cn("text-[10px] mt-1 font-medium", selectedJobId === job.id ? "text-white/70" : "text-muted-foreground")}>{job.department || 'General'}</p>
-                        </div>
-                        {selectedJobId === job.id && <span className="text-[10px] font-bold border border-white/30 px-2 py-0.5 rounded-sm absolute top-3 right-3">Selected</span>}
-                      </button>
+                        <button
+                          key={job.id}
+                          onClick={() => {
+                            setSelectedJobId(job.id);
+                            setSelectedApplicationIds([]);
+                          }}
+                          className={cn(
+                            "p-4 rounded-sm border text-left transition-all hover:shadow-md relative overflow-hidden group",
+                            selectedJobId === job.id
+                              ? "bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-600/10"
+                              : "bg-card border-border hover:border-blue-600/30"
+                          )}
+                        >
+                          <div className="relative z-10">
+                            <p className={cn("text-[11px] font-bold truncate", selectedJobId === job.id ? "text-white" : "text-foreground")}>{job.title}</p>
+                            <p className={cn("text-[9px] mt-0.5 font-bold opacity-60", selectedJobId === job.id ? "text-white" : "text-muted-foreground")}>{job.department || 'General'}</p>
+                          </div>
+                          {selectedJobId === job.id && <span className="text-[8px] font-bold border border-white/30 px-1.5 py-0.5 rounded-sm absolute top-2 right-2">Selected</span>}
+                        </button>
                     ))
                   ) : (
                     <div className="text-center py-24 bg-muted/5 rounded-sm border border-dashed border-border flex flex-col items-center gap-6">
@@ -431,24 +431,24 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
               </div>
 
               {/* Selection Summary */}
-              <div className="bg-muted/10 border border-border rounded-sm p-8 space-y-8">
-                <h4 className="text-xs font-semibold text-muted-foreground opacity-70">Workspace Summary</h4>
-                <div className="space-y-6">
+              <div className="bg-muted/10 border border-border rounded-sm p-5 space-y-5">
+                <h4 className="text-[10px] font-bold text-muted-foreground opacity-70">Workspace summary</h4>
+                <div className="space-y-4">
                   <div className="flex items-center justify-between gap-4">
-                    <span className="text-xs font-medium opacity-50 shrink-0">Target Job</span>
-                    <span className="text-sm font-bold text-right" data-agent="target-job-title">{selectedJobId ? jobs.find(j => j.id === selectedJobId)?.title : 'Undefined'}</span>
+                    <span className="text-[10px] font-bold opacity-50 shrink-0">Target job</span>
+                    <span className="text-xs font-bold text-right truncate" data-agent="target-job-title">{selectedJobId ? jobs.find(j => j.id === selectedJobId)?.title : 'Undefined'}</span>
                   </div>
-                  <div className="flex items-center justify-between border-t border-border pt-6">
-                    <span className="text-xs font-medium opacity-50">Volume</span>
-                    <span className="text-sm font-bold">{selectedApplicationIds.length} Candidates</span>
+                  <div className="flex items-center justify-between border-t border-border pt-4">
+                    <span className="text-[10px] font-bold opacity-50">Volume</span>
+                    <span className="text-xs font-bold">{selectedApplicationIds.length} Candidates</span>
                   </div>
                   <button
                     disabled={!selectedJobId || selectedApplicationIds.length === 0}
                     onClick={() => setStep(2)}
                     data-agent="proceed-to-architecture-button"
-                    className="w-full mt-6 bg-blue-600 text-white py-4 rounded-sm font-bold text-sm hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-30 flex items-center justify-center"
+                    className="w-full mt-4 bg-blue-600 text-white py-3 rounded-sm font-bold text-xs hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-30 flex items-center justify-center shadow-lg shadow-blue-600/20"
                   >
-                    Proceed to Architecture
+                    Next step
                   </button>
                 </div>
               </div>
@@ -484,9 +484,9 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                         data-agent="candidate-card"
                         data-candidate-name={`${app.applicant.first_name} ${app.applicant.last_name}`}
                         className={cn(
-                          "relative group p-6 rounded-sm border cursor-pointer transition-all hover:shadow-lg",
+                          "relative group p-4 rounded-sm border cursor-pointer transition-all hover:shadow-md",
                           selectedApplicationIds.includes(app.id)
-                            ? "bg-blue-600 border-blue-600 text-white shadow-xl shadow-blue-600/10"
+                            ? "bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-600/10"
                             : "bg-card border-border hover:border-blue-600/30"
                         )}
                       >
@@ -503,32 +503,30 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                             }
                           }}
                         />
-                        <div className="space-y-4">
-                          <div className="flex items-start justify-between">
-                            <div className={cn(
-                              "w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold border transition-all",
-                              selectedApplicationIds.includes(app.id) ? "bg-white/20 border-white/40" : "bg-muted border-border"
-                            )}>
-                              {app.applicant.first_name[0]}{app.applicant.last_name[0]}
-                            </div>
-                            {selectedApplicationIds.includes(app.id) && (
-                              <div className="w-5 h-5 rounded-full bg-white flex items-center justify-center">
-                                <svg className="w-3 h-3 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" /></svg>
-                              </div>
-                            )}
+                        <div className="flex items-center gap-4">
+                          <div className={cn(
+                            "w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold border transition-all shrink-0",
+                            selectedApplicationIds.includes(app.id) ? "bg-white/20 border-white/40" : "bg-muted border-border"
+                          )}>
+                            {app.applicant.first_name[0]}{app.applicant.last_name[0]}
                           </div>
-                          <div>
-                            <p className="text-[13px] font-bold truncate">{app.applicant.first_name} {app.applicant.last_name}</p>
-                            <p className={cn("text-[10px] font-medium opacity-70 mt-1", selectedApplicationIds.includes(app.id) ? "text-white" : "text-muted-foreground")}>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-[12px] font-bold truncate">{app.applicant.first_name} {app.applicant.last_name}</p>
+                            <p className={cn("text-[9px] font-bold opacity-60 mt-0.5", selectedApplicationIds.includes(app.id) ? "text-white" : "text-muted-foreground")}>
                               {app.status || 'Applied'} • {new Date(app.created_at).toLocaleDateString()}
                             </p>
                           </div>
+                          {selectedApplicationIds.includes(app.id) && (
+                            <div className="w-4 h-4 rounded-full bg-white flex items-center justify-center shadow-sm">
+                              <svg className="w-2.5 h-2.5 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" /></svg>
+                            </div>
+                          )}
                         </div>
                       </label>
                     ))
                   ) : (
                     <div className="col-span-full py-24 bg-muted/5 border border-dashed border-border rounded-sm flex flex-col items-center justify-center opacity-40">
-                      <p className="text-[11px] font-bold tracking-widest uppercase">Awaiting Job Selection</p>
+                      <p className="text-[11px] font-bold opacity-40">Awaiting job selection</p>
                     </div>
                   )}
                 </div>
@@ -559,28 +557,28 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                     key={round.id}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="p-8 rounded-sm border border-border bg-card shadow-sm hover:border-blue-600/30 transition-all"
+                    className="p-5 rounded-sm border border-border bg-card shadow-sm hover:border-blue-600/30 transition-all"
                   >
-                    <div className="flex items-center justify-between mb-8">
-                      <span className="text-[10px] font-bold px-3 py-1 bg-blue-600 text-white rounded-sm">#{index + 1}</span>
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-[9px] font-bold px-2 py-0.5 bg-blue-600 text-white rounded-sm">Round #{index + 1}</span>
                       {rounds.length > 1 && (
                         <button
                           onClick={() => removeRound(round.id)}
-                          className="text-[10px] font-bold text-rose-500 hover:opacity-70 transition-opacity"
+                          className="text-[9px] font-bold text-rose-500 hover:opacity-70 transition-opacity"
                         >
-                          Delete
+                          Remove
                         </button>
                       )}
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                      <div className="md:col-span-2 space-y-2">
-                        <label className="text-[13px] font-semibold text-foreground">Round Designation (Name)</label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="md:col-span-2 space-y-1.5">
+                        <label className="text-[11px] font-bold text-muted-foreground">Round designation</label>
                         <select
                           value={round.title}
                           onChange={(e) => updateRound(round.id, { title: e.target.value })}
                           data-agent={`round-designation-select-${index}`}
-                          className="w-full bg-muted/10 border border-border rounded-sm py-3 px-4 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-blue-600 transition-all appearance-none"
+                          className="w-full bg-muted/10 border border-border rounded-sm py-2 px-3 text-[11px] font-bold focus:outline-none focus:ring-1 focus:ring-blue-600 transition-all appearance-none"
                         >
                           <option value="" disabled>Select Round Type</option>
                           {metadata.designations.map((r: any) => (

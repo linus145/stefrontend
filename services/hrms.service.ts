@@ -19,6 +19,9 @@ export const hrmsService = {
   createEmployee: (data: any): Promise<BaseAPIResponse<any>> => 
     api.post<any>('/employees/employees/', data).then(res => ({ status: 'success', message: '', data: res })),
     
+  addManualEmployee: (data: any): Promise<BaseAPIResponse<any>> => 
+    api.post<any>('/employees/employees/add-manual/', data).then(res => ({ status: 'success', message: '', data: res })),
+    
   updateEmployee: (id: string, data: any): Promise<BaseAPIResponse<any>> => 
     api.patch<any>(`/employees/employees/${id}/`, data).then(res => ({ status: 'success', message: '', data: res })),
 

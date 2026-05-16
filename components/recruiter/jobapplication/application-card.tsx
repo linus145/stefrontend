@@ -33,7 +33,7 @@ export function ApplicationCard({
       REVIEWED: 'bg-blue-500/10 text-blue-600 border-blue-500/20',
       SHORTLISTED: 'bg-cyan-500/10 text-cyan-600 border-cyan-500/20',
       INTERVIEW: 'bg-purple-500/10 text-purple-600 border-purple-500/20',
-      HIRED: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20',
+      ONBOARDED: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20',
       REJECTED: 'bg-red-500/10 text-red-500 border-red-500/20',
     };
     return map[status];
@@ -146,16 +146,6 @@ export function ApplicationCard({
               </button>
             </>
           )}
-          {app.status === 'SHORTLISTED' && (
-            <button 
-              onClick={(e) => { e.stopPropagation(); onUpdateStatus(app.id, 'HIRED'); }} 
-              data-agent="mark-hired"
-              className="p-2 rounded-sm bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 transition-all" 
-              title="Hire"
-            >
-              <CheckCircle className="w-4 h-4" />
-            </button>
-          )}
           <ChevronDown className={cn("w-4 h-4 text-muted-foreground transition-transform ml-2", isExpanded && "rotate-180")} />
         </div>
       </div>
@@ -170,7 +160,7 @@ export function ApplicationCard({
               <div>
                 <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-2">Change Status</h4>
                 <div className="flex flex-wrap gap-1.5">
-                  {(['PENDING', 'REVIEWED', 'SHORTLISTED', 'INTERVIEW', 'HIRED', 'REJECTED'] as ApplicationStatus[]).map(s => (
+                  {(['PENDING', 'REVIEWED', 'SHORTLISTED', 'INTERVIEW', 'REJECTED'] as ApplicationStatus[]).map(s => (
                     <button
                       key={s}
                       disabled={app.status === s || isUpdatePending}

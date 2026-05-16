@@ -125,17 +125,17 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
       <tr key={session.id} className="border-b border-border/50 last:border-0 group hover:bg-muted/5 transition-colors">
         {/* Candidate */}
         <td className="pl-6 pr-4 py-3">
-          <p className="text-xs font-bold truncate max-w-[200px]" data-agent="candidate-name">{session.candidate_name}</p>
-          <p className="text-[10px] text-muted-foreground mt-0.5">{new Date(session.created_at).toLocaleDateString()}</p>
+          <p className="text-[13px] font-bold truncate max-w-[200px]" data-agent="candidate-name">{session.candidate_name}</p>
+          <p className="text-[11px] text-muted-foreground mt-0.5">{new Date(session.created_at).toLocaleDateString()}</p>
         </td>
         {/* Role */}
         <td className="px-4 py-3">
-          <p className="text-xs font-semibold truncate max-w-[160px]">{session.job_title}</p>
+          <p className="text-[13px] font-semibold truncate max-w-[160px]">{session.job_title}</p>
         </td>
         {/* Status */}
         <td className="px-4 py-3">
           <span className={cn(
-            "inline-flex px-2 py-0.5 rounded-sm text-[9px] font-bold capitalize border whitespace-nowrap",
+            "inline-flex px-2 py-0.5 rounded-sm text-[10px] font-bold capitalize border whitespace-nowrap",
             getStatusStyle(session.status)
           )}>
             {session.status.toLowerCase().replace(/_/g, ' ')}
@@ -143,17 +143,17 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
         </td>
         {/* Rounds */}
         <td className="px-4 py-3 text-center">
-          <span className="text-xs font-bold">{session.rounds_count}</span>
+          <span className="text-[13px] font-bold">{session.rounds_count}</span>
         </td>
         {/* Exam Access */}
         <td className="px-4 py-3">
           {session.exam_credentials ? (
             <div className="flex items-center gap-3">
               <div className="min-w-0">
-                <p className="text-[10px] text-muted-foreground leading-relaxed">
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
                   <span className="font-mono font-bold text-foreground">{session.exam_credentials.username}</span>
                 </p>
-                <p className="text-[10px] text-muted-foreground leading-relaxed">
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
                   <span className="font-mono font-bold text-foreground">{session.exam_credentials.password}</span>
                 </p>
               </div>
@@ -164,11 +164,11 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
                   );
                   toast.success('Credentials copied');
                 }}
-                className="shrink-0 px-2 py-1 rounded-sm bg-blue-600/10 text-blue-600 text-[9px] font-bold hover:bg-blue-600 hover:text-white transition-all"
+                className="shrink-0 px-2 py-1 rounded-sm bg-blue-600/10 text-blue-600 text-[10px] font-bold hover:bg-blue-600 hover:text-white transition-all"
               >Copy</button>
             </div>
           ) : (
-            <span className="text-[10px] text-muted-foreground/40 italic">Not generated</span>
+            <span className="text-[11px] text-muted-foreground/40 italic">Not generated</span>
           )}
         </td>
         {/* Action */}
@@ -178,7 +178,7 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
               onClick={() => onConfigure(session.application_id, session.is_orchestrated ? session.id : undefined)}
               data-agent="configure-interview-button"
               className={cn(
-                "px-3 py-1.5 rounded-sm text-[10px] font-bold transition-all active:scale-95 whitespace-nowrap",
+                "px-3 py-1.5 rounded-sm text-[11px] font-bold transition-all active:scale-95 whitespace-nowrap",
                 !session.is_orchestrated
                   ? "bg-blue-600 text-white hover:bg-blue-700 shadow-sm"
                   : "border border-border hover:bg-blue-600 hover:text-white hover:border-blue-600"
@@ -242,7 +242,7 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
       {/* Header with Search & Filter */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h2 className="text-xl font-bold tracking-tight">Interview Pipeline</h2>
+          <h2 className="text-2xl font-bold tracking-tight">Interview Pipeline</h2>
         </div>
 
         <div className="flex flex-wrap items-center gap-4">
@@ -250,7 +250,7 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
             onClick={handleSync}
             disabled={isRefetching}
             data-agent="sync-pipeline-button"
-            className="flex items-center gap-2 px-4 py-2 rounded-sm border border-border bg-card text-xs font-bold hover:bg-muted transition-all active:scale-95"
+            className="flex items-center gap-2 px-4 py-2 rounded-sm border border-border bg-card text-[13px] font-bold hover:bg-muted transition-all active:scale-95"
           >
             <RefreshCw className={cn("w-3.5 h-3.5", isRefetching && "animate-spin")} />
             Sync Pipeline
@@ -264,7 +264,7 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               data-agent="pipeline-search-input"
-              className="w-full bg-background border border-border rounded-sm py-2 pl-9 pr-3 text-xs font-medium focus:outline-none focus:ring-1 focus:ring-blue-600/50 shadow-sm transition-all"
+              className="w-full bg-background border border-border rounded-sm py-2 pl-9 pr-3 text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-blue-600/50 shadow-sm transition-all"
             />
           </div>
 
@@ -274,7 +274,7 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
                 key={t}
                 onClick={() => setFilter(t)}
                 className={cn(
-                  "px-4 py-1.5 rounded-sm text-xs font-semibold capitalize transition-all",
+                  "px-4 py-1.5 rounded-sm text-[13px] font-semibold capitalize transition-all",
                   filter === t ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
                 )}
               >
@@ -292,8 +292,8 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
             <Users2 className="w-4 h-4" />
           </div>
           <div>
-            <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Total Sessions</p>
-            <h4 className="text-lg font-bold mt-0.5">{stats.total}</h4>
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Total Sessions</p>
+            <h4 className="text-xl font-bold mt-0.5">{stats.total}</h4>
           </div>
         </div>
         <div className="bg-card border border-border p-4 rounded-sm shadow-sm flex items-center gap-3">
@@ -301,8 +301,8 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
             <Timer className="w-4 h-4" />
           </div>
           <div>
-            <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Interviewing</p>
-            <h4 className="text-lg font-bold mt-0.5">{stats.active}</h4>
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Interviewing</p>
+            <h4 className="text-xl font-bold mt-0.5">{stats.active}</h4>
           </div>
         </div>
         <div className="bg-card border border-border p-4 rounded-sm shadow-sm flex items-center gap-3">
@@ -310,8 +310,8 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
             <BrainCircuit className="w-4 h-4" />
           </div>
           <div>
-            <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Evaluating</p>
-            <h4 className="text-lg font-bold mt-0.5">{stats.evaluating}</h4>
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Evaluating</p>
+            <h4 className="text-xl font-bold mt-0.5">{stats.evaluating}</h4>
           </div>
         </div>
         <div className="bg-card border border-border p-4 rounded-sm shadow-sm flex items-center gap-3">
@@ -319,8 +319,8 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
             <CheckCircle2 className="w-4 h-4" />
           </div>
           <div>
-            <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Completed</p>
-            <h4 className="text-lg font-bold mt-0.5">{stats.completed}</h4>
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Completed</p>
+            <h4 className="text-xl font-bold mt-0.5">{stats.completed}</h4>
           </div>
         </div>
       </div>
@@ -331,12 +331,12 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-muted/30 border-b border-border">
-                <th className="pl-6 pr-4 py-3.5 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-wider w-[25%]">Candidate</th>
-                <th className="px-4 py-3.5 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-wider w-[20%]">Role</th>
-                <th className="px-4 py-3.5 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-wider w-[10%]">Status</th>
-                <th className="px-4 py-3.5 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-wider w-[7%] text-center">Rounds</th>
-                <th className="px-4 py-3.5 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-wider w-[22%]">Exam Access</th>
-                <th className="pl-4 pr-6 py-3.5 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-wider w-[23%] text-right">Action</th>
+                <th className="pl-6 pr-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[25%]">Candidate</th>
+                <th className="px-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[20%]">Role</th>
+                <th className="px-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[10%]">Status</th>
+                <th className="px-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[7%] text-center">Rounds</th>
+                <th className="px-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[22%]">Exam Access</th>
+                <th className="pl-4 pr-6 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[23%] text-right">Action</th>
               </tr>
             </thead>
             <tbody>

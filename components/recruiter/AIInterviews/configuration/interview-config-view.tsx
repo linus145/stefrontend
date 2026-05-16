@@ -142,10 +142,10 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
               programming_language: rnd.programming_language || '',
               max_questions: rnd.max_questions || 5,
               timer_seconds: rnd.timer_seconds || 600,
-              questions: rnd.questions?.map((q: any) => ({ 
-                text: q.question_text || q.text || q, 
+              questions: rnd.questions?.map((q: any) => ({
+                text: q.question_text || q.text || q,
                 marks: q.marks || 10,
-                ideal_answer: q.ideal_answer 
+                ideal_answer: q.ideal_answer
               })) || [],
             })));
           }
@@ -225,7 +225,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
           attempts++;
           // Wait 2 seconds between polls
           await new Promise(resolve => setTimeout(resolve, 2000));
-          
+
           const statusResponse = await aiInterviewsService.checkTaskStatus(taskId);
           const taskData = statusResponse.data;
 
@@ -239,14 +239,14 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
             });
             toast.success(`AI generated ${taskData.questions.length} questions.`, { id: toastId });
             return;
-          } 
-          
+          }
+
           if (taskData?.status === 'FAILURE' || statusResponse.status === 'error') {
             toast.error(statusResponse.message || "AI failed to generate questions.", { id: toastId });
             return;
           }
         }
-        
+
         toast.error("Question generation timed out. Please try again.", { id: toastId });
       } else if (response.status === 'success' && response.data?.questions?.length > 0) {
         // Fallback for synchronous response
@@ -327,8 +327,8 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 border-b border-border pb-6">
         <div>
-          <h1 className="text-xl font-bold tracking-tight">Configuration workspace</h1>
-          <p className="text-[11px] font-medium text-blue-600 mt-1 opacity-80">Architect multi-round AI agents & security</p>
+          <h1 className="text-2xl font-bold tracking-tight">Configuration workspace</h1>
+          <p className="text-[12px] font-medium text-blue-600 mt-1 opacity-80">Architect multi-round AI agents & security</p>
         </div>
 
         <div className="flex items-center gap-8">
@@ -347,12 +347,12 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
               )}
             >
               <span className={cn(
-                "w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold border transition-all",
+                "w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold border transition-all",
                 step === s.n ? "bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-600/20" : "border-border"
               )}>
                 {s.n}
               </span>
-              <span className="text-[11px] font-bold tracking-tight">{s.label}</span>
+              <span className="text-[13px] font-bold tracking-tight">{s.label}</span>
               {step === s.n && (
                 <motion.div
                   layoutId="activeStep"
@@ -383,7 +383,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
             {/* Left: Job Selection */}
             <div className="lg:col-span-5 space-y-8">
               <div className="space-y-4">
-                <h3 className="text-sm font-bold">Targeted Position</h3>
+                <h3 className="text-base font-bold">Targeted Position</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {(jobsLoading || sessionsLoading) ? (
                     Array.from({ length: 3 }).map((_, i) => (
@@ -391,25 +391,25 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                     ))
                   ) : filteredJobs.length > 0 ? (
                     filteredJobs.map((job: any) => (
-                        <button
-                          key={job.id}
-                          onClick={() => {
-                            setSelectedJobId(job.id);
-                            setSelectedApplicationIds([]);
-                          }}
-                          className={cn(
-                            "p-4 rounded-sm border text-left transition-all hover:shadow-md relative overflow-hidden group",
-                            selectedJobId === job.id
-                              ? "bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-600/10"
-                              : "bg-card border-border hover:border-blue-600/30"
-                          )}
-                        >
-                          <div className="relative z-10">
-                            <p className={cn("text-[11px] font-bold truncate", selectedJobId === job.id ? "text-white" : "text-foreground")}>{job.title}</p>
-                            <p className={cn("text-[9px] mt-0.5 font-bold opacity-60", selectedJobId === job.id ? "text-white" : "text-muted-foreground")}>{job.department || 'General'}</p>
-                          </div>
-                          {selectedJobId === job.id && <span className="text-[8px] font-bold border border-white/30 px-1.5 py-0.5 rounded-sm absolute top-2 right-2">Selected</span>}
-                        </button>
+                      <button
+                        key={job.id}
+                        onClick={() => {
+                          setSelectedJobId(job.id);
+                          setSelectedApplicationIds([]);
+                        }}
+                        className={cn(
+                          "p-5 rounded-sm border text-left transition-all hover:shadow-md relative overflow-hidden group",
+                          selectedJobId === job.id
+                            ? "bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-600/10"
+                            : "bg-card border-border hover:border-blue-600/30"
+                        )}
+                      >
+                        <div className="relative z-10">
+                          <p className={cn("text-[13px] font-bold truncate", selectedJobId === job.id ? "text-white" : "text-foreground")}>{job.title}</p>
+                          <p className={cn("text-[11px] mt-1 font-bold opacity-60", selectedJobId === job.id ? "text-white" : "text-muted-foreground")}>{job.department || 'General'}</p>
+                        </div>
+                        {selectedJobId === job.id && <span className="text-[10px] font-bold border border-white/30 px-2 py-1 rounded-sm absolute top-3 right-3">Selected</span>}
+                      </button>
                     ))
                   ) : (
                     <div className="text-center py-24 bg-muted/5 rounded-sm border border-dashed border-border flex flex-col items-center gap-6">
@@ -431,22 +431,22 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
               </div>
 
               {/* Selection Summary */}
-              <div className="bg-muted/10 border border-border rounded-sm p-5 space-y-5">
-                <h4 className="text-[10px] font-bold text-muted-foreground opacity-70">Workspace summary</h4>
-                <div className="space-y-4">
+              <div className="bg-muted/10 border border-border rounded-sm p-6 space-y-6">
+                <h4 className="text-[12px] font-bold text-muted-foreground opacity-70">Workspace summary</h4>
+                <div className="space-y-5">
                   <div className="flex items-center justify-between gap-4">
-                    <span className="text-[10px] font-bold opacity-50 shrink-0">Target job</span>
-                    <span className="text-xs font-bold text-right truncate" data-agent="target-job-title">{selectedJobId ? jobs.find(j => j.id === selectedJobId)?.title : 'Undefined'}</span>
+                    <span className="text-[12px] font-bold opacity-50 shrink-0">Target job</span>
+                    <span className="text-[14px] font-bold text-right truncate" data-agent="target-job-title">{selectedJobId ? jobs.find(j => j.id === selectedJobId)?.title : 'Undefined'}</span>
                   </div>
-                  <div className="flex items-center justify-between border-t border-border pt-4">
-                    <span className="text-[10px] font-bold opacity-50">Volume</span>
-                    <span className="text-xs font-bold">{selectedApplicationIds.length} Candidates</span>
+                  <div className="flex items-center justify-between border-t border-border pt-5">
+                    <span className="text-[12px] font-bold opacity-50">Volume</span>
+                    <span className="text-[14px] font-bold">{selectedApplicationIds.length} Candidates</span>
                   </div>
                   <button
                     disabled={!selectedJobId || selectedApplicationIds.length === 0}
                     onClick={() => setStep(2)}
                     data-agent="proceed-to-architecture-button"
-                    className="w-full mt-4 bg-blue-600 text-white py-3 rounded-sm font-bold text-xs hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-30 flex items-center justify-center shadow-lg shadow-blue-600/20"
+                    className="w-full mt-6 bg-blue-600 text-white py-4 rounded-sm font-bold text-[13px] hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-30 flex items-center justify-center shadow-lg shadow-blue-600/20"
                   >
                     Next step
                   </button>
@@ -457,7 +457,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
             {/* Right: Candidate Grid */}
             <div className="lg:col-span-7 space-y-8">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-bold">Candidate Pipeline</h3>
+                <h3 className="text-base font-bold">Candidate Pipeline</h3>
                 {selectedJobId && applications.length > 0 && (
                   <button
                     onClick={() => {
@@ -484,7 +484,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                         data-agent="candidate-card"
                         data-candidate-name={`${app.applicant.first_name} ${app.applicant.last_name}`}
                         className={cn(
-                          "relative group p-4 rounded-sm border cursor-pointer transition-all hover:shadow-md",
+                          "relative group p-5 rounded-sm border cursor-pointer transition-all hover:shadow-md",
                           selectedApplicationIds.includes(app.id)
                             ? "bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-600/10"
                             : "bg-card border-border hover:border-blue-600/30"
@@ -503,22 +503,22 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                             }
                           }}
                         />
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-5">
                           <div className={cn(
-                            "w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold border transition-all shrink-0",
+                            "w-10 h-10 rounded-full flex items-center justify-center text-[12px] font-bold border transition-all shrink-0",
                             selectedApplicationIds.includes(app.id) ? "bg-white/20 border-white/40" : "bg-muted border-border"
                           )}>
                             {app.applicant.first_name[0]}{app.applicant.last_name[0]}
                           </div>
                           <div className="min-w-0 flex-1">
-                            <p className="text-[12px] font-bold truncate">{app.applicant.first_name} {app.applicant.last_name}</p>
-                            <p className={cn("text-[9px] font-bold opacity-60 mt-0.5", selectedApplicationIds.includes(app.id) ? "text-white" : "text-muted-foreground")}>
+                            <p className="text-[14px] font-bold truncate">{app.applicant.first_name} {app.applicant.last_name}</p>
+                            <p className={cn("text-[11px] font-bold opacity-60 mt-1", selectedApplicationIds.includes(app.id) ? "text-white" : "text-muted-foreground")}>
                               {app.status || 'Applied'} • {new Date(app.created_at).toLocaleDateString()}
                             </p>
                           </div>
                           {selectedApplicationIds.includes(app.id) && (
-                            <div className="w-4 h-4 rounded-full bg-white flex items-center justify-center shadow-sm">
-                              <svg className="w-2.5 h-2.5 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" /></svg>
+                            <div className="w-5 h-5 rounded-full bg-white flex items-center justify-center shadow-sm">
+                              <svg className="w-3 h-3 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" /></svg>
                             </div>
                           )}
                         </div>
@@ -541,7 +541,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
             {/* Left: Configuration Form */}
             <div className="flex-1 min-w-0 space-y-8">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-xs font-semibold text-muted-foreground opacity-70">Architecture</h3>
+                <h3 className="text-sm font-bold text-muted-foreground opacity-70">Architecture</h3>
                 <button
                   onClick={addRound}
                   data-agent="add-round-button"
@@ -560,11 +560,11 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                     className="p-5 rounded-sm border border-border bg-card shadow-sm hover:border-blue-600/30 transition-all"
                   >
                     <div className="flex items-center justify-between mb-4">
-                      <span className="text-[9px] font-bold px-2 py-0.5 bg-blue-600 text-white rounded-sm">Round #{index + 1}</span>
+                      <span className="text-[11px] font-bold px-2 py-0.5 bg-blue-600 text-white rounded-sm">Round #{index + 1}</span>
                       {rounds.length > 1 && (
                         <button
                           onClick={() => removeRound(round.id)}
-                          className="text-[9px] font-bold text-rose-500 hover:opacity-70 transition-opacity"
+                          className="text-[11px] font-bold text-rose-500 hover:opacity-70 transition-opacity"
                         >
                           Remove
                         </button>
@@ -573,7 +573,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="md:col-span-2 space-y-1.5">
-                        <label className="text-[11px] font-bold text-muted-foreground">Round designation</label>
+                        <label className="text-[13px] font-bold text-muted-foreground">Round designation</label>
                         <select
                           value={round.title}
                           onChange={(e) => updateRound(round.id, { title: e.target.value })}
@@ -789,14 +789,14 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
             <div className="hidden lg:block w-[340px] shrink-0 sticky top-24 self-start">
               <div className="bg-card border border-border rounded-sm p-8 shadow-sm space-y-10">
                 <div>
-                  <h3 className="text-xs font-semibold text-muted-foreground opacity-70 mb-6">Dispatch Protocol</h3>
+                  <h3 className="text-sm font-bold text-muted-foreground opacity-70 mb-6 uppercase tracking-wider">Dispatch Protocol</h3>
                   <div className="space-y-6">
                     <div className="flex items-center justify-between gap-4">
-                      <span className="text-[10px] font-bold opacity-50 shrink-0">Target Job</span>
+                      <span className="text-[11px] font-bold opacity-50 shrink-0">Target Job</span>
                       <span className="text-sm font-bold text-right">{jobs.find(j => j.id === selectedJobId)?.title}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold opacity-50">Candidates</span>
+                      <span className="text-[11px] font-bold opacity-50">Candidates</span>
                       <span className="text-sm font-bold">{selectedApplicationIds.length} Targets</span>
                     </div>
 
@@ -817,11 +817,11 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                     </div>
 
                     <div className="flex items-center justify-between border-t border-border pt-6">
-                      <span className="text-[10px] font-bold opacity-50">Total Duration</span>
+                      <span className="text-[11px] font-bold opacity-50">Total Duration</span>
                       <span className="text-sm font-bold">{Math.floor(rounds.reduce((acc, r) => acc + r.timer_seconds, 0) / 60)} Min</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold opacity-50">Total Potential Score</span>
+                      <span className="text-[11px] font-bold opacity-50">Total Potential Score</span>
                       <span className="text-sm font-bold text-blue-600">
                         {rounds.reduce((totalAcc, r) => totalAcc + (r.questions?.reduce((acc, q: any) => acc + (typeof q === 'string' ? 10 : (q.marks || 0)), 0) || 0), 0)} Marks
                       </span>

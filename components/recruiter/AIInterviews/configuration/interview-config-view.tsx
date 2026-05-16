@@ -216,7 +216,40 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
         count: round.max_questions
       });
 
-      if (response.status === 'success' && response.data?.questions?.length > 0) {
+      if (response.status === 'success' && response.data?.task_id) {
+        const taskId = response.data.task_id;
+        let attempts = 0;
+        const maxAttempts = 30; // Max 60 seconds polling
+
+        while (attempts < maxAttempts) {
+          attempts++;
+          // Wait 2 seconds between polls
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          
+          const statusResponse = await aiInterviewsService.checkTaskStatus(taskId);
+          const taskData = statusResponse.data;
+
+          if (taskData?.status === 'SUCCESS' && taskData?.questions?.length > 0) {
+            updateRound(roundId, {
+              questions: taskData.questions.map((q: any) => ({
+                text: typeof q === 'object' ? q.question : q,
+                ideal_answer: typeof q === 'object' ? q.ideal_answer : undefined,
+                marks: 10
+              }))
+            });
+            toast.success(`AI generated ${taskData.questions.length} questions.`, { id: toastId });
+            return;
+          } 
+          
+          if (taskData?.status === 'FAILURE' || statusResponse.status === 'error') {
+            toast.error(statusResponse.message || "AI failed to generate questions.", { id: toastId });
+            return;
+          }
+        }
+        
+        toast.error("Question generation timed out. Please try again.", { id: toastId });
+      } else if (response.status === 'success' && response.data?.questions?.length > 0) {
+        // Fallback for synchronous response
         updateRound(roundId, {
           questions: response.data.questions.map((q: any) => ({
             text: typeof q === 'object' ? q.question : q,

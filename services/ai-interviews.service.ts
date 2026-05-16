@@ -33,7 +33,6 @@ export const aiInterviewsService = {
     return api.post<any>(`/AIrounds/session/${sessionId}/report/`);
   },
 
-  // Generate a pool of questions for configuration
   generateQuestions: async (data: { 
     application_id: string; 
     type: string; 
@@ -45,6 +44,11 @@ export const aiInterviewsService = {
     count: number 
   }) => {
     return api.post<any>('/AIrounds/generate-questions/', data);
+  },
+
+  // Check status of a question generation task
+  checkTaskStatus: async (taskId: string) => {
+    return api.get<any>(`/AIrounds/task-status/${taskId}/`);
   },
 
   // Get specific session details

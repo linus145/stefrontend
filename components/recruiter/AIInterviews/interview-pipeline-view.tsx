@@ -15,7 +15,8 @@ import {
   CheckCircle2,
   Timer,
   CalendarDays,
-  Trash2
+  Trash2,
+  Copy
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';

@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import { aiInterviewsService } from '@/services/ai-interviews.service';
 import { jobsService } from '@/services/jobs.service';
 import { useQuery } from '@tanstack/react-query';
-import { Sparkles, BrainCircuit } from 'lucide-react';
+import { Sparkles, BrainCircuit, Copy } from 'lucide-react';
 
 type RoundType = 'TECHNICAL' | 'CODING' | 'HR' | 'BEHAVIORAL' | 'SYSTEM_DESIGN';
 
@@ -916,24 +916,37 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                       <div className="bg-amber-500/5 border border-amber-500/10 rounded-sm px-4 py-3">
                         <p className="text-[10px] font-bold text-amber-600 mb-2">Exam Credentials</p>
                         <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <p className="text-[9px] text-muted-foreground uppercase tracking-wider">Username</p>
-                            <p className="text-xs font-mono font-bold mt-0.5">{result.examCredentials.username}</p>
+                          <div className="flex items-center justify-between group/cred bg-black/5 p-2 rounded-sm border border-amber-600/10">
+                            <div>
+                              <p className="text-[9px] text-muted-foreground uppercase tracking-wider">Username</p>
+                              <p className="text-xs font-mono font-bold mt-0.5">{result.examCredentials.username}</p>
+                            </div>
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText(result.examCredentials.username);
+                                toast.success('Username copied');
+                              }}
+                              className="p-1.5 rounded-sm hover:bg-amber-600/10 text-amber-600 transition-all"
+                            >
+                              <Copy size={12} />
+                            </button>
                           </div>
-                          <div>
-                            <p className="text-[9px] text-muted-foreground uppercase tracking-wider">Password</p>
-                            <p className="text-xs font-mono font-bold mt-0.5">{result.examCredentials.password}</p>
+                          <div className="flex items-center justify-between group/cred bg-black/5 p-2 rounded-sm border border-amber-600/10">
+                            <div>
+                              <p className="text-[9px] text-muted-foreground uppercase tracking-wider">Password</p>
+                              <p className="text-xs font-mono font-bold mt-0.5">{result.examCredentials.password}</p>
+                            </div>
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText(result.examCredentials.password);
+                                toast.success('Password copied');
+                              }}
+                              className="p-1.5 rounded-sm hover:bg-amber-600/10 text-amber-600 transition-all"
+                            >
+                              <Copy size={12} />
+                            </button>
                           </div>
                         </div>
-                        <button
-                          onClick={() => {
-                            navigator.clipboard.writeText(`Username: ${result.examCredentials.username}\nPassword: ${result.examCredentials.password}\nExam Portal: ${window.location.origin}/interview/exam`);
-                            toast.success('Credentials copied');
-                          }}
-                          className="mt-2 w-full px-4 py-1.5 rounded-sm bg-amber-600 text-white text-[10px] font-bold hover:bg-amber-700 transition-all active:scale-95"
-                        >
-                          Copy All Credentials
-                        </button>
                       </div>
                     )}
                   </div>

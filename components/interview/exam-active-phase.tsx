@@ -3,7 +3,9 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Toaster } from 'sonner';
+import { ShieldAlertIcon } from 'lucide-react';
 import { ExamData } from '@/types/exam-types';
+import { SurveillanceOverlay } from './proctoring/surveillance-overlay';
 
 interface ExamActivePhaseProps {
   examData: ExamData | null;
@@ -19,12 +21,14 @@ interface ExamActivePhaseProps {
   handleCompleteExam: () => void;
   answeredQuestions: number;
   totalQuestions: number;
+  logViolation: (type: string, metadata: any, severity: 'LOW' | 'MEDIUM' | 'HIGH') => void;
 }
 
 export function ExamActivePhase({
   examData, answers, setAnswers, activeRoundIndex, setActiveRoundIndex,
   activeQuestionIndex, setActiveQuestionIndex, submitting, isCompleting,
-  handleSubmitAnswer, handleCompleteExam, answeredQuestions, totalQuestions
+  handleSubmitAnswer, handleCompleteExam, answeredQuestions, totalQuestions,
+  logViolation
 }: ExamActivePhaseProps) {
   const [showConfirmModal, setShowConfirmModal] = React.useState(false);
 
@@ -279,6 +283,27 @@ export function ExamActivePhase({
           </div>
         )}
       </AnimatePresence>
+
+      {/* AI Surveillance Overlay */}
+      <SurveillanceOverlay 
+        isActive={true} 
+        onViolation={logViolation} 
+      />
+
+      {/* CSS Security & Privacy Shield */}
+      <style jsx global>{`
+        body {
+          user-select: none;
+          -webkit-user-select: none;
+          -moz-user-select: none;
+          -ms-user-select: none;
+        }
+        
+        @media print {
+          body { display: none; }
+        }
+      `}</style>
+
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { ExamData } from '@/types/exam-types';
 import { ExamLoginPhase } from '@/components/interview/exam-login-phase';
 import { ExamCompletedPhase } from '@/components/interview/exam-completed-phase';
 import { ExamActivePhase } from '@/components/interview/exam-active-phase';
+import { useProctoring } from '@/hooks/use-proctoring';
 
 // Standalone axios for candidate exam — NO JWT auth, NO token refresh
 const examApi = axios.create({
@@ -25,6 +26,14 @@ export function CandidateExamWrapper() {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState<string | null>(null);
   const [isCompleting, setIsCompleting] = useState(false);
+
+  // Activate AI Surveillance when in the exam phase
+  const { logViolation } = useProctoring({
+    sessionId: examData?.session_id || '',
+    enableTabLock: phase === 'exam',
+    enableFullscreen: phase === 'exam',
+    enableCamera: phase === 'exam'
+  });
 
   const handleLogin = async () => {
     if (!username.trim() || !password.trim()) {
@@ -157,6 +166,7 @@ export function CandidateExamWrapper() {
       handleCompleteExam={handleCompleteExam}
       answeredQuestions={answeredQuestions}
       totalQuestions={totalQuestions}
+      logViolation={logViolation}
     />
   );
 }

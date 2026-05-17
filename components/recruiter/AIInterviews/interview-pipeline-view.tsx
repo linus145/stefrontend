@@ -148,24 +148,37 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
         {/* Exam Access */}
         <td className="px-4 py-3">
           {session.exam_credentials ? (
-            <div className="flex items-center gap-3">
-              <div className="min-w-0">
-                <p className="text-[11px] text-muted-foreground leading-relaxed">
-                  <span className="font-mono font-bold text-foreground">{session.exam_credentials.username}</span>
-                </p>
-                <p className="text-[11px] text-muted-foreground leading-relaxed">
-                  <span className="font-mono font-bold text-foreground">{session.exam_credentials.password}</span>
-                </p>
+            <div className="flex flex-col gap-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-[11px] font-bold text-foreground leading-relaxed">
+                  {session.exam_credentials.username}
+                </span>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(session.exam_credentials!.username);
+                    toast.success('Username copied');
+                  }}
+                  className="p-0.5 rounded-sm text-muted-foreground/40 hover:text-blue-500 hover:bg-blue-500/10 transition-all hover:scale-105 active:scale-95 shrink-0"
+                  title="Copy Username"
+                >
+                  <Copy className="w-3 h-3" />
+                </button>
               </div>
-              <button
-                onClick={() => {
-                  navigator.clipboard.writeText(
-                    `Username: ${session.exam_credentials!.username}\nPassword: ${session.exam_credentials!.password}\nExam Portal: ${window.location.origin}/interview/exam`
-                  );
-                  toast.success('Credentials copied');
-                }}
-                className="shrink-0 px-2 py-1 rounded-sm bg-blue-600/10 text-blue-600 text-[10px] font-bold hover:bg-blue-600 hover:text-white transition-all"
-              >Copy</button>
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-[11px] font-bold text-foreground leading-relaxed">
+                  {session.exam_credentials.password}
+                </span>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(session.exam_credentials!.password);
+                    toast.success('Password copied');
+                  }}
+                  className="p-0.5 rounded-sm text-muted-foreground/40 hover:text-blue-500 hover:bg-blue-500/10 transition-all hover:scale-105 active:scale-95 shrink-0"
+                  title="Copy Password"
+                >
+                  <Copy className="w-3 h-3" />
+                </button>
+              </div>
             </div>
           ) : (
             <span className="text-[11px] text-muted-foreground/40 italic">Not generated</span>

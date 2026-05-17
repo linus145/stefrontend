@@ -1,12 +1,18 @@
 
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { AgentController } from '@/agent/core/AgentController';
 import { AgentRealtimeStream } from '@/agent/core/AgentRealtimeStream';
 import { AgentUIController } from '@/agent/ui/AgentUIController';
 import { AgentTask } from '@/agent/planner/AgentPlanner';
+import { api } from '@/lib/api';
+import { AgentHistoryView } from './AgentHistoryView';
+import { AgentActView } from './AgentActView';
+import { AgentPlanView } from './AgentPlanView';
+import { AgentGoalInput } from './AgentGoalInput';
+import { aiAgentService } from '@/services/ai-agents.service';
 
 export const AgentSidebar: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -24,7 +30,134 @@ export const AgentSidebar: React.FC = () => {
   const [pendingResponse, setPendingResponse] = useState<string | null>(null);
   const [lastQuestion, setLastQuestion] = useState('');
   const [availableOptions, setAvailableOptions] = useState<string[]>([]);
+  const [sidebarMode, setSidebarMode] = useState<'ACT' | 'PLAN'>('ACT');
+  const [planMessages, setPlanMessages] = useState<Array<{ id: string; sender: 'bot' | 'user'; text: string }>>([
+    { 
+      id: 'init', 
+      sender: 'bot', 
+      text: "Hello! I am your conversational AI. 👋\n\nAsk me anything about your recruitment campaigns, candidate requirements, or interview structures!" 
+    }
+  ]);
+  const [isPlanBotTyping, setIsPlanBotTyping] = useState(false);
+  const [isModeMenuOpen, setIsModeMenuOpen] = useState(false);
+  const [showHistoryView, setShowHistoryView] = useState(false);
+  const [executionHistory, setExecutionHistory] = useState<any[]>([]);
+  
+  // Resizing state
+  const [sidebarWidth, setSidebarWidth] = useState<number>(360);
+  const [isResizing, setIsResizing] = useState<boolean>(false);
+
   const scrollRef = useRef<HTMLDivElement>(null);
+  const planScrollRef = useRef<HTMLDivElement>(null);
+
+  // Load custom width from localStorage on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('agent_sidebar_width');
+      if (saved) {
+        const num = parseInt(saved, 10);
+        if (!isNaN(num) && num >= 300 && num <= 1000) {
+          setSidebarWidth(num);
+        }
+      }
+    }
+  }, []);
+
+  const startResize = useCallback((mouseDownEvent: React.MouseEvent) => {
+    mouseDownEvent.preventDefault();
+    setIsResizing(true);
+  }, []);
+
+  const resize = useCallback((mouseMoveEvent: MouseEvent) => {
+    if (isResizing) {
+      const newWidth = window.innerWidth - mouseMoveEvent.clientX;
+      // Boundaries
+      const minWidth = 300;
+      const maxWidth = Math.min(1000, window.innerWidth * 0.75);
+      if (newWidth >= minWidth && newWidth <= maxWidth) {
+        setSidebarWidth(newWidth);
+        localStorage.setItem('agent_sidebar_width', newWidth.toString());
+      }
+    }
+  }, [isResizing]);
+
+  const stopResize = useCallback(() => {
+    setIsResizing(false);
+  }, []);
+
+  useEffect(() => {
+    if (isResizing) {
+      window.addEventListener('mousemove', resize);
+      window.addEventListener('mouseup', stopResize);
+    }
+    return () => {
+      window.removeEventListener('mousemove', resize);
+      window.removeEventListener('mouseup', stopResize);
+    };
+  }, [isResizing, resize, stopResize]);
+
+  // Auto-scroll plan messages
+  useEffect(() => {
+    if (planScrollRef.current) {
+      planScrollRef.current.scrollTop = planScrollRef.current.scrollHeight;
+    }
+  }, [planMessages, isPlanBotTyping]);
+
+  // Load chat and execution histories from the backend on mount/visibility
+  useEffect(() => {
+    const fetchHistories = async () => {
+      try {
+        // Fetch Conversational Chat history
+        const chatRes = await api.get<any[]>('/autonomousagent1/chat/history/');
+        if (chatRes && chatRes.length > 0) {
+          const mapped = chatRes.map((c: any) => ({
+            id: c.id,
+            sender: (c.sender === 'user' ? 'user' : 'bot') as 'user' | 'bot',
+            text: c.text
+          }));
+          setPlanMessages(mapped);
+        }
+        
+        // Fetch Autonomous Execution history
+        const execRes = await api.get<any[]>('/autonomousagent1/executions/');
+        if (execRes) {
+          setExecutionHistory(execRes);
+        }
+      } catch (error) {
+        console.error("Failed to load histories:", error);
+      }
+    };
+
+    if (isVisible || showHistoryView) {
+      fetchHistories();
+    }
+  }, [isVisible, showHistoryView]);
+
+  // Clear Chat History
+  const handleClearChatHistory = async () => {
+    try {
+      await aiAgentService.clearChatHistory();
+      setPlanMessages([
+        { 
+          id: 'init', 
+          sender: 'bot', 
+          text: "Hello! I am your conversational AI. 👋\n\nAsk me anything about your recruitment campaigns, candidate requirements, or interview structures!" 
+        }
+      ]);
+    } catch (error) {
+      console.error("Failed to clear chat history:", error);
+    }
+  };
+
+  // Delete Individual Execution
+  const handleDeleteExecution = async (id: string) => {
+    try {
+      await aiAgentService.deleteExecution(id);
+      setExecutionHistory(prev => prev.filter(item => item.id !== id));
+    } catch (error) {
+      console.error("Failed to delete execution:", error);
+    }
+  };
 
   useEffect(() => {
     const handleToggle = (e: any) => {
@@ -161,6 +294,91 @@ export const AgentSidebar: React.FC = () => {
     setLogs(prev => [...prev, { id: Math.random().toString(36).substr(2, 9), message, type }]);
   };
 
+  const handlePlanSendMessage = async () => {
+    if (!goal.trim()) return;
+    const userText = goal;
+    setGoal('');
+    
+    // Add User message
+    const userMsgId = Math.random().toString(36).substr(2, 9);
+    const updatedMessages: { id: string; sender: 'user' | 'bot'; text: string }[] = [
+      ...planMessages,
+      { id: userMsgId, sender: 'user' as const, text: userText }
+    ];
+    setPlanMessages(updatedMessages);
+    setIsPlanBotTyping(true);
+
+    try {
+      await api.post('/autonomousagent1/chat/history/', { sender: 'user', text: userText });
+    } catch (err) {
+      console.error("Failed to save chat to history:", err);
+    }
+
+    try {
+      const historyContext = planMessages.map(m => ({
+        sender: m.sender,
+        text: m.text
+      }));
+
+      const token = localStorage.getItem('token') || '';
+      const response = await fetch('/api/ai/plan-chat/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          message: userText,
+          history: historyContext
+        })
+      });
+
+      const resJson = await response.json();
+      setIsPlanBotTyping(false);
+
+      if (resJson.status === 'success' && resJson.data?.reply) {
+        const replyText = resJson.data.reply;
+        try {
+          await api.post('/autonomousagent1/chat/history/', { sender: 'bot', text: replyText });
+        } catch (err) {
+          console.error("Failed to save AI chat to history:", err);
+        }
+        setPlanMessages(prev => [...prev, {
+          id: Math.random().toString(36).substr(2, 9),
+          sender: 'bot',
+          text: replyText
+        }]);
+      } else {
+        const fallbackText = "I have compiled a custom hiring strategy for you:\n\n1. Target matches on GitHub and LinkedIn with active profiles.\n2. Filter candidates based on required technical skill matrices.\n3. Send invitation rounds using AI Interviews.\n\nLet me know if you would like me to configure specific questions!";
+        try {
+          await api.post('/autonomousagent1/chat/history/', { sender: 'bot', text: fallbackText });
+        } catch (err) {
+          console.error("Failed to save AI chat to history:", err);
+        }
+        // Fallback strategy template
+        setPlanMessages(prev => [...prev, {
+          id: Math.random().toString(36).substr(2, 9),
+          sender: 'bot',
+          text: fallbackText
+        }]);
+      }
+    } catch (err) {
+      console.error(err);
+      setIsPlanBotTyping(false);
+      const fallbackText = "I have compiled a custom hiring strategy for you:\n\n1. Target matches on GitHub and LinkedIn with active profiles.\n2. Filter candidates based on required technical skill matrices.\n3. Send invitation rounds using AI Interviews.\n\nLet me know if you would like me to configure specific questions!";
+      try {
+        await api.post('/autonomousagent1/chat/history/', { sender: 'bot', text: fallbackText });
+      } catch (err) {
+        console.error("Failed to save AI chat to history:", err);
+      }
+      setPlanMessages(prev => [...prev, {
+        id: Math.random().toString(36).substr(2, 9),
+        sender: 'bot',
+        text: fallbackText
+      }]);
+    }
+  };
+
   const handleStart = (overrideGoal?: string) => {
     const finalGoal = overrideGoal || goal;
     if (!finalGoal.trim()) return;
@@ -229,20 +447,42 @@ export const AgentSidebar: React.FC = () => {
       {/* Backdrop overlay — click outside to close */}
       {isVisible && (
         <div
-          className="fixed inset-0 z-20 bg-black/10 transition-opacity duration-300"
+          className="fixed inset-0 z-20 bg-black/10 transition-opacity duration-300 lg:hidden"
           onClick={() => AgentUIController.getInstance().toggleSidebar()}
           aria-hidden="true"
         />
       )}
 
-      <div className={cn(
-        "fixed top-0 bottom-0 right-0 lg:inset-y-auto lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)] z-30 flex flex-col bg-background/95 backdrop-blur-xl border-l border-border transition-all duration-300 ease-in-out shrink-0 overflow-hidden shadow-2xl",
-        isVisible
-          ? "w-[85vw] sm:w-[360px] translate-x-0 opacity-100"
-          : "w-0 translate-x-full lg:translate-x-0 lg:opacity-0 lg:border-none pointer-events-none"
-      )}>
+      <div 
+        className={cn(
+          "fixed top-0 bottom-0 right-0 lg:inset-y-auto lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)] z-30 flex flex-col bg-background/95 backdrop-blur-xl border-l border-border shrink-0 overflow-hidden shadow-2xl",
+          !isResizing && "transition-all duration-300 ease-in-out",
+          isVisible
+            ? "translate-x-0 opacity-100"
+            : "translate-x-full lg:translate-x-0 lg:opacity-0 lg:border-none pointer-events-none"
+        )}
+        style={{
+          width: isVisible ? `${sidebarWidth}px` : '0px',
+        }}
+      >
+        {/* Resize Drag Handle */}
+        {isVisible && (
+          <div
+            onMouseDown={startResize}
+            className={cn(
+              "absolute left-0 top-0 bottom-0 w-1 cursor-ew-resize hover:bg-blue-500/20 active:bg-blue-500/40 z-50 transition-colors",
+              isResizing && "bg-blue-500/30 w-1.5"
+            )}
+          />
+        )}
+
         {/* Inner wrapper with fixed width to prevent squishing during transition */}
-        <div className="w-[85vw] sm:w-[360px] h-full flex flex-col bg-background">
+        <div 
+          className="h-full flex flex-col bg-background"
+          style={{
+            width: isVisible ? `${sidebarWidth}px` : '360px',
+          }}
+        >
           {/* Header */}
           <div className="p-3 border-b border-border flex justify-between items-center bg-muted/40 shrink-0">
             <div>
@@ -256,15 +496,25 @@ export const AgentSidebar: React.FC = () => {
             </div>
             
             <div className="flex items-center gap-3.5 shrink-0">
-              {/* History/timer symbol container with custom premium tooltip */}
-              <div className="relative group flex items-center select-none">
-                {/* Big non-clickable history/timer symbol */}
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="text-foreground/50 pointer-events-auto mr-1.5 cursor-help"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              {/* History/timer symbol button with custom premium tooltip */}
+              <div className="relative flex items-center">
+                <button
+                  onClick={() => setShowHistoryView(!showHistoryView)}
+                  className={cn(
+                    "p-1 hover:bg-muted rounded-sm transition-colors text-foreground/50 hover:text-foreground shrink-0 border border-border shadow-sm flex items-center justify-center relative",
+                    showHistoryView && "bg-blue-600/10 text-blue-600 border-blue-600/20"
+                  )}
+                  title="Toggle Agent History"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </button>
                 
                 {/* Tooltip */}
-                <div className="absolute right-full top-1/2 -translate-y-1/2 mr-2.5 px-2 py-0.5 bg-foreground text-background text-[9px] font-bold rounded-sm opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-200 whitespace-nowrap shadow-md z-40 border border-border/10">
-                  history
-                </div>
+                {!showHistoryView && (
+                  <div className="absolute right-full top-1/2 -translate-y-1/2 mr-2.5 px-2 py-0.5 bg-foreground text-background text-[9px] font-bold rounded-sm opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-200 whitespace-nowrap shadow-md z-40 border border-border/10">
+                    history
+                  </div>
+                )}
               </div>
               
               {/* Close arrow — slides sidebar back to the right */}
@@ -278,133 +528,62 @@ export const AgentSidebar: React.FC = () => {
             </div>
           </div>
 
+
           {/* Scrollable middle container */}
           <div className="flex-1 overflow-y-auto p-3 space-y-3.5 scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-            {/* Status Indicator */}
-            <div className="space-y-1">
-              <div className="flex justify-between items-end w-full">
-                <span className="text-[11px] font-semibold text-foreground/80">System status</span>
-                <span className={cn(
-                  "text-[11px] font-semibold truncate max-w-[200px] transition-colors",
-                  getStatusColorClass()
-                )}>
-                  {getStatusText()}
-                </span>
-              </div>
-              <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden border border-black">
-                <div className={cn(
-                  "h-full transition-all duration-1000",
-                  getProgressBarClass()
-                )} />
-              </div>
-            </div>
-
-            {/* Execution Logs */}
-            <div className="h-[200px] bg-card rounded-sm border border-border flex flex-col overflow-hidden shadow-sm shrink-0">
-              <div className="px-3 py-2 border-b border-border bg-muted/60 flex justify-between items-center">
-                <span className="text-[11px] font-bold text-foreground/90">Execution stream</span>
-                <div className="flex gap-1.5">
-                  <div className="w-2 h-2 rounded-full bg-border" />
-                  <div className="w-2 h-2 rounded-full bg-border" />
-                </div>
-              </div>
-              <div ref={scrollRef} className="flex-1 overflow-y-auto p-2.5 font-mono text-[10px] space-y-2.5 scrollbar-thin scrollbar-thumb-border">
-                {logs.length === 0 && (
-                  <div className="h-full flex items-center justify-center text-foreground/30 italic opacity-80 font-sans">
-                    Waiting for autonomous command...
-                  </div>
-                )}
-                {logs.map((log) => (
-                  <div key={log.id} className="flex space-x-2 animate-in fade-in slide-in-from-left-1 duration-300">
-                    <span className="text-foreground/50 shrink-0 font-sans">[{new Date().toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })}]</span>
-                    <span className={cn(
-                      "leading-relaxed",
-                      log.type === 'error' ? 'text-red-500 font-bold' : '',
-                      log.type === 'success' ? 'text-emerald-500 font-bold' : '',
-                      log.type === 'task' ? 'text-blue-500 font-bold' : '',
-                      log.type === 'action' ? 'text-violet-500 font-medium' : 'text-foreground/90'
-                    )}>
-                      {log.message}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Options List (Expands fully inside scrollable container) */}
-            {availableOptions.length > 0 && isWaitingForInput && (
-              <div className="space-y-1.5 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                <div className="flex justify-between items-center">
-                  <label className="text-[11px] font-bold text-foreground/80">Set autonomous goal</label>
-                  <span className="text-[10px] font-bold text-blue-500 animate-pulse">Select option below</span>
-                </div>
-                <div className="flex flex-wrap gap-1.5 p-2 border border-border/50 rounded-sm bg-muted/20">
-                  {availableOptions.map((opt, i) => (
-                    <button
-                      key={i}
-                      onClick={() => handleStart(opt)}
-                      className="px-2 py-1 bg-blue-600/10 text-blue-600 border border-blue-600/20 rounded-sm text-[10px] font-bold hover:bg-blue-600 hover:text-white transition-all shadow-sm flex items-center gap-1.5 group/opt shrink-0"
-                    >
-                      <div className="w-2.5 h-2.5 rounded-full border border-current flex items-center justify-center">
-                        <div className="w-1.5 h-1.5 bg-current rounded-full opacity-0 group-hover/opt:opacity-100 transition-opacity" />
-                      </div>
-                      {opt}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Goal Input - LOCKED at bottom, never hidden! */}
-          <div className="p-3 border-t border-border bg-background space-y-2 shrink-0">
-            {(!isWaitingForInput || availableOptions.length === 0) && (
-              <label className="text-[11px] font-bold text-foreground/80 block">Set autonomous goal</label>
-            )}
-
-            <div className="relative group">
-              <textarea
-                value={goal}
-                onChange={(e) => setGoal(e.target.value)}
-                placeholder={isWaitingForInput ? "Type your answer here..." : "e.g. Hire a Senior Next.js Developer..."}
-                className={cn(
-                  "w-full bg-card border border-border rounded-sm p-2.5 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all min-h-[48px] sm:min-h-[56px] resize-none text-foreground placeholder:text-muted-foreground/60 focus:placeholder:text-transparent shadow-sm",
-                  isWaitingForInput && "border-blue-500 ring-1 ring-blue-500/20"
-                )}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    handleStart();
-                  }
-                }}
+            {showHistoryView ? (
+              <AgentHistoryView
+                planMessages={planMessages}
+                executionHistory={executionHistory}
+                onClearChatHistory={handleClearChatHistory}
+                onDeleteExecution={handleDeleteExecution}
+                onClose={() => setShowHistoryView(false)}
               />
-              {isRunning && (
-                <button
-                  onClick={handleStop}
-                  className="absolute bottom-2.5 right-11 p-1.5 bg-red-600/10 text-red-600 hover:bg-red-600 hover:text-white rounded-sm transition-all shadow-xl active:scale-95 animate-in slide-in-from-right-2 duration-300"
-                  title="Stop Agent"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" /></svg>
-                </button>
-              )}
-              {!isRunning && status === 'Stopped' && (
-                <button
-                  onClick={handleResume}
-                  className="absolute bottom-2.5 right-11 p-1.5 bg-blue-600/10 text-blue-600 hover:bg-blue-600 hover:text-white rounded-sm transition-all shadow-xl active:scale-95 animate-in slide-in-from-right-2 duration-300 flex items-center justify-center"
-                  title="Continue Agent"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m5 3 14 9-14 9V3z" /></svg>
-                </button>
-              )}
-              <button
-                onClick={() => handleStart()}
-                disabled={!goal.trim()}
-                className="absolute bottom-2.5 right-2.5 p-1.5 bg-foreground text-background hover:bg-blue-500 hover:text-white rounded-sm transition-all shadow-xl disabled:opacity-20 disabled:cursor-not-allowed active:scale-95"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
-              </button>
-            </div>
+            ) : sidebarMode === 'ACT' ? (
+              <AgentActView
+                status={status}
+                isAwaking={isAwaking}
+                isSleeping={isSleeping}
+                isWaitingForInput={isWaitingForInput}
+                sleepCountdown={sleepCountdown}
+                sleepTime={sleepTime}
+                awakeCountdown={awakeCountdown}
+                logs={logs}
+                scrollRef={scrollRef}
+                getStatusColorClass={getStatusColorClass}
+                getStatusText={getStatusText}
+                getProgressBarClass={getProgressBarClass}
+                availableOptions={availableOptions}
+                handleStart={handleStart}
+              />
+            ) : (
+              <AgentPlanView
+                planMessages={planMessages}
+                isPlanBotTyping={isPlanBotTyping}
+                planScrollRef={planScrollRef}
+              />
+            )}
           </div>
+
+          {/* Goal Input - LOCKED at bottom, hidden in history mode */}
+          {!showHistoryView && (
+            <AgentGoalInput
+              goal={goal}
+              setGoal={setGoal}
+              sidebarMode={sidebarMode}
+              isWaitingForInput={isWaitingForInput}
+              availableOptions={availableOptions}
+              isModeMenuOpen={isModeMenuOpen}
+              setIsModeMenuOpen={setIsModeMenuOpen}
+              setSidebarMode={setSidebarMode}
+              isRunning={isRunning}
+              status={status}
+              handleStart={handleStart}
+              handleStop={handleStop}
+              handleResume={handleResume}
+              handlePlanSendMessage={handlePlanSendMessage}
+            />
+          )}
 
           {/* Footer */}
           <div className="p-2 sm:p-2.5 border-t border-border bg-muted/20 shrink-0">

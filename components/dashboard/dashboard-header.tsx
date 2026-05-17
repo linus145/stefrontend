@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 import { ThemeToggle } from './theme-toggle';
 import { postService } from '@/services/post.service';
+import { notificationService } from '@/services/notification.service';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { formatDistanceToNow } from 'date-fns';
 import { api } from '@/lib/api';
@@ -38,17 +39,17 @@ export function DashboardHeader({
 
    const { data: notifications } = useQuery({
       queryKey: ['notifications'],
-      queryFn: postService.getNotifications,
+      queryFn: () => notificationService.getNotifications('USER'),
       refetchInterval: 30000,
    });
 
    const markReadMutation = useMutation({
-      mutationFn: postService.markNotificationRead,
+      mutationFn: notificationService.markNotificationRead,
       onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notifications'] }),
    });
 
    const clearAllMutation = useMutation({
-      mutationFn: postService.deleteAllNotifications,
+      mutationFn: () => notificationService.deleteAllNotifications('USER'),
       onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notifications'] }),
    });
 

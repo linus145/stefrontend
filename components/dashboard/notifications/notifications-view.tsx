@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { postService } from '@/services/post.service';
+import { notificationService } from '@/services/notification.service';
 import { Bell, Heart, MessageSquare, UserPlus, Loader2, Trash2, CheckCircle2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -13,17 +13,17 @@ export function NotificationsView() {
 
   const { data: notifications, isLoading } = useQuery({
     queryKey: ['notifications'],
-    queryFn: postService.getNotifications,
+    queryFn: () => notificationService.getNotifications('USER'),
     refetchInterval: 30000,
   });
 
   const markReadMutation = useMutation({
-    mutationFn: postService.markNotificationRead,
+    mutationFn: notificationService.markNotificationRead,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notifications'] }),
   });
 
   const markAllReadMutation = useMutation({
-    mutationFn: postService.markAllNotificationsRead,
+    mutationFn: () => notificationService.markAllNotificationsRead('USER'),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       toast.success('All notifications marked as read.');
@@ -31,7 +31,7 @@ export function NotificationsView() {
   });
 
   const clearAllMutation = useMutation({
-    mutationFn: postService.deleteAllNotifications,
+    mutationFn: () => notificationService.deleteAllNotifications('USER'),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       toast.success('Notification history cleared.');

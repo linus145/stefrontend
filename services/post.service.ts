@@ -35,22 +35,6 @@ export const postService = {
     return api.get<{ token: string; expire: number; signature: string }>('/posts/imagekit-auth/');
   },
 
-  getNotifications: (): Promise<any[]> => {
-    return api.get<PaginatedResponse<any>>('/notifications/')
-      .then(res => res.results || []);
-  },
-
-  markNotificationRead: (id: string): Promise<void> => {
-    return api.post(`/notifications/${id}/read/`, {});
-  },
-
-  markAllNotificationsRead: (): Promise<void> => {
-    return api.post('/notifications/mark-all-read/', {});
-  },
-
-  deleteAllNotifications: (): Promise<void> => {
-    return api.delete('/notifications/delete-all/');
-  },
 
   getComments: (postId: string): Promise<any[]> => {
     return api.get<PaginatedResponse<any>>(`/interactions/comments/?post_id=${postId}`)

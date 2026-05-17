@@ -1,14 +1,12 @@
-'use client';
-
-import React, { useState } from 'react';
+import React from 'react';
 import { 
   Bot, Sparkles, Activity, CheckCircle2, ChevronRight, 
   Terminal, BarChart3, Settings, Play, Briefcase, Mail, FileText
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { AgentConsole } from '@/components/recruiter/aiagents/AgentConsole';
 
 export default function AIAgentsDashboard() {
-  const [activeTab, setActiveTab] = useState('overview');
 
   const agents = [
     {
@@ -78,6 +76,9 @@ export default function AIAgentsDashboard() {
             </div>
           ))}
         </div>
+
+        {/* Agent Workspace Console (ACT vs PLAN modes) */}
+        <AgentConsole />
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

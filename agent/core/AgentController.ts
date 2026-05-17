@@ -6,6 +6,7 @@ import { AgentMonitor } from '@/agent/monitoring/AgentMonitor';
 import { AgentRealtimeStream } from '@/agent/core/AgentRealtimeStream';
 import { StateObserver } from '@/agent/core/StateObserver';
 import { api } from '@/lib/api';
+import { aiAgentService } from '@/services/ai-agents.service';
 
 interface LLMAction {
   action_type: string;
@@ -48,6 +49,8 @@ export class AgentController {
   private _userResponse: string | null = null;
   private lastQuestion: string = '';
   private originalGoal: string = '';
+  private currentExecutionId: string | null = null;
+  private legacyActionHistory: any[] = [];
 
   private static MAX_LLM_ITERATIONS = 30;
 
@@ -122,13 +125,18 @@ export class AgentController {
       this.originalGoal = goal;
     }
 
+    this.llmActionHistory = [];
+    this.legacyActionHistory = [];
+
     if (this.shouldUseLLM(goal)) {
       this._isLLMMode = true;
       this.stream.emit('status', `🤖 Starting AI-powered autonomous agent...`);
+      await this.createBackendExecution(goal);
       await this.runLLMLoop(goal);
     } else {
       this._isLLMMode = false;
       this.stream.emit('status', `Planning goal: ${goal}`);
+      await this.createBackendExecution(goal);
       const plan = await this.planner.generatePlan(goal);
       
       if (!this.isRunning) return; // Stop if user cancelled during planning
@@ -215,12 +223,18 @@ export class AgentController {
         // Show the LLM's thinking
         if (action.thinking) {
           this.stream.emit('status', `🧠 ${action.thinking}`);
+          try {
+            await api.post('/autonomousagent1/chat/history/', { sender: 'bot', text: `🧠 [Thinking]: ${action.thinking}` });
+          } catch (e) {
+            console.error("Failed to save agent thinking to chat history:", e);
+          }
         }
 
         // 3. CHECK — is the goal complete?
         if (action.action_type === 'done') {
           this.stream.emit('goal_complete', this.llmGoal);
           localStorage.removeItem('agent_llm_context'); // Clear memory on completion
+          await this.updateBackendExecution('success', this.llmActionHistory);
           break;
         }
 
@@ -229,6 +243,13 @@ export class AgentController {
           this.stream.emit('status', `❓ Agent is asking you a question...`);
           this._isWaitingForUser = true;
           this._userResponse = null;
+
+          // Save agent's question to conversational chat history
+          try {
+            await api.post('/autonomousagent1/chat/history/', { sender: 'bot', text: `🤖 [Autonomous Question]: ${action.value}` });
+          } catch (e) {
+            console.error("Failed to save agent question to chat history:", e);
+          }
 
           // Dispatch event so the sidebar shows the question
           window.dispatchEvent(new CustomEvent('agent-ask-user', {
@@ -245,9 +266,17 @@ export class AgentController {
           }
 
           if (this._userResponse) {
-            this.stream.emit('status', `✅ User responded: "${this._userResponse}"`);
-            userResponse = this._userResponse;
+            const reply = this._userResponse;
+            this.stream.emit('status', `✅ User responded: "${reply}"`);
+            userResponse = reply;
             this._userResponse = null;
+
+            // Save user response to conversational chat history
+            try {
+              await api.post('/autonomousagent1/chat/history/', { sender: 'user', text: reply });
+            } catch (e) {
+              console.error("Failed to save user response to chat history:", e);
+            }
 
             // Record in history
             this.llmActionHistory.push({
@@ -255,11 +284,13 @@ export class AgentController {
               value: action.value,
               description: `Asked user: ${action.value} → User said: ${userResponse}`,
             });
+            await this.updateBackendExecution('running', this.llmActionHistory);
             continue; // Go back to THINK with user's response
           } else {
             this.stream.emit('status', `⏱️ No response received. Stopping.`);
             this.isRunning = false;
             this.stream.emit('task_failed', { task: { description: 'Waiting for Input' }, error: 'Execution terminated' });
+            await this.updateBackendExecution('failed', this.llmActionHistory);
             break;
           }
         }
@@ -286,6 +317,7 @@ export class AgentController {
           ...action,
           ...(success ? {} : { error: 'Action failed' }),
         });
+        await this.updateBackendExecution('running', this.llmActionHistory);
 
         // AUTO-STOP: If we just returned to the pipeline page after a full flow, STOP.
         // This prevents the agent from looping after a successful dispatch + return.
@@ -299,6 +331,7 @@ export class AgentController {
           this.stream.emit('status', `✅ Full flow completed. Returned to pipeline. Stopping.`);
           this.stream.emit('goal_complete', this.llmGoal);
           localStorage.removeItem('agent_llm_context');
+          await this.updateBackendExecution('success', this.llmActionHistory);
           break;
         }
 
@@ -311,14 +344,18 @@ export class AgentController {
 
       if (this.llmIteration >= AgentController.MAX_LLM_ITERATIONS) {
         this.stream.emit('status', `⚠️ Reached max iterations (${AgentController.MAX_LLM_ITERATIONS}). Stopping.`);
+        await this.updateBackendExecution('failed', this.llmActionHistory);
       }
 
     } catch (error: any) {
       this.stream.emit('task_failed', { task: { description: this.llmGoal }, error: error.message });
+      await this.updateBackendExecution('failed', this.llmActionHistory);
     } finally {
       this.isRunning = false;
       this._isLLMMode = false;
       this._isWaitingForUser = false;
+      const finalStatus = this.llmActionHistory.some(a => a.error) ? 'failed' : 'success';
+      await this.updateBackendExecution(finalStatus, this.llmActionHistory);
     }
   }
 
@@ -438,6 +475,43 @@ export class AgentController {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
+  private async createBackendExecution(goal: string) {
+    try {
+      const res = await aiAgentService.createExecution({
+        agent_type: 'browser_agent',
+        status: 'running',
+        actions_performed: [],
+        metadata: { goal }
+      });
+      if (res && res.id) {
+        this.currentExecutionId = res.id;
+      }
+    } catch (e) {
+      console.error('Failed to create backend execution record:', e);
+    }
+  }
+
+  private async updateBackendExecution(status: string, actions?: any[]) {
+    if (!this.currentExecutionId) return;
+    try {
+      const data: any = { status };
+      if (actions) {
+        data.actions_performed = actions.map(a => ({
+          type: a.action_type || a.type,
+          selector: a.selector || '',
+          value: a.value || '',
+          description: a.description || ''
+        }));
+      }
+      if (status === 'success' || status === 'failed') {
+        data.completed_at = new Date().toISOString();
+      }
+      await aiAgentService.updateExecution(this.currentExecutionId, data);
+    } catch (e) {
+      console.error('Failed to update backend execution record:', e);
+    }
+  }
+
   /**
    * Check if another tab left a continuation goal for us.
    * This is how the agent "follows" across tabs:
@@ -548,12 +622,26 @@ export class AgentController {
           this.memory.remember('action', action);
           this.stream.emit('action_complete', action);
 
+          this.legacyActionHistory.push({
+            action_type: action.type,
+            selector: action.selector || '',
+            value: action.value || '',
+            description: action.description || action.message || action.type
+          });
+          await this.updateBackendExecution('running', this.legacyActionHistory);
+
           if (action.type === 'ask_user') {
             this.lastQuestion = action.message || '';
+            try {
+              await api.post('/autonomousagent1/chat/history/', { sender: 'bot', text: `🤖 [Plan Question]: ${this.lastQuestion}` });
+            } catch (e) {
+              console.error("Failed to save agent plan question to chat history:", e);
+            }
             task.status = 'paused';
             this.persistPlan();
             this.stream.emit('task_paused', task);
             this.isRunning = false;
+            await this.updateBackendExecution('running', this.legacyActionHistory);
             return; 
           }
 
@@ -575,7 +663,6 @@ export class AgentController {
                 timestamp: Date.now(),
                 sourceUrl: window.location.href,
               }));
-              // console.log('[AgentController] Saved cross-tab continuation for new tab');
             }
 
             task.currentActionIndex = i + 1;
@@ -583,6 +670,7 @@ export class AgentController {
             this.persistPlan();
             this.stream.emit('status', 'Continuing execution on new page...');
             this.isRunning = false;
+            await this.updateBackendExecution('running', this.legacyActionHistory);
             return;
           }
 
@@ -594,11 +682,15 @@ export class AgentController {
         this.persistPlan();
         this.stream.emit('task_complete', task);
       } catch (error) {
-        // console.error('Task failed', error);
         task.status = 'failed';
         this.persistPlan();
         this.stream.emit('task_failed', { task, error: (error as Error).message });
         this.isRunning = false;
+        this.legacyActionHistory.push({
+          action_type: 'error',
+          description: `Task failed: ${(error as Error).message}`
+        });
+        await this.updateBackendExecution('failed', this.legacyActionHistory);
         return;
       }
     }
@@ -606,6 +698,7 @@ export class AgentController {
     this.isRunning = false;
     this.clearPersistedPlan();
     this.stream.emit('goal_complete', this.originalGoal || this.currentPlan.goal);
+    await this.updateBackendExecution('success', this.legacyActionHistory);
   }
 
   public stop() {

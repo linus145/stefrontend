@@ -16,7 +16,8 @@ import {
   Timer,
   CalendarDays,
   Trash2,
-  Copy
+  Copy,
+  Mail
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -25,6 +26,7 @@ interface InterviewSession {
   id: string;
   application_id: string;
   candidate_name: string;
+  candidate_email: string;
   job_title: string;
   status: string;
   rounds_count: number;
@@ -72,6 +74,21 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
     onError: () => toast.error('Failed to delete session'),
   });
 
+  const resendInviteMutation = useMutation({
+    mutationFn: (sessionId: string) => aiInterviewsService.resendInvite(sessionId),
+    onMutate: () => {
+      return toast.loading('Resending invitation email...');
+    },
+    onSuccess: (data, variables, context: any) => {
+      toast.dismiss(context);
+      toast.success('Invitation email resent successfully');
+    },
+    onError: (err, variables, context: any) => {
+      toast.dismiss(context);
+      toast.error('Failed to resend invitation email');
+    }
+  });
+
   const sessions: InterviewSession[] = Array.isArray(sessionsResponse?.data) ? sessionsResponse.data : [];
 
   const filteredSessions = sessions.filter(s => {
@@ -102,7 +119,7 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
     if (isLoading) {
       return Array.from({ length: 4 }).map((_, i) => (
         <tr key={i} className="border-b border-border/50 last:border-0 animate-pulse">
-          {Array.from({ length: 6 }).map((__, j) => (
+          {Array.from({ length: 7 }).map((__, j) => (
             <td key={j} className="px-4 py-5">
               <div className="h-3.5 bg-muted rounded w-full opacity-40" />
             </td>
@@ -114,7 +131,7 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
     if (filteredSessions.length === 0) {
       return (
         <tr>
-          <td colSpan={6} className="px-6 py-20 text-center">
+          <td colSpan={7} className="px-6 py-20 text-center">
             <p className="text-sm font-medium opacity-40">No matching interview sessions found.</p>
           </td>
         </tr>
@@ -127,6 +144,10 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
         <td className="pl-6 pr-4 py-3">
           <p className="text-[13px] font-bold truncate max-w-[200px]" data-agent="candidate-name">{session.candidate_name}</p>
           <p className="text-[11px] text-muted-foreground mt-0.5">{new Date(session.created_at).toLocaleDateString()}</p>
+        </td>
+        {/* Email */}
+        <td className="px-4 py-3">
+          <p className="text-[13px] font-medium text-muted-foreground truncate max-w-[220px]">{session.candidate_email}</p>
         </td>
         {/* Role */}
         <td className="px-4 py-3">
@@ -200,6 +221,17 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
             >
               {!session.is_orchestrated ? 'Configure' : 'Reconfigure'}
             </button>
+            
+            {session.is_orchestrated && (
+              <button
+                onClick={() => resendInviteMutation.mutate(session.id)}
+                disabled={resendInviteMutation.isPending}
+                className="w-8 h-8 flex items-center justify-center rounded-sm bg-blue-600/5 text-blue-600 hover:bg-blue-600 hover:text-white transition-all active:scale-95 border border-blue-600/10 disabled:opacity-50 shrink-0"
+                title="Resend Invitation Email"
+              >
+                <Mail className="w-3.5 h-3.5" />
+              </button>
+            )}
             
             {session.is_orchestrated && (
               <>
@@ -344,12 +376,13 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-muted/30 border-b border-border">
-                <th className="pl-6 pr-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[25%]">Candidate</th>
-                <th className="px-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[20%]">Role</th>
+                <th className="pl-6 pr-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[20%]">Candidate</th>
+                <th className="px-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[18%]">Email</th>
+                <th className="px-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[15%]">Role</th>
                 <th className="px-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[10%]">Status</th>
                 <th className="px-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[7%] text-center">Rounds</th>
-                <th className="px-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[22%]">Exam Access</th>
-                <th className="pl-4 pr-6 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[23%] text-right">Action</th>
+                <th className="px-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[15%]">Exam Access</th>
+                <th className="pl-4 pr-6 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[15%] text-right">Action</th>
               </tr>
             </thead>
             <tbody>

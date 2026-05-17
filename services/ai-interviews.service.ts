@@ -95,4 +95,9 @@ export const aiInterviewsService = {
   deleteSession: async (sessionId: string) => {
     return api.delete<any>(`/AIrounds/session/${sessionId}/delete/`);
   },
+
+  // Resend invitation email to candidate
+  resendInvite: async (sessionId: string) => {
+    return api.post<any>(`/AIrounds/session/${sessionId}/resend-invite/`);
+  },
 };

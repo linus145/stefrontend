@@ -128,9 +128,9 @@ export function EvaluationView() {
       >
         <button
           onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-          className="absolute -right-3 top-6 h-6 w-6 rounded-full bg-background border border-border flex items-center justify-center shadow-sm hover:text-blue-600 hover:border-blue-600 transition-all z-30"
+          className="absolute -right-2.5 top-[18px] h-5 w-5 rounded-full bg-background border border-border flex items-center justify-center shadow-sm hover:text-blue-600 hover:border-blue-600 transition-all z-30"
         >
-          <ChevronRight className={cn("w-3.5 h-3.5 transition-transform duration-300", !isSidebarCollapsed && "rotate-180")} />
+          <ChevronRight className={cn("w-3 h-3 transition-transform duration-300", !isSidebarCollapsed && "rotate-180")} />
         </button>
 
         <EvaluationSidebar

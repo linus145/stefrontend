@@ -164,12 +164,12 @@ export function TalentFeed({
       </div>
 
       {/* Pagination */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-border/50">
-        <p className="text-xs font-medium text-muted-foreground">
+      <div className="grid grid-cols-1 md:grid-cols-3 items-center gap-4 pt-4 border-t border-border/50">
+        <p className="text-xs font-medium text-muted-foreground text-center md:text-left">
           Showing <span className="text-foreground">{totalItems > 0 ? startIndex + 1 : 0}</span> to <span className="text-foreground">{Math.min(startIndex + itemsPerPage, totalItems)}</span> of <span className="text-foreground">{totalItems}</span> talents
         </p>
 
-        <div className="flex items-center gap-1.5 ml-auto">
+        <div className="flex items-center justify-center gap-1.5">
           <button
             disabled={currentPage === 1}
             onClick={() => handlePageChange(currentPage - 1)}
@@ -212,6 +212,8 @@ export function TalentFeed({
             Next
           </button>
         </div>
+
+        <div className="hidden md:block" />
       </div>
     </div>
   );

@@ -88,7 +88,7 @@ export const EvaluationSidebar = ({
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {!isCollapsed && (
-        <div className="p-3 border-b border-border">
+        <div className="pt-[13px] pb-[13px] pl-3 pr-5 border-b border-border">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground opacity-50" />
             <input
@@ -96,7 +96,7 @@ export const EvaluationSidebar = ({
               placeholder="Search..."
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="w-full bg-muted/40 border-none rounded-md py-2 pl-9 pr-3 text-[12px] font-medium focus:outline-none focus:ring-1 focus:ring-blue-600/20 transition-all placeholder:opacity-50"
+              className="w-full bg-transparent border border-border/50 rounded-sm py-1.5 pl-9 pr-3 text-[11px] font-semibold text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/5 transition-all shadow-sm"
             />
           </div>
         </div>

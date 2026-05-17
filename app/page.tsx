@@ -22,7 +22,7 @@ export default function Home() {
           </div>
 
           <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold tracking-tight text-slate-900 mb-4 sm:mb-6 leading-tight">
-            The autonomous <br /> operating system for <span className="text-indigo-600">hiring.</span>
+            The autonomous <br /> hiring <span className="text-indigo-600">platform.</span>
           </h1>
 
           <p className="text-base sm:text-lg md:text-xl text-slate-600 max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed px-2">

@@ -32,17 +32,17 @@ export const AgentSidebar: React.FC = () => {
   const [availableOptions, setAvailableOptions] = useState<string[]>([]);
   const [sidebarMode, setSidebarMode] = useState<'ACT' | 'PLAN'>('ACT');
   const [planMessages, setPlanMessages] = useState<Array<{ id: string; sender: 'bot' | 'user'; text: string }>>([
-    { 
-      id: 'init', 
-      sender: 'bot', 
-      text: "Hello! I am your conversational AI. 👋\n\nAsk me anything about your recruitment campaigns, candidate requirements, or interview structures!" 
+    {
+      id: 'init',
+      sender: 'bot',
+      text: "Hello! I am your conversational AI. 👋\n\nAsk me anything about your recruitment campaigns, candidate requirements, or interview structures!"
     }
   ]);
   const [isPlanBotTyping, setIsPlanBotTyping] = useState(false);
   const [isModeMenuOpen, setIsModeMenuOpen] = useState(false);
   const [showHistoryView, setShowHistoryView] = useState(false);
   const [executionHistory, setExecutionHistory] = useState<any[]>([]);
-  
+
   // Resizing state
   const [sidebarWidth, setSidebarWidth] = useState<number>(360);
   const [isResizing, setIsResizing] = useState<boolean>(false);
@@ -117,7 +117,7 @@ export const AgentSidebar: React.FC = () => {
           }));
           setPlanMessages(mapped);
         }
-        
+
         // Fetch Autonomous Execution history
         const execRes = await api.get<any[]>('/autonomousagent1/executions/');
         if (execRes) {
@@ -138,14 +138,47 @@ export const AgentSidebar: React.FC = () => {
     try {
       await aiAgentService.clearChatHistory();
       setPlanMessages([
-        { 
-          id: 'init', 
-          sender: 'bot', 
-          text: "Hello! I am your conversational AI. 👋\n\nAsk me anything about your recruitment campaigns, candidate requirements, or interview structures!" 
+        {
+          id: 'init',
+          sender: 'bot',
+          text: "Hello! I am your conversational AI. 👋\n\nAsk me anything about your recruitment campaigns, candidate requirements, or interview structures!"
         }
       ]);
     } catch (error) {
       console.error("Failed to clear chat history:", error);
+    }
+  };
+
+  // Start a completely fresh new chat session and reset all execution/UI states
+  const handleNewChat = async () => {
+    try {
+      // 1. Stop any active agent execution
+      AgentController.getInstance().stopAgent();
+      
+      // 2. Clear localStorage contexts
+      localStorage.removeItem('agent_llm_context');
+      localStorage.removeItem('agent_paused_action');
+      localStorage.removeItem('agent_paused_tab_transition');
+
+      // 3. Reset all frontend states
+      setGoal('');
+      setLogs([]);
+      setTasks([]);
+      setStatus('Idle');
+      setIsRunning(false);
+      setIsWaitingForInput(false);
+      setIsSleeping(false);
+      setLastQuestion('');
+      setAvailableOptions([]);
+      setPendingResponse(null);
+
+      // 4. Clear conversation history in backend & state
+      await handleClearChatHistory();
+      
+      // 5. Add custom status log
+      addLog("✨ Started a new conversation. All states reset successfully.", "success");
+    } catch (error) {
+      console.error("Failed to start new chat:", error);
     }
   };
 
@@ -169,13 +202,27 @@ export const AgentSidebar: React.FC = () => {
     window.addEventListener('agent-ui-toggle', handleToggle);
 
     // Initialize the controller so it can pick up any persisted cross-tab plans
-    AgentController.getInstance();
+    const controller = AgentController.getInstance();
+    const activeRunning = controller.getIsRunning();
+    setIsRunning(activeRunning);
+    if (activeRunning) {
+      setStatus('Running...');
+    } else {
+      if (typeof window !== 'undefined') {
+        const planData = localStorage.getItem('agent_active_plan');
+        const llmData = localStorage.getItem('agent_llm_context');
+        if (planData || llmData) {
+          setStatus('Stopped');
+        }
+      }
+    }
 
     const stream = AgentRealtimeStream.getInstance();
 
     stream.on('status', (msg: string) => {
       setStatus(msg);
       addLog(msg, 'info');
+      setIsRunning(controller.getIsRunning());
     });
 
     stream.on('task_start', (task: AgentTask) => {
@@ -186,12 +233,23 @@ export const AgentSidebar: React.FC = () => {
 
     stream.on('action_start', (action: any) => {
       addLog(`Executing ${action.type} on ${action.selector || 'page'}`, 'action');
+      setIsRunning(controller.getIsRunning());
     });
 
     stream.on('goal_complete', (goal: string) => {
       setStatus('Goal Completed');
       setIsRunning(false);
-      addLog(`Successfully completed goal: ${goal}`, 'success');
+      
+      let cleanGoal = goal;
+      if (goal.includes('You are now in the Interview Pipeline') || goal.length > 80) {
+        const firstLine = goal.split('\n')[0].trim();
+        if (firstLine && firstLine.length < 80) {
+          cleanGoal = firstLine;
+        } else {
+          cleanGoal = 'Hiring workflow phase successfully completed.';
+        }
+      }
+      addLog(`Successfully completed goal: ${cleanGoal}`, 'success');
     });
 
     stream.on('task_failed', ({ task, error }: any) => {
@@ -218,9 +276,20 @@ export const AgentSidebar: React.FC = () => {
     };
     window.addEventListener('agent-ask-user', handleAskUser);
 
+    const handleScreeningCompleted = (e: any) => {
+      const score = e.detail?.score;
+      const candidateName = e.detail?.candidateName;
+      const totalCandidates = e.detail?.totalCandidates;
+      if (score !== undefined) {
+        addLog(`📊 AI Screening Complete! Evaluated ${totalCandidates} candidates. Top Match: ${candidateName} (${score}%)`, 'success');
+      }
+    };
+    window.addEventListener('agent-screening-completed', handleScreeningCompleted);
+
     return () => {
       window.removeEventListener('agent-ui-toggle', handleToggle);
       window.removeEventListener('agent-ask-user', handleAskUser);
+      window.removeEventListener('agent-screening-completed', handleScreeningCompleted);
     };
   }, []);
 
@@ -298,7 +367,7 @@ export const AgentSidebar: React.FC = () => {
     if (!goal.trim()) return;
     const userText = goal;
     setGoal('');
-    
+
     // Add User message
     const userMsgId = Math.random().toString(36).substr(2, 9);
     const updatedMessages: { id: string; sender: 'user' | 'bot'; text: string }[] = [
@@ -453,7 +522,7 @@ export const AgentSidebar: React.FC = () => {
         />
       )}
 
-      <div 
+      <div
         className={cn(
           "fixed top-0 bottom-0 right-0 lg:inset-y-auto lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)] z-30 flex flex-col bg-background/95 backdrop-blur-xl border-l border-border shrink-0 overflow-hidden shadow-2xl",
           !isResizing && "transition-all duration-300 ease-in-out",
@@ -477,7 +546,7 @@ export const AgentSidebar: React.FC = () => {
         )}
 
         {/* Inner wrapper with fixed width to prevent squishing during transition */}
-        <div 
+        <div
           className="h-full flex flex-col bg-background"
           style={{
             width: isVisible ? `${sidebarWidth}px` : '360px',
@@ -494,10 +563,24 @@ export const AgentSidebar: React.FC = () => {
               </div>
               <p className="text-[10px] text-foreground/70 mt-0.5 font-semibold">Autonomous executor</p>
             </div>
-            
-            <div className="flex items-center gap-3.5 shrink-0">
+
+            <div className="flex items-center gap-2.5 shrink-0">
+              {/* New Chat Button */}
+              <div className="relative flex items-center group">
+                <button
+                  onClick={handleNewChat}
+                  className="p-1 hover:bg-muted rounded-sm transition-colors text-foreground/50 hover:text-foreground shrink-0 border border-border shadow-sm flex items-center justify-center relative hover:text-blue-600 hover:border-blue-600/20"
+                  title="New Chat"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                </button>
+                <div className="absolute right-full top-1/2 -translate-y-1/2 mr-2.5 px-2 py-0.5 bg-foreground text-background text-[9px] font-bold rounded-sm opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-200 whitespace-nowrap shadow-md z-40 border border-border/10">
+                  new chat
+                </div>
+              </div>
+
               {/* History/timer symbol button with custom premium tooltip */}
-              <div className="relative flex items-center">
+              <div className="relative flex items-center group">
                 <button
                   onClick={() => setShowHistoryView(!showHistoryView)}
                   className={cn(

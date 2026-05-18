@@ -55,6 +55,7 @@ export function HRSidebar({ activeTab, onTabChange }: HRSidebarProps) {
             <button
               key={item.id}
               onClick={() => onTabChange(item.id)}
+              data-agent={`nav-tab-hr-${item.id}`}
               className={cn(
                 "w-full flex items-center gap-3 px-3 py-2 text-sm font-medium transition-all group relative rounded-sm",
                 activeTab === item.id

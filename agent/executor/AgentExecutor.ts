@@ -228,27 +228,51 @@ export class AgentExecutor {
     if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) {
       element.scrollIntoView({ behavior: 'smooth', block: 'center' });
       await new Promise(r => setTimeout(r, 300)); // Wait for scroll
+
+      // Smart Fallback: If typing into the manual Job ID input and the value is empty,
+      // dynamically scrape the active job ID from the page state or select dropdown.
+      let finalValue = value;
+      if (element.getAttribute('data-agent') === 'manual-job-uid-input' && !value) {
+        // 1. Try to read from the active-job-id-display element
+        const displayEl = document.querySelector('[data-agent="active-job-id-display"]');
+        if (displayEl && displayEl.textContent) {
+          const match = displayEl.textContent.match(/ID:\s*([a-f0-9-]+)/i);
+          if (match && match[1]) {
+            finalValue = match[1];
+            console.log(`[AgentExecutor] Dynamically auto-extracted selected Job ID: ${finalValue}`);
+          }
+        }
+        
+        // 2. Fallback to active-job-select selected value
+        if (!finalValue) {
+          const selectEl = document.querySelector('[data-agent="active-job-select"]') as HTMLSelectElement;
+          if (selectEl && selectEl.value) {
+            finalValue = selectEl.value;
+            console.log(`[AgentExecutor] Dynamically auto-extracted select Job ID: ${finalValue}`);
+          }
+        }
+      }
+
       // Use native setter to work with React controlled inputs
       const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
         element instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype,
         'value'
       )?.set;
-      nativeInputValueSetter?.call(element, value);
+      nativeInputValueSetter?.call(element, finalValue);
       element.dispatchEvent(new Event('input', { bubbles: true }));
       element.dispatchEvent(new Event('change', { bubbles: true }));
 
       // Track the UID if this is the manual job UID input
       if (element.getAttribute('data-agent') === 'manual-job-uid-input' ||
         element.getAttribute('placeholder')?.includes('Paste Job UID')) {
-        this.lastTypedJobUid = value;
-        // console.log(`[AgentExecutor] Stored job UID for screen trigger: ${value}`);
+        this.lastTypedJobUid = finalValue;
       }
     } else if (element instanceof HTMLSelectElement) {
       const nativeSelectValueSetter = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value')?.set;
       nativeSelectValueSetter?.call(element, value);
-      
+
       if (element.value !== value) {
-        const option = Array.from(element.options).find(o => 
+        const option = Array.from(element.options).find(o =>
           o.text.toLowerCase().trim() === value.toLowerCase().trim() ||
           o.value.toLowerCase().trim() === value.toLowerCase().trim()
         );
@@ -336,13 +360,13 @@ export class AgentExecutor {
       if (indexMatch) {
         const baseSelector = indexMatch[1];
         const nthIndex = parseInt(indexMatch[2], 10); // e.g., 1 = second element
-        
+
         // Check if the base selector has data-agent matches
         const allMatches = document.querySelectorAll(`[data-agent="${baseSelector}"]`);
         if (allMatches.length > nthIndex) {
           return allMatches[nthIndex]; // 0-based: index 1 = second element
         }
-        
+
         // Also try the full selector as data-agent in case it's a real attribute
         element = document.querySelector(`[data-agent="${selector}"]`);
         if (element) return element;

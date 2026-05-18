@@ -52,6 +52,7 @@ export function JobSelector({
           <select
             value={activeJobId || ''}
             onChange={(e) => setActiveJobId(e.target.value || null)}
+            data-agent="active-job-select"
             className="w-full rounded-sm bg-muted/30 dark:bg-slate-800 border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none appearance-none transition-all cursor-pointer"
             style={{ colorScheme: 'dark' }}
           >
@@ -72,11 +73,15 @@ export function JobSelector({
         </div>
         {activeJobId && (
           <div className="mt-2 flex items-center gap-2 group">
-            <code className="text-[10px] bg-muted px-2 py-1 rounded text-muted-foreground font-mono">
+            <code 
+              data-agent="active-job-id-display"
+              className="text-[10px] bg-muted px-2 py-1 rounded text-muted-foreground font-mono"
+            >
               ID: {activeJobId}
             </code>
             <button
               onClick={() => onCopyId(activeJobId)}
+              data-agent="copy-job-id-button"
               className="text-muted-foreground hover:text-blue-500 transition-colors"
             >
               {copiedId === activeJobId ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}

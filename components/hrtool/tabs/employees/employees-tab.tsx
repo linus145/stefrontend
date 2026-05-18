@@ -116,6 +116,15 @@ export function EmployeesTab() {
     </div>
   );
 
+  if (isAddModalOpen) {
+    return (
+      <AddEmployeeModal 
+        open={isAddModalOpen} 
+        onOpenChange={setIsAddModalOpen} 
+      />
+    );
+  }
+
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
       <div>
@@ -217,7 +226,11 @@ export function EmployeesTab() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <Button onClick={() => setIsAddModalOpen(true)} className="bg-[#0a66c2] text-white hover:bg-[#004182] shadow-sm rounded-sm text-[11px] font-semibold px-4 h-10 transition-all whitespace-nowrap">
+          <Button
+            onClick={() => setIsAddModalOpen(true)}
+            data-agent="add-employee-button"
+            className="bg-[#0a66c2] text-white hover:bg-[#004182] shadow-sm rounded-sm text-[11px] font-semibold px-4 h-10 transition-all whitespace-nowrap"
+          >
             <UserPlus className="mr-2 h-3.5 w-3.5" /> Add Employee
           </Button>
         </div>
@@ -346,11 +359,6 @@ export function EmployeesTab() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      <AddEmployeeModal 
-        open={isAddModalOpen} 
-        onOpenChange={setIsAddModalOpen} 
-      />
     </div>
   );
 }

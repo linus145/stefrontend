@@ -62,6 +62,16 @@ export class AgentController {
     this.stream = AgentRealtimeStream.getInstance();
     this.observer = StateObserver.getInstance();
     
+    // Clear stale plans if a fresh cross-tab handover is pending
+    if (typeof window !== 'undefined') {
+      const continuation = localStorage.getItem('agent_cross_tab_continuation');
+      if (continuation) {
+        console.log('[AgentController] Pending cross-tab continuation detected. Clearing legacy/stale plans for fresh handover.');
+        localStorage.removeItem('agent_active_plan');
+        localStorage.removeItem('agent_llm_context');
+      }
+    }
+
     this.loadLLMContext();
     this.checkCrossTabContinuation();
     this.loadPersistedPlan();
@@ -94,25 +104,21 @@ export class AgentController {
    */
   private shouldUseLLM(goal: string): boolean {
     if (!goal) return false;
-    const lower = goal.toLowerCase();
 
-    // UUID goals → ALWAYS use legacy plan (screening → open tab → handover)
+    // UUID goals (programmatic candidate screening) → ALWAYS use legacy plan (screening → open tab → handover)
     const uuidPattern = /[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/i;
     if (uuidPattern.test(goal)) return false;
 
-    // Only use LLM for explicit interview config keywords 
-    // (typically when user is ALREADY on the AI Interviews page)
-    const llmKeywords = [
-      'configure', 'reconfigure',
-      'orchestrate', 'dispatch',
-      'autonomous interview', 'interview setup',
-      'pipeline', 'candidate', 'architecture'
-    ];
-    return llmKeywords.some(kw => lower.includes(kw));
+    // All other natural language prompts from the user use the smart, flexible LLM Planner!
+    return true;
   }
 
   public get isLLMMode(): boolean {
     return this._isLLMMode;
+  }
+
+  public getIsRunning(): boolean {
+    return this.isRunning;
   }
 
   public async startGoal(goal: string) {
@@ -165,7 +171,8 @@ export class AgentController {
 
     this.isRunning = true;
 
-    if (this._isLLMMode && this.llmGoal) {
+    if (this.llmGoal) {
+      this._isLLMMode = true;
       this.stream.emit('status', `🔄 Resuming AI-powered autonomous agent...`);
       await this.runLLMLoop(this.llmGoal, undefined, true);
     } else if (this.currentPlan) {
@@ -646,6 +653,42 @@ export class AgentController {
           }
 
           if (action.type === 'open_new_tab') {
+            // Check if we are resuming from a pause at this index
+            let isPausedAtThisIndex = false;
+            if (typeof window !== 'undefined') {
+              isPausedAtThisIndex = localStorage.getItem('agent_paused_tab_transition') === i.toString();
+            }
+
+            if (!isPausedAtThisIndex) {
+              // Pause execution and ask the user to click play/resume to proceed to the next tab
+              if (typeof window !== 'undefined') {
+                localStorage.setItem('agent_paused_tab_transition', i.toString());
+              }
+              task.status = 'paused';
+              this.persistPlan();
+              this.stream.emit('status', `🔔 Phase Completed. Ready to proceed to the next tab.`);
+              this.stream.emit('task_paused', task);
+              
+              // Dispatch event to prompt the user in the conversational log
+              if (typeof window !== 'undefined') {
+                window.dispatchEvent(new CustomEvent('agent-ask-user', {
+                  detail: { 
+                    message: `AI Screening completed successfully! 📊 Would you like to proceed to the Interview Pipeline (${action.value}) now? Click the Play (Continue) button in the sidebar to proceed.`,
+                    options: ['Click the Play/Continue button to proceed']
+                  }
+                }));
+              }
+              
+              this.isRunning = false;
+              await this.updateBackendExecution('running', this.legacyActionHistory);
+              return;
+            }
+
+            // Resuming! Clear the pause flag
+            if (typeof window !== 'undefined') {
+              localStorage.removeItem('agent_paused_tab_transition');
+            }
+
             // Save a continuation goal for the new tab to pick up
             const continuationGoal = `You are now in the Interview Pipeline. 
 1. Click 'Sync Pipeline' (data-agent="sync-pipeline-button") first.

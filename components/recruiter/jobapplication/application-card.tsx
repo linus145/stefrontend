@@ -71,7 +71,10 @@ export function ApplicationCard({
               <Clock className="w-3 h-3" /> {new Date(app.applied_at).toLocaleDateString()}
             </span>
             {app.ai_score !== null && app.ai_score !== undefined && (
-              <span className={cn("flex items-center gap-1 font-bold", getAIScoreColor(app.ai_score))}>
+              <span 
+                data-agent="ai-match-score"
+                className={cn("flex items-center gap-1 font-bold", getAIScoreColor(app.ai_score))}
+              >
                 <BrainCircuit className="w-3 h-3" /> Match: {app.ai_score}%
               </span>
             )}

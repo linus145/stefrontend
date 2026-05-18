@@ -69,6 +69,19 @@ export function ApplicationsTab({ selectedJobId, onBack }: ApplicationsTabProps)
       queryClient.invalidateQueries({ queryKey: ['job-applications'] });
       setAiResults(res.data);
       toast.success(res.message || 'AI Screening complete.');
+
+      // Dispatch custom event to notify agent of screening scores
+      if (res.data?.top_candidates && res.data.top_candidates.length > 0) {
+        const topCandidate = res.data.top_candidates[0];
+        window.dispatchEvent(new CustomEvent('agent-screening-completed', {
+          detail: {
+            score: topCandidate.score,
+            candidateName: topCandidate.name || 'Top Candidate',
+            totalCandidates: res.data.total_applicants || res.data.top_candidates.length
+          }
+        }));
+      }
+
       if (res.data?.errors?.length > 0) {
         res.data.errors.forEach((err: string) => toast.error(err, { duration: 6000 }));
       }
@@ -270,6 +283,18 @@ export function ApplicationsTab({ selectedJobId, onBack }: ApplicationsTabProps)
             setAiResults(reportResults);
             queryClient.invalidateQueries({ queryKey: ['job-applications'] });
             toast.success('AI Screening results loaded.');
+
+            // Dispatch custom event to notify agent of screening scores
+            if (reportResults?.top_candidates && reportResults.top_candidates.length > 0) {
+              const topCandidate = reportResults.top_candidates[0];
+              window.dispatchEvent(new CustomEvent('agent-screening-completed', {
+                detail: {
+                  score: topCandidate.score,
+                  candidateName: topCandidate.name || 'Top Candidate',
+                  totalCandidates: reportResults.total_applicants || reportResults.top_candidates.length
+                }
+              }));
+            }
           }}
           onViewDetails={(id) => {
             setExpandedAppId(id);

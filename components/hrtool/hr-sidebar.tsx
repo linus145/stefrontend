@@ -13,7 +13,8 @@ import {
   ChevronRight,
   LayoutDashboard,
   CreditCard,
-  UserCheck
+  UserCheck,
+  ChevronDown
 } from 'lucide-react';
 import { HRSection } from './hr-header';
 
@@ -22,12 +23,33 @@ interface HRSidebarProps {
   onTabChange: (tab: HRSection) => void;
 }
 
-const NAVIGATION_ITEMS: { id: HRSection; label: string; icon: any }[] = [
+const NAVIGATION_ITEMS: { id: HRSection; label: string; icon: any; subItems?: { id: HRSection; label: string }[] }[] = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'onboarding', label: 'Onboarding', icon: UserCheck },
   { id: 'employees', label: 'Employees', icon: Users },
-  { id: 'attendance', label: 'Attendance', icon: Calendar },
-  { id: 'leave', label: 'Leave', icon: FileText },
+  {
+    id: 'attendance',
+    label: 'Attendance',
+    icon: Calendar,
+    subItems: [
+      { id: 'attendance-activity', label: 'Attendance Activity' },
+      { id: 'attendance-requests', label: 'Attendance Requests' },
+      { id: 'attendance-hour-account', label: 'Hour Account' },
+      { id: 'attendance-work-records', label: 'Work Records' },
+      { id: 'attendance-late-early', label: 'Late Come Early Out' },
+      { id: 'attendance-settings', label: 'Attendance Settings' }
+    ]
+  },
+  {
+    id: 'leave',
+    label: 'Leave',
+    icon: FileText,
+    subItems: [
+      { id: 'leave-requests', label: 'Leave Requests' },
+      { id: 'leave-pending', label: 'Pending' },
+      { id: 'leave-approved', label: 'Approved' }
+    ]
+  },
   { id: 'payroll', label: 'Payroll', icon: CreditCard },
   { id: 'performance', label: 'Performance', icon: BarChart3 },
   { id: 'organization', label: 'Organization', icon: Building2 },
@@ -35,6 +57,27 @@ const NAVIGATION_ITEMS: { id: HRSection; label: string; icon: any }[] = [
 
 export function HRSidebar({ activeTab, onTabChange }: HRSidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({
+    leave: false,
+    attendance: false,
+  });
+
+  const toggleExpand = (itemId: string) => {
+    setExpandedItems(prev => ({
+      ...prev,
+      [itemId]: !prev[itemId],
+    }));
+  };
+
+  // Auto-expand if active tab is a sub-item
+  React.useEffect(() => {
+    if (activeTab.startsWith('leave')) {
+      setExpandedItems(prev => ({ ...prev, leave: true }));
+    }
+    if (activeTab.startsWith('attendance')) {
+      setExpandedItems(prev => ({ ...prev, attendance: true }));
+    }
+  }, [activeTab]);
 
   return (
     <aside className={cn(
@@ -51,31 +94,105 @@ export function HRSidebar({ activeTab, onTabChange }: HRSidebarProps) {
 
       <div className="flex-1 py-8 overflow-y-auto no-scrollbar">
         <nav className="px-3 space-y-1">
-          {NAVIGATION_ITEMS.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => onTabChange(item.id)}
-              data-agent={`nav-tab-hr-${item.id}`}
-              className={cn(
-                "w-full flex items-center gap-3 px-3 py-2 text-sm font-medium transition-all group relative rounded-sm",
-                activeTab === item.id
-                  ? "bg-[#0a66c2] text-white shadow-lg shadow-blue-500/20"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
-              )}
-            >
-              <item.icon className={cn(
-                "w-5 h-5 shrink-0",
-                activeTab === item.id ? "text-white" : "text-muted-foreground group-hover:text-[#0a66c2] transition-colors"
-              )} />
-              {!isCollapsed && <span className="truncate">{item.label}</span>}
-              {isCollapsed && activeTab === item.id && (
-                <div className="absolute left-0 w-1 h-6 bg-white rounded-sm" />
-              )}
-            </button>
-          ))}
+          {NAVIGATION_ITEMS.map((item) => {
+            const hasSubItems = !!item.subItems;
+
+            if (hasSubItems) {
+              const isParentDirectlyActive = activeTab === item.id || activeTab === `${item.id}-requests`;
+              const isAnySubActive = activeTab.startsWith(item.id);
+              const isExpanded = !!expandedItems[item.id];
+
+              return (
+                <div key={item.id} className="space-y-1">
+                  <button
+                    onClick={() => {
+                      if (isCollapsed) {
+                        setIsCollapsed(false);
+                      }
+                      toggleExpand(item.id);
+                      onTabChange(item.subItems ? item.subItems[0].id : item.id);
+                    }}
+                    data-agent={`nav-tab-hr-${item.id}`}
+                    className={cn(
+                      "w-full flex items-center justify-between px-3 py-2 text-sm font-medium transition-all group relative rounded-sm",
+                      isParentDirectlyActive
+                        ? "bg-[#0a66c2] text-white shadow-lg shadow-blue-500/20"
+                        : isAnySubActive
+                          ? "text-[#0a66c2] bg-[#0a66c2]/5 font-bold"
+                          : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      <item.icon className={cn(
+                        "w-5 h-5 shrink-0",
+                        isParentDirectlyActive
+                          ? "text-white"
+                          : isAnySubActive
+                            ? "text-[#0a66c2]"
+                            : "text-muted-foreground group-hover:text-[#0a66c2] transition-colors"
+                      )} />
+                      {!isCollapsed && <span className="truncate">{item.label}</span>}
+                    </div>
+                    {!isCollapsed && (
+                      <ChevronDown className={cn(
+                        "w-3.5 h-3.5 transition-transform duration-200 opacity-60 group-hover:opacity-100",
+                        isExpanded && "rotate-180",
+                        isParentDirectlyActive ? "text-white" : isAnySubActive ? "text-[#0a66c2]" : ""
+                      )} />
+                    )}
+                  </button>
+
+                  {!isCollapsed && isExpanded && (
+                    <div className="pl-8 space-y-1 animate-in fade-in slide-in-from-top-1 duration-200">
+                      {item.subItems?.map((sub) => {
+                        const isActive = activeTab === sub.id;
+                        return (
+                          <button
+                            key={sub.id}
+                            onClick={() => onTabChange(sub.id)}
+                            data-agent={`nav-tab-hr-sub-${sub.id}`}
+                            className={cn(
+                              "w-full flex items-center px-3 py-1.5 text-xs font-semibold rounded-sm transition-all",
+                              isActive
+                                ? "text-[#0a66c2] bg-blue-50/5 font-bold"
+                                : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                            )}
+                          >
+                            {sub.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            }
+
+            return (
+              <button
+                key={item.id}
+                onClick={() => onTabChange(item.id)}
+                data-agent={`nav-tab-hr-${item.id}`}
+                className={cn(
+                  "w-full flex items-center gap-3 px-3 py-2 text-sm font-medium transition-all group relative rounded-sm",
+                  activeTab === item.id
+                    ? "bg-[#0a66c2] text-white shadow-lg shadow-blue-500/20"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                )}
+              >
+                <item.icon className={cn(
+                  "w-5 h-5 shrink-0",
+                  activeTab === item.id ? "text-white" : "text-muted-foreground group-hover:text-[#0a66c2] transition-colors"
+                )} />
+                {!isCollapsed && <span className="truncate">{item.label}</span>}
+                {isCollapsed && activeTab === item.id && (
+                  <div className="absolute left-0 w-1 h-6 bg-white rounded-sm" />
+                )}
+              </button>
+            );
+          })}
         </nav>
       </div>
-
     </aside>
   );
 }

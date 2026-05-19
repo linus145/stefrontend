@@ -8,7 +8,24 @@ import Link from 'next/link';
 import { NotificationPopover } from '@/components/dashboard/notifications/notification-popover';
 import { AgentUIController } from '@/agent/ui/AgentUIController';
 
-export type HRSection = 'dashboard' | 'employees' | 'onboarding' | 'attendance' | 'leave' | 'payroll' | 'performance' | 'organization';
+export type HRSection = 
+  | 'dashboard' 
+  | 'employees' 
+  | 'onboarding' 
+  | 'attendance' 
+  | 'attendance-requests'
+  | 'attendance-hour-account'
+  | 'attendance-work-records'
+  | 'attendance-activity'
+  | 'attendance-late-early'
+  | 'attendance-settings'
+  | 'leave' 
+  | 'leave-requests' 
+  | 'leave-pending' 
+  | 'leave-approved' 
+  | 'payroll' 
+  | 'performance' 
+  | 'organization';
 
 interface HRHeaderProps {
   companyName: string;

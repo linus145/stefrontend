@@ -53,8 +53,20 @@ export function HRShell() {
         {activeTab === 'dashboard' && <DashboardTab />}
         {activeTab === 'onboarding' && <OnboardingTab />}
         {activeTab === 'employees' && <EmployeesTab />}
-        {activeTab === 'attendance' && <AttendanceTab />}
-        {activeTab === 'leave' && <LeaveTab />}
+        {activeTab.startsWith('attendance') && (
+          <AttendanceTab 
+            subTab={activeTab} 
+          />
+        )}
+        {activeTab.startsWith('leave') && (
+          <LeaveTab 
+            filterStatus={
+              activeTab === 'leave-pending' ? 'pending' :
+              activeTab === 'leave-approved' ? 'approved' :
+              undefined
+            }
+          />
+        )}
         {activeTab === 'payroll' && <PayrollTab />}
         {activeTab === 'performance' && <PerformanceTab />}
         {activeTab === 'organization' && <OrgTab />}

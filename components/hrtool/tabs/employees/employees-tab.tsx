@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { hrmsService } from '@/services/hrms.service';
+import { hrOrgService, hrEmployeeService } from '@/services/hr';
 import { jobsService } from '@/services/jobs.service';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -31,27 +31,103 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { AddEmployeeModal } from './add-employee-modal';
+import { EmployeeDetailsView } from './employee-details-view';
 
 export function EmployeesTab() {
   const queryClient = useQueryClient();
-  const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState('ALL');
-  const [ordering, setOrdering] = useState('-created_at');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [searchInput, setSearchInput] = useState('');
+  const [filterInput, setFilterInput] = useState('ALL');
+  const [designationInput, setDesignationInput] = useState('ALL');
+  const [departmentInput, setDepartmentInput] = useState('ALL');
+  const [orderingInput, setOrderingInput] = useState('-created_at');
+  const [startDateInput, setStartDateInput] = useState('');
+  const [endDateInput, setEndDateInput] = useState('');
+
+  const [activeFilters, setActiveFilters] = useState({
+    search: '',
+    filter: 'ALL',
+    designation: 'ALL',
+    department: 'ALL',
+    ordering: '-created_at',
+    startDate: '',
+    endDate: ''
+  });
+
+  const handleApplyFilters = () => {
+    setActiveFilters({
+      search: searchInput,
+      filter: filterInput,
+      designation: designationInput,
+      department: departmentInput,
+      ordering: orderingInput,
+      startDate: startDateInput,
+      endDate: endDateInput
+    });
+  };
+
+  const handleSortChange = (newOrder: string) => {
+    setOrderingInput(newOrder);
+    setActiveFilters(prev => ({ ...prev, ordering: newOrder }));
+  };
+
+  const handleResetFilters = () => {
+    setSearchInput('');
+    setFilterInput('ALL');
+    setDesignationInput('ALL');
+    setDepartmentInput('ALL');
+    setOrderingInput('-created_at');
+    setStartDateInput('');
+    setEndDateInput('');
+
+    setActiveFilters({
+      search: '',
+      filter: 'ALL',
+      designation: 'ALL',
+      department: 'ALL',
+      ordering: '-created_at',
+      startDate: '',
+      endDate: ''
+    });
+  };
+
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
-  
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(null);
+
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
+  const { data: designationsRes } = useQuery({
+    queryKey: ['designations'],
+    queryFn: () => hrOrgService.getDesignations(),
+  });
+
+  const { data: departmentsRes } = useQuery({
+    queryKey: ['departments'],
+    queryFn: () => hrOrgService.getDepartments(),
+  });
+
+  const designations = designationsRes?.data?.results || [];
+  const departments = departmentsRes?.data?.results || [];
+
   const { data: employees, isLoading } = useQuery({
-    queryKey: ['employees', search, filter, ordering, startDate, endDate],
-    queryFn: () => hrmsService.getEmployees({ 
-      search, 
+    queryKey: [
+      'employees',
+      activeFilters.search,
+      activeFilters.filter,
+      activeFilters.ordering,
+      activeFilters.startDate,
+      activeFilters.endDate,
+      activeFilters.designation,
+      activeFilters.department
+    ],
+    queryFn: () => hrEmployeeService.getEmployees({
+      search: activeFilters.search || undefined,
       status: 'ACTIVE',
-      employment_type: filter === 'ALL' ? undefined : filter,
-      ordering,
-      joining_date__gte: startDate || undefined,
-      joining_date__lte: endDate || undefined
+      employment_type: activeFilters.filter === 'ALL' ? undefined : activeFilters.filter,
+      designation: activeFilters.designation === 'ALL' ? undefined : activeFilters.designation,
+      department: activeFilters.department === 'ALL' ? undefined : activeFilters.department,
+      ordering: activeFilters.ordering,
+      joining_date__gte: activeFilters.startDate || undefined,
+      joining_date__lte: activeFilters.endDate || undefined
     }),
   });
 
@@ -67,7 +143,7 @@ export function EmployeesTab() {
 
   const updateEmployeeMutation = useMutation({
     mutationFn: ({ id, employment_type }: { id: string; employment_type: string }) =>
-      hrmsService.updateEmployee(id, { employment_type }),
+      hrEmployeeService.updateEmployee(id, { employment_type }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employees'] });
       toast.success('Employment type updated manually');
@@ -76,7 +152,7 @@ export function EmployeesTab() {
   });
 
   const deleteEmployeeMutation = useMutation({
-    mutationFn: (id: string) => hrmsService.deleteEmployee(id),
+    mutationFn: (id: string) => hrEmployeeService.deleteEmployee(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employees'] });
       toast.success('Employee removed successfully');
@@ -85,6 +161,20 @@ export function EmployeesTab() {
     onError: () => {
       toast.error('Failed to remove employee');
       setDeleteTarget(null);
+    }
+  });
+
+  const sendCredentialsMutation = useMutation({
+    mutationFn: (id: string) => hrEmployeeService.sendCredentials(id),
+    onSuccess: (res: any) => {
+      if (res?.data?.sent) {
+        toast.success(`Credentials email dispatched successfully to ${res.data.email}`);
+      } else {
+        toast.info(`Email registered: ${res?.data?.email}. Portal link: ${res?.data?.login_url}`);
+      }
+    },
+    onError: (err: any) => {
+      toast.error(err.message || 'Failed to send credentials.');
     }
   });
 
@@ -118,114 +208,29 @@ export function EmployeesTab() {
 
   if (isAddModalOpen) {
     return (
-      <AddEmployeeModal 
-        open={isAddModalOpen} 
-        onOpenChange={setIsAddModalOpen} 
+      <AddEmployeeModal
+        open={isAddModalOpen}
+        onOpenChange={setIsAddModalOpen}
+      />
+    );
+  }
+
+  if (selectedEmployeeId) {
+    return (
+      <EmployeeDetailsView
+        employeeId={selectedEmployeeId}
+        onBack={() => setSelectedEmployeeId(null)}
       />
     );
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
-      <div>
-        <h2 className="text-xl font-bold tracking-tight">Employee Directory</h2>
-      </div>
-
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-        <div className="flex flex-1 items-center gap-3 w-full">
-          <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#0a66c2]/60" />
-            <Input
-              placeholder="Search directory..."
-              className="pl-10 h-10 bg-white border border-border ring-offset-background focus-visible:ring-1 focus-visible:ring-[#0a66c2]/50 focus-visible:border-[#0a66c2]/50 rounded-sm text-sm font-medium placeholder:text-muted-foreground/60 shadow-sm transition-all"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-
-          <div className="flex items-center gap-2">
-            <div className="relative w-36">
-              <span className="absolute -top-2.5 left-2 bg-white px-1 text-[10px] font-bold text-muted-foreground z-10">Start Date</span>
-              <Input
-                type="date"
-                className="h-10 bg-white border border-border focus-visible:ring-1 focus-visible:ring-[#0a66c2]/50 focus-visible:border-[#0a66c2]/50 rounded-sm text-sm font-medium text-foreground shadow-sm transition-all relative"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-              />
-            </div>
-            <span className="text-muted-foreground/50 font-medium">-</span>
-            <div className="relative w-36">
-              <span className="absolute -top-2.5 left-2 bg-white px-1 text-[10px] font-bold text-muted-foreground z-10">End Date</span>
-              <Input
-                type="date"
-                className="h-10 bg-white border border-border focus-visible:ring-1 focus-visible:ring-[#0a66c2]/50 focus-visible:border-[#0a66c2]/50 rounded-sm text-sm font-medium text-foreground shadow-sm transition-all relative"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-              />
-            </div>
-          </div>
+    <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
+      <div className="flex items-center justify-between border-b border-border/40 pb-2">
+        <div>
+          <h2 className="text-xl font-bold tracking-tight">Employee Directory</h2>
         </div>
-
-        <div className="flex items-center gap-3 w-full md:w-auto">
-          <div className="flex items-center bg-muted/40 p-1 rounded-sm border border-border/30 h-10">
-            {[
-              { label: 'All', value: 'ALL' },
-              { label: 'Permanent', value: 'FULL_TIME' },
-              { label: 'Contract', value: 'CONTRACT' },
-            ].map((item) => (
-              <button
-                key={item.value}
-                onClick={() => setFilter(item.value)}
-                className={cn(
-                  "px-5 py-1.5 rounded-sm text-[11px] font-bold transition-all active:scale-95 whitespace-nowrap h-full flex items-center",
-                  filter === item.value
-                    ? "bg-white text-[#0a66c2] shadow-sm border border-border/20"
-                    : "text-muted-foreground hover:text-foreground hover:bg-white/30"
-                )}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger className="h-10 px-4 flex items-center justify-center rounded-sm text-[11px] font-bold border border-border bg-white hover:bg-blue-50/30 text-muted-foreground transition-all outline-none shadow-sm">
-              More <MoreHorizontal className="ml-2 h-3.5 w-3.5" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="rounded-sm border-border/50 bg-card/95 backdrop-blur-md shadow-xl min-w-[160px]">
-              <DropdownMenuItem onClick={() => setFilter('INTERN')} className="text-xs font-semibold py-2.5 cursor-pointer focus:bg-[#0a66c2]/10 focus:text-[#0a66c2]">
-                Interns
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setFilter('ON_LEAVE')} className="text-xs font-semibold py-2.5 cursor-pointer focus:bg-[#0a66c2]/10 focus:text-[#0a66c2]">
-                On Leave
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setFilter('TERMINATED')} className="text-xs font-semibold py-2.5 cursor-pointer focus:bg-[#0a66c2]/10 focus:text-[#0a66c2]">
-                Terminated
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger className="h-10 px-4 flex items-center justify-center gap-2 rounded-sm text-[11px] font-bold border border-border bg-white hover:bg-blue-50/30 text-muted-foreground transition-all outline-none whitespace-nowrap shadow-sm">
-              <Calendar className="h-3.5 w-3.5 text-[#0a66c2]" />
-              {ordering === '-created_at' ? 'Newest' : 'Oldest'}
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="rounded-sm border-border/50 bg-card/95 backdrop-blur-md shadow-xl min-w-[160px]">
-              <DropdownMenuItem 
-                onClick={() => setOrdering('-created_at')} 
-                className={cn("text-xs font-semibold py-2.5 cursor-pointer focus:bg-[#0a66c2]/10", ordering === '-created_at' ? "text-[#0a66c2] bg-[#0a66c2]/5" : "")}
-              >
-                Newest First
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={() => setOrdering('created_at')} 
-                className={cn("text-xs font-semibold py-2.5 cursor-pointer focus:bg-[#0a66c2]/10", ordering === 'created_at' ? "text-[#0a66c2] bg-[#0a66c2]/5" : "")}
-              >
-                Oldest First
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
+        <div className="flex items-center gap-2">
           <Button
             onClick={() => setIsAddModalOpen(true)}
             data-agent="add-employee-button"
@@ -233,8 +238,150 @@ export function EmployeesTab() {
           >
             <UserPlus className="mr-2 h-3.5 w-3.5" /> Add Employee
           </Button>
+          <Button
+            type="button"
+            onClick={handleResetFilters}
+            variant="outline"
+            data-agent="reset-employee-filters-button"
+            className="border-border text-muted-foreground hover:bg-red-50/20 hover:text-red-600 hover:border-red-200 shadow-sm rounded-sm text-[11px] font-semibold px-4 h-10 transition-all whitespace-nowrap flex items-center gap-1.5"
+          >
+            <RefreshCw className="h-3.5 w-3.5" /> Reset Filters
+          </Button>
         </div>
       </div>
+
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleApplyFilters();
+        }}
+        className="flex flex-col xl:flex-row items-center justify-between gap-4 w-full"
+      >
+        {/* Search Filter */}
+        <div className="relative flex-1 w-full max-w-sm">
+          <button
+            type="submit"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-[#0a66c2]/60 hover:text-[#0a66c2] transition-colors z-10"
+            title="Click to search"
+            data-agent="employee-search-button"
+          >
+            <Search className="h-4 w-4" />
+          </button>
+          <Input
+            placeholder="Search directory..."
+            className="pl-10 h-10 bg-white border border-border ring-offset-background focus-visible:ring-1 focus-visible:ring-[#0a66c2]/50 focus-visible:border-[#0a66c2]/50 rounded-sm text-sm font-medium placeholder:text-muted-foreground/60 shadow-sm transition-all"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+          />
+        </div>
+
+        {/* Dynamic Dropdowns & Date Filters */}
+        <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto xl:justify-end">
+          {/* Employment Type Selector Dropdown */}
+          <div className="relative w-36">
+            <select
+              value={filterInput}
+              onChange={(e) => setFilterInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleApplyFilters();
+              }}
+              className="h-10 w-full bg-white border border-border focus-visible:ring-1 focus-visible:ring-[#0a66c2]/50 focus-visible:border-[#0a66c2]/50 rounded-sm text-[11px] font-bold text-muted-foreground px-3 shadow-sm transition-all focus:outline-none cursor-pointer"
+            >
+              <option value="ALL">All Types</option>
+              <option value="FULL_TIME">Permanent</option>
+              <option value="CONTRACT">Contract</option>
+              <option value="INTERN">Intern</option>
+              <option value="ON_LEAVE">On Leave</option>
+              <option value="TERMINATED">Terminated</option>
+            </select>
+          </div>
+
+          {/* Designation Filter Dropdown */}
+          <div className="relative w-40">
+            <select
+              value={designationInput}
+              onChange={(e) => setDesignationInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleApplyFilters();
+              }}
+              className="h-10 w-full bg-white border border-border focus-visible:ring-1 focus-visible:ring-[#0a66c2]/50 focus-visible:border-[#0a66c2]/50 rounded-sm text-[11px] font-bold text-muted-foreground px-3 shadow-sm transition-all focus:outline-none cursor-pointer"
+            >
+              <option value="ALL">All Designations</option>
+              {designations.map((d: any) => (
+                <option key={d.id} value={d.id}>{d.title}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Department Filter Dropdown */}
+          <div className="relative w-40">
+            <select
+              value={departmentInput}
+              onChange={(e) => setDepartmentInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleApplyFilters();
+              }}
+              className="h-10 w-full bg-white border border-border focus-visible:ring-1 focus-visible:ring-[#0a66c2]/50 focus-visible:border-[#0a66c2]/50 rounded-sm text-[11px] font-bold text-muted-foreground px-3 shadow-sm transition-all focus:outline-none cursor-pointer"
+            >
+              <option value="ALL">All Departments</option>
+              {departments.map((d: any) => (
+                <option key={d.id} value={d.id}>{d.name}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Sort / Ordering */}
+          <DropdownMenu>
+            <DropdownMenuTrigger className="h-10 px-4 flex items-center justify-center gap-2 rounded-sm text-[11px] font-bold border border-border bg-white hover:bg-blue-50/30 text-muted-foreground transition-all outline-none whitespace-nowrap shadow-sm">
+              <Calendar className="h-3.5 w-3.5 text-[#0a66c2]" />
+              {orderingInput === '-created_at' ? 'Newest' : 'Oldest'}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="rounded-sm border-border/50 bg-card/95 backdrop-blur-md shadow-xl min-w-[160px]">
+              <DropdownMenuItem
+                onClick={() => handleSortChange('-created_at')}
+                className={cn("text-xs font-semibold py-2.5 cursor-pointer focus:bg-[#0a66c2]/10", orderingInput === '-created_at' ? "text-[#0a66c2] bg-[#0a66c2]/5" : "")}
+              >
+                Newest First
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => handleSortChange('created_at')}
+                className={cn("text-xs font-semibold py-2.5 cursor-pointer focus:bg-[#0a66c2]/10", orderingInput === 'created_at' ? "text-[#0a66c2] bg-[#0a66c2]/5" : "")}
+              >
+                Oldest First
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Date range filters (moved to the last position) */}
+          <div className="flex items-center gap-2">
+            <div className="relative w-32">
+              <span className="absolute -top-2.5 left-2 bg-white px-1 text-[9px] font-bold text-muted-foreground z-10">Start Date</span>
+              <Input
+                type="date"
+                className="h-10 bg-white border border-border focus-visible:ring-1 focus-visible:ring-[#0a66c2]/50 focus-visible:border-[#0a66c2]/50 rounded-sm text-xs font-medium text-foreground shadow-sm transition-all relative"
+                value={startDateInput}
+                onChange={(e) => setStartDateInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleApplyFilters();
+                }}
+              />
+            </div>
+            <span className="text-muted-foreground/50 font-medium">-</span>
+            <div className="relative w-32">
+              <span className="absolute -top-2.5 left-2 bg-white px-1 text-[9px] font-bold text-muted-foreground z-10">End Date</span>
+              <Input
+                type="date"
+                className="h-10 bg-white border border-border focus-visible:ring-1 focus-visible:ring-[#0a66c2]/50 focus-visible:border-[#0a66c2]/50 rounded-sm text-xs font-medium text-foreground shadow-sm transition-all relative"
+                value={endDateInput}
+                onChange={(e) => setEndDateInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleApplyFilters();
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      </form>
 
       {isLoading ? renderSkeletons() : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -251,7 +398,10 @@ export function EmployeesTab() {
                     </Avatar>
                     <div className="min-w-0">
                       <CardTitle className="text-[15px] font-bold tracking-tight truncate group-hover:text-[#0a66c2] transition-colors">{employee.first_name} {employee.last_name}</CardTitle>
-                      <p className="text-[11px] font-medium text-[#0a66c2]/70 mt-0.5">{employee.designation_detail?.title || 'Team Member'}</p>
+                      <p className="text-[11px] font-medium text-[#0a66c2]/70 mt-0.5">
+                        {employee.designation_detail?.title || 'Team Member'}
+                        {employee.department_detail?.name && ` | ${employee.department_detail.name}`}
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5">
@@ -269,8 +419,20 @@ export function EmployeesTab() {
                         <MoreHorizontal className="h-4 w-4" />
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="rounded-sm border-border/50 bg-card/95 backdrop-blur-md min-w-[140px] shadow-xl">
-                        <DropdownMenuItem className="text-xs font-semibold py-2 cursor-pointer focus:bg-[#0a66c2]/10 focus:text-[#0a66c2] transition-colors rounded-none">
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setSelectedEmployeeId(employee.id);
+                          }}
+                          className="text-xs font-semibold py-2 cursor-pointer focus:bg-[#0a66c2]/10 focus:text-[#0a66c2] transition-colors rounded-none"
+                        >
                           <User className="mr-2 h-3.5 w-3.5 opacity-60" /> Details
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => sendCredentialsMutation.mutate(employee.id)}
+                          disabled={sendCredentialsMutation.isPending}
+                          className="text-xs font-semibold py-2 cursor-pointer focus:bg-[#0a66c2]/10 focus:text-[#0a66c2] transition-colors rounded-none"
+                        >
+                          <Mail className="mr-2 h-3.5 w-3.5 opacity-60" /> Send Email Link
                         </DropdownMenuItem>
                         <DropdownMenuItem className="text-xs font-semibold py-2 cursor-pointer focus:bg-[#0a66c2]/10 focus:text-[#0a66c2] transition-colors rounded-none">
                           <BrainCircuit className="mr-2 h-3.5 w-3.5 opacity-60" /> Interview

@@ -6,8 +6,16 @@ export const authService = {
     return api.post<BaseAPIResponse<AuthResponsePayload>>('/auth/login/', { email, password });
   },
 
+  employeeLogin: (email: string, password: string): Promise<BaseAPIResponse<AuthResponsePayload>> => {
+    return api.post<BaseAPIResponse<AuthResponsePayload>>('/employees/login/', { email, password });
+  },
+
   logout: (): Promise<BaseAPIResponse<any>> => {
     return api.post<BaseAPIResponse<any>>('/auth/logout/', {});
+  },
+
+  employeeLogout: (): Promise<BaseAPIResponse<any>> => {
+    return api.post<BaseAPIResponse<any>>('/employees/logout/', {});
   },
 
   // Refresh is handled silently by the axios interceptor.

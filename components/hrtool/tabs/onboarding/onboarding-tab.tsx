@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { hrmsService } from '@/services/hrms.service';
+import { hrEmployeeService } from '@/services/hr';
 import { jobsService } from '@/services/jobs.service';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -43,8 +43,8 @@ export function OnboardingTab() {
 
   const { data: employees, isLoading } = useQuery({
     queryKey: ['onboarding-employees', search, ordering, startDate, endDate],
-    queryFn: () => hrmsService.getEmployees({ 
-      search, 
+    queryFn: () => hrEmployeeService.getEmployees({
+      search,
       status: 'ON_BOARDING',
       ordering,
       joining_date__gte: startDate || undefined,
@@ -53,7 +53,7 @@ export function OnboardingTab() {
   });
 
   const activateEmployeeMutation = useMutation({
-    mutationFn: (id: string) => hrmsService.updateEmployee(id, { status: 'ACTIVE' }),
+    mutationFn: (id: string) => hrEmployeeService.updateEmployee(id, { status: 'ACTIVE' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['onboarding-employees'] });
       queryClient.invalidateQueries({ queryKey: ['employees'] });
@@ -78,7 +78,7 @@ export function OnboardingTab() {
 
   const updateEmployeeMutation = useMutation({
     mutationFn: ({ id, employment_type }: { id: string; employment_type: string }) =>
-      hrmsService.updateEmployee(id, { employment_type }),
+      hrEmployeeService.updateEmployee(id, { employment_type }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['onboarding-employees'] });
       queryClient.invalidateQueries({ queryKey: ['employees'] });
@@ -88,7 +88,7 @@ export function OnboardingTab() {
   });
 
   const deleteEmployeeMutation = useMutation({
-    mutationFn: (id: string) => hrmsService.deleteEmployee(id),
+    mutationFn: (id: string) => hrEmployeeService.deleteEmployee(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['onboarding-employees'] });
       queryClient.invalidateQueries({ queryKey: ['employees'] });
@@ -142,17 +142,41 @@ export function OnboardingTab() {
       </div>
 
       <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-        <div className="flex flex-1 items-center gap-3 w-full">
-          <div className="relative flex-1 max-w-sm">
+        <div className="flex flex-wrap items-center gap-3 w-full">
+          <div className="relative flex-1 max-w-sm min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#0a66c2]/60" />
             <Input
               placeholder="Search directory..."
               className="pl-10 h-10 bg-white border border-border ring-offset-background focus-visible:ring-1 focus-visible:ring-[#0a66c2]/50 focus-visible:border-[#0a66c2]/50 rounded-sm text-sm font-medium placeholder:text-muted-foreground/60 shadow-sm transition-all"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              data-agent="onboarding-search-input"
             />
           </div>
-          
+
+          <DropdownMenu>
+            <DropdownMenuTrigger data-agent="onboarding-sort-trigger" className="h-10 px-4 flex items-center justify-center gap-2 rounded-sm text-[11px] font-bold border border-border/60 bg-white hover:bg-blue-50/30 text-muted-foreground transition-all outline-none whitespace-nowrap shadow-sm">
+              <Calendar className="h-3.5 w-3.5 text-[#0a66c2]" />
+              {ordering === '-created_at' ? 'Newest' : 'Oldest'}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="rounded-sm border-border/50 bg-card/95 backdrop-blur-md shadow-xl min-w-[160px]">
+              <DropdownMenuItem
+                onClick={() => setOrdering('-created_at')}
+                data-agent="onboarding-sort-newest-btn"
+                className={cn("text-xs font-semibold py-2.5 cursor-pointer focus:bg-[#0a66c2]/10", ordering === '-created_at' ? "text-[#0a66c2] bg-[#0a66c2]/5" : "")}
+              >
+                Newest First
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => setOrdering('created_at')}
+                data-agent="onboarding-sort-oldest-btn"
+                className={cn("text-xs font-semibold py-2.5 cursor-pointer focus:bg-[#0a66c2]/10", ordering === 'created_at' ? "text-[#0a66c2] bg-[#0a66c2]/5" : "")}
+              >
+                Oldest First
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           <div className="flex items-center gap-2">
             <div className="relative w-36">
               <span className="absolute -top-2.5 left-2 bg-white px-1 text-[10px] font-bold text-muted-foreground z-10">Start Date</span>
@@ -161,6 +185,7 @@ export function OnboardingTab() {
                 className="h-10 bg-white border border-border focus-visible:ring-1 focus-visible:ring-[#0a66c2]/50 focus-visible:border-[#0a66c2]/50 rounded-sm text-sm font-medium text-foreground shadow-sm transition-all relative"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
+                data-agent="onboarding-start-date-input"
               />
             </div>
             <span className="text-muted-foreground/50 font-medium">-</span>
@@ -171,32 +196,10 @@ export function OnboardingTab() {
                 className="h-10 bg-white border border-border focus-visible:ring-1 focus-visible:ring-[#0a66c2]/50 focus-visible:border-[#0a66c2]/50 rounded-sm text-sm font-medium text-foreground shadow-sm transition-all relative"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
+                data-agent="onboarding-end-date-input"
               />
             </div>
           </div>
-        </div>
-
-        <div className="flex items-center gap-3 w-full md:w-auto">
-          <DropdownMenu>
-            <DropdownMenuTrigger className="h-10 px-4 flex items-center justify-center gap-2 rounded-sm text-[11px] font-bold border border-border/60 bg-white hover:bg-blue-50/30 text-muted-foreground transition-all outline-none whitespace-nowrap shadow-sm">
-              <Calendar className="h-3.5 w-3.5 text-[#0a66c2]" />
-              {ordering === '-created_at' ? 'Newest' : 'Oldest'}
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="rounded-sm border-border/50 bg-card/95 backdrop-blur-md shadow-xl min-w-[160px]">
-              <DropdownMenuItem 
-                onClick={() => setOrdering('-created_at')} 
-                className={cn("text-xs font-semibold py-2.5 cursor-pointer focus:bg-[#0a66c2]/10", ordering === '-created_at' ? "text-[#0a66c2] bg-[#0a66c2]/5" : "")}
-              >
-                Newest First
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={() => setOrdering('created_at')} 
-                className={cn("text-xs font-semibold py-2.5 cursor-pointer focus:bg-[#0a66c2]/10", ordering === 'created_at' ? "text-[#0a66c2] bg-[#0a66c2]/5" : "")}
-              >
-                Oldest First
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
       </div>
 
@@ -222,6 +225,7 @@ export function OnboardingTab() {
                     {employee.job_application && (
                       <button
                         onClick={() => rescheduleMutation.mutate(employee.job_application)}
+                        data-agent={`onboarding-move-back-btn-${employee.id}`}
                         className="w-8 h-8 flex items-center justify-center rounded-sm bg-purple-600/5 text-purple-600 hover:bg-purple-600 hover:text-white transition-all active:scale-95 border border-purple-600/10"
                         title="Move back to Recruitment"
                       >
@@ -229,19 +233,20 @@ export function OnboardingTab() {
                       </button>
                     )}
                     <DropdownMenu>
-                      <DropdownMenuTrigger className="w-8 h-8 flex items-center justify-center rounded-sm bg-muted/30 text-muted-foreground hover:text-foreground transition-all border border-border/30 outline-none">
+                      <DropdownMenuTrigger data-agent={`onboarding-more-trigger-${employee.id}`} className="w-8 h-8 flex items-center justify-center rounded-sm bg-muted/30 text-muted-foreground hover:text-foreground transition-all border border-border/30 outline-none">
                         <MoreHorizontal className="h-4 w-4" />
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="rounded-sm border-border/50 bg-card/95 backdrop-blur-md min-w-[140px] shadow-xl">
-                        <DropdownMenuItem className="text-xs font-semibold py-2 cursor-pointer focus:bg-[#0a66c2]/10 focus:text-[#0a66c2] transition-colors rounded-none">
+                        <DropdownMenuItem data-agent={`onboarding-details-btn-${employee.id}`} className="text-xs font-semibold py-2 cursor-pointer focus:bg-[#0a66c2]/10 focus:text-[#0a66c2] transition-colors rounded-none">
                           <User className="mr-2 h-3.5 w-3.5 opacity-60" /> Details
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="text-xs font-semibold py-2 cursor-pointer focus:bg-[#0a66c2]/10 focus:text-[#0a66c2] transition-colors rounded-none">
+                        <DropdownMenuItem data-agent={`onboarding-interview-btn-${employee.id}`} className="text-xs font-semibold py-2 cursor-pointer focus:bg-[#0a66c2]/10 focus:text-[#0a66c2] transition-colors rounded-none">
                           <BrainCircuit className="mr-2 h-3.5 w-3.5 opacity-60" /> Interview
                         </DropdownMenuItem>
                         <DropdownMenuSeparator className="bg-border/40" />
                         <DropdownMenuItem
                           onClick={() => setDeleteTarget({ id: employee.id, name: `${employee.first_name} ${employee.last_name}` })}
+                          data-agent={`onboarding-delete-btn-${employee.id}`}
                           className="text-xs font-semibold py-2 cursor-pointer text-red-600 focus:bg-red-50 focus:text-red-700 transition-colors rounded-none"
                         >
                           <Trash2 className="mr-2 h-3.5 w-3.5 opacity-60" /> Delete
@@ -271,8 +276,9 @@ export function OnboardingTab() {
                     </Badge>
                   </div>
 
-                  <Button 
+                  <Button
                     onClick={() => setActivateTarget({ id: employee.id, name: `${employee.first_name} ${employee.last_name}` })}
+                    data-agent={`onboarding-add-to-employees-btn-${employee.id}`}
                     className="w-full bg-[#0a66c2]/10 hover:bg-[#0a66c2]/20 text-[#0a66c2] border border-[#0a66c2]/20 shadow-none font-bold tracking-wide transition-all h-9 text-xs rounded-sm"
                   >
                     <UserCheck className="mr-2 h-4 w-4" /> Add to Employees
@@ -294,12 +300,13 @@ export function OnboardingTab() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-2">
-            <AlertDialogCancel className="rounded-sm text-xs font-semibold h-9 px-5 border-border/60 hover:bg-muted/50">
+            <AlertDialogCancel data-agent="onboarding-delete-cancel-btn" className="rounded-sm text-xs font-semibold h-9 px-5 border-border/60 hover:bg-muted/50">
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteConfirm}
               disabled={deleteEmployeeMutation.isPending}
+              data-agent="onboarding-delete-confirm-btn"
               className="rounded-sm text-xs font-semibold h-9 px-5 bg-red-600 text-white hover:bg-red-700 shadow-lg shadow-red-500/20 transition-all"
             >
               {deleteEmployeeMutation.isPending ? 'Removing...' : 'Remove Employee'}
@@ -318,12 +325,13 @@ export function OnboardingTab() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-2">
-            <AlertDialogCancel className="rounded-sm text-xs font-semibold h-9 px-5 border-border/60 hover:bg-muted/50">
+            <AlertDialogCancel data-agent="onboarding-add-cancel-btn" className="rounded-sm text-xs font-semibold h-9 px-5 border-border/60 hover:bg-muted/50">
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleActivateConfirm}
               disabled={activateEmployeeMutation.isPending}
+              data-agent="onboarding-add-confirm-btn"
               className="rounded-sm text-xs font-semibold h-9 px-5 bg-[#0a66c2] text-white hover:bg-[#004182] shadow-lg shadow-blue-500/20 transition-all"
             >
               {activateEmployeeMutation.isPending ? 'Adding...' : 'Yes, Add to Employees'}

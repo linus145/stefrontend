@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { hrmsService } from '@/services/hrms.service';
+import { hrPerformanceService } from '@/services/hr';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Target, TrendingUp, Award, MessageSquare, Star, ArrowUpRight } from 'lucide-react';
@@ -10,12 +10,12 @@ import { Badge } from '@/components/ui/badge';
 export function PerformanceTab() {
   const { data: reviews, isLoading } = useQuery({
     queryKey: ['performance-reviews'],
-    queryFn: () => hrmsService.getReviews(),
+    queryFn: () => hrPerformanceService.getReviews(),
   });
 
   const { data: goals } = useQuery({
     queryKey: ['performance-goals'],
-    queryFn: () => hrmsService.getGoals(),
+    queryFn: () => hrPerformanceService.getGoals(),
   });
 
   return (
@@ -25,7 +25,7 @@ export function PerformanceTab() {
           <h2 className="text-2xl font-bold tracking-tight">Performance Tracking</h2>
           <p className="text-sm text-muted-foreground">Monitor KPIs, goals, and employee reviews.</p>
         </div>
-        <Button className="bg-[#0a66c2] hover:bg-[#004182] text-white shadow-lg shadow-blue-500/20 rounded-sm">
+        <Button data-agent="performance-new-review-btn" className="bg-[#0a66c2] hover:bg-[#004182] text-white shadow-lg shadow-blue-500/20 rounded-sm">
           <Star className="mr-2 h-4 w-4" /> New Review
         </Button>
       </div>
@@ -35,7 +35,7 @@ export function PerformanceTab() {
           <section>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Active Goals</h3>
-              <Button variant="link" className="text-blue-600 text-xs font-bold uppercase p-0 h-auto">View All</Button>
+              <Button data-agent="performance-view-all-goals-btn" variant="link" className="text-blue-600 text-xs font-bold uppercase p-0 h-auto">View All</Button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {goals?.data?.results?.map((goal: any) => (
@@ -57,8 +57,8 @@ export function PerformanceTab() {
                         <span className="text-blue-600">{goal.progress}%</span>
                       </div>
                       <div className="h-1.5 w-full bg-muted rounded-none overflow-hidden">
-                        <div 
-                          className="h-full bg-blue-500 transition-all duration-1000" 
+                        <div
+                          className="h-full bg-blue-500 transition-all duration-1000"
                           style={{ width: `${goal.progress}%` }}
                         />
                       </div>
@@ -92,7 +92,7 @@ export function PerformanceTab() {
                       </div>
                       <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Rating: {review.rating}/5</p>
                     </div>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-sm hover:bg-blue-500/10 hover:text-blue-600">
+                    <Button data-agent={`performance-review-details-btn-${review.id}`} variant="ghost" size="icon" className="h-8 w-8 rounded-sm hover:bg-blue-500/10 hover:text-blue-600">
                       <ArrowUpRight className="h-4 w-4" />
                     </Button>
                   </div>
@@ -132,7 +132,7 @@ export function PerformanceTab() {
             </CardHeader>
             <CardContent>
               <p className="text-xs text-muted-foreground mb-4">12 new feedbacks collected this week from peer reviews.</p>
-              <Button variant="link" className="text-blue-600 p-0 h-auto text-xs font-bold uppercase tracking-wider">
+              <Button data-agent="performance-generate-feedback-report-btn" variant="link" className="text-blue-600 p-0 h-auto text-xs font-bold uppercase tracking-wider">
                 Generate Report →
               </Button>
             </CardContent>

@@ -1,12 +1,14 @@
 'use client';
 
 import React from 'react';
-import { 
-  Users, 
-  Calendar, 
-  FileText, 
-  TrendingUp, 
-  ArrowUpRight, 
+import { useQuery } from '@tanstack/react-query';
+import { hrEmployeeService, hrOrgService, hrLeaveService } from '@/services/hr';
+import {
+  Users,
+  Calendar,
+  FileText,
+  TrendingUp,
+  ArrowUpRight,
   ArrowDownRight,
   Clock,
   CheckCircle2,
@@ -15,40 +17,67 @@ import {
 import { cn } from '@/lib/utils';
 
 export function DashboardTab() {
+  const { data: employeesRes, isLoading: employeesLoading } = useQuery({
+    queryKey: ['dashboard-employees'],
+    queryFn: () => hrEmployeeService.getEmployees(),
+  });
+
+  const { data: departmentsRes, isLoading: deptsLoading } = useQuery({
+    queryKey: ['dashboard-departments'],
+    queryFn: () => hrOrgService.getDepartments(),
+  });
+
+  const { data: designationsRes, isLoading: desigsLoading } = useQuery({
+    queryKey: ['dashboard-designations'],
+    queryFn: () => hrOrgService.getDesignations(),
+  });
+
+  const { data: leaveRequestsRes, isLoading: leavesLoading } = useQuery({
+    queryKey: ['dashboard-leaves'],
+    queryFn: () => hrLeaveService.getLeaveRequests(),
+  });
+
+  const totalEmployees = employeesRes?.data?.count ?? employeesRes?.data?.results?.length ?? 0;
+  const totalDepartments = departmentsRes?.data?.count ?? departmentsRes?.data?.results?.length ?? 0;
+  const totalDesignations = designationsRes?.data?.count ?? designationsRes?.data?.results?.length ?? 0;
+  const pendingLeaves = leaveRequestsRes?.data?.results?.filter((r: any) => r.status === 'PENDING' || r.status === 'pending')?.length ?? 0;
+
   const stats = [
     {
       label: 'Total Employees',
-      value: '124',
-      change: '+12%',
+      value: totalEmployees.toString(),
+      change: `+${totalEmployees}`,
       trend: 'up',
       icon: Users,
       color: 'blue'
     },
     {
-      label: 'On Leave Today',
-      value: '8',
-      change: '-2',
-      trend: 'down',
+      label: 'Total Departments',
+      value: totalDepartments.toString(),
+      change: 'Active',
+      trend: 'up',
       icon: FileText,
       color: 'orange'
     },
     {
-      label: 'Present Today',
-      value: '112',
-      change: '92%',
+      label: 'Total Designations',
+      value: totalDesignations.toString(),
+      change: 'Active',
       trend: 'up',
       icon: Calendar,
       color: 'green'
     },
     {
-      label: 'Pending Requests',
-      value: '15',
-      change: '+5',
-      trend: 'up',
+      label: 'Pending Leave Requests',
+      value: pendingLeaves.toString(),
+      change: pendingLeaves > 0 ? 'Urgent' : 'Clear',
+      trend: pendingLeaves > 0 ? 'down' : 'up',
       icon: Clock,
       color: 'purple'
     }
   ];
+
+  const isLoading = employeesLoading || deptsLoading || desigsLoading || leavesLoading;
 
   const recentActivities = [
     {
@@ -88,7 +117,7 @@ export function DashboardTab() {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat, i) => (
-          <div 
+          <div
             key={i}
             className="group p-6 bg-card border border-border rounded-sm hover:border-blue-500/50 transition-all hover:shadow-lg hover:shadow-blue-500/5"
           >
@@ -111,7 +140,11 @@ export function DashboardTab() {
               </div>
             </div>
             <div className="mt-4">
-              <h3 className="text-3xl font-bold tracking-tight">{stat.value}</h3>
+              {isLoading ? (
+                <div className="h-9 w-12 bg-muted/60 animate-pulse rounded-sm" />
+              ) : (
+                <h3 className="text-3xl font-bold tracking-tight">{stat.value}</h3>
+              )}
               <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider mt-1">{stat.label}</p>
             </div>
           </div>
@@ -124,7 +157,7 @@ export function DashboardTab() {
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold">Recent Activity</h2>
-            <button className="text-xs font-semibold text-blue-600 hover:underline">View all</button>
+            <button data-agent="dashboard-view-all-activities-btn" className="text-xs font-semibold text-blue-600 hover:underline">View all</button>
           </div>
           <div className="bg-card border border-border rounded-sm divide-y divide-border">
             {recentActivities.map((activity) => (
@@ -156,12 +189,12 @@ export function DashboardTab() {
             <p className="text-sm font-medium text-white/80">Organization growth</p>
             <h3 className="text-2xl font-bold mt-1">+15% this month</h3>
             <div className="mt-6 flex gap-2">
-              <button className="px-4 py-2 bg-white text-blue-600 text-xs font-bold rounded-sm hover:bg-blue-50 transition-colors">
+              <button data-agent="dashboard-generate-growth-report-btn" className="px-4 py-2 bg-white text-blue-600 text-xs font-bold rounded-sm hover:bg-blue-50 transition-colors">
                 Generate Report
               </button>
             </div>
           </div>
-          
+
           <div className="bg-card border border-border rounded-sm p-6">
             <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-4">Upcoming events</h3>
             <div className="space-y-4">
@@ -211,7 +244,7 @@ export function DashboardTab() {
                   </div>
                 </div>
               ))}
-              <button className="w-full mt-2 py-2 text-[10px] font-bold text-blue-600 hover:bg-blue-500/5 rounded-sm transition-colors border border-dashed border-blue-500/20">
+              <button data-agent="dashboard-view-leave-calendar-btn" className="w-full mt-2 py-2 text-[10px] font-bold text-blue-600 hover:bg-blue-500/5 rounded-sm transition-colors border border-dashed border-blue-500/20">
                 View Leave Calendar
               </button>
             </div>

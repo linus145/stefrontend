@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { hrmsService } from '@/services/hrms.service';
+import { hrPayrollService } from '@/services/hr';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CreditCard, Play, FileDown, Download, CheckCircle2, AlertCircle } from 'lucide-react';
@@ -12,11 +12,11 @@ export function PayrollTab() {
   const queryClient = useQueryClient();
   const { data: payrolls, isLoading } = useQuery({
     queryKey: ['payrolls'],
-    queryFn: () => hrmsService.getPayrolls(),
+    queryFn: () => hrPayrollService.getPayrolls(),
   });
 
   const processMutation = useMutation({
-    mutationFn: (id: string) => hrmsService.processPayroll(id),
+    mutationFn: (id: string) => hrPayrollService.processPayroll(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['payrolls'] });
       toast.success('Payroll processed successfully');
@@ -33,7 +33,7 @@ export function PayrollTab() {
           <h2 className="text-2xl font-bold tracking-tight">Payroll Management</h2>
           <p className="text-sm text-muted-foreground">Process monthly payroll and generate payslips.</p>
         </div>
-        <Button className="bg-[#0a66c2] hover:bg-[#004182] text-white shadow-lg shadow-blue-500/20 rounded-sm">
+        <Button data-agent="payroll-start-new-run-btn" className="bg-[#0a66c2] hover:bg-[#004182] text-white shadow-lg shadow-blue-500/20 rounded-sm">
           <Play className="mr-2 h-4 w-4" /> Start New Run
         </Button>
       </div>
@@ -54,7 +54,7 @@ export function PayrollTab() {
                       <p className="text-xs text-muted-foreground">Processed on {new Date(run.processed_at || run.created_at).toLocaleDateString()}</p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center gap-6">
                     <div className="text-right">
                       <p className="text-sm font-bold text-blue-600">₹{run.total_net_amount?.toLocaleString()}</p>
@@ -62,12 +62,13 @@ export function PayrollTab() {
                     </div>
                     <div className="flex items-center gap-2">
                       {run.status === 'processed' ? (
-                        <Button variant="outline" size="sm" className="text-xs h-8 border-blue-500/20 text-blue-600 hover:bg-blue-500/5 rounded-sm">
+                        <Button data-agent={`payroll-report-btn-${run.id}`} variant="outline" size="sm" className="text-xs h-8 border-blue-500/20 text-blue-600 hover:bg-blue-500/5 rounded-sm">
                           <FileDown className="mr-1.5 h-3.5 w-3.5" /> Reports
                         </Button>
                       ) : (
-                        <Button 
-                          size="sm" 
+                        <Button
+                          data-agent={`payroll-process-btn-${run.id}`}
+                          size="sm"
                           className="h-8 bg-[#0a66c2] hover:bg-[#004182] rounded-sm"
                           onClick={() => processMutation.mutate(run.id)}
                           disabled={processMutation.isPending}
@@ -113,7 +114,7 @@ export function PayrollTab() {
             </CardHeader>
             <CardContent>
               <p className="text-xs text-muted-foreground mb-4">3 employees are missing salary structures and won't be included in next run.</p>
-              <Button variant="link" className="text-blue-600 p-0 h-auto text-xs font-bold uppercase tracking-wider">
+              <Button data-agent="payroll-fix-structures-btn" variant="link" className="text-blue-600 p-0 h-auto text-xs font-bold uppercase tracking-wider">
                 Fix Now →
               </Button>
             </CardContent>

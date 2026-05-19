@@ -12,6 +12,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string, redirectTo?: string) => Promise<void>;
+  employeeLogin: (email: string, password: string, redirectTo?: string) => Promise<void>;
   googleLogin: (token: string, redirectTo?: string) => Promise<void>;
   requestOtp: (email: string) => Promise<void>;
   verifyOtp: (email: string, otp: string, redirectTo?: string) => Promise<void>;
@@ -52,6 +53,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Re-enabled toast for all errors as per user request
       toast.error('Login Failed', {
         description: error.response?.data?.detail || error.data?.detail || error.data?.message || error.message || 'Invalid credentials.'
+      });
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const employeeLogin = async (email: string, password: string, redirectTo: string = '/employee/dashboard') => {
+    setIsLoading(true);
+    try {
+      const resp = await authService.employeeLogin(email, password);
+      setUser(resp.data.user);
+
+      toast.success('Successfully logged in to Employee Portal.');
+      router.replace(redirectTo);
+    } catch (error: any) {
+      toast.error('Employee Login Failed', {
+        description: error.response?.data?.error || error.data?.detail || error.data?.error || error.data?.message || error.message || 'Invalid credentials.'
       });
       throw error;
     } finally {
@@ -111,16 +130,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     setIsLoading(true);
+    const isEmployeePath = typeof window !== 'undefined' && window.location.pathname.startsWith('/employee');
     try {
-      await authService.logout();
+      if (isEmployeePath) {
+        await authService.employeeLogout();
+      } else {
+        await authService.logout();
+      }
     } catch (e) {
       console.error('Logout request failed natively', e);
     } finally {
       // Clear all state immediately
       setUser(null);
+      // Clean up any local demo storage
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('demo_employee_user');
+      }
       // Wait for the state to settle before pushing
+      const targetPath = isEmployeePath ? '/employee/login' : '/login';
       setTimeout(() => {
-        router.replace('/login');
+        router.replace(targetPath);
         setIsLoading(false);
         toast.info('Logged out securely.');
       }, 100);
@@ -162,7 +191,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [pathname, isLoading, user, router]);
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, googleLogin, requestOtp, verifyOtp, logout, fetchProfile }}>
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, employeeLogin, googleLogin, requestOtp, verifyOtp, logout, fetchProfile }}>
       {children}
     </AuthContext.Provider>
   );

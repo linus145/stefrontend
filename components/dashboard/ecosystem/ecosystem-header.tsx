@@ -36,10 +36,10 @@ export function EcosystemHeader() {
            </button>
         </div>
 
-        <button className="flex items-center gap-2.5 px-6 py-2.5 rounded-xl bg-white/[0.02] border border-[var(--border-primary)] text-[var(--text-secondary)] text-xs font-bold hover:bg-white/[0.05] hover:text-[var(--text-primary)] transition-all shadow-xl backdrop-blur-sm">
+        {/* <button className="flex items-center gap-2.5 px-6 py-2.5 rounded-xl bg-white/[0.02] border border-[var(--border-primary)] text-[var(--text-secondary)] text-xs font-bold hover:bg-white/[0.05] hover:text-[var(--text-primary)] transition-all shadow-xl backdrop-blur-sm">
            <Wallet className="w-4 h-4 text-[#b49cf8]" />
            Connect Wallet
-        </button>
+        </button> */}
 
         <div className="w-10 h-10 rounded-full border border-[var(--border-primary)] p-0.5 bg-gradient-to-br from-[#b49cf8]/20 to-transparent flex items-center justify-center cursor-pointer hover:scale-105 transition-transform">
            <div className="w-full h-full rounded-full bg-[var(--bg-primary)] flex items-center justify-center p-0.5 font-bold text-[#b49cf8]">

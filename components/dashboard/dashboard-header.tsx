@@ -360,12 +360,12 @@ export function DashboardHeader({
 
                   </div>
 
-                  <button className="hidden lg:flex items-center gap-2 px-3 xl:px-4 py-2 rounded-xl bg-primary/5 border border-primary/20 text-foreground text-[10px] font-bold hover:bg-primary/10 transition-all shadow-sm group whitespace-nowrap">
+                  {/* <button className="hidden lg:flex items-center gap-2 px-3 xl:px-4 py-2 rounded-xl bg-primary/5 border border-primary/20 text-foreground text-[10px] font-bold hover:bg-primary/10 transition-all shadow-sm group whitespace-nowrap">
                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 group-hover:animate-pulse" />
                      <span className="transition-all duration-300">
                         {isRightCollapsed ? 'Connect Wallet' : 'Wallet'}
                      </span>
-                  </button>
+                  </button> */}
 
                   {/* LinkedIn-style "Me" Section on the right */}
                   <div

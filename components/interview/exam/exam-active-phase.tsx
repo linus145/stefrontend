@@ -3,9 +3,11 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import dynamic from 'next/dynamic';
-import { ShieldAlertIcon, TerminalIcon } from 'lucide-react';
+import { ShieldAlertIcon, TerminalIcon, Sun, Moon } from 'lucide-react';
+import { useDashboardTheme } from '@/context/DashboardThemeContext';
 import { ExamData } from '@/types/exam-types';
 import { SurveillanceOverlay } from '../proctoring/surveillance-overlay';
+import { ExamVoiceVideoPhase } from './exam-voice-video-phase';
 
 // Import CodeEditor with SSR disabled to prevent hydration issues with Monaco
 const CodeEditor = dynamic(() => import('./code-editor').then(mod => mod.CodeEditor), {
@@ -41,6 +43,7 @@ export function ExamActivePhase({
   logViolation
 }: ExamActivePhaseProps) {
   const [showConfirmModal, setShowConfirmModal] = React.useState(false);
+  const { theme, toggleTheme, isDark } = useDashboardTheme();
 
   const currentRound = examData?.rounds[activeRoundIndex];
   const currentQuestion = currentRound?.questions[activeQuestionIndex];
@@ -74,6 +77,13 @@ export function ExamActivePhase({
                 style={{ width: `${totalQuestions > 0 ? (answeredQuestions / totalQuestions) * 100 : 0}%` }}
               />
             </div>
+            <button
+              onClick={toggleTheme}
+              className="w-9 h-9 rounded-sm border border-border bg-secondary/50 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
+              title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            >
+              {isDark ? <Sun size={15} /> : <Moon size={15} />}
+            </button>
             <button
               onClick={() => setShowConfirmModal(true)}
               disabled={isCompleting}
@@ -128,149 +138,174 @@ export function ExamActivePhase({
                 </p>
               </div>
 
-              {/* Question Pills */}
-              <div className="flex items-center gap-2 mb-8 flex-wrap">
-                {currentRound.questions.map((q, qIdx) => {
-                  const isAnswered = !!(q.candidate_answer || answers[q.id]);
-                  const isCurrent = qIdx === activeQuestionIndex;
-                  return (
-                    <button
-                      key={q.id}
-                      onClick={() => setActiveQuestionIndex(qIdx)}
-                      className={`w-9 h-9 rounded-sm text-xs font-bold transition-all ${isCurrent
-                        ? 'bg-primary text-primary-foreground shadow-sm ring-2 ring-primary/20 ring-offset-2 ring-offset-background'
-                        : isAnswered
-                          ? 'bg-primary/10 text-primary border border-primary/30'
-                          : 'bg-secondary text-muted-foreground border border-border hover:border-border/80'
-                        }`}
-                    >
-                      {qIdx + 1}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Question Card */}
-              <AnimatePresence mode="wait">
-                {currentQuestion && (
-                  <motion.div
-                    key={currentQuestion.id}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{ duration: 0.2 }}
-                    className="bg-card border border-border rounded-sm overflow-hidden shadow-sm"
-                  >
-                    {/* Question */}
-                    <div className="p-8 border-b border-border">
-                      <div className="flex items-start gap-4">
-                        <span className="shrink-0 w-8 h-8 rounded-sm bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">
-                          Q{activeQuestionIndex + 1}
-                        </span>
-                        <div className="flex-1">
-                          <p className="text-sm leading-relaxed whitespace-pre-wrap">{currentQuestion.question_text}</p>
-                          {currentQuestion.question_type === 'MCQ' && currentQuestion.mcq_options && (
-                            <div className="mt-4 space-y-2">
-                              {currentQuestion.mcq_options.map((opt: any, i: number) => (
-                                <label
-                                  key={i}
-                                  className={`flex items-center gap-3 p-3 rounded-sm border cursor-pointer transition-all ${answers[currentQuestion.id] === opt.label
-                                    ? 'bg-primary/10 border-primary/40 text-foreground shadow-sm'
-                                    : 'bg-secondary/40 border-border text-muted-foreground hover:border-border/80'
-                                    }`}
-                                >
-                                  <input
-                                    type="radio"
-                                    name={`q_${currentQuestion.id}`}
-                                    checked={answers[currentQuestion.id] === opt.label}
-                                    onChange={() => setAnswers(prev => ({ ...prev, [currentQuestion.id]: opt.label }))}
-                                    className="sr-only"
-                                  />
-                                  <span className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 ${answers[currentQuestion.id] === opt.label ? 'border-primary' : 'border-muted-foreground/30'
-                                    }`}>
-                                    {answers[currentQuestion.id] === opt.label && (
-                                      <span className="w-3 h-3 rounded-full bg-primary" />
-                                    )}
-                                  </span>
-                                  <span className="text-sm font-medium">{opt.label}) {opt.text}</span>
-                                </label>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    {/* Answer Area */}
-                    {currentQuestion.question_type === 'TEXT' && 
-                     currentRound.question_format !== 'CODE' && 
-                     !currentRound.designation_display.toLowerCase().includes('coding') && (
-                      <div className="p-8">
-                        <label className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold block mb-3">
-                          Your Answer
-                        </label>
-                        <textarea
-                          value={answers[currentQuestion.id] ?? currentQuestion.candidate_answer ?? ''}
-                          onChange={(e) => setAnswers(prev => ({ ...prev, [currentQuestion.id]: e.target.value }))}
-                          placeholder="Type your answer here..."
-                          className="w-full bg-background border border-input rounded-sm py-4 px-5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring transition-all resize-none shadow-sm min-h-[150px]"
-                        />
-                      </div>
-                    )}
-
-                    {(currentQuestion.question_type === 'CODE' || 
-                      currentRound.question_format === 'CODE' || 
-                      currentRound.designation_display.toLowerCase().includes('coding')) && (
-                      <div className="p-8">
-                        <label className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold block mb-3">
-                          Coding Environment ({currentRound.programming_language || 'Python'})
-                        </label>
-                        <CodeEditor 
-                          initialValue={answers[currentQuestion.id] ?? currentQuestion.candidate_answer ?? ''}
-                          language={currentRound.programming_language || 'python'}
-                          onChange={(val) => setAnswers(prev => ({ ...prev, [currentQuestion.id]: val || '' }))}
-                        />
-                        <p className="mt-4 text-[10px] text-muted-foreground italic flex items-center gap-2">
-                          <TerminalIcon size={10} />
-                          Note: You can run your code multiple times to verify the output before saving.
-                        </p>
-                      </div>
-                    )}
-
-                    {/* Actions */}
-                    <div className="px-8 py-5 bg-muted/30 border-t border-border flex items-center justify-between">
-                      <div className="flex items-center gap-3">
+              {currentRound.question_format === 'VIDEO' ? (
+                <ExamVoiceVideoPhase
+                  currentRound={currentRound}
+                  activeQuestionIndex={activeQuestionIndex}
+                  setActiveQuestionIndex={setActiveQuestionIndex}
+                  answers={answers}
+                  setAnswers={setAnswers}
+                  handleSubmitAnswer={handleSubmitAnswer}
+                  submitting={submitting}
+                  examData={examData}
+                  logViolation={logViolation}
+                />
+              ) : (
+                <>
+                  {/* Question Pills */}
+                  <div className="flex items-center gap-2 mb-8 flex-wrap">
+                    {currentRound.questions.map((q, qIdx) => {
+                      const isAnswered = !!(q.candidate_answer || answers[q.id]);
+                      const isCurrent = qIdx === activeQuestionIndex;
+                      return (
                         <button
-                          onClick={() => setActiveQuestionIndex(Math.max(0, activeQuestionIndex - 1))}
-                          disabled={activeQuestionIndex === 0}
-                          className="px-5 py-2.5 rounded-sm border border-input bg-background text-xs font-bold text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-all disabled:opacity-30"
+                          key={q.id}
+                          onClick={() => setActiveQuestionIndex(qIdx)}
+                          className={`w-9 h-9 rounded-sm text-xs font-bold transition-all ${isCurrent
+                            ? 'bg-primary text-primary-foreground shadow-sm ring-2 ring-primary/20 ring-offset-2 ring-offset-background'
+                            : isAnswered
+                              ? 'bg-primary/10 text-primary border border-primary/30'
+                              : 'bg-secondary text-muted-foreground border border-border hover:border-border/80'
+                            }`}
                         >
-                          ← Previous
+                          {qIdx + 1}
                         </button>
-                        <button
-                          onClick={() => {
-                            if (activeQuestionIndex < currentRound.questions.length - 1) {
-                              setActiveQuestionIndex(activeQuestionIndex + 1);
-                            } else if (activeRoundIndex < (examData?.rounds.length || 0) - 1) {
-                              setActiveRoundIndex(activeRoundIndex + 1);
-                              setActiveQuestionIndex(0);
-                            }
-                          }}
-                          className="px-5 py-2.5 rounded-sm border border-input bg-background text-xs font-bold text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-all"
-                        >
-                          Next →
-                        </button>
-                      </div>
-                      <button
-                        onClick={() => handleSubmitAnswer(currentQuestion.id)}
-                        disabled={submitting === currentQuestion.id || (!answers[currentQuestion.id]?.trim() && !currentQuestion.candidate_answer)}
-                        className="px-8 py-2.5 rounded-sm bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/90 transition-all active:scale-95 disabled:opacity-40 shadow-sm"
-                      >
-                        {submitting === currentQuestion.id ? 'Saving...' : currentQuestion.candidate_answer ? 'Update Answer' : 'Save Answer'}
-                      </button>
-                    </div>
+                      );
+                    })}
                   </div>
-                </motion.div>
-                )}
-              </AnimatePresence>
+
+                  {/* Question Card */}
+                  <AnimatePresence mode="wait">
+                    {currentQuestion && (
+                      <motion.div
+                        key={currentQuestion.id}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        transition={{ duration: 0.2 }}
+                        className="bg-card border border-border rounded-sm overflow-hidden shadow-sm"
+                      >
+                        {/* Question */}
+                        <div className="p-8 border-b border-border">
+                          <div className="flex items-start gap-4">
+                            <span className="shrink-0 w-8 h-8 rounded-sm bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">
+                              Q{activeQuestionIndex + 1}
+                            </span>
+                            <div className="flex-1">
+                              <p className="text-sm leading-relaxed whitespace-pre-wrap">{currentQuestion.question_text}</p>
+                              {currentQuestion.question_type === 'MCQ' && currentQuestion.mcq_options && (
+                                <div className="mt-4 space-y-2">
+                                  {currentQuestion.mcq_options.map((opt: any, i: number) => (
+                                    <label
+                                      key={i}
+                                      className={`flex items-center gap-3 p-3 rounded-sm border cursor-pointer transition-all ${answers[currentQuestion.id] === opt.label
+                                        ? 'bg-primary/10 border-primary/40 text-foreground shadow-sm'
+                                        : 'bg-secondary/40 border-border text-muted-foreground hover:border-border/80'
+                                        }`}
+                                    >
+                                      <input
+                                        type="radio"
+                                        name={`q_${currentQuestion.id}`}
+                                        checked={answers[currentQuestion.id] === opt.label}
+                                        onChange={() => setAnswers(prev => ({ ...prev, [currentQuestion.id]: opt.label }))}
+                                        className="sr-only"
+                                      />
+                                      <span className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 ${answers[currentQuestion.id] === opt.label ? 'border-primary' : 'border-muted-foreground/30'
+                                        }`}>
+                                        {answers[currentQuestion.id] === opt.label && (
+                                          <span className="w-3 h-3 rounded-full bg-primary" />
+                                        )}
+                                      </span>
+                                      <span className="text-sm font-medium">{opt.label}) {opt.text}</span>
+                                    </label>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Answer Area */}
+                        {currentQuestion.question_type === 'TEXT' && 
+                         currentRound.question_format !== 'CODE' && 
+                         !currentRound.designation_display.toLowerCase().includes('coding') && (
+                          <div className="p-8">
+                            <label className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold block mb-3">
+                              Your Answer
+                            </label>
+                            <textarea
+                              value={answers[currentQuestion.id] ?? currentQuestion.candidate_answer ?? ''}
+                              onChange={(e) => setAnswers(prev => ({ ...prev, [currentQuestion.id]: e.target.value }))}
+                              placeholder="Type your answer here..."
+                              className="w-full bg-background border border-input rounded-sm py-4 px-5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring transition-all resize-none shadow-sm min-h-[150px]"
+                            />
+                          </div>
+                        )}
+
+                        {(currentQuestion.question_type === 'CODE' || 
+                          currentRound.question_format === 'CODE' || 
+                          currentRound.designation_display.toLowerCase().includes('coding')) && (
+                          <div className="p-8">
+                            <label className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold block mb-3">
+                              Coding Environment ({currentRound.programming_language || 'Python'})
+                            </label>
+                            {/* 
+                            <CodeEditor 
+                              initialValue={answers[currentQuestion.id] ?? currentQuestion.candidate_answer ?? ''}
+                              language={currentRound.programming_language || 'python'}
+                              onChange={(val) => setAnswers(prev => ({ ...prev, [currentQuestion.id]: val || '' }))}
+                            />
+                            */}
+                            <textarea
+                              value={answers[currentQuestion.id] ?? currentQuestion.candidate_answer ?? ''}
+                              onChange={(e) => setAnswers(prev => ({ ...prev, [currentQuestion.id]: e.target.value }))}
+                              placeholder="Write your code solution here..."
+                              className="w-full bg-slate-950 border border-slate-800 rounded-sm py-4 px-5 text-sm font-mono text-slate-100 placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all resize-y shadow-sm min-h-[300px]"
+                            />
+                            <p className="mt-4 text-[10px] text-muted-foreground italic flex items-center gap-2">
+                              <TerminalIcon size={10} />
+                              Note: Standard coding text editor active. Write your code here.
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Actions */}
+                        <div className="px-8 py-5 bg-muted/30 border-t border-border flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <button
+                              onClick={() => setActiveQuestionIndex(Math.max(0, activeQuestionIndex - 1))}
+                              disabled={activeQuestionIndex === 0}
+                              className="px-5 py-2.5 rounded-sm border border-input bg-background text-xs font-bold text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-all disabled:opacity-30"
+                            >
+                              ← Previous
+                            </button>
+                            <button
+                              onClick={() => {
+                                if (activeQuestionIndex < currentRound.questions.length - 1) {
+                                  setActiveQuestionIndex(activeQuestionIndex + 1);
+                                } else if (activeRoundIndex < (examData?.rounds.length || 0) - 1) {
+                                  setActiveRoundIndex(activeRoundIndex + 1);
+                                  setActiveQuestionIndex(0);
+                                }
+                              }}
+                              className="px-5 py-2.5 rounded-sm border border-input bg-background text-xs font-bold text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-all"
+                            >
+                              Next →
+                            </button>
+                          </div>
+                          <button
+                            onClick={() => handleSubmitAnswer(currentQuestion.id)}
+                            disabled={submitting === currentQuestion.id || (!answers[currentQuestion.id]?.trim() && !currentQuestion.candidate_answer)}
+                            className="px-8 py-2.5 rounded-sm bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/90 transition-all active:scale-95 disabled:opacity-40 shadow-sm"
+                          >
+                            {submitting === currentQuestion.id ? 'Saving...' : currentQuestion.candidate_answer ? 'Update Answer' : 'Save Answer'}
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </>
+              )}
             </div>
           )}
         </div>
@@ -315,6 +350,7 @@ export function ExamActivePhase({
       <SurveillanceOverlay
         isActive={true}
         onViolation={logViolation}
+        hideFloatingFeed={currentRound?.question_format === 'VIDEO'}
       />
 
       {/* CSS Security & Privacy Shield */}

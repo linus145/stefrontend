@@ -2,6 +2,8 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Sun, Moon } from 'lucide-react';
+import { useDashboardTheme } from '@/context/DashboardThemeContext';
 
 interface ExamLoginPhaseProps {
   username: string;
@@ -15,8 +17,18 @@ interface ExamLoginPhaseProps {
 export function ExamLoginPhase({
   username, setUsername, password, setPassword, isLoggingIn, handleLogin
 }: ExamLoginPhaseProps) {
+  const { toggleTheme, isDark } = useDashboardTheme();
+
   return (
-    <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-4 relative">
+      {/* Theme toggle */}
+      <button
+        onClick={toggleTheme}
+        className="absolute top-5 right-5 w-9 h-9 rounded-sm border border-border bg-card flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-all z-10"
+        title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+      >
+        {isDark ? <Sun size={15} /> : <Moon size={15} />}
+      </button>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

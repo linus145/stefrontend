@@ -11,9 +11,10 @@ import * as cocoSsd from '@tensorflow-models/coco-ssd';
 interface SurveillanceOverlayProps {
   onViolation: (type: string, metadata: any, severity: 'LOW' | 'MEDIUM' | 'HIGH') => void;
   isActive: boolean;
+  hideFloatingFeed?: boolean;
 }
 
-export const SurveillanceOverlay: React.FC<SurveillanceOverlayProps> = ({ onViolation, isActive }) => {
+export const SurveillanceOverlay: React.FC<SurveillanceOverlayProps> = ({ onViolation, isActive, hideFloatingFeed = false }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [isCameraOn, setIsCameraOn] = useState(false);
@@ -34,6 +35,9 @@ export const SurveillanceOverlay: React.FC<SurveillanceOverlayProps> = ({ onViol
         videoRef.current.srcObject = stream;
         setHasPermission(true);
         setIsCameraOn(true);
+        if (typeof window !== 'undefined') {
+          (window as any).proctoringStream = stream;
+        }
       }
     } catch (err) {
       setHasPermission(false);
@@ -175,7 +179,7 @@ export const SurveillanceOverlay: React.FC<SurveillanceOverlayProps> = ({ onViol
   if (!isActive) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 group">
+    <div className={cn("fixed bottom-4 right-4 z-50 group", hideFloatingFeed && "hidden")}>
       <div className={cn(
         "relative w-48 h-36 bg-slate-950 rounded-xl overflow-hidden border-2 shadow-2xl transition-all duration-300 group-hover:w-72 group-hover:h-52 ring-1 ring-black/50",
         threatBbox ? "border-red-600 shadow-[0_0_30px_rgba(220,38,38,0.4)]" : "border-white/10"

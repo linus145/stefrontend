@@ -16,14 +16,18 @@ export const useProctoring = (config: ProctoringConfig) => {
   const violationCount = useRef(0);
   const splitToastId = useRef<string | number | null>(null);
   const focusToastId = useRef<string | number | null>(null);
+  const blurStartTime = useRef<number | null>(null);
+  const splitStartTime = useRef<number | null>(null);
 
   const logViolation = useCallback(async (type: string, metadata: any = {}, severity: 'LOW' | 'MEDIUM' | 'HIGH' = 'MEDIUM') => {
     try {
       violationCount.current += 1;
+      const duration = metadata.duration_seconds || 0.0;
       await api.post('/proctoring/log-violation/', {
         session_id: sessionId,
         violation_type: type,
         severity: severity,
+        duration_seconds: duration,
         metadata: {
           ...metadata,
           browser: navigator.userAgent,
@@ -38,24 +42,58 @@ export const useProctoring = (config: ProctoringConfig) => {
   useEffect(() => {
     if (!sessionId) return;
 
+    let blurTimeout: NodeJS.Timeout | null = null;
+
     // 1. Tab Switch & Focus Detection
     const handleFocusGain = () => {
-      if (focusToastId.current) {
-        toast.dismiss(focusToastId.current);
-        focusToastId.current = null;
+      if (blurTimeout) {
+        clearTimeout(blurTimeout);
+        blurTimeout = null;
+      }
+      toast.dismiss('proctor-focus-error');
+
+      // Log the violation ONCE with full accumulated duration when candidate returns
+      if (blurStartTime.current) {
+        const elapsed = (performance.now() - blurStartTime.current) / 1000;
+        blurStartTime.current = null;
+        
+        if (elapsed > 0.1) {
+          logViolation('TAB_SWITCH', { 
+            action: 'tab_switch_detected', 
+            duration_seconds: parseFloat(elapsed.toFixed(3)) 
+          }, elapsed > 10 ? 'HIGH' : 'MEDIUM');
+        }
       }
     };
 
     const handleFocusLoss = (action: string) => {
-      if (enableTabLock) {
-        logViolation('TAB_SWITCH', { action }, 'MEDIUM');
-        
-        if (!focusToastId.current) {
-          focusToastId.current = toast.error("External App or Window Detected. Please return to the exam.", {
-            duration: Infinity,
-            className: "bg-destructive text-destructive-foreground font-bold border-none"
-          });
+      if (typeof window !== 'undefined' && (window as any).suspendProctoring) {
+        return;
+      }
+      if (!enableTabLock) return;
+
+      const triggerViolation = () => {
+        // Start millisecond timer — NO api call here, only when they return
+        if (!blurStartTime.current) {
+          blurStartTime.current = performance.now();
         }
+        toast.error("External App or Window Detected. Please return to the exam.", {
+          id: 'proctor-focus-error',
+          duration: Infinity,
+          className: "bg-destructive text-destructive-foreground font-bold border-none"
+        });
+      };
+
+      if (action === 'lost_focus') {
+        // Direct tab switch or minimized window: flag immediately
+        triggerViolation();
+      } else if (action === 'window_blur') {
+        // Clicks on browser settings or permissions popovers:
+        // Allow a 3-second grace period for browser overlays to resolve
+        if (blurTimeout) clearTimeout(blurTimeout);
+        blurTimeout = setTimeout(() => {
+          triggerViolation();
+        }, 3000);
       }
     };
 
@@ -127,17 +165,29 @@ export const useProctoring = (config: ProctoringConfig) => {
       const screenWidth = window.screen.width;
       const currentWidth = window.innerWidth;
       if (currentWidth < screenWidth * 0.85) {
-        logViolation('SPLIT_SCREEN_DETECTED', { screenWidth, currentWidth, ratio: currentWidth / screenWidth }, 'MEDIUM');
-        if (!splitToastId.current) {
-          splitToastId.current = toast.error("Split screen mode detected. Please use the full window to continue.", {
-            duration: Infinity,
-            className: "bg-destructive text-destructive-foreground font-bold border-none"
-          });
+        // Start split screen timer — NO api call here, only when they return to full screen
+        if (!splitStartTime.current) {
+          splitStartTime.current = performance.now();
         }
+        toast.error("Split screen mode detected. Please use the full window to continue.", {
+          id: 'proctor-split-error',
+          duration: Infinity,
+          className: "bg-destructive text-destructive-foreground font-bold border-none"
+        });
       } else {
-        if (splitToastId.current) {
-          toast.dismiss(splitToastId.current);
-          splitToastId.current = null;
+        toast.dismiss('proctor-split-error');
+
+        // Log the violation ONCE with full accumulated duration when split screen resolves
+        if (splitStartTime.current) {
+          const elapsed = (performance.now() - splitStartTime.current) / 1000;
+          splitStartTime.current = null;
+          
+          if (elapsed > 0.1) {
+            logViolation('SPLIT_SCREEN_DETECTED', { 
+              action: 'split_screen_detected', 
+              duration_seconds: parseFloat(elapsed.toFixed(3)) 
+            }, elapsed > 10 ? 'HIGH' : 'MEDIUM');
+          }
         }
       }
     };
@@ -174,6 +224,7 @@ export const useProctoring = (config: ProctoringConfig) => {
     const dtInterval = setInterval(checkDevTools, 5000);
 
     return () => {
+      if (blurTimeout) clearTimeout(blurTimeout);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('blur', handleBlur);
       window.removeEventListener('focus', handleFocus);
@@ -186,6 +237,8 @@ export const useProctoring = (config: ProctoringConfig) => {
       window.removeEventListener('resize', handleResize);
       document.removeEventListener('mouseleave', handleMouseLeave);
       clearInterval(dtInterval);
+      toast.dismiss('proctor-focus-error');
+      toast.dismiss('proctor-split-error');
     };
   }, [sessionId, enableTabLock, enableFullscreen, logViolation]);
 

@@ -76,19 +76,29 @@ export function CandidateExamWrapper() {
       });
 
       if (response.data.status === 'success') {
+        const nextQ = response.data.data?.next_question;
         // Update local state
         setExamData(prev => {
           if (!prev) return prev;
           return {
             ...prev,
-            rounds: prev.rounds.map(rnd => ({
-              ...rnd,
-              questions: rnd.questions.map(q =>
-                q.id === questionId
-                  ? { ...q, candidate_answer: answers[questionId], answered_at: new Date().toISOString() }
-                  : q
-              ),
-            })),
+            rounds: prev.rounds.map(rnd => {
+              if (rnd.questions.some(q => q.id === questionId)) {
+                let updatedQuestions = rnd.questions.map(q =>
+                  q.id === questionId
+                    ? { ...q, candidate_answer: answers[questionId], answered_at: new Date().toISOString() }
+                    : q
+                );
+                if (nextQ && !updatedQuestions.some(q => q.id === nextQ.id)) {
+                  updatedQuestions.push(nextQ);
+                }
+                return {
+                  ...rnd,
+                  questions: updatedQuestions
+                };
+              }
+              return rnd;
+            }),
           };
         });
         toast.success('Answer saved successfully.');

@@ -35,7 +35,10 @@ const DEFAULT_ROUNDS = [{ label: "Technical Screening", value: "TECHNICAL_SCREEN
 const DEFAULT_TIERS = [{ label: "Technical Screen", value: "TECHNICAL" }];
 const DEFAULT_LEVELS = [{ label: "Mid Level", value: "MID" }];
 const DEFAULT_CATEGORIES = [{ label: "Non-Coding", value: "NON_CODING" }, { label: "Coding", value: "CODING" }];
-const DEFAULT_FORMATS = [{ label: "Text / Typing Answer", value: "TEXT" }];
+const DEFAULT_FORMATS = [
+  { label: "Text / Typing Answer", value: "TEXT" },
+  { label: "AI Voice/Video Interview", value: "VIDEO" }
+];
 const DEFAULT_LANGS = [{ label: "Python", value: "PYTHON" }];
 
 export function InterviewConfigView({ initialApplicationId, initialSessionId, onBack }: InterviewConfigViewProps) {
@@ -186,7 +189,16 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
   };
 
   const updateRound = (id: string, updates: Partial<RoundConfig>) => {
-    setRounds(rounds.map(r => r.id === id ? { ...r, ...updates } : r));
+    setRounds(rounds.map(r => {
+      if (r.id === id) {
+        const updated = { ...r, ...updates };
+        if (updates.question_format === 'VIDEO') {
+          updated.questions = [];
+        }
+        return updated;
+      }
+      return r;
+    }));
   };
 
   const handleGenerateQuestions = async (roundId: string) => {
@@ -669,117 +681,131 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                         />
                       </div>
 
-                      <div className="md:col-span-2 space-y-4 pt-4 border-t border-border/50">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <label className="text-[13px] font-semibold text-foreground">AI Question Configuration</label>
-                            <p className="text-[10px] text-muted-foreground mt-1">AI will generate these based on candidate resume and job requirements.</p>
+                      {round.question_format === 'VIDEO' ? (
+                        <div className="md:col-span-2 p-6 rounded-sm bg-blue-600/[0.03] border border-blue-600/10 flex items-start gap-4">
+                          <div className="w-8 h-8 rounded-full bg-blue-600/10 text-blue-600 flex items-center justify-center shrink-0">
+                            <Sparkles className="w-4 h-4" />
                           </div>
-                          <div className="flex items-center gap-3">
-                            <span className="text-[11px] font-bold text-muted-foreground bg-muted/30 px-3 py-1.5 rounded-sm border border-border">
-                              Total Marks: <span className="text-primary">{round.questions?.reduce((acc, q: any) => acc + (typeof q === 'string' ? 10 : (q.marks || 0)), 0) || 0}</span>
-                            </span>
-                            <button
-                              onClick={() => {
-                                const newQuestions = [...(round.questions || []), { text: '', marks: 10 }];
-                                updateRound(round.id, { questions: newQuestions });
-                              }}
-                              data-agent={`add-question-button-${index}`}
-                              className="px-4 py-1.5 rounded-sm border border-border bg-card text-[11px] font-bold hover:bg-muted transition-all"
-                            >
-                              + Add Question
-                            </button>
-                            <button
-                              onClick={() => handleGenerateQuestions(round.id)}
-                              data-agent={`generate-questions-ai-button-${index}`}
-                              className="px-4 py-1.5 rounded-sm bg-blue-600 text-white text-[11px] font-bold hover:bg-blue-700 transition-all flex items-center gap-2"
-                            >
-                              <Sparkles className="w-3.5 h-3.5" />
-                              Generate with AI
-                            </button>
+                          <div>
+                            <p className="text-[12px] font-bold text-blue-600">AI HR Agent Active</p>
+                            <p className="text-[10px] text-muted-foreground mt-1 leading-relaxed">
+                              This round is configured as a Live AI Voice/Video Interview. The AI HR Agent will act as the host, vocalizing tailored questions and transcribing spoken answers at runtime. Manual question layout is not required.
+                            </p>
                           </div>
                         </div>
-
-                        <div className="space-y-3">
-                          {round.questions?.length === 0 ? (
-                            <div className="py-12 bg-muted/5 border border-dashed border-border rounded-sm flex flex-col items-center justify-center opacity-40">
-                              <p className="text-[11px] font-bold tracking-widest uppercase">Awaiting AI Generation</p>
+                      ) : (
+                        <div className="md:col-span-2 space-y-4 pt-4 border-t border-border/50">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <label className="text-[13px] font-semibold text-foreground">AI Question Configuration</label>
+                              <p className="text-[10px] text-muted-foreground mt-1">AI will generate these based on candidate resume and job requirements.</p>
                             </div>
-                          ) : (
-                            round.questions?.map((q, idx) => (
-                              <div key={idx} className="relative group flex gap-3 items-start">
-                                <div className="flex-1 space-y-4">
-                                  <div>
-                                    <label className="text-[10px] font-bold text-muted-foreground block mb-1 uppercase tracking-wider opacity-60">Question</label>
-                                    <textarea
-                                      value={typeof q === 'string' ? q : q.text}
+                            <div className="flex items-center gap-3">
+                              <span className="text-[11px] font-bold text-muted-foreground bg-muted/30 px-3 py-1.5 rounded-sm border border-border">
+                                Total Marks: <span className="text-primary">{round.questions?.reduce((acc, q: any) => acc + (typeof q === 'string' ? 10 : (q.marks || 0)), 0) || 0}</span>
+                              </span>
+                              <button
+                                onClick={() => {
+                                  const newQuestions = [...(round.questions || []), { text: '', marks: 10 }];
+                                  updateRound(round.id, { questions: newQuestions });
+                                }}
+                                data-agent={`add-question-button-${index}`}
+                                className="px-4 py-1.5 rounded-sm border border-border bg-card text-[11px] font-bold hover:bg-muted transition-all"
+                              >
+                                + Add Question
+                              </button>
+                              <button
+                                onClick={() => handleGenerateQuestions(round.id)}
+                                data-agent={`generate-questions-ai-button-${index}`}
+                                className="px-4 py-1.5 rounded-sm bg-blue-600 text-white text-[11px] font-bold hover:bg-blue-700 transition-all flex items-center gap-2"
+                              >
+                                <Sparkles className="w-3.5 h-3.5" />
+                                Generate with AI
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="space-y-3">
+                            {round.questions?.length === 0 ? (
+                              <div className="py-12 bg-muted/5 border border-dashed border-border rounded-sm flex flex-col items-center justify-center opacity-40">
+                                <p className="text-[11px] font-bold tracking-widest uppercase">Awaiting AI Generation</p>
+                              </div>
+                            ) : (
+                              round.questions?.map((q, idx) => (
+                                <div key={idx} className="relative group flex gap-3 items-start">
+                                  <div className="flex-1 space-y-4">
+                                    <div>
+                                      <label className="text-[10px] font-bold text-muted-foreground block mb-1 uppercase tracking-wider opacity-60">Question</label>
+                                      <textarea
+                                        value={typeof q === 'string' ? q : q.text}
+                                        onChange={(e) => {
+                                          const newQuestions = [...(round.questions || [])] as any[];
+                                          const current = newQuestions[idx];
+                                          newQuestions[idx] = typeof current === 'string'
+                                            ? { text: e.target.value, marks: 10 }
+                                            : { ...current, text: e.target.value };
+                                          updateRound(round.id, { questions: newQuestions });
+                                        }}
+                                        placeholder="Type your question here..."
+                                        data-agent="question-text-textarea"
+                                        className="w-full bg-muted/10 border border-border rounded-sm py-3 px-4 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-blue-600 transition-all min-h-[60px]"
+                                      />
+                                    </div>
+
+                                    <div>
+                                      <label className="text-[10px] font-bold text-blue-600 block mb-1 uppercase tracking-wider opacity-60 flex items-center gap-2">
+                                        <BrainCircuit className="w-3 h-3" />
+                                        AI Generated Ideal Answer
+                                      </label>
+                                      <textarea
+                                        value={typeof q === 'object' ? q.ideal_answer : ''}
+                                        onChange={(e) => {
+                                          const newQuestions = [...(round.questions || [])] as any[];
+                                          const current = newQuestions[idx];
+                                          if (typeof current === 'object') {
+                                            newQuestions[idx] = { ...current, ideal_answer: e.target.value };
+                                            updateRound(round.id, { questions: newQuestions });
+                                          }
+                                        }}
+                                        placeholder="AI will generate an ideal answer to compare against..."
+                                        data-agent="ideal-answer-textarea"
+                                        className="w-full bg-blue-600/[0.03] border border-blue-600/10 rounded-sm py-3 px-4 text-xs font-medium italic focus:outline-none focus:ring-1 focus:ring-blue-600 transition-all min-h-[60px]"
+                                      />
+                                    </div>
+                                  </div>
+                                  <div className="w-20 shrink-0">
+                                    <label className="text-[10px] font-bold text-muted-foreground block mb-1">Marks</label>
+                                    <input
+                                      type="number"
+                                      value={typeof q === 'string' ? 10 : q.marks}
                                       onChange={(e) => {
                                         const newQuestions = [...(round.questions || [])] as any[];
                                         const current = newQuestions[idx];
+                                        const newMarks = parseInt(e.target.value) || 0;
                                         newQuestions[idx] = typeof current === 'string'
-                                          ? { text: e.target.value, marks: 10 }
-                                          : { ...current, text: e.target.value };
+                                          ? { text: current, marks: newMarks }
+                                          : { ...current, marks: newMarks };
                                         updateRound(round.id, { questions: newQuestions });
                                       }}
-                                      placeholder="Type your question here..."
-                                      data-agent="question-text-textarea"
-                                      className="w-full bg-muted/10 border border-border rounded-sm py-3 px-4 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-blue-600 transition-all min-h-[60px]"
+                                      data-agent="marks-input"
+                                      className="w-full bg-muted/10 border border-border rounded-sm py-3 px-3 text-xs font-bold text-center focus:outline-none focus:ring-1 focus:ring-blue-600 transition-all"
                                     />
                                   </div>
-
-                                  <div>
-                                    <label className="text-[10px] font-bold text-blue-600 block mb-1 uppercase tracking-wider opacity-60 flex items-center gap-2">
-                                      <BrainCircuit className="w-3 h-3" />
-                                      AI Generated Ideal Answer
-                                    </label>
-                                    <textarea
-                                      value={typeof q === 'object' ? q.ideal_answer : ''}
-                                      onChange={(e) => {
-                                        const newQuestions = [...(round.questions || [])] as any[];
-                                        const current = newQuestions[idx];
-                                        if (typeof current === 'object') {
-                                          newQuestions[idx] = { ...current, ideal_answer: e.target.value };
-                                          updateRound(round.id, { questions: newQuestions });
-                                        }
-                                      }}
-                                      placeholder="AI will generate an ideal answer to compare against..."
-                                      data-agent="ideal-answer-textarea"
-                                      className="w-full bg-blue-600/[0.03] border border-blue-600/10 rounded-sm py-3 px-4 text-xs font-medium italic focus:outline-none focus:ring-1 focus:ring-blue-600 transition-all min-h-[60px]"
-                                    />
-                                  </div>
-                                </div>
-                                <div className="w-20 shrink-0">
-                                  <label className="text-[10px] font-bold text-muted-foreground block mb-1">Marks</label>
-                                  <input
-                                    type="number"
-                                    value={typeof q === 'string' ? 10 : q.marks}
-                                    onChange={(e) => {
-                                      const newQuestions = [...(round.questions || [])] as any[];
-                                      const current = newQuestions[idx];
-                                      const newMarks = parseInt(e.target.value) || 0;
-                                      newQuestions[idx] = typeof current === 'string'
-                                        ? { text: current, marks: newMarks }
-                                        : { ...current, marks: newMarks };
+                                  <button
+                                    onClick={() => {
+                                      const newQuestions = round.questions?.filter((_, i) => i !== idx);
                                       updateRound(round.id, { questions: newQuestions });
                                     }}
-                                    data-agent="marks-input"
-                                    className="w-full bg-muted/10 border border-border rounded-sm py-3 px-3 text-xs font-bold text-center focus:outline-none focus:ring-1 focus:ring-blue-600 transition-all"
-                                  />
+                                    className="absolute top-2 right-2 p-1.5 bg-rose-500 text-white rounded-sm opacity-0 group-hover:opacity-100 transition-all z-10 shadow-sm"
+                                  >
+                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                                  </button>
                                 </div>
-                                <button
-                                  onClick={() => {
-                                    const newQuestions = round.questions?.filter((_, i) => i !== idx);
-                                    updateRound(round.id, { questions: newQuestions });
-                                  }}
-                                  className="absolute top-2 right-2 p-1.5 bg-rose-500 text-white rounded-sm opacity-0 group-hover:opacity-100 transition-all z-10 shadow-sm"
-                                >
-                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                                </button>
-                              </div>
-                            ))
-                          )}
+                              ))
+                            )}
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </div>
                   </motion.div>
                 ))}
@@ -831,7 +857,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
 
                 <div className="space-y-3">
                   <button
-                    disabled={isSubmitting || isGenerating || rounds.some(r => !r.questions || r.questions.length === 0)}
+                    disabled={isSubmitting || isGenerating || rounds.some(r => r.question_format !== 'VIDEO' && (!r.questions || r.questions.length === 0))}
                     onClick={handleConfigure}
                     data-agent="dispatch-interviews-button"
                     className="w-full py-5 rounded-sm bg-blue-600 text-white font-bold text-sm shadow-2xl shadow-blue-600/20 hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-30 flex items-center justify-center"

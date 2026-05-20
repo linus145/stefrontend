@@ -19,11 +19,22 @@ const LeaveTab = React.lazy(() => import('@/components/hrtool/tabs/leaves/leave-
 const PayrollTab = React.lazy(() => import('@/components/hrtool/tabs/payroll/payroll-tab').then(m => ({ default: m.PayrollTab })));
 const PerformanceTab = React.lazy(() => import('@/components/hrtool/tabs/performance/performance-tab').then(m => ({ default: m.PerformanceTab })));
 const OrgTab = React.lazy(() => import('@/components/hrtool/tabs/organisation/org-tab').then(m => ({ default: m.OrgTab })));
+const TemplatesTab = React.lazy(() => import('@/components/hrtool/tabs/templates/templates-tab').then(m => ({ default: m.TemplatesTab })));
 
 export function HRShell() {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<HRSection>('dashboard');
+
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const tab = params.get('tab');
+      if (tab) {
+        setActiveTab(tab as HRSection);
+      }
+    }
+  }, []);
 
   const { data: companyCheck, isLoading: companyLoading } = useQuery({
     queryKey: ['company-check'],
@@ -69,6 +80,7 @@ export function HRShell() {
           />
         )}
         {activeTab === 'payroll' && <PayrollTab />}
+        {activeTab === 'templates' && <TemplatesTab />}
         {activeTab === 'performance' && <PerformanceTab />}
         {activeTab === 'organization' && <OrgTab />}
       </React.Suspense>

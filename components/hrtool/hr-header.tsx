@@ -25,8 +25,19 @@ export type HRSection =
   | 'leave-approved' 
   | 'leave-company' 
   | 'payroll' 
+  | 'payroll-dashboard'
+  | 'payroll-runs'
+  | 'payroll-salary-structures'
+  | 'payroll-payslips'
+  | 'payroll-reimbursements'
+  | 'payroll-tax-configurations'
+  | 'payroll-adjustments'
+  | 'payroll-approvals'
+  | 'payroll-reports'
+  | 'payroll-settings'
   | 'performance' 
-  | 'organization';
+  | 'organization'
+  | 'templates';
 
 interface HRHeaderProps {
   companyName: string;

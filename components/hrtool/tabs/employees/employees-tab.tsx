@@ -42,6 +42,7 @@ export function EmployeesTab() {
   const [orderingInput, setOrderingInput] = useState('-created_at');
   const [startDateInput, setStartDateInput] = useState('');
   const [endDateInput, setEndDateInput] = useState('');
+  const [page, setPage] = useState(1);
 
   const [activeFilters, setActiveFilters] = useState({
     search: '',
@@ -63,6 +64,7 @@ export function EmployeesTab() {
       startDate: startDateInput,
       endDate: endDateInput
     });
+    setPage(1); // Reset page on filter apply
   };
 
   const handleSortChange = (newOrder: string) => {
@@ -88,6 +90,7 @@ export function EmployeesTab() {
       startDate: '',
       endDate: ''
     });
+    setPage(1); // Reset page on clear filters
   };
 
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
@@ -127,7 +130,8 @@ export function EmployeesTab() {
       department: activeFilters.department === 'ALL' ? undefined : activeFilters.department,
       ordering: activeFilters.ordering,
       joining_date__gte: activeFilters.startDate || undefined,
-      joining_date__lte: activeFilters.endDate || undefined
+      joining_date__lte: activeFilters.endDate || undefined,
+      page: page
     }),
   });
 
@@ -185,24 +189,32 @@ export function EmployeesTab() {
   }, [deleteTarget]);
 
   const renderSkeletons = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {[1, 2, 3, 4, 5, 6].map((i) => (
-        <Card key={i} className="animate-pulse">
-          <CardHeader className="pb-2">
-            <div className="flex gap-4">
-              <Skeleton className="h-12 w-12 rounded-full" />
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-32" />
-                <Skeleton className="h-3 w-20" />
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <Skeleton className="h-3 w-full" />
-            <Skeleton className="h-3 w-full" />
-          </CardContent>
-        </Card>
-      ))}
+    <div className="w-full overflow-x-auto rounded-sm border border-border/40 bg-card/40 backdrop-blur-md shadow-sm">
+      <table className="w-full text-sm text-left">
+        <thead className="text-[11px] uppercase bg-muted/50 text-muted-foreground font-bold border-b border-border/40">
+          <tr>
+            <th className="px-4 py-3">Employee</th>
+            <th className="px-4 py-3">Role</th>
+            <th className="px-4 py-3">Contact</th>
+            <th className="px-4 py-3 w-[140px]">Type</th>
+            <th className="px-4 py-3 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {[1, 2, 3, 4, 5].map((i) => (
+            <tr key={i} className="border-b border-border/40 animate-pulse">
+              <td className="px-4 py-3 flex items-center gap-3">
+                <Skeleton className="h-9 w-9 rounded-sm" />
+                <div className="space-y-2"><Skeleton className="h-3 w-24" /><Skeleton className="h-2 w-16" /></div>
+              </td>
+              <td className="px-4 py-3 space-y-2"><Skeleton className="h-3 w-20" /><Skeleton className="h-2 w-16" /></td>
+              <td className="px-4 py-3 space-y-2"><Skeleton className="h-3 w-24" /><Skeleton className="h-2 w-20" /></td>
+              <td className="px-4 py-3"><Skeleton className="h-8 w-full rounded-sm" /></td>
+              <td className="px-4 py-3 flex justify-end"><Skeleton className="h-7 w-7 rounded-sm" /></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 
@@ -384,117 +396,136 @@ export function EmployeesTab() {
       </form>
 
       {isLoading ? renderSkeletons() : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {employees?.data?.results?.map((employee: any) => (
-            <Card key={employee.id} className="group overflow-hidden hover:shadow-2xl hover:shadow-blue-500/5 transition-all duration-500 border-border/40 bg-card/40 backdrop-blur-md rounded-sm">
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex gap-4">
-                    <Avatar className="h-12 w-12 border border-border/50 shadow-sm group-hover:scale-105 transition-transform rounded-sm">
-                      <AvatarImage src={employee.avatar} className="rounded-sm" />
-                      <AvatarFallback className="bg-blue-500/5 text-[#0a66c2] font-semibold rounded-sm text-xs">
-                        {employee.first_name[0]}{employee.last_name[0]}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="min-w-0">
-                      <CardTitle className="text-[15px] font-bold tracking-tight truncate group-hover:text-[#0a66c2] transition-colors">{employee.first_name} {employee.last_name}</CardTitle>
-                      <p className="text-[11px] font-medium text-[#0a66c2]/70 mt-0.5">
-                        {employee.designation_detail?.title || 'Team Member'}
-                        {employee.department_detail?.name && ` | ${employee.department_detail.name}`}
-                      </p>
+        <div className="w-full overflow-x-auto rounded-sm border border-border/40 bg-card/40 backdrop-blur-md shadow-sm">
+          <table className="w-full text-sm text-left">
+            <thead className="text-[11px] uppercase bg-muted/50 text-muted-foreground font-bold border-b border-border/40">
+              <tr>
+                <th className="px-4 py-3">Employee</th>
+                <th className="px-4 py-3">Role</th>
+                <th className="px-4 py-3">Contact</th>
+                <th className="px-4 py-3 w-[140px]">Type</th>
+                <th className="px-4 py-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {employees?.data?.results?.map((employee: any) => (
+                <tr key={employee.id} className="border-b border-border/40 hover:bg-muted/20 transition-colors group">
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-9 w-9 border border-border/50 shadow-sm rounded-sm">
+                        <AvatarImage src={employee.avatar} className="rounded-sm" />
+                        <AvatarFallback className="bg-blue-500/5 text-[#0a66c2] font-semibold rounded-sm text-[10px]">
+                          {employee.first_name[0]}{employee.last_name[0]}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col">
+                        <span className="font-bold text-[13px] text-foreground group-hover:text-[#0a66c2] transition-colors">{employee.first_name} {employee.last_name}</span>
+                        <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">ID: {employee.employee_id}</span>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    {employee.job_application && (
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex flex-col">
+                      <span className="text-[12px] font-semibold text-foreground">{employee.designation_detail?.title || 'Team Member'}</span>
+                      <span className="text-[11px] font-medium text-muted-foreground">{employee.department_detail?.name || 'No Department'}</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex flex-col gap-1 text-[11px] font-semibold text-muted-foreground">
+                      <div className="flex items-center gap-2"><Mail className="h-3 w-3 text-[#0a66c2]/60"/> {employee.email}</div>
+                      <div className="flex items-center gap-2"><Phone className="h-3 w-3 text-[#0a66c2]/60"/> {employee.phone || 'No contact'}</div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <select
+                      value={employee.employment_type || 'FULL_TIME'}
+                      disabled={updateEmployeeMutation.isPending}
+                      onChange={(e) => updateEmployeeMutation.mutate({ id: employee.id, employment_type: e.target.value })}
+                      className="h-7 w-[105px] bg-[#0a66c2]/5 hover:bg-[#0a66c2]/10 border border-[#0a66c2]/20 focus-visible:ring-1 focus-visible:ring-[#0a66c2]/50 focus-visible:border-[#0a66c2]/50 rounded-sm text-[10px] font-bold text-[#0a66c2] px-2 shadow-sm transition-all focus:outline-none cursor-pointer"
+                    >
+                      <option value="FULL_TIME">Permanent</option>
+                      <option value="CONTRACT">Contract</option>
+                      <option value="INTERN">Intern</option>
+                      <option value="ON_LEAVE">On Leave</option>
+                      <option value="TERMINATED">Terminated</option>
+                    </select>
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <div className="flex items-center justify-end gap-1.5">
+                      {employee.job_application && (
+                        <button
+                          onClick={() => rescheduleMutation.mutate(employee.job_application)}
+                          className="w-7 h-7 flex items-center justify-center rounded-sm bg-purple-600/5 text-purple-600 hover:bg-purple-600 hover:text-white transition-all active:scale-95 border border-purple-600/10"
+                          title="Reschedule Interview"
+                        >
+                          <RefreshCw className={cn("h-3 w-3", rescheduleMutation.isPending && "animate-spin")} />
+                        </button>
+                      )}
+                      
                       <button
-                        onClick={() => rescheduleMutation.mutate(employee.job_application)}
-                        className="w-8 h-8 flex items-center justify-center rounded-sm bg-purple-600/5 text-purple-600 hover:bg-purple-600 hover:text-white transition-all active:scale-95 border border-purple-600/10"
-                        title="Reschedule Interview"
+                        onClick={() => setSelectedEmployeeId(employee.id)}
+                        className="w-7 h-7 flex items-center justify-center rounded-sm bg-blue-500/5 text-blue-600 hover:bg-blue-600 hover:text-white transition-all active:scale-95 border border-blue-500/10"
+                        title="View Details"
                       >
-                        <RefreshCw className={cn("h-3.5 w-3.5", rescheduleMutation.isPending && "animate-spin")} />
+                        <User className="h-3 w-3" />
                       </button>
-                    )}
-                    <DropdownMenu>
-                      <DropdownMenuTrigger className="w-8 h-8 flex items-center justify-center rounded-sm bg-muted/30 text-muted-foreground hover:text-foreground transition-all border border-border/30 outline-none">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="rounded-sm border-border/50 bg-card/95 backdrop-blur-md min-w-[140px] shadow-xl">
-                        <DropdownMenuItem
-                          onClick={() => {
-                            setSelectedEmployeeId(employee.id);
-                          }}
-                          className="text-xs font-semibold py-2 cursor-pointer focus:bg-[#0a66c2]/10 focus:text-[#0a66c2] transition-colors rounded-none"
-                        >
-                          <User className="mr-2 h-3.5 w-3.5 opacity-60" /> Details
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => sendCredentialsMutation.mutate(employee.id)}
-                          disabled={sendCredentialsMutation.isPending}
-                          className="text-xs font-semibold py-2 cursor-pointer focus:bg-[#0a66c2]/10 focus:text-[#0a66c2] transition-colors rounded-none"
-                        >
-                          <Mail className="mr-2 h-3.5 w-3.5 opacity-60" /> Send Email Link
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="text-xs font-semibold py-2 cursor-pointer focus:bg-[#0a66c2]/10 focus:text-[#0a66c2] transition-colors rounded-none">
-                          <BrainCircuit className="mr-2 h-3.5 w-3.5 opacity-60" /> Interview
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator className="bg-border/40" />
-                        <DropdownMenuItem
-                          onClick={() => setDeleteTarget({ id: employee.id, name: `${employee.first_name} ${employee.last_name}` })}
-                          className="text-xs font-semibold py-2 cursor-pointer text-red-600 focus:bg-red-50 focus:text-red-700 transition-colors rounded-none"
-                        >
-                          <Trash2 className="mr-2 h-3.5 w-3.5 opacity-60" /> Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-2 text-[13px] space-y-4">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-3 text-foreground/90 transition-colors">
-                    <Mail className="h-3.5 w-3.5 text-[#0a66c2]/60" />
-                    <span className="truncate text-xs font-semibold">{employee.email}</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-foreground/90 transition-colors">
-                    <Phone className="h-3.5 w-3.5 text-[#0a66c2]/60" />
-                    <span className="text-xs font-semibold">{employee.phone || 'No contact provided'}</span>
-                  </div>
-                </div>
 
-                <div className="pt-4 border-t border-border/50">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">ID: {employee.employee_id}</span>
-                    <Badge variant="outline" className="text-[10px] px-2.5 py-0.5 font-bold rounded-sm border-[#0a66c2]/30 text-[#0a66c2] bg-[#0a66c2]/5 shadow-sm">
-                      {employee.employment_type?.replace('_', ' ').toLowerCase().replace(/^\w/, (c: string) => c.toUpperCase()) || 'Full time'}
-                    </Badge>
-                  </div>
-
-                  {/* Manual Type Change Buttons */}
-                  <div className="flex gap-2">
-                    {[
-                      { label: 'Perm', value: 'FULL_TIME' },
-                      { label: 'Contr', value: 'CONTRACT' },
-                      { label: 'Intern', value: 'INTERN' },
-                    ].map(type => (
                       <button
-                        key={type.value}
-                        disabled={employee.employment_type === type.value || updateEmployeeMutation.isPending}
-                        onClick={() => updateEmployeeMutation.mutate({ id: employee.id, employment_type: type.value })}
-                        className={cn(
-                          "flex-1 py-2 rounded-sm text-[11px] font-bold border transition-all active:scale-95 shadow-sm",
-                          employee.employment_type === type.value
-                            ? "bg-[#0a66c2] text-white border-[#0a66c2] shadow-md"
-                            : "bg-white hover:bg-blue-50/50 border-border text-muted-foreground hover:text-[#0a66c2] hover:border-[#0a66c2]/40"
-                        )}
+                        onClick={() => sendCredentialsMutation.mutate(employee.id)}
+                        disabled={sendCredentialsMutation.isPending}
+                        className="w-7 h-7 flex items-center justify-center rounded-sm bg-emerald-500/5 text-emerald-600 hover:bg-emerald-600 hover:text-white transition-all active:scale-95 border border-emerald-500/10 disabled:opacity-50"
+                        title="Send Email Link"
                       >
-                        {type.label}
+                        <Mail className="h-3 w-3" />
                       </button>
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+
+                      <button
+                        className="w-7 h-7 flex items-center justify-center rounded-sm bg-indigo-500/5 text-indigo-600 hover:bg-indigo-600 hover:text-white transition-all active:scale-95 border border-indigo-500/10"
+                        title="Start Interview"
+                      >
+                        <BrainCircuit className="h-3 w-3" />
+                      </button>
+
+                      <button
+                        onClick={() => setDeleteTarget({ id: employee.id, name: `${employee.first_name} ${employee.last_name}` })}
+                        className="w-7 h-7 flex items-center justify-center rounded-sm bg-red-500/5 text-red-600 hover:bg-red-600 hover:text-white transition-all active:scale-95 border border-red-500/10"
+                        title="Delete Employee"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Pagination Controls */}
+      {(employees?.data?.count ?? 0) > 0 && (
+        <div className="flex justify-center items-center gap-4 pt-6 pb-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+            disabled={page === 1 || isLoading}
+            className="text-xs h-8 px-4 rounded-sm border-border text-muted-foreground shadow-sm hover:bg-muted"
+          >
+            Previous
+          </Button>
+          <span className="text-[11px] text-muted-foreground font-bold uppercase tracking-wider">
+            Page {page} of {Math.max(1, Math.ceil((employees?.data?.count || 0) / 10))}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPage(p => p + 1)}
+            disabled={!employees?.data?.next || isLoading}
+            className="text-xs h-8 px-4 rounded-sm border-border text-muted-foreground shadow-sm hover:bg-muted"
+          >
+            Next
+          </Button>
         </div>
       )}
 

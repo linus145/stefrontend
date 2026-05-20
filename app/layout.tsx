@@ -34,7 +34,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
-        {/* <script src="https://accounts.google.com/gsi/client" async defer></script> */}
+        <script src="https://accounts.google.com/gsi/client" async defer></script>
         <script
           dangerouslySetInnerHTML={{
             __html: `

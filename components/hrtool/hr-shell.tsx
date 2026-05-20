@@ -60,6 +60,7 @@ export function HRShell() {
         )}
         {activeTab.startsWith('leave') && (
           <LeaveTab 
+            subTab={activeTab}
             filterStatus={
               activeTab === 'leave-pending' ? 'pending' :
               activeTab === 'leave-approved' ? 'approved' :

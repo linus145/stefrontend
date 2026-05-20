@@ -11,6 +11,15 @@ export const hrLeaveService = {
   getLeaveTypes: (): Promise<BaseAPIResponse<PaginatedResponse<any>>> => 
     api.get<any>('/leave_management/types/').then(res => ({ status: 'success', message: '', data: res })),
     
+  createLeaveType: (data: any): Promise<BaseAPIResponse<any>> => 
+    api.post<any>('/leave_management/types/', data).then(res => ({ status: 'success', message: '', data: res })),
+
+  updateLeaveType: (id: string, data: any): Promise<BaseAPIResponse<any>> => 
+    api.patch<any>(`/leave_management/types/${id}/`, data).then(res => ({ status: 'success', message: '', data: res })),
+
+  deleteLeaveType: (id: string): Promise<BaseAPIResponse<any>> => 
+    api.delete<any>(`/leave_management/types/${id}/`).then(res => ({ status: 'success', message: '', data: res })),
+
   approveLeave: (id: string, comment?: string): Promise<BaseAPIResponse<any>> => 
     api.post<any>(`/leave_management/requests/${id}/approve/`, { comment }).then(res => ({ status: 'success', message: '', data: res })),
     
@@ -23,3 +32,4 @@ export const hrLeaveService = {
   createLeaveRequest: (data: any): Promise<BaseAPIResponse<any>> => 
     api.post<any>('/leave_management/requests/', data).then(res => ({ status: 'success', message: '', data: res })),
 };
+

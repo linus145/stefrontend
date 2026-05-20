@@ -23,6 +23,7 @@ export type HRSection =
   | 'leave-requests' 
   | 'leave-pending' 
   | 'leave-approved' 
+  | 'leave-company' 
   | 'payroll' 
   | 'performance' 
   | 'organization';

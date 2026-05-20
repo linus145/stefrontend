@@ -45,6 +45,7 @@ const NAVIGATION_ITEMS: { id: HRSection; label: string; icon: any; subItems?: { 
     label: 'Leave',
     icon: FileText,
     subItems: [
+      { id: 'leave-company', label: 'Company Leaves' },
       { id: 'leave-requests', label: 'Leave Requests' },
       { id: 'leave-pending', label: 'Pending' },
       { id: 'leave-approved', label: 'Approved' }

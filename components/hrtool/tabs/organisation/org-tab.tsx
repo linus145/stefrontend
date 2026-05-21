@@ -115,8 +115,8 @@ export function OrgTab() {
               className={cn(
                 "px-5 py-1.5 rounded-sm text-[11px] font-bold transition-all active:scale-95 whitespace-nowrap h-full flex items-center gap-1.5",
                 activeSubTab === 'structure'
-                  ? "bg-white text-[#0a66c2] shadow-sm border border-border/20"
-                  : "text-muted-foreground hover:text-foreground hover:bg-white/30"
+                  ? "bg-white dark:bg-background text-[#0a66c2] dark:text-[#818cf8] shadow-sm border border-border/20 dark:border-border/10"
+                  : "text-muted-foreground hover:text-foreground hover:bg-white/30 dark:hover:bg-white/5"
               )}
             >
               <Building2 className="h-3.5 w-3.5" /> Structure
@@ -127,8 +127,8 @@ export function OrgTab() {
               className={cn(
                 "px-5 py-1.5 rounded-sm text-[11px] font-bold transition-all active:scale-95 whitespace-nowrap h-full flex items-center gap-1.5",
                 activeSubTab === 'profile'
-                  ? "bg-white text-[#0a66c2] shadow-sm border border-border/20"
-                  : "text-muted-foreground hover:text-foreground hover:bg-white/30"
+                  ? "bg-white dark:bg-background text-[#0a66c2] dark:text-[#818cf8] shadow-sm border border-border/20 dark:border-border/10"
+                  : "text-muted-foreground hover:text-foreground hover:bg-white/30 dark:hover:bg-white/5"
               )}
             >
               <Building className="h-3.5 w-3.5" /> Organization Profile
@@ -262,7 +262,7 @@ export function OrgTab() {
                         <Building className="h-4 w-4" />
                       </div>
                       <input id="name" value={formData.name} onChange={handleChange} data-agent="org-name-input"
-                        className="w-full rounded-sm bg-white border border-border text-foreground pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-[#0a66c2]/50 focus:border-[#0a66c2]/50 outline-none shadow-sm transition-all" required />
+                        className="w-full rounded-sm bg-background border border-border text-foreground pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-[#0a66c2]/50 focus:border-[#0a66c2]/50 outline-none shadow-sm transition-all placeholder:text-muted-foreground/50" required />
                     </div>
                   </div>
 
@@ -276,7 +276,7 @@ export function OrgTab() {
                         <Globe className="h-4 w-4" />
                       </div>
                       <input id="website" type="url" value={formData.website} onChange={handleChange} placeholder="https://..." data-agent="org-website-input"
-                        className="w-full rounded-sm bg-white border border-border text-foreground pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-[#0a66c2]/50 focus:border-[#0a66c2]/50 outline-none shadow-sm transition-all" />
+                        className="w-full rounded-sm bg-background border border-border text-foreground pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-[#0a66c2]/50 focus:border-[#0a66c2]/50 outline-none shadow-sm transition-all placeholder:text-muted-foreground/50" />
                     </div>
                   </div>
 
@@ -290,7 +290,7 @@ export function OrgTab() {
                         <FileText className="h-4 w-4" />
                       </div>
                       <input id="tax_id" value={formData.tax_id} onChange={handleChange} placeholder="GSTINXXXXXX" data-agent="org-tax-id-input"
-                        className="w-full rounded-sm bg-white border border-border text-foreground pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-[#0a66c2]/50 focus:border-[#0a66c2]/50 outline-none shadow-sm transition-all" />
+                        className="w-full rounded-sm bg-background border border-border text-foreground pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-[#0a66c2]/50 focus:border-[#0a66c2]/50 outline-none shadow-sm transition-all placeholder:text-muted-foreground/50" />
                     </div>
                   </div>
 
@@ -304,7 +304,7 @@ export function OrgTab() {
                         <Calendar className="h-4 w-4" />
                       </div>
                       <input id="founded_year" type="number" value={formData.founded_year} onChange={handleChange} placeholder="2020" min="1900" max={new Date().getFullYear()} data-agent="org-founded-year-input"
-                        className="w-full rounded-sm bg-white border border-border text-foreground pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-[#0a66c2]/50 focus:border-[#0a66c2]/50 outline-none shadow-sm transition-all" />
+                        className="w-full rounded-sm bg-background border border-border text-foreground pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-[#0a66c2]/50 focus:border-[#0a66c2]/50 outline-none shadow-sm transition-all placeholder:text-muted-foreground/50" />
                     </div>
                   </div>
 
@@ -314,10 +314,10 @@ export function OrgTab() {
                       Industry
                     </label>
                     <select id="industry" value={formData.industry} onChange={handleChange} data-agent="org-industry-select"
-                      className="w-full rounded-sm bg-white border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-[#0a66c2]/50 focus:border-[#0a66c2]/50 outline-none shadow-sm transition-all appearance-none h-10">
-                      <option value="">Select Industry</option>
+                      className="w-full rounded-sm bg-background border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-[#0a66c2]/50 focus:border-[#0a66c2]/50 outline-none shadow-sm transition-all h-10 cursor-pointer">
+                      <option value="" className="bg-background text-foreground">Select Industry</option>
                       {INDUSTRY_OPTIONS.map(opt => (
-                        <option key={opt} value={opt}>{opt}</option>
+                        <option key={opt} value={opt} className="bg-background text-foreground">{opt}</option>
                       ))}
                     </select>
                   </div>
@@ -328,10 +328,10 @@ export function OrgTab() {
                       Company Size
                     </label>
                     <select id="company_size" value={formData.company_size} onChange={handleChange} data-agent="org-company-size-select"
-                      className="w-full rounded-sm bg-white border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-[#0a66c2]/50 focus:border-[#0a66c2]/50 outline-none shadow-sm transition-all appearance-none h-10">
-                      <option value="">Select Size</option>
+                      className="w-full rounded-sm bg-background border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-[#0a66c2]/50 focus:border-[#0a66c2]/50 outline-none shadow-sm transition-all h-10 cursor-pointer">
+                      <option value="" className="bg-background text-foreground">Select Size</option>
                       {SIZE_OPTIONS.map(opt => (
-                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        <option key={opt.value} value={opt.value} className="bg-background text-foreground">{opt.label}</option>
                       ))}
                     </select>
                   </div>
@@ -346,7 +346,7 @@ export function OrgTab() {
                         <MapPin className="h-4 w-4" />
                       </div>
                       <textarea id="address" value={formData.address} onChange={handleChange} placeholder="123 Corporate Way, Suite 100" rows={2} data-agent="org-address-textarea"
-                        className="w-full rounded-sm bg-white border border-border text-foreground pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-[#0a66c2]/50 focus:border-[#0a66c2]/50 outline-none shadow-sm transition-all resize-none" />
+                        className="w-full rounded-sm bg-background border border-border text-foreground pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-[#0a66c2]/50 focus:border-[#0a66c2]/50 outline-none shadow-sm transition-all resize-none placeholder:text-muted-foreground/50" />
                     </div>
                   </div>
 
@@ -356,7 +356,7 @@ export function OrgTab() {
                       About Organization / Bio
                     </label>
                     <textarea id="description" value={formData.description} onChange={handleChange} placeholder="Brief summary of your company missions, culture, or offerings..." rows={4} data-agent="org-description-textarea"
-                      className="w-full rounded-sm bg-white border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-[#0a66c2]/50 focus:border-[#0a66c2]/50 outline-none shadow-sm transition-all resize-none" />
+                      className="w-full rounded-sm bg-background border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-[#0a66c2]/50 focus:border-[#0a66c2]/50 outline-none shadow-sm transition-all resize-none placeholder:text-muted-foreground/50" />
                   </div>
 
                   {/* Logo URL */}
@@ -365,7 +365,7 @@ export function OrgTab() {
                       Logo URL
                     </label>
                     <input id="logo_url" value={formData.logo_url} onChange={handleChange} placeholder="https://..." data-agent="org-logo-url-input"
-                      className="w-full rounded-sm bg-white border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-[#0a66c2]/50 focus:border-[#0a66c2]/50 outline-none shadow-sm transition-all" />
+                      className="w-full rounded-sm bg-background border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-[#0a66c2]/50 focus:border-[#0a66c2]/50 outline-none shadow-sm transition-all placeholder:text-muted-foreground/50" />
                   </div>
 
                   {/* Banner URL */}
@@ -374,7 +374,7 @@ export function OrgTab() {
                       Banner URL
                     </label>
                     <input id="banner_url" value={formData.banner_url} onChange={handleChange} placeholder="https://..." data-agent="org-banner-url-input"
-                      className="w-full rounded-sm bg-white border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-[#0a66c2]/50 focus:border-[#0a66c2]/50 outline-none shadow-sm transition-all" />
+                      className="w-full rounded-sm bg-background border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-[#0a66c2]/50 focus:border-[#0a66c2]/50 outline-none shadow-sm transition-all placeholder:text-muted-foreground/50" />
                   </div>
                 </div>
 

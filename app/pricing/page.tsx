@@ -2,11 +2,14 @@ import { Header } from '@/components/Public/header';
 import { Footer } from '@/components/Public/footer';
 import { PricingTable } from '@/components/Public/pricing/pricing-table';
 import { Metadata } from 'next';
+import { getPageMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
-  title: 'Pricing Plans | B2linq Platform',
-  description: 'Choose the right hiring orchestration plan. Standardized plans built for teams scaling from growth to enterprise-level intelligence.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return getPageMetadata('/pricing', {
+    title: 'Pricing Plans | B2linq Platform',
+    description: 'Choose the right hiring orchestration plan. Standardized plans built for teams scaling from growth to enterprise-level intelligence.',
+  });
+}
 
 export default function PricingPage() {
   return (

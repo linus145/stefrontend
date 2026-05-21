@@ -3,11 +3,14 @@ import { Footer } from '@/components/Public/footer';
 import { BlogList } from '@/components/blogs/blog-list';
 import { Metadata } from 'next';
 import { publicService } from '@/services/public.service';
+import { getPageMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
-  title: 'Blog | B2linq Platform',
-  description: 'Insights, guides, and news from the B2linq team.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return getPageMetadata('/blogs', {
+    title: 'Blog | B2linq Platform',
+    description: 'Insights, guides, and news from the B2linq team.',
+  });
+}
 
 export default async function BlogsPage() {
   let blogs = [];

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ArrowLeft, Clock, Calendar, User, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Metadata } from 'next';
+import { getPageMetadata } from '@/lib/seo';
 
 interface BlogPageProps {
   params: Promise<{ slug: string }>;
@@ -12,12 +13,20 @@ interface BlogPageProps {
 
 export async function generateMetadata({ params }: BlogPageProps): Promise<Metadata> {
   const { slug } = await params;
+  const path = `/blogs/${slug}`;
   try {
     const blog = await publicService.getBlogDetail(slug);
-    return {
+    return getPageMetadata(path, {
       title: `${blog.title} | B2linq Blog`,
       description: blog.excerpt,
-    };
+      keywords: [blog.category],
+      openGraph: {
+        title: `${blog.title} | B2linq Blog`,
+        description: blog.excerpt,
+        images: blog.image ? [{ url: blog.image }] : undefined,
+        type: 'article',
+      }
+    });
   } catch {
     return {
       title: 'Blog Post | B2linq',

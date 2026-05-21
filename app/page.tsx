@@ -9,6 +9,15 @@ import {
   Workflow, ArrowUpRight, Search, ClipboardCheck, Video, Award, ChevronRight
 } from 'lucide-react';
 import { InteractiveAgentFlow } from '@/components/Public/home/interactive-agent-flow';
+import { Metadata } from 'next';
+import { getPageMetadata } from '@/lib/seo';
+
+export async function generateMetadata(): Promise<Metadata> {
+  return getPageMetadata('/', {
+    title: 'B2linq Platform | Autonomous Agentic Infrastructure',
+    description: 'The infrastructure for the next generation of founders, matching talent and capital seamlessly.',
+  });
+}
 
 export default function Home() {
   return (

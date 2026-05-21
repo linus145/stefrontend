@@ -3,11 +3,14 @@ import { Footer } from '@/components/Public/footer';
 import { CareersList } from '@/components/Public/careers/careers-list';
 import { Metadata } from 'next';
 import { publicService } from '@/services/public.service';
+import { getPageMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
-  title: 'Careers | B2linq Platform',
-  description: 'Join the team building the future of startup execution.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return getPageMetadata('/careers', {
+    title: 'Careers | B2linq Platform',
+    description: 'Join the team building the future of startup execution.',
+  });
+}
 
 export default async function CareersPage() {
   let jobs = [];

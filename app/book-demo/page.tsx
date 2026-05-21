@@ -2,11 +2,14 @@ import { Header } from '@/components/Public/header';
 import { Footer } from '@/components/Public/footer';
 import { BookDemoForm } from '@/components/Public/book-demo/book-demo-form';
 import { Metadata } from 'next';
+import { getPageMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
-  title: 'Book Custom Demo | B2linq Platform',
-  description: 'Book a custom demo of our autonomous hiring orchestration engine.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return getPageMetadata('/book-demo', {
+    title: 'Book Custom Demo | B2linq Platform',
+    description: 'Book a custom demo of our autonomous hiring orchestration engine.',
+  });
+}
 
 export default function BookDemoPage() {
   return (

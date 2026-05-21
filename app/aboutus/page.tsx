@@ -4,11 +4,14 @@ import { AboutHero } from '@/components/aboutus/about-hero';
 import { MissionSection } from '@/components/aboutus/mission-section';
 import { Metadata } from 'next';
 import { publicService } from '@/services/public.service';
+import { getPageMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
-  title: 'About Us | B2linq Platform',
-  description: 'Learn about the mission and vision of B2linq.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return getPageMetadata('/aboutus', {
+    title: 'About Us | B2linq Platform',
+    description: 'Learn about the mission and vision of B2linq.',
+  });
+}
 
 export default async function AboutPage() {
   let aboutData = null;

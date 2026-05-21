@@ -166,7 +166,7 @@ export function JobsView({ isCollapsed, onNavigateToMessages, initialSearch, ini
   };
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
+    <div className="flex flex-col">
       {/* Search and Filters Header */}
       <div className="mb-6 flex flex-col gap-4">
         <div className="relative w-full group">
@@ -241,9 +241,9 @@ export function JobsView({ isCollapsed, onNavigateToMessages, initialSearch, ini
         </div>
       </div>
 
-      <div className="flex-1 flex gap-6 overflow-hidden">
+      <div className="flex gap-6 items-start">
         <div className={cn(
-          "flex-1 overflow-y-auto custom-scrollbar bg-card border border-border/50 rounded-lg transition-all",
+          "flex-1 bg-card border border-border/50 rounded-lg transition-all",
           selectedJob ? "hidden lg:block lg:flex-[0.4]" : "w-full"
         )}>
           {isLoading ? (
@@ -265,7 +265,7 @@ export function JobsView({ isCollapsed, onNavigateToMessages, initialSearch, ini
               </p>
             </div>
           ) : (
-            <div className="flex flex-col h-full">
+            <div className="flex flex-col">
               {activeTab === 'browse' && (
                 <div className="p-4 border-b border-border/50">
                   <h3 className="text-lg font-bold text-foreground">Top job picks for you</h3>
@@ -273,7 +273,7 @@ export function JobsView({ isCollapsed, onNavigateToMessages, initialSearch, ini
                 </div>
               )}
 
-              <div className="flex-1 overflow-y-auto">
+              <div>
                 <div className="grid grid-cols-1">
                   {activeTab === 'browse' ? (
                     <div className="flex flex-col">
@@ -331,6 +331,7 @@ export function JobsView({ isCollapsed, onNavigateToMessages, initialSearch, ini
 
         <div className={cn(
           "lg:flex-[0.6] flex flex-col bg-card border border-border rounded-lg overflow-hidden transition-all",
+          "h-[calc(100vh-9rem)] lg:h-[calc(100vh-5.5rem)] lg:sticky lg:top-20 lg:self-start",
           selectedJob ? "flex" : "hidden"
         )}>
           {selectedJob ? (

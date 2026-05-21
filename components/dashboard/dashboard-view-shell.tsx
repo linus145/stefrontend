@@ -91,7 +91,7 @@ export function DashboardViewShell() {
         return <EcosystemContent userId={selectedProfileId} />;
       case 'jobs':
         return (
-          <div className="flex-1 flex flex-col p-4 sm:p-8 transition-all ease-out">
+          <div className="flex-1 flex flex-col p-4 sm:p-8 transition-all ease-out min-h-0">
             {/* Recruiter CTA Banner - Hidden on mobile for cleaner UX */}
             <a
               href="/recruiter/register"
@@ -115,10 +115,10 @@ export function DashboardViewShell() {
 
             {/* Active Job Listings */}
             <div className="flex-1 min-h-0">
-              <JobsView 
+              <JobsView
                 initialSearch={selectedProfileId?.includes('-') ? null : selectedProfileId}
                 initialJobId={selectedProfileId?.includes('-') ? selectedProfileId : null}
-                onNavigateToMessages={(userId) => handleSectionChange('messages', userId, 'direct')} 
+                onNavigateToMessages={(userId) => handleSectionChange('messages', userId, 'direct')}
               />
             </div>
           </div>
@@ -180,7 +180,8 @@ export function DashboardViewShell() {
         />
 
         <div className={cn(
-          "flex-1 flex flex-col min-w-0 pt-16 pb-16 lg:pb-0"
+          "flex-1 flex flex-col min-w-0 pt-16 pb-16 lg:pb-0",
+          activeSection === 'messages' ? "h-screen overflow-hidden" : "min-h-0"
         )}>
           {renderContent()}
         </div>

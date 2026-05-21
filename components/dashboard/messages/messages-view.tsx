@@ -246,7 +246,7 @@ export function MessagesView({
   // ─── Loading state ───
   if (isLoadingRooms) {
     return (
-      <div className="flex-1 h-[calc(100vh-64px)] bg-background flex items-center justify-center">
+      <div className="flex-1 h-full bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-primary animate-spin" />
       </div>
     );
@@ -254,7 +254,7 @@ export function MessagesView({
 
   return (
     <div className={cn(
-      "flex-1 h-[calc(100vh-64px)] bg-background flex transition-all duration-300 ease-in-out"
+      "flex-1 h-full bg-background flex transition-all duration-300 ease-in-out"
     )}>
       {/* Conversations Sidebar */}
       <RoomSidebar

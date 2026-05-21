@@ -13,6 +13,12 @@ import { AgentTaskModal } from '../aiagents/AgentTaskModal';
 import { toast } from 'sonner';
 import { AgentUIController } from '@/agent/ui/AgentUIController';
 
+/** Converts any string to Title Case — first letter capital, rest lowercase. */
+function toTitleCase(str: string): string {
+  if (!str) return str;
+  const clean = str.replace(/[_-]/g, ' ');
+  return clean.charAt(0).toUpperCase() + clean.slice(1).toLowerCase();
+}
 
 interface AIScreeningPanelProps {
   isOpen: boolean;
@@ -139,16 +145,16 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
       "absolute inset-y-0 right-0 w-full sm:w-[480px] bg-white dark:bg-[#0B0F19] border-l border-border shadow-2xl z-30 transform transition-transform duration-500 ease-in-out flex flex-col font-sans",
       isOpen ? "translate-x-0" : "translate-x-full"
     )}>
-      {/* Header - Inspired by Chat Interface */}
+      {/* Header */}
       <div className="relative pt-6 pb-4 px-6 flex items-center justify-between bg-white dark:bg-[#0B0F19] border-b border-border">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-sm bg-muted/10 flex items-center justify-center shadow-sm border border-[#7C3AED]/20">
             <Sparkles className="w-5 h-5 text-[#7C3AED]" />
           </div>
           <div>
-            <h1 className="text-base font-bold text-foreground tracking-tight">Recruitment Copilot</h1>
-            <p className="text-[10px] font-bold text-[#8B5CF6] uppercase tracking-widest">
-              {activeTab === 'results' ? (isLoading ? "Analyzing..." : "Analysis Ready") : "History"}
+            <h1 className="text-base font-bold text-foreground tracking-tight">Recruitment copilot</h1>
+            <p className="text-[10px] font-bold text-[#8B5CF6] tracking-widest">
+              {activeTab === 'results' ? (isLoading ? "Analyzing..." : "Analysis ready") : "History"}
             </p>
           </div>
         </div>
@@ -157,16 +163,16 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
           <button
             onClick={() => setActiveTab(activeTab === 'results' ? 'history' : 'results')}
             className={cn(
-              "p-2 rounded-lg transition-all",
+              "p-2 rounded-sm transition-all",
               activeTab === 'history' ? "bg-[#7C3AED]/10 text-[#7C3AED]" : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
             )}
-            title="View History"
+            title="View history"
           >
             <History className="w-5 h-5" />
           </button>
           <button
             onClick={onClose}
-            className="p-2 text-muted-foreground hover:bg-muted/50 hover:text-foreground rounded-lg transition-colors"
+            className="p-2 text-muted-foreground hover:bg-muted/50 hover:text-foreground rounded-sm transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -180,35 +186,35 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
             <div className="flex flex-col items-center justify-center h-full space-y-6 px-12 text-center">
               {historyError ? (
                 <>
-                  <div className="w-12 h-12 bg-rose-500/10 rounded-full flex items-center justify-center">
+                    <div className="w-12 h-12 bg-rose-500/10 rounded-sm flex items-center justify-center">
                     <AlertCircle className="w-6 h-6 text-rose-500" />
                   </div>
                   <div className="space-y-2">
-                    <p className="text-sm font-black text-slate-900 dark:text-white tracking-tight uppercase">Connection Interrupted</p>
+                    <p className="text-sm font-black text-slate-900 dark:text-white tracking-tight">Connection interrupted</p>
                     <p className="text-xs text-slate-500 font-medium">The server is unreachable. Please check your connection.</p>
                     <button
                       onClick={() => refetchHistory()}
-                      className="mt-4 px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-md text-[10px] font-black uppercase tracking-widest hover:bg-slate-200 transition-colors"
+                      className="mt-4 px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-sm text-[10px] font-black tracking-widest hover:bg-slate-200 transition-colors"
                     >
-                      Retry Connection
+                      Retry connection
                     </button>
                   </div>
                 </>
               ) : (
                 <>
                   <div className="relative">
-                    <div className="w-16 h-16 border-4 border-indigo-500/10 border-t-indigo-500 rounded-full animate-spin" />
+                    <div className="w-16 h-16 border-4 border-indigo-500/10 border-t-indigo-500 rounded-sm animate-spin" />
                     <Bot className="w-6 h-6 text-indigo-500 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 animate-pulse" />
                   </div>
                   <div className="space-y-2">
-                    <p className="text-sm font-black text-slate-900 dark:text-white tracking-tight uppercase">AI Engine Processing</p>
+                    <p className="text-sm font-black text-slate-900 dark:text-white tracking-tight">Ai engine processing</p>
                     <p className="text-xs text-slate-500 font-medium leading-relaxed">
                       We are analyzing the resumes in the background.
                       This usually takes 15-30 seconds per resume.
                     </p>
                     <div className="pt-4 space-y-3">
-                      <span className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-500/10 text-indigo-500 text-[10px] font-black uppercase rounded-full">
-                        <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-ping" />
+                      <span className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-500/10 text-indigo-500 text-[10px] font-black tracking-widest rounded-sm">
+                        <span className="w-1.5 h-1.5 rounded-sm bg-indigo-500 animate-ping" />
                         Auto-refreshing ({processingTime}s)
                       </span>
 
@@ -216,9 +222,9 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
                         <div className="pt-2 animate-in fade-in slide-in-from-bottom-2 duration-500">
                           <button
                             onClick={onRestartAnalysis}
-                            className="px-6 py-2 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest rounded-md shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 transition-all transform active:scale-95"
+                            className="px-6 py-2 bg-indigo-600 text-white text-[10px] font-black tracking-widest rounded-sm shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 transition-all transform active:scale-95"
                           >
-                            Restart AI Engine
+                            Restart ai engine
                           </button>
                           <p className="text-[10px] text-slate-400 font-bold mt-2 italic">Taking longer than usual? Click to force a refresh.</p>
                         </div>
@@ -243,7 +249,7 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
                     {/* AI Intelligence Card */}
                     <div
                       className={cn(
-                        "bg-white dark:bg-[#111827] rounded-lg p-5 transition-all cursor-pointer border shadow-sm relative overflow-hidden group",
+                        "bg-white dark:bg-[#111827] rounded-sm p-5 transition-all cursor-pointer border shadow-sm relative overflow-hidden group",
                         isExpanded ? "border-[#7C3AED] ring-1 ring-[#7C3AED]/10" : "border-slate-200 dark:border-slate-800 hover:border-[#7C3AED]/40"
                       )}
                       onClick={() => toggleExpand(cand.id)}
@@ -258,15 +264,15 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
                           <div className="flex items-center gap-2 mb-1">
                             <h3 className="text-base font-bold text-slate-900 dark:text-white truncate">{cand.name}</h3>
                             {idx === 0 && (
-                              <span className="bg-amber-500/10 text-amber-500 text-[9px] font-black uppercase px-1.5 py-0.5 rounded-sm border border-amber-500/20">
-                                Top Match
+                              <span className="bg-amber-500/10 text-amber-500 text-[9px] font-black px-1.5 py-0.5 rounded-sm border border-amber-500/20">
+                                Top match
                               </span>
                             )}
                           </div>
                           <div className="flex items-center gap-3">
                             <div className="flex items-center gap-1 text-[11px] font-bold text-indigo-500">
                               <Target className="w-3 h-3" />
-                              {cand.score}% Match
+                              {cand.score}% match
                             </div>
                             {ai?.startup_fit && (
                               <div className={cn(
@@ -274,7 +280,7 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
                                 ai.startup_fit === 'High' ? "text-emerald-500" : "text-amber-500"
                               )}>
                                 <Sparkles className="w-3 h-3" />
-                                {ai.startup_fit} Fit
+                                {toTitleCase(ai.startup_fit)} fit
                               </div>
                             )}
                           </div>
@@ -284,8 +290,8 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
                           <div className="text-[20px] font-black text-slate-900 dark:text-white leading-none">
                             {cand.score}<span className="text-[12px] opacity-30">%</span>
                           </div>
-                          <div className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter mt-1">
-                            Fit Score
+                          <div className="text-[9px] font-bold text-slate-400 tracking-tighter mt-1">
+                            Fit score
                           </div>
                         </div>
                       </div>
@@ -298,7 +304,7 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
                         {ai?.explanation || cand.summary}
                       </p>
 
-                      {/* Structured Insights (Always show a preview if not expanded?) */}
+                      {/* Expanded Structured Insights */}
                       {isExpanded && ai && (
                         <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800 animate-in fade-in duration-500">
 
@@ -306,13 +312,13 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
                           <div className="grid grid-cols-1 gap-4">
                             {ai.strengths?.length > 0 && (
                               <div className="space-y-2">
-                                <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-1.5">
-                                  <CheckCircle2 className="w-3 h-3" /> Key Strengths
+                                <p className="text-[10px] font-black text-emerald-500 tracking-widest flex items-center gap-1.5">
+                                  <CheckCircle2 className="w-3 h-3" /> Key strengths
                                 </p>
                                 <div className="flex flex-wrap gap-1.5">
                                   {ai.strengths.map((s: string, i: number) => (
                                     <span key={i} className="bg-emerald-500/5 text-emerald-600 dark:text-emerald-400 text-[11px] font-bold px-2 py-1 rounded-sm border border-emerald-500/10">
-                                      {s}
+                                      {toTitleCase(s)}
                                     </span>
                                   ))}
                                 </div>
@@ -321,13 +327,13 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
 
                             {ai.concerns?.length > 0 && (
                               <div className="space-y-2">
-                                <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest flex items-center gap-1.5">
-                                  <AlertCircle className="w-3 h-3" /> Potential Concerns
+                                <p className="text-[10px] font-black text-rose-500 tracking-widest flex items-center gap-1.5">
+                                  <AlertCircle className="w-3 h-3" /> Potential concerns
                                 </p>
                                 <div className="flex flex-wrap gap-1.5">
                                   {ai.concerns.map((c: string, i: number) => (
                                     <span key={i} className="bg-rose-500/5 text-rose-600 dark:text-rose-400 text-[11px] font-bold px-2 py-1 rounded-sm border border-rose-500/10">
-                                      {c}
+                                      {toTitleCase(c)}
                                     </span>
                                   ))}
                                 </div>
@@ -337,15 +343,15 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
 
                           {/* Red Flags */}
                           {ai.red_flags?.length > 0 && (
-                            <div className="bg-rose-500/10 border border-rose-500/20 rounded-md p-3">
-                              <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest flex items-center gap-1.5 mb-2">
-                                <AlertCircle className="w-3 h-3" /> AI Red Flags
+                            <div className="bg-rose-500/10 border border-rose-500/20 rounded-sm p-3">
+                              <p className="text-[10px] font-black text-rose-500 tracking-widest flex items-center gap-1.5 mb-2">
+                                <AlertCircle className="w-3 h-3" /> Ai red flags
                               </p>
                               <ul className="space-y-1">
                                 {ai.red_flags.map((rf: string, i: number) => (
                                   <li key={i} className="text-[11px] font-bold text-rose-700 dark:text-rose-300 flex items-start gap-2">
-                                    <span className="mt-1 w-1 h-1 rounded-full bg-rose-500 shrink-0" />
-                                    {rf}
+                                    <span className="mt-1 w-1 h-1 rounded-sm bg-rose-500 shrink-0" />
+                                    {toTitleCase(rf)}
                                   </li>
                                 ))}
                               </ul>
@@ -353,39 +359,82 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
                           )}
 
                           {/* Interview Questions */}
-                          {ai.interview_questions?.length > 0 && (
-                            <div className="bg-indigo-500/5 border border-indigo-500/10 rounded-md p-3">
-                              <p className="text-[10px] font-black text-indigo-500 uppercase tracking-widest flex items-center gap-1.5 mb-2">
-                                <MessageSquare className="w-3 h-3" /> Suggested Interview Questions
+                          {(ai.tailored_interview_questions?.length > 0 || ai.interview_questions?.length > 0) && (
+                            <div className="bg-indigo-500/5 border border-indigo-500/10 rounded-sm p-3">
+                              <p className="text-[10px] font-black text-indigo-500 tracking-widest flex items-center gap-1.5 mb-2">
+                                <MessageSquare className="w-3 h-3" /> Suggested interview questions
                               </p>
                               <div className="space-y-3">
-                                {ai.interview_questions.map((q: string, i: number) => (
-                                  <div key={i} className="flex gap-3">
-                                    <div className="w-5 h-5 rounded-full bg-indigo-500/10 flex items-center justify-center text-[10px] font-black text-indigo-500 shrink-0">
-                                      {i + 1}
+                                {(ai.tailored_interview_questions || ai.interview_questions).map((q: any, i: number) => {
+                                  const questionText = typeof q === 'string' ? q : q?.question || '';
+                                  return (
+                                    <div key={i} className="flex gap-3">
+                                      <div className="w-5 h-5 rounded-sm bg-indigo-500/10 flex items-center justify-center text-[10px] font-black text-indigo-500 shrink-0">
+                                        {i + 1}
+                                      </div>
+                                      <p className="text-[12px] font-medium text-slate-700 dark:text-slate-300 italic">"{questionText}"</p>
                                     </div>
-                                    <p className="text-[12px] font-medium text-slate-700 dark:text-slate-300 italic">"{q}"</p>
-                                  </div>
-                                ))}
+                                  );
+                                })}
                               </div>
                             </div>
                           )}
+
                           {/* Stats Row */}
                           <div className="grid grid-cols-2 gap-3 pt-2">
                             <div className="bg-slate-50 dark:bg-slate-900/50 p-2.5 rounded-sm border border-slate-100 dark:border-slate-800">
-                              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Trust Score</p>
+                              <p className="text-[9px] font-bold text-slate-400 tracking-widest mb-1">Trust score</p>
                               <div className="flex items-center justify-between">
                                 <span className="text-sm font-black text-slate-700 dark:text-slate-300">{ai.trust_score}%</span>
-                                <div className="w-12 h-1 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                                  <div className="w-12 h-1 bg-slate-200 dark:bg-slate-700 rounded-sm overflow-hidden">
                                   <div className="h-full bg-indigo-500" style={{ width: `${ai.trust_score}%` }} />
                                 </div>
                               </div>
                             </div>
                             <div className="bg-slate-50 dark:bg-slate-900/50 p-2.5 rounded-sm border border-slate-100 dark:border-slate-800">
-                              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Recommended</p>
-                              <p className="text-xs font-bold text-indigo-600 dark:text-indigo-400 truncate">{ai.recommended_action || "Yes"}</p>
+                              <p className="text-[9px] font-bold text-slate-400 tracking-widest mb-1">Recommended</p>
+                              <p className="text-xs font-bold text-indigo-600 dark:text-indigo-400 truncate">
+                                {toTitleCase(ai.recommended_action || ai.pipeline_disposition || "Yes")}
+                              </p>
                             </div>
                           </div>
+
+                          {/* Pipeline Disposition & Hiring Confidence (new fields) */}
+                          {(ai.pipeline_disposition || ai.hiring_confidence) && (
+                            <div className="grid grid-cols-2 gap-3">
+                              {ai.pipeline_disposition && (
+                                <div className="bg-slate-50 dark:bg-slate-900/50 p-2.5 rounded-sm border border-slate-100 dark:border-slate-800">
+                                  <p className="text-[9px] font-bold text-slate-400 tracking-widest mb-1">Disposition</p>
+                                  <p className="text-xs font-bold text-violet-600 dark:text-violet-400 truncate">
+                                    {toTitleCase(ai.pipeline_disposition)}
+                                  </p>
+                                </div>
+                              )}
+                              {ai.hiring_confidence && (
+                                <div className="bg-slate-50 dark:bg-slate-900/50 p-2.5 rounded-sm border border-slate-100 dark:border-slate-800">
+                                  <p className="text-[9px] font-bold text-slate-400 tracking-widest mb-1">Hiring confidence</p>
+                                  <p className={cn(
+                                    "text-xs font-bold truncate",
+                                    ai.hiring_confidence === 'HIGH' ? "text-emerald-600 dark:text-emerald-400" :
+                                    ai.hiring_confidence === 'MEDIUM' ? "text-amber-600 dark:text-amber-400" :
+                                    "text-rose-600 dark:text-rose-400"
+                                  )}>
+                                    {toTitleCase(ai.hiring_confidence)}
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Recruiter Action Memo (new field) */}
+                          {ai.recruiter_action_memo && (
+                            <div className="bg-violet-500/5 border border-violet-500/10 rounded-sm p-3">
+                              <p className="text-[10px] font-black text-violet-500 tracking-widest mb-1">Recruiter memo</p>
+                              <p className="text-[12px] text-slate-600 dark:text-slate-400 font-medium leading-relaxed">
+                                {ai.recruiter_action_memo}
+                              </p>
+                            </div>
+                          )}
                         </div>
                       )}
 
@@ -402,10 +451,10 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
                             e.stopPropagation();
                             onViewDetails(cand.id);
                           }}
-                          className="flex items-center justify-center gap-2 p-2.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all shadow-sm"
+                          className="flex items-center justify-center gap-2 p-2.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-sm text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all shadow-sm"
                         >
                           <FileText className="w-3.5 h-3.5" />
-                          Full Profile
+                          Full profile
                         </button>
 
                         <button
@@ -414,10 +463,10 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
                             setAgentModalOpen(true);
                             setSelectedCandidateName(cand.name);
                           }}
-                          className="flex items-center justify-center gap-2 p-2.5 bg-indigo-600 rounded-md text-[11px] font-bold text-white hover:bg-indigo-500 transition-all shadow-[0_0_15px_rgba(79,70,229,0.3)]"
+                          className="flex items-center justify-center gap-2 p-2.5 bg-indigo-600 rounded-sm text-[11px] font-bold text-white hover:bg-indigo-500 transition-all shadow-[0_0_15px_rgba(79,70,229,0.3)]"
                         >
                           <Zap className="w-3.5 h-3.5 fill-current" />
-                          Deploy Agent
+                          Deploy agent
                         </button>
                       </div>
                     )}
@@ -435,8 +484,8 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
           /* History Tab */
           historyLoading ? (
             <div className="flex flex-col items-center justify-center h-full space-y-4 opacity-60">
-              <div className="w-8 h-8 border-2 border-[#7C3AED]/20 border-t-[#7C3AED] rounded-full animate-spin" />
-              <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Loading History...</p>
+              <div className="w-8 h-8 border-2 border-[#7C3AED]/20 border-t-[#7C3AED] rounded-sm animate-spin" />
+              <p className="text-xs font-bold text-muted-foreground tracking-widest">Loading history...</p>
             </div>
           ) : historyData?.data && historyData.data.length > 0 ? (
             <div className="space-y-2 pb-20">
@@ -467,7 +516,6 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
                     </div>
                   </div>
 
-
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -490,7 +538,7 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
         )}
       </div>
 
-      {/* Footer Chat Input - Professional Chat Style */}
+      {/* Footer Chat Input */}
       <div className="p-4 border-t border-border bg-white dark:bg-[#0B0F19]">
         <div className="relative group">
           <input

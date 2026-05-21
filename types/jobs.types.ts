@@ -70,6 +70,7 @@ export interface JobPost {
   description: string;
   location: string;
   job_type: JobType;
+  job_category: 'IT' | 'NON_IT';
   work_mode: WorkMode;
   salary_min: number | null;
   salary_max: number | null;
@@ -96,6 +97,7 @@ export interface JobPostCreatePayload {
   description: string;
   location?: string;
   job_type?: JobType;
+  job_category?: 'IT' | 'NON_IT';
   work_mode?: WorkMode;
   salary_min?: number | null;
   salary_max?: number | null;
@@ -107,6 +109,7 @@ export interface JobPostCreatePayload {
   department?: string;
   status?: JobStatus;
   hiring_status?: HiringStatus;
+  hr_profile?: string | null;
   deadline?: string | null;
 }
 

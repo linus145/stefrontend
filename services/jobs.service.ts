@@ -43,6 +43,22 @@ export const jobsService = {
     return api.patch<BaseAPIResponse<CompanyHRProfile>>('/startups/company/hr-profile/', data);
   },
 
+  getHRProfiles: (): Promise<BaseAPIResponse<CompanyHRProfile[]>> => {
+    return api.get<BaseAPIResponse<CompanyHRProfile[]>>('/startups/company/hr-profiles/');
+  },
+
+  createHRProfile: (data: Partial<CompanyHRProfile>): Promise<BaseAPIResponse<CompanyHRProfile>> => {
+    return api.post<BaseAPIResponse<CompanyHRProfile>>('/startups/company/hr-profiles/', data);
+  },
+
+  updateHRProfileById: (id: string, data: Partial<CompanyHRProfile>): Promise<BaseAPIResponse<CompanyHRProfile>> => {
+    return api.patch<BaseAPIResponse<CompanyHRProfile>>(`/startups/company/hr-profiles/${id}/`, data);
+  },
+
+  deleteHRProfileById: (id: string): Promise<BaseAPIResponse<any>> => {
+    return api.delete<BaseAPIResponse<any>>(`/startups/company/hr-profiles/${id}/`);
+  },
+
   // ─── Public Job Browsing ──────────────────────────────────────
 
   getPublicJobs: (params?: Record<string, string>): Promise<BaseAPIResponse<JobPost[]>> => {

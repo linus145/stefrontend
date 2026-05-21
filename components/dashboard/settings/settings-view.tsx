@@ -112,7 +112,7 @@ export function SettingsView({ isCollapsed }: { isCollapsed?: boolean }) {
             {menuItems.find(m => m.id === activeTab)?.label}
           </h2>
         </div>
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 p-6">
           <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as SettingsTab)} className="w-full">
             <TabsContent value="Privacy">
               <PrivacyTab />
@@ -155,7 +155,7 @@ export function SettingsView({ isCollapsed }: { isCollapsed?: boolean }) {
       </div>
 
       {/* Desktop Main Content */}
-      <div className="hidden md:flex flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 lg:p-10">
+      <div className="hidden md:flex flex-1 p-4 sm:p-6 lg:p-10">
         <div className="max-w-3xl mx-auto space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500 w-full">
           <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as SettingsTab)} className="w-full">
             <TabsContent value="Privacy">

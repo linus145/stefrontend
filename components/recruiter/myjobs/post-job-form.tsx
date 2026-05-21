@@ -47,6 +47,11 @@ const HIRING_STATUS_OPTIONS = [
   { value: 'ACTIVELY_REVIEWING', label: 'Actively Reviewing' },
 ];
 
+const JOB_CATEGORY_OPTIONS = [
+  { value: 'IT', label: 'IT' },
+  { value: 'NON_IT', label: 'Non-IT' },
+];
+
 export function PostJobForm({ editJob, onClose, onSuccess }: PostJobFormProps) {
   const isEditing = !!editJob;
   const queryClient = useQueryClient();
@@ -58,11 +63,19 @@ export function PostJobForm({ editJob, onClose, onSuccess }: PostJobFormProps) {
 
   const skills = Array.isArray(skillsResponse?.data) ? skillsResponse.data : [];
 
+  const { data: hrProfilesResponse } = useQuery({
+    queryKey: ['company-hr-profiles'],
+    queryFn: () => jobsService.getHRProfiles(),
+  });
+
+  const hrProfiles = Array.isArray(hrProfilesResponse?.data) ? hrProfilesResponse.data : [];
+
   const [formData, setFormData] = useState<JobPostCreatePayload>({
     title: editJob?.title || '',
     description: editJob?.description || '',
     location: editJob?.location || '',
     job_type: editJob?.job_type || 'FULL_TIME',
+    job_category: editJob?.job_category || 'IT',
     work_mode: editJob?.work_mode || 'ONSITE',
     salary_min: editJob?.salary_min || null,
     salary_max: editJob?.salary_max || null,
@@ -76,6 +89,7 @@ export function PostJobForm({ editJob, onClose, onSuccess }: PostJobFormProps) {
     department: editJob?.department || '',
     status: editJob?.status || 'DRAFT',
     hiring_status: editJob?.hiring_status || 'ACTIVELY_HIRING',
+    hr_profile: editJob?.hr_profile?.id || null,
     deadline: editJob?.deadline ? editJob.deadline.split('T')[0] : null,
   });
 
@@ -262,11 +276,18 @@ export function PostJobForm({ editJob, onClose, onSuccess }: PostJobFormProps) {
             </FormField>
           </div>
 
-          {/* Experience + Location */}
+          {/* Category + Experience */}
           <div className="grid grid-cols-2 gap-4">
+            <FormField label="Job Category" id="job_category">
+              <SelectField id="job_category" value={formData.job_category!} onChange={handleChange} options={JOB_CATEGORY_OPTIONS} disabled={isSubmitting} />
+            </FormField>
             <FormField label="Experience Level" id="experience_level">
               <SelectField id="experience_level" value={formData.experience_level!} onChange={handleChange} options={EXPERIENCE_OPTIONS} disabled={isSubmitting} />
             </FormField>
+          </div>
+
+          {/* Location + Department */}
+          <div className="grid grid-cols-2 gap-4">
             <FormField label="Location" id="location">
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground">
@@ -278,6 +299,21 @@ export function PostJobForm({ editJob, onClose, onSuccess }: PostJobFormProps) {
                   value={formData.location}
                   onChange={handleChange}
                   placeholder="Bangalore, India"
+                  className="w-full rounded-sm bg-background border border-border text-foreground pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground"
+                />
+              </div>
+            </FormField>
+            <FormField label="Department / Role Group" id="department" error={errors.department}>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground">
+                  <Briefcase className="h-4 w-4" />
+                </div>
+                <input
+                  id="department"
+                  disabled={isSubmitting}
+                  value={formData.department}
+                  onChange={handleChange}
+                  placeholder="e.g. Engineering"
                   className="w-full rounded-sm bg-background border border-border text-foreground pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground"
                 />
               </div>
@@ -320,8 +356,8 @@ export function PostJobForm({ editJob, onClose, onSuccess }: PostJobFormProps) {
             </FormField>
           </div>
 
-          {/* Opening Details - Integrated */}
-          <div className="grid grid-cols-2 gap-4">
+          {/* Opening Details & HR Profile - Integrated */}
+          <div className={cn("grid gap-4", hrProfiles.length > 0 ? "grid-cols-2" : "grid-cols-1")}>
             <FormField label="Open Positions *" id="open_positions" error={errors.open_positions}>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground">
@@ -338,21 +374,30 @@ export function PostJobForm({ editJob, onClose, onSuccess }: PostJobFormProps) {
                 />
               </div>
             </FormField>
-            <FormField label="Department / Role Group" id="department" error={errors.department}>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground">
-                  <Briefcase className="h-4 w-4" />
+
+            {hrProfiles.length > 0 && (
+              <FormField label="HR contact profile" id="hr_profile" error={errors.hr_profile}>
+                <div className="relative">
+                  <select
+                    id="hr_profile"
+                    disabled={isSubmitting}
+                    value={formData.hr_profile || ''}
+                    onChange={(e) => setFormData(prev => ({ ...prev, hr_profile: e.target.value || null }))}
+                    className="w-full rounded-sm bg-background border border-border text-foreground px-4 py-2 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none appearance-none transition-colors"
+                  >
+                    <option value="">Select HR profile (Fallback to default)...</option>
+                    {hrProfiles.map((p) => (
+                      <option key={p.id} value={p.id} className="bg-background text-foreground">
+                        {p.name} ({p.designation})
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-muted-foreground">
+                    <ChevronDown className="w-4 h-4" />
+                  </div>
                 </div>
-                <input
-                  id="department"
-                  disabled={isSubmitting}
-                  value={formData.department}
-                  onChange={handleChange}
-                  placeholder="e.g. Engineering"
-                  className="w-full rounded-sm bg-background border border-border text-foreground pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground"
-                />
-              </div>
-            </FormField>
+              </FormField>
+            )}
           </div>
 
           {/* Categorized Skills Dropdown */}

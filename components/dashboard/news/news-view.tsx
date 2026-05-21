@@ -45,7 +45,7 @@ export function NewsView({ selectedNewsId }: NewsViewProps) {
   ] as const;
 
   return (
-    <div className="flex-1 flex flex-col p-4 sm:p-8 animate-in fade-in duration-500 overflow-y-auto custom-scrollbar">
+    <div className="flex-1 flex flex-col p-4 sm:p-8 animate-in fade-in duration-500">
       <div className="max-w-4xl mx-auto w-full">
         <div className="mb-8 text-center">
           <h2 className="text-2xl font-bold text-foreground tracking-tight mb-2">Ecosystem News</h2>

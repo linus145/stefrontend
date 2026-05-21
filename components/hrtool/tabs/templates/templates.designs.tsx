@@ -1,6 +1,6 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
-import { renderFormattedContent } from './templates.helpers';
+import { renderFormattedContent, getCompanyAbbreviation } from './templates.helpers';
 
 // ─── Design Theme Registry ──────────────────────────────────────────────────
 
@@ -60,16 +60,16 @@ export const renderThemedDocument = (
   if (themeId === 'corporate') {
     return (
       <div className="relative overflow-hidden border-t-4 border-[#0a66c2] bg-white dark:bg-[#0c0d19] p-8 shadow-xl min-h-[480px] font-sans flex flex-col justify-between rounded-b-md transition-all duration-300">
-        <div className="absolute -right-16 -top-16 w-48 h-48 rounded-full bg-blue-50/40 dark:bg-blue-950/10 pointer-events-none blur-3xl" />
-        <div className="absolute -left-16 -bottom-16 w-64 h-64 rounded-full bg-indigo-50/30 dark:bg-indigo-950/5 pointer-events-none blur-3xl" />
+        <div className="absolute -right-16 -top-16 w-48 h-48 rounded-full bg-blue-50/40 dark:bg-blue-950/10 pointer-events-none blur-3xl transform-gpu" />
+        <div className="absolute -left-16 -bottom-16 w-64 h-64 rounded-full bg-indigo-50/30 dark:bg-indigo-950/5 pointer-events-none blur-3xl transform-gpu" />
 
         <div>
           {/* Header */}
           <div className="flex flex-col sm:flex-row justify-between items-start gap-4 border-b border-slate-100 dark:border-slate-800 pb-5 mb-6">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <div className="h-7 w-7 rounded-md bg-gradient-to-tr from-[#0a66c2] to-indigo-400 flex items-center justify-center text-white font-black text-xs shadow-md">
-                  B
+                <div className="h-7 w-7 rounded-md bg-gradient-to-tr from-[#0a66c2] to-indigo-400 flex items-center justify-center text-white font-black text-xs shadow-md uppercase">
+                  {orgName[0]}
                 </div>
                 <span className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-tight">
                   {orgName}
@@ -81,7 +81,7 @@ export const renderThemedDocument = (
               <Badge className="bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-100/50 dark:border-blue-900/60 shadow-none text-[8px] font-extrabold uppercase rounded-md px-2 py-0.5 tracking-wider">
                 Confidential
               </Badge>
-              <div className="text-[9px] text-slate-400 font-medium">Ref: B2L/DOC/2026/{empId}</div>
+              <div className="text-[9px] text-slate-400 font-medium uppercase">Ref: {getCompanyAbbreviation(orgName)}/DOC/2026/{empId}</div>
               <div className="text-[9px] text-slate-400">{today}</div>
             </div>
           </div>
@@ -96,7 +96,7 @@ export const renderThemedDocument = (
         <div className="mt-12 pt-6 border-t border-slate-100 dark:border-slate-900 flex flex-col sm:flex-row justify-between items-center sm:items-end gap-6 text-[10px]">
           <div className="relative flex items-center gap-2 bg-emerald-50/50 dark:bg-emerald-950/10 border border-emerald-100 dark:border-emerald-900/30 px-3 py-1.5 rounded-full">
             <div className="h-2 w-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
-            <span className="text-[8px] text-emerald-800 dark:text-emerald-400 font-extrabold uppercase tracking-widest">B2Linq Verified</span>
+            <span className="text-[8px] text-emerald-800 dark:text-emerald-400 font-extrabold uppercase tracking-widest">{orgName} Verified</span>
           </div>
           <div className="flex gap-12">
             <div className="space-y-1.5">
@@ -137,8 +137,8 @@ export const renderThemedDocument = (
           <div className="flex flex-col sm:flex-row justify-between items-start gap-4 border-b border-amber-800/30 pb-5 mb-6">
             <div className="space-y-1.5">
               <div className="flex items-center gap-2.5">
-                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-amber-500 to-yellow-600 flex items-center justify-center text-[#1a1a2e] font-black text-sm shadow-lg shadow-amber-500/20">
-                  B
+                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-amber-500 to-yellow-600 flex items-center justify-center text-[#1a1a2e] font-black text-sm shadow-lg shadow-amber-500/20 uppercase">
+                  {orgName[0]}
                 </div>
                 <div>
                   <span className="text-sm font-black text-amber-100 uppercase tracking-widest block">
@@ -152,7 +152,7 @@ export const renderThemedDocument = (
               <Badge className="bg-amber-500/10 text-amber-400 border border-amber-500/20 shadow-none text-[8px] font-extrabold uppercase rounded-sm px-2.5 py-0.5 tracking-[0.15em]">
                 ★ Premium
               </Badge>
-              <div className="text-[9px] text-amber-600/50 font-medium tracking-wider">REF: B2L/{empId}/EXC</div>
+              <div className="text-[9px] text-amber-600/50 font-medium tracking-wider uppercase">REF: {getCompanyAbbreviation(orgName)}/{empId}/EXC</div>
               <div className="text-[9px] text-amber-600/40">{today}</div>
             </div>
           </div>
@@ -169,7 +169,7 @@ export const renderThemedDocument = (
           <div className="relative">
             <div className="h-14 w-14 rounded-full border-2 border-amber-500/40 flex items-center justify-center bg-amber-500/5">
               <div className="h-10 w-10 rounded-full border border-amber-500/30 flex items-center justify-center">
-                <span className="text-amber-400 font-black text-xs tracking-widest">B2L</span>
+                <span className="text-amber-400 font-black text-xs tracking-widest uppercase">{getCompanyAbbreviation(orgName)}</span>
               </div>
             </div>
             <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-[7px] text-amber-500/60 font-bold uppercase tracking-widest whitespace-nowrap">Certified</div>
@@ -210,8 +210,8 @@ export const renderThemedDocument = (
           <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start gap-3">
             <div>
               <div className="flex items-center gap-2.5 mb-1.5">
-                <div className="h-8 w-8 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center text-white font-black text-sm border border-white/10">
-                  B
+                <div className="h-8 w-8 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center text-white font-black text-sm border border-white/10 uppercase">
+                  {orgName[0]}
                 </div>
                 <span className="text-base font-black text-white uppercase tracking-tight drop-shadow-sm">
                   {orgName}
@@ -247,7 +247,7 @@ export const renderThemedDocument = (
               </div>
               <div>
                 <span className="text-[9px] text-violet-600 dark:text-violet-400 font-extrabold uppercase tracking-widest block">Document Verified</span>
-                <span className="text-[8px] text-slate-400 font-medium">Digitally processed by B2Linq HR Suite</span>
+                <span className="text-[8px] text-slate-400 font-medium">Digitally processed by {orgName} HR Suite</span>
               </div>
             </div>
 
@@ -335,7 +335,7 @@ export const renderThemedDocument = (
           {/* Minimal brand mark */}
           <div className="mt-8 flex items-center justify-center gap-2 opacity-30">
             <div className="h-px w-6 bg-slate-400" />
-            <span className="text-[7px] text-slate-400 tracking-[0.3em] uppercase font-sans">B2Linq</span>
+            <span className="text-[7px] text-slate-400 tracking-[0.3em] uppercase font-sans">{orgName}</span>
             <div className="h-px w-6 bg-slate-400" />
           </div>
         </div>

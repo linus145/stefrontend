@@ -10,7 +10,7 @@ export const DEFAULT_TEMPLATES = [
     category_display: 'Payroll Related',
     content: `# MONTHLY SALARY STATEMENT
 
-**Employer:** B2Linq Technologies Inc
+**Employer:** {{organization_name}}
 **Employee Name:** {{employee_name}}
 **Employee ID:** {{employee_id}}
 **Pay Period:** {{pay_period}}
@@ -48,7 +48,7 @@ export const DEFAULT_TEMPLATES = [
     category_display: 'Payroll Related',
     content: `# EXECUTIVE COMPENSATION BONUS SCHEDULE
 
-This document outlines the performance-based bonus structures applicable to all management, executive, and lead roles inside B2Linq.
+This document outlines the performance-based bonus structures applicable to all management, executive, and lead roles inside {{organization_name}}.
 
 ### KEY METRICS:
 1. **Corporate Milestone Attainment:** 40% Weightage
@@ -67,7 +67,7 @@ This document outlines the performance-based bonus structures applicable to all 
     category_display: 'Offer Letter',
     content: `Dear {{candidate_name}},
 
-On behalf of B2Linq Technologies, we are thrilled to offer you the position of **Software Engineer**!
+On behalf of {{organization_name}}, we are thrilled to offer you the position of **Software Engineer**!
 
 We were exceptionally impressed by your technical assessments and alignment with our product ecosystem.
 
@@ -80,7 +80,7 @@ We were exceptionally impressed by your technical assessments and alignment with
 Please review this letter, sign it, and return a copy to the onboarding department within 5 business days.
 
 Warm regards,
-**The B2Linq Talent Team**`
+**The {{organization_name}} Talent Team**`
   },
   {
     id: 'default-joining-1',
@@ -89,18 +89,18 @@ Warm regards,
     category_display: 'Joining Letter',
     content: `# EMPLOYEE DECK & JOINING AGREEMENT
 
-Welcome to B2Linq! This joining covenant establishes the operational parameters of your day-to-day engagement with the company.
+Welcome to {{organization_name}}! This joining covenant establishes the operational parameters of your day-to-day engagement with the company.
 
 ### 1. Day-One Setup
 * Complete Aadhaar & PAN authentication checks.
-* Provision B2Linq cloud workspace profile.
+* Provision {{organization_name}} cloud workspace profile.
 * Set up direct salary bank account details.
 
 ### 2. Confidentiality & NDA
 * You agree not to disclose proprietary codebase structures, client portfolios, or algorithmic solutions to any third-party entities during or after your tenure.
 
 ### 3. Workspace Compliance
-* Hours and shifts must comply with local regional settings defined inside B2Linq HR Dashboard.`
+* Hours and shifts must comply with local regional settings defined inside {{organization_name}} HR Dashboard.`
   }
 ];
 
@@ -108,6 +108,26 @@ export const MONTHS = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"
 ];
+
+export const getCompanyAbbreviation = (name?: string): string => {
+  if (!name) return 'B2L';
+  const cleanName = name.replace(/Technologies|Inc\.|Corp\.|Ltd\.|LLC|Corporation|Limited/gi, '').trim();
+  const words = cleanName.split(/\s+/).filter(Boolean);
+  if (words.length >= 3) {
+    return words.slice(0, 3).map(w => w[0]).join('').toUpperCase();
+  } else if (words.length === 2) {
+    const first = words[0];
+    const second = words[1];
+    return (first.substring(0, 2) + second[0]).toUpperCase();
+  } else if (words.length === 1) {
+    const single = words[0];
+    if (single.length >= 3) {
+      return single.substring(0, 3).toUpperCase();
+    }
+    return single.toUpperCase();
+  }
+  return 'B2L';
+};
 
 // Helper functions for template parsing and premium visual rendering
 export const extractPlaceholders = (content: string): string[] => {
@@ -237,16 +257,16 @@ export const renderDocumentTheme = (category: string, content: string, variables
     return (
       <div className="relative overflow-hidden border-t-4 border-indigo-600 bg-white dark:bg-[#0c0d19] p-8 shadow-xl min-h-[450px] font-sans flex flex-col justify-between rounded-b-md transition-all duration-300">
         {/* Modern corporate watermarks / background decoration */}
-        <div className="absolute -right-16 -top-16 w-48 h-48 rounded-full bg-indigo-50/40 dark:bg-indigo-950/10 pointer-events-none blur-3xl" />
-        <div className="absolute -left-16 -bottom-16 w-64 h-64 rounded-full bg-blue-50/30 dark:bg-blue-950/5 pointer-events-none blur-3xl" />
+        <div className="absolute -right-16 -top-16 w-48 h-48 rounded-full bg-indigo-50/40 dark:bg-indigo-950/10 pointer-events-none blur-3xl transform-gpu" />
+        <div className="absolute -left-16 -bottom-16 w-64 h-64 rounded-full bg-blue-50/30 dark:bg-blue-950/5 pointer-events-none blur-3xl transform-gpu" />
 
         <div>
           {/* Header Layout */}
           <div className="flex flex-col sm:flex-row justify-between items-start gap-4 border-b border-slate-100 dark:border-slate-800 pb-5 mb-6">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <div className="h-6 w-6 rounded bg-gradient-to-tr from-indigo-600 to-indigo-400 flex items-center justify-center text-white font-black text-xs shadow-sm">
-                  B
+                <div className="h-6 w-6 rounded bg-gradient-to-tr from-indigo-600 to-indigo-400 flex items-center justify-center text-white font-black text-xs shadow-sm uppercase">
+                  {(variables['organization_name'] || 'B2Linq')[0]}
                 </div>
                 <span className="text-sm font-black text-slate-850 dark:text-white uppercase tracking-tight">
                   {variables['organization_name'] || 'B2LINQ TECHNOLOGIES INC'}
@@ -259,7 +279,7 @@ export const renderDocumentTheme = (category: string, content: string, variables
               <Badge className="bg-indigo-50 dark:bg-indigo-950/40 text-indigo-750 dark:text-indigo-300 border border-indigo-100/50 dark:border-indigo-900/60 shadow-none text-[8px] font-extrabold uppercase rounded-md px-2 py-0.5 tracking-wider">
                 Strictly Confidential
               </Badge>
-              <div className="text-[9px] text-slate-400 font-medium">Ref: B2L/OFFER/2026/{(variables['employee_id'] || 'TEMP')}</div>
+              <div className="text-[9px] text-slate-400 font-medium uppercase">Ref: {getCompanyAbbreviation(variables['organization_name'])}/OFFER/2026/{(variables['employee_id'] || 'TEMP')}</div>
             </div>
           </div>
 
@@ -274,7 +294,7 @@ export const renderDocumentTheme = (category: string, content: string, variables
           {/* Circular Verification Seal Stamp */}
           <div className="relative flex items-center gap-2 bg-emerald-50/50 dark:bg-emerald-950/10 border border-emerald-100 dark:border-emerald-900/30 px-3 py-1.5 rounded-full">
             <div className="h-2 w-2 rounded-full bg-emerald-550 dark:bg-emerald-400 animate-pulse" />
-            <span className="text-[8px] text-emerald-800 dark:text-emerald-400 font-extrabold uppercase tracking-widest">B2Linq Verified Contract</span>
+            <span className="text-[8px] text-emerald-800 dark:text-emerald-400 font-extrabold uppercase tracking-widest">{(variables['organization_name'] || 'B2Linq')} Verified Contract</span>
           </div>
 
           <div className="flex justify-between w-full sm:w-auto gap-12">
@@ -316,8 +336,8 @@ export const renderDocumentTheme = (category: string, content: string, variables
           <div className="flex flex-col sm:flex-row justify-between items-start gap-4 border-b-2 border-slate-900 dark:border-slate-800 pb-4 mb-6">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <div className="h-6 w-6 rounded bg-slate-900 dark:bg-white flex items-center justify-center text-white dark:text-slate-900 font-extrabold text-xs shadow-sm">
-                  L
+                <div className="h-6 w-6 rounded bg-slate-900 dark:bg-white flex items-center justify-center text-white dark:text-slate-900 font-extrabold text-xs shadow-sm uppercase">
+                  {(variables['organization_name'] || 'B2Linq')[0]}
                 </div>
                 <span className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
                   {variables['organization_name'] || 'B2LINQ TECHNOLOGIES INC'}
@@ -327,7 +347,7 @@ export const renderDocumentTheme = (category: string, content: string, variables
             </div>
             
             <div className="text-[8px] text-slate-450 dark:text-slate-400 font-bold uppercase tracking-wider text-right">
-              <div>Ref: B2L/JOIN/2026/{(variables['employee_id'] || 'TEMP')}</div>
+              <div className="uppercase">Ref: {getCompanyAbbreviation(variables['organization_name'])}/JOIN/2026/{(variables['employee_id'] || 'TEMP')}</div>
               <div className="text-slate-400 font-normal mt-0.5">Date: {variables['joining_date'] || new Date().toLocaleDateString()}</div>
             </div>
           </div>
@@ -429,7 +449,7 @@ export const renderDocumentTheme = (category: string, content: string, variables
       {/* Footer */}
       <div className="border-t border-slate-100 dark:border-slate-900 pt-4 mt-12 flex justify-between text-[8px] text-slate-450 font-semibold">
         <span>Generated: {new Date().toLocaleDateString()}</span>
-        <span>b2linq.com • System Dispatched</span>
+        <span className="lowercase">{(variables['organization_name'] || 'B2Linq').toLowerCase().replace(/[^a-z0-9]/g, '')}.com • System Dispatched</span>
       </div>
     </div>
   );

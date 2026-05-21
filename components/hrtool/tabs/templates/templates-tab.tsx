@@ -21,7 +21,7 @@ import {
   Send
 } from 'lucide-react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { hrPayrollService, hrEmployeeService } from '@/services/hr';
+import { hrPayrollService, hrEmployeeService, hrOrgService } from '@/services/hr';
 import { toast } from 'sonner';
 
 import {
@@ -93,6 +93,13 @@ export function TemplatesTab() {
     queryFn: () => hrEmployeeService.getEmployees({ limit: 100 })
   });
   const employees = employeesRes?.data?.results || [];
+
+  // Query organization profile
+  const { data: organizationRes } = useQuery({
+    queryKey: ['organization'],
+    queryFn: () => hrOrgService.getOrganization()
+  });
+  const orgName = organizationRes?.data?.name || 'B2Linq Technologies Inc';
 
   // Send Template Mutation
   const sendTemplateMutation = useMutation({
@@ -236,7 +243,7 @@ export function TemplatesTab() {
           : 'HR Manager';
       }
       if (parsedVariables.includes('organization_name')) {
-        updatedVars['organization_name'] = emp.organization_detail?.name || 'B2Linq Technologies Inc';
+        updatedVars['organization_name'] = emp.organization_detail?.name || orgName;
       }
       if (parsedVariables.includes('pay_period')) {
         const date = new Date();
@@ -435,7 +442,40 @@ export function TemplatesTab() {
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[1, 2, 3, 4].map(i => (
-            <div key={i} className="h-44 bg-slate-100 dark:bg-slate-800/40 animate-pulse rounded-md border border-slate-100 dark:border-slate-800" />
+            <div
+              key={i}
+              className="bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800/50 rounded-md overflow-hidden flex flex-col p-5 gap-3"
+            >
+              {/* Header row skeleton */}
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-md bg-slate-100 dark:bg-slate-800/60 animate-pulse" />
+                  <div className="space-y-1.5">
+                    <div className="h-3 w-36 rounded bg-slate-100 dark:bg-slate-800/60 animate-pulse" />
+                    <div className="h-2.5 w-20 rounded-full bg-slate-100 dark:bg-slate-800/50 animate-pulse" />
+                  </div>
+                </div>
+                <div className="h-4 w-12 rounded bg-slate-100 dark:bg-slate-800/40 animate-pulse" />
+              </div>
+
+              {/* Content preview lines skeleton */}
+              <div className="bg-slate-50 dark:bg-[#151624]/40 border border-slate-100 dark:border-slate-800/30 rounded p-3 space-y-1.5">
+                <div className="h-2 w-full rounded bg-slate-100 dark:bg-slate-800/60 animate-pulse" />
+                <div className="h-2 w-5/6 rounded bg-slate-100 dark:bg-slate-800/50 animate-pulse" />
+                <div className="h-2 w-4/6 rounded bg-slate-100 dark:bg-slate-800/40 animate-pulse" />
+                <div className="h-2 w-3/4 rounded bg-slate-100 dark:bg-slate-800/50 animate-pulse" />
+              </div>
+
+              {/* Footer row skeleton */}
+              <div className="pt-2 mt-auto border-t border-slate-100 dark:border-slate-800/40 flex items-center justify-between">
+                <div className="h-2 w-28 rounded bg-slate-100 dark:bg-slate-800/40 animate-pulse" />
+                <div className="flex gap-1.5">
+                  {[1, 2, 3].map(j => (
+                    <div key={j} className="h-7 w-7 rounded bg-slate-100 dark:bg-slate-800/60 animate-pulse" />
+                  ))}
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       ) : filteredList.length === 0 ? (
@@ -509,7 +549,11 @@ export function TemplatesTab() {
                           
                           const initialVars: Record<string, string> = {};
                           vars.forEach(v => {
-                            initialVars[v] = '';
+                            if (v === 'organization_name') {
+                              initialVars[v] = orgName;
+                            } else {
+                              initialVars[v] = '';
+                            }
                           });
                           setTemplateVariables(initialVars);
                         }}
@@ -581,6 +625,7 @@ export function TemplatesTab() {
         isOpen={!!viewingTemplate}
         onClose={() => setViewingTemplate(null)}
         template={viewingTemplate}
+        orgName={orgName}
         onCopy={handleCopy}
         copiedId={copiedId}
         getCategoryLabel={getCategoryLabel}

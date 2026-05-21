@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Mail, Send, Eye, Palette } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -51,6 +51,22 @@ export function SendTemplateDialog({
   selectedDesign,
   onDesignChange
 }: SendTemplateDialogProps) {
+  const [isRendered, setIsRendered] = useState(false);
+
+  // Show skeleton briefly when dialog opens or design/employee changes
+  useEffect(() => {
+    if (isOpen && sendingTemplate) {
+      setIsRendered(false);
+      const t = requestAnimationFrame(() => setIsRendered(true));
+      return () => cancelAnimationFrame(t);
+    }
+  }, [isOpen, sendingTemplate?.id, selectedDesign, selectedEmployeeId]);
+
+  const themedDocument = React.useMemo(() => {
+    if (!sendingTemplate) return null;
+    return renderThemedDocument(selectedDesign, sendingTemplate.content, templateVariables);
+  }, [selectedDesign, sendingTemplate, templateVariables]);
+
   if (!isOpen || !sendingTemplate) return null;
 
   return (
@@ -64,7 +80,7 @@ export function SendTemplateDialog({
         </button>
 
         {/* Left side: Form Inputs */}
-        <div className="w-full md:w-1/2 flex flex-col justify-between overflow-y-auto pr-2 max-h-[80vh]">
+        <div className="w-full md:w-1/2 flex flex-col justify-between overflow-y-auto custom-scrollbar pr-2 max-h-[80vh] transform-gpu">
           <div>
             <h3 className="text-sm font-extrabold text-slate-900 dark:text-white mb-1 flex items-center gap-2">
               <Mail className="h-4 w-4 text-[#0a66c2]" /> Send Document to Employee
@@ -240,8 +256,51 @@ export function SendTemplateDialog({
           </div>
 
           {/* Scrollable Wrapper for Document */}
-          <div className="flex-1 overflow-y-auto pr-1">
-            {renderThemedDocument(selectedDesign, sendingTemplate.content, templateVariables)}
+          <div className="flex-1 overflow-y-auto custom-scrollbar pr-1 transform-gpu">
+            {!isRendered ? (
+              /* ── Live preview skeleton ─────────────────── */
+              <div className="space-y-4 animate-pulse">
+                <div className="flex justify-between items-start pb-4 border-b border-slate-200 dark:border-slate-700">
+                  <div className="flex items-center gap-2">
+                    <div className="h-7 w-7 rounded-md bg-slate-200 dark:bg-slate-700" />
+                    <div className="space-y-1">
+                      <div className="h-3 w-36 rounded bg-slate-200 dark:bg-slate-700" />
+                      <div className="h-2 w-20 rounded bg-slate-150 dark:bg-slate-800" />
+                    </div>
+                  </div>
+                  <div className="h-4 w-16 rounded-full bg-slate-200 dark:bg-slate-700" />
+                </div>
+                <div className="space-y-2 pt-1">
+                  <div className="h-3 w-44 rounded bg-slate-200 dark:bg-slate-700" />
+                  {[1, 0.88, 0.75, 0.92, 0.65, 0.80].map((w, i) => (
+                    <div key={i} className="h-2.5 rounded bg-slate-150 dark:bg-slate-800" style={{ width: `${w * 100}%` }} />
+                  ))}
+                </div>
+                <div className="h-3 w-32 rounded bg-slate-200 dark:bg-slate-700 mt-3" />
+                <div className="space-y-2">
+                  {[0.9, 0.78, 0.60].map((w, i) => (
+                    <div key={i} className="h-2.5 rounded bg-slate-150 dark:bg-slate-800" style={{ width: `${w * 100}%` }} />
+                  ))}
+                </div>
+                <div className="flex justify-between items-end pt-5 mt-5 border-t border-slate-200 dark:border-slate-700">
+                  <div className="h-5 w-20 rounded-full bg-slate-200 dark:bg-slate-700" />
+                  <div className="flex gap-10">
+                    <div className="space-y-1">
+                      <div className="h-3 w-18 rounded bg-slate-150 dark:bg-slate-800" />
+                      <div className="h-px w-20 bg-slate-200 dark:bg-slate-700" />
+                      <div className="h-2 w-14 rounded bg-slate-100 dark:bg-slate-800/60" />
+                    </div>
+                    <div className="space-y-1 text-right">
+                      <div className="h-3 w-14 rounded bg-slate-150 dark:bg-slate-800 ml-auto" />
+                      <div className="h-px w-20 bg-slate-200 dark:bg-slate-700" />
+                      <div className="h-2 w-10 rounded bg-slate-100 dark:bg-slate-800/60 ml-auto" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              themedDocument
+            )}
           </div>
         </div>
 

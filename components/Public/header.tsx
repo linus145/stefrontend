@@ -27,9 +27,10 @@ export function Header() {
         <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
           <Link href="/" className="hover:text-slate-900 transition-colors">Home</Link>
           <Link href="/aboutus" className="hover:text-slate-900 transition-colors">About Us</Link>
+          <Link href="/pricing" className="hover:text-slate-900 transition-colors">Pricing</Link>
           <Link href="/blogs" className="hover:text-slate-900 transition-colors">Blog</Link>
           <Link href="/careers" className="hover:text-slate-900 transition-colors">Careers</Link>
-          <Link href="/contactus" className="hover:text-slate-900 transition-colors">Contact</Link>
+          <Link href="/book-demo" className="hover:text-slate-900 transition-colors">Contact</Link>
         </nav>
 
         {/* Auth CTA */}
@@ -38,7 +39,7 @@ export function Header() {
             Sign In
           </Link>
           <Link href="/register" className="hidden sm:block">
-            <Button className="rounded-full bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm transition-all font-semibold">
+            <Button className="rounded-full bg-[#0a66c2] text-white hover:bg-[#084e96] shadow-sm transition-all font-semibold">
               Get Started
             </Button>
           </Link>
@@ -64,13 +65,16 @@ export function Header() {
             <Link href="/aboutus" onClick={() => setIsMobileMenuOpen(false)} className="py-3 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors border-b border-slate-100">
               About Us
             </Link>
+            <Link href="/pricing" onClick={() => setIsMobileMenuOpen(false)} className="py-3 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors border-b border-slate-100">
+              Pricing
+            </Link>
             <Link href="/blogs" onClick={() => setIsMobileMenuOpen(false)} className="py-3 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors border-b border-slate-100">
               Blog
             </Link>
             <Link href="/careers" onClick={() => setIsMobileMenuOpen(false)} className="py-3 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors border-b border-slate-100">
               Careers
             </Link>
-            <Link href="/contactus" onClick={() => setIsMobileMenuOpen(false)} className="py-3 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
+            <Link href="/book-demo" onClick={() => setIsMobileMenuOpen(false)} className="py-3 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
               Contact
             </Link>
           </nav>
@@ -81,7 +85,7 @@ export function Header() {
               </Button>
             </Link>
             <Link href="/register" onClick={() => setIsMobileMenuOpen(false)}>
-              <Button className="w-full h-11 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm transition-all font-semibold">
+              <Button className="w-full h-11 rounded-lg bg-[#0a66c2] text-white hover:bg-[#084e96] shadow-sm transition-all font-semibold">
                 Get Started
               </Button>
             </Link>

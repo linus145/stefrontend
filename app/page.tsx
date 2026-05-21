@@ -56,14 +56,14 @@ export default function Home() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto mb-16">
-            <Link href="/register" className="w-full sm:w-auto">
-              <Button className="w-full sm:w-auto h-13 px-8 rounded-xl bg-indigo-600 text-white shadow-lg shadow-indigo-200 hover:shadow-xl hover:shadow-indigo-300 hover:bg-indigo-500 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 font-semibold flex items-center justify-center gap-2 group">
+            <Link href="/book-demo" className="w-full sm:w-auto">
+              <Button className="w-full sm:w-auto h-13 px-8 rounded-xl bg-[#0a66c2] text-white shadow-lg shadow-blue-100 hover:shadow-xl hover:shadow-blue-200 hover:bg-[#084e96] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 font-semibold flex items-center justify-center gap-2 group">
                 Book Custom Demo <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
               </Button>
             </Link>
             <Link href="#interactive-flow" className="w-full sm:w-auto">
               <Button variant="outline" className="w-full sm:w-auto h-13 px-8 rounded-xl border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-all font-semibold flex items-center justify-center gap-2 shadow-sm">
-                <Play className="w-4 h-4 text-indigo-600 fill-indigo-600" /> Watch Live Flow
+                <Play className="w-4 h-4 text-[#0a66c2] fill-[#0a66c2]" /> Watch Live Flow
               </Button>
             </Link>
           </div>
@@ -421,7 +421,7 @@ export default function Home() {
                     </div>
                   </div>
 
-                  <Link href="/recruiter" className="flex items-center justify-center w-full h-11 rounded-xl bg-emerald-600 text-white font-semibold shadow hover:bg-emerald-500 hover:-translate-y-0.5 transition-all duration-200">
+                  <Link href="/recruiter" className="flex items-center justify-center w-full h-11 rounded-xl bg-[#0a66c2] text-white font-semibold shadow hover:bg-[#084e96] hover:-translate-y-0.5 transition-all duration-200">
                     Enter Recruiter Dashboard
                   </Link>
                 </div>
@@ -518,11 +518,11 @@ export default function Home() {
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto">
               <Link href="/register" className="w-full sm:w-auto">
-                <Button className="w-full sm:w-auto h-14 px-10 rounded-xl bg-indigo-600 text-white shadow-lg shadow-indigo-200 hover:shadow-xl hover:shadow-indigo-300 hover:bg-indigo-500 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 font-bold text-base">
+                <Button className="w-full sm:w-auto h-14 px-10 rounded-xl bg-[#0a66c2] text-white shadow-lg shadow-blue-100 hover:shadow-xl hover:shadow-blue-200 hover:bg-[#084e96] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 font-bold text-base">
                   Get Started Free
                 </Button>
               </Link>
-              <Link href="/contactus" className="w-full sm:w-auto">
+              <Link href="/book-demo" className="w-full sm:w-auto">
                 <Button variant="outline" className="w-full sm:w-auto h-14 px-10 rounded-xl border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-all font-bold text-base shadow-sm">
                   Contact Sales
                 </Button>

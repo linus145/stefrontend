@@ -11,7 +11,7 @@ export const publicService = {
 
   getBlogs: async () => {
     const response = await axios.get(`${API_URL}/public/blogs/`);
-    return response.data;
+    return response.data.results || response.data;
   },
 
   getBlogDetail: async (slug: string) => {
@@ -21,11 +21,23 @@ export const publicService = {
 
   getCareers: async () => {
     const response = await axios.get(`${API_URL}/public/careers/`);
-    return response.data;
+    return response.data.results || response.data;
   },
 
   submitContactInquiry: async (data: { full_name: string; email: string; subject: string; message: string }) => {
     const response = await axios.post(`${API_URL}/public/contactus/`, data);
+    return response.data;
+  },
+
+  submitContactSales: async (data: {
+    full_name: string;
+    email: string;
+    company_name: string;
+    company_size: string;
+    phone_number?: string;
+    message?: string;
+  }) => {
+    const response = await axios.post(`${API_URL}/public/contactsales/`, data);
     return response.data;
   }
 };

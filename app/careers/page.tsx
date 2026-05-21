@@ -1,6 +1,6 @@
 import { Header } from '@/components/Public/header';
 import { Footer } from '@/components/Public/footer';
-import { JobList } from '@/components/careers/job-list';
+import { CareersList } from '@/components/Public/careers/careers-list';
 import { Metadata } from 'next';
 import { publicService } from '@/services/public.service';
 
@@ -15,21 +15,7 @@ export default async function CareersPage() {
     jobs = await publicService.getCareers();
   } catch (error) {
     console.error("Failed to fetch jobs:", error);
-    // Fallback jobs
-    jobs = [
-      {
-        role: "Senior AI Engineer",
-        department: "Engineering",
-        location: "Remote / San Francisco",
-        job_type: "Full-time"
-      },
-      {
-        role: "Product Designer",
-        department: "Product",
-        location: "London / Remote",
-        job_type: "Full-time"
-      }
-    ];
+    jobs = [];
   }
 
   return (
@@ -51,8 +37,7 @@ export default async function CareersPage() {
           </p>
         </section>
 
-        <JobList jobs={jobs} />
-// ...
+        <CareersList jobs={jobs} />
 
         <section className="py-24 bg-slate-50 border-t border-slate-200">
           <div className="max-w-4xl mx-auto px-6 text-center">

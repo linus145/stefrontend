@@ -99,6 +99,7 @@ export function AttendanceActivity({ attendanceData }: AttendanceActivityProps) 
                       <td className="px-6 py-4">
                         <button
                           onClick={() => handleDelete(record.id)}
+                          data-agent={`attendance-delete-btn-${record.id}`}
                           className="text-rose-500/50 hover:text-rose-600 hover:bg-rose-500/10 p-1.5 rounded-sm transition-colors"
                           title="Delete Record"
                         >
@@ -208,6 +209,7 @@ export function AttendanceActivity({ attendanceData }: AttendanceActivityProps) 
                         {index === 0 ? (
                           <button
                             onClick={() => handleDelete(record.id)}
+                            data-agent={`attendance-delete-btn-${record.id}`}
                             className="text-rose-500/50 hover:text-rose-600 hover:bg-rose-500/10 p-1.5 rounded-sm transition-colors"
                             title="Delete Record"
                           >

@@ -137,6 +137,7 @@ export function PayrollRuns({
             <p className="text-xs text-slate-400 max-w-sm mx-auto mb-4">Click below to dynamically execute attendance integrations and compile draft figures.</p>
             <Button 
               onClick={() => setIsNewRunOpen(true)}
+              data-agent="payroll-start-run-btn"
               className="bg-[#0a66c2] hover:bg-[#084e96] text-white shadow-md shadow-blue-500/15 rounded-md text-xs font-bold py-2 px-4 cursor-pointer inline-flex items-center gap-1.5 h-9 mx-auto"
             >
               <Play className="h-3.5 w-3.5 fill-current" /> Start Payroll Run
@@ -188,6 +189,7 @@ export function PayrollRuns({
                             }
                           }}
                           disabled={rerunPending}
+                          data-agent={`payroll-rerun-btn-${run.id}`}
                           title="Rerun"
                           className="border border-amber-500/20 hover:bg-amber-500/5 text-amber-600 bg-transparent rounded-md font-bold text-xs h-7.5 w-7.5 p-0 cursor-pointer transition-all duration-300 inline-flex items-center justify-center"
                         >
@@ -201,6 +203,7 @@ export function PayrollRuns({
                             }
                           }}
                           disabled={deletePending}
+                          data-agent={`payroll-delete-btn-${run.id}`}
                           title="Delete"
                           className="border border-red-500/20 hover:bg-red-500/5 text-red-600 bg-transparent rounded-md font-bold text-xs h-7.5 w-7.5 p-0 cursor-pointer transition-all duration-300 inline-flex items-center justify-center"
                         >
@@ -208,6 +211,7 @@ export function PayrollRuns({
                         </Button>
                         <Button 
                           onClick={() => setSelectedRun(run)}
+                          data-agent={`payroll-review-sheet-btn-${run.id}`}
                           className="border border-[#0a66c2]/20 hover:bg-[#0a66c2]/5 text-[#0a66c2] dark:text-[#3b8fd9] dark:hover:bg-[#0a66c2]/10 bg-transparent rounded-md font-bold text-xs h-7.5 px-3 cursor-pointer transition-all duration-300 inline-flex items-center gap-1"
                         >
                           Review sheet <ArrowRight className="h-3 w-3" />
@@ -270,6 +274,7 @@ export function PayrollRuns({
                   <select 
                     value={newRunMonth} 
                     onChange={(e) => setNewRunMonth(e.target.value)}
+                    data-agent="payroll-new-run-month-select"
                     className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-md px-3 py-2 text-xs text-slate-900 dark:text-white outline-none cursor-pointer"
                   >
                     <option value="1">January</option>
@@ -292,6 +297,7 @@ export function PayrollRuns({
                   <select 
                     value={newRunYear} 
                     onChange={(e) => setNewRunYear(e.target.value)}
+                    data-agent="payroll-new-run-year-select"
                     className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-md px-3 py-2 text-xs text-slate-900 dark:text-white outline-none cursor-pointer"
                   >
                     <option value="2025">2025</option>
@@ -310,6 +316,7 @@ export function PayrollRuns({
                   <Button 
                     onClick={onCompileSubmit}
                     disabled={compilePending}
+                    data-agent="payroll-new-run-compile-btn"
                     className="bg-[#0a66c2] hover:bg-[#084e96] text-white shadow-md shadow-blue-500/15 rounded-md text-xs font-bold py-2 px-4 cursor-pointer flex items-center gap-1.5"
                   >
                     Compile sheets
@@ -333,6 +340,7 @@ export function PayrollRuns({
         <div>
           <button 
             onClick={() => setSelectedRun(null)}
+            data-agent="payroll-back-to-logs-btn"
             className="text-xs font-bold text-[#0a66c2] dark:text-[#3b8fd9] hover:underline mb-1 flex items-center gap-1 cursor-pointer bg-transparent border-none outline-none"
           >
             ← Back to cycle logs
@@ -354,6 +362,7 @@ export function PayrollRuns({
                 }
               }}
               disabled={rerunPending}
+              data-agent={`payroll-drilldown-rerun-btn-${selectedRun.id}`}
               className="bg-amber-600 hover:bg-amber-700 text-white shadow-md shadow-amber-500/15 rounded-md text-xs font-bold py-2 px-4 cursor-pointer flex items-center gap-1.5 transition-all duration-300 h-9"
             >
               <RotateCcw className="h-3.5 w-3.5" /> Rerun Compilation

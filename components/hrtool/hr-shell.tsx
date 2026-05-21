@@ -25,6 +25,19 @@ export function HRShell() {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<HRSection>('dashboard');
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('hr-sidebar-collapsed') === 'true';
+    }
+    return false;
+  });
+
+  const handleSidebarCollapse = (collapsed: boolean) => {
+    setIsSidebarCollapsed(collapsed);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('hr-sidebar-collapsed', String(collapsed));
+    }
+  };
 
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -98,9 +111,11 @@ export function HRShell() {
       <HRSidebar 
         activeTab={activeTab} 
         onTabChange={setActiveTab} 
+        isCollapsed={isSidebarCollapsed}
+        setIsCollapsed={handleSidebarCollapse}
       />
 
-      <main className="flex-1 pt-16 min-w-0 flex flex-col lg:pl-64 transition-all duration-300">
+      <main className={`flex-1 pt-16 min-w-0 flex flex-col transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-16' : 'lg:pl-64'}`}>
         <div className="container mx-auto p-4 lg:p-8 flex-1 flex flex-col">
           {renderContent()}
         </div>

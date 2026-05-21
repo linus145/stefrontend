@@ -18,6 +18,20 @@ export default function PayrollLayout({ children }: { children: React.ReactNode 
   const router = useRouter();
   const pathname = usePathname();
   
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = React.useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('hr-sidebar-collapsed') === 'true';
+    }
+    return false;
+  });
+
+  const handleSidebarCollapse = (collapsed: boolean) => {
+    setIsSidebarCollapsed(collapsed);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('hr-sidebar-collapsed', String(collapsed));
+    }
+  };
+  
   // Calculate active tab dynamically based on current URL path
   const getActiveTab = (): HRSection => {
     const segment = pathname.split('/').pop() || 'dashboard';
@@ -59,9 +73,11 @@ export default function PayrollLayout({ children }: { children: React.ReactNode 
         <HRSidebar 
           activeTab={activeTab} 
           onTabChange={() => {}} 
+          isCollapsed={isSidebarCollapsed}
+          setIsCollapsed={handleSidebarCollapse}
         />
 
-        <main className="flex-1 pt-16 min-w-0 flex flex-col lg:pl-64 transition-all duration-300">
+        <main className={`flex-1 pt-16 min-w-0 flex flex-col transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-16' : 'lg:pl-64'}`}>
           <div className="container mx-auto p-4 lg:p-8 flex-1 flex flex-col">
             {companyLoading ? <LocalLoader /> : children}
           </div>

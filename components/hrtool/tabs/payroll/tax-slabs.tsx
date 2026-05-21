@@ -48,6 +48,7 @@ export function TaxSlabs({
             });
             setIsTaxModalOpen(true);
           }}
+          data-agent="payroll-tax-add-btn"
           className="bg-[#0a66c2] hover:bg-[#084e96] text-white shadow-sm rounded-md text-xs font-bold py-2 px-3 flex items-center gap-1 cursor-pointer transition-all duration-300"
         >
           <Plus className="h-4 w-4" /> Add tax slab bracket
@@ -108,6 +109,7 @@ export function TaxSlabs({
                   type="text" 
                   value={taxForm.slab_name}
                   onChange={(e) => setTaxForm({...taxForm, slab_name: e.target.value})}
+                  data-agent="payroll-tax-slab-name-input"
                   placeholder="e.g. Higher bracket tier"
                   className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-md px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
                 />
@@ -119,6 +121,7 @@ export function TaxSlabs({
                   type="number" 
                   value={taxForm.percentage}
                   onChange={(e) => setTaxForm({...taxForm, percentage: e.target.value})}
+                  data-agent="payroll-tax-percentage-input"
                   placeholder="e.g. 25"
                   className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-md px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
                 />
@@ -131,6 +134,7 @@ export function TaxSlabs({
                     type="number" 
                     value={taxForm.min_amount}
                     onChange={(e) => setTaxForm({...taxForm, min_amount: e.target.value})}
+                    data-agent="payroll-tax-min-amount-input"
                     placeholder="e.g. 10000"
                     className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-md px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
                   />
@@ -142,6 +146,7 @@ export function TaxSlabs({
                     type="number" 
                     value={taxForm.max_amount}
                     onChange={(e) => setTaxForm({...taxForm, max_amount: e.target.value})}
+                    data-agent="payroll-tax-max-amount-input"
                     placeholder="Leave empty for infinity"
                     className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-md px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
                   />
@@ -168,6 +173,7 @@ export function TaxSlabs({
                     onTaxSubmit(parsedData);
                   }}
                   disabled={taxPending}
+                  data-agent="payroll-tax-modal-save-btn"
                   className="bg-[#0a66c2] hover:bg-[#084e96] text-white shadow-md shadow-blue-500/15 rounded-md text-xs font-bold py-2 px-4 cursor-pointer"
                 >
                   Save bracket

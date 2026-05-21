@@ -23,6 +23,8 @@ import { HRSection } from './hr-header';
 interface HRSidebarProps {
   activeTab: HRSection;
   onTabChange: (tab: HRSection) => void;
+  isCollapsed?: boolean;
+  setIsCollapsed?: (collapsed: boolean) => void;
 }
 
 const NAVIGATION_ITEMS: { id: HRSection; label: string; icon: any; subItems?: { id: HRSection; label: string }[] }[] = [
@@ -75,9 +77,18 @@ const NAVIGATION_ITEMS: { id: HRSection; label: string; icon: any; subItems?: { 
   { id: 'organization', label: 'Organization', icon: Building2 },
 ];
 
-export function HRSidebar({ activeTab, onTabChange }: HRSidebarProps) {
+export function HRSidebar({ 
+  activeTab, 
+  onTabChange,
+  isCollapsed: controlledIsCollapsed,
+  setIsCollapsed: controlledSetIsCollapsed
+}: HRSidebarProps) {
   const router = useRouter();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [localIsCollapsed, setLocalIsCollapsed] = useState(false);
+  
+  const isCollapsed = controlledIsCollapsed !== undefined ? controlledIsCollapsed : localIsCollapsed;
+  const setIsCollapsed = controlledSetIsCollapsed !== undefined ? controlledSetIsCollapsed : setLocalIsCollapsed;
+  
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({
     leave: false,
     attendance: false,
@@ -143,6 +154,7 @@ export function HRSidebar({ activeTab, onTabChange }: HRSidebarProps) {
                 <div key={item.id} className="space-y-1">
                   <button
                     onClick={() => toggleExpand(item.id)}
+                    data-agent={`nav-parent-${item.id}`}
                     className={cn(
                       "w-full flex items-center justify-between px-3 py-2 text-sm font-medium transition-all group rounded-sm cursor-pointer",
                       isNavParentActive

@@ -106,6 +106,7 @@ export default function ApprovalsPage() {
           <div>
             <button 
               onClick={() => setSelectedRun(null)}
+              data-agent="payroll-approvals-back-btn"
               className="text-xs font-bold text-[#0a66c2] dark:text-[#3b8fd9] hover:underline mb-1 flex items-center gap-1 cursor-pointer bg-transparent border-none outline-none"
             >
               ← Back to approvals queue
@@ -123,6 +124,7 @@ export default function ApprovalsPage() {
             <Button 
               onClick={() => rejectMutation.mutate(selectedRun.id)}
               disabled={rejectMutation.isPending}
+              data-agent={`payroll-run-reject-btn-${selectedRun.id}`}
               className="border border-red-500/20 bg-transparent hover:bg-red-500/5 text-red-600 rounded-md text-xs font-bold py-2 px-4 cursor-pointer transition-all duration-300"
             >
               Reject run
@@ -130,6 +132,7 @@ export default function ApprovalsPage() {
             <Button 
               onClick={() => approveMutation.mutate(selectedRun.id)}
               disabled={approveMutation.isPending}
+              data-agent={`payroll-run-approve-btn-${selectedRun.id}`}
               className="bg-[#0a66c2] hover:bg-[#084e96] text-white shadow-md shadow-blue-500/15 rounded-md text-xs font-bold py-2 px-4 cursor-pointer transition-all duration-300 flex items-center gap-1.5"
             >
               <Check className="h-4 w-4" /> Approve & issue payslips
@@ -264,6 +267,7 @@ export default function ApprovalsPage() {
                     <td className="py-3 px-4 text-right">
                       <Button 
                         onClick={() => setSelectedRun(run)}
+                        data-agent={`payroll-approvals-review-sheet-btn-${run.id}`}
                         className="border border-[#0a66c2]/20 hover:bg-[#0a66c2]/5 text-[#0a66c2] dark:text-[#3b8fd9] dark:hover:bg-[#0a66c2]/10 bg-transparent rounded-md font-bold text-xs h-7.5 px-3 cursor-pointer transition-all duration-300 inline-flex items-center gap-1"
                       >
                         Review sheet <ArrowRight className="h-3 w-3" />

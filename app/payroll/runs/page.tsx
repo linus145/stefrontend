@@ -130,6 +130,7 @@ export default function PayrollRunsPage() {
         {!selectedRun && (
           <Button
             onClick={() => setIsNewRunOpen(true)}
+            data-agent="payroll-start-run-btn"
             className="bg-[#0a66c2] hover:bg-[#084e96] text-white shadow-md shadow-blue-500/15 rounded-md text-xs font-bold py-2 px-4 cursor-pointer inline-flex items-center gap-1.5 h-9 shrink-0 self-start sm:self-center"
           >
             <Play className="h-3.5 w-3.5 fill-current" /> Start Payroll Run

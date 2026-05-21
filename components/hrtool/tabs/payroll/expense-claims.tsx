@@ -110,12 +110,14 @@ export function ExpenseClaims({
                         <div className="flex items-center justify-end gap-1.5">
                           <Button 
                             onClick={() => onRejectClaim(claim.id)}
+                            data-agent={`payroll-claim-reject-btn-${claim.id}`}
                             className="w-7 h-7 p-0 rounded-full border border-red-500/20 bg-transparent text-red-500 hover:bg-red-500/5 cursor-pointer flex items-center justify-center"
                           >
                             <X className="h-3.5 w-3.5" />
                           </Button>
                           <Button 
                             onClick={() => onApproveClaim(claim.id)}
+                            data-agent={`payroll-claim-approve-btn-${claim.id}`}
                             className="w-7 h-7 p-0 rounded-full border border-emerald-500/20 bg-transparent text-emerald-500 hover:bg-emerald-500/5 cursor-pointer flex items-center justify-center"
                           >
                             <Check className="h-3.5 w-3.5" />

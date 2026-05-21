@@ -87,6 +87,7 @@ export function SalaryStructures({
             });
             setIsStructureModalOpen(true);
           }}
+          data-agent="payroll-salary-add-btn"
           className="bg-[#0a66c2] hover:bg-[#084e96] text-white shadow-sm rounded-md text-xs font-bold py-2 px-3 flex items-center gap-1 cursor-pointer transition-all duration-300"
         >
           <Plus className="h-4 w-4" /> Add compensation profile
@@ -168,6 +169,7 @@ export function SalaryStructures({
                           });
                           setIsStructureModalOpen(true);
                         }}
+                        data-agent={`payroll-salary-edit-btn-${str.id}`}
                         className="border border-[#0a66c2]/10 bg-transparent hover:bg-[#0a66c2]/5 text-[#0a66c2] dark:text-[#3b8fd9] font-bold text-[10px] py-1.5 h-8 rounded-md cursor-pointer transition-all duration-300 flex items-center gap-1 inline-flex"
                       >
                         <Edit2 className="h-3 w-3" /> Edit profile
@@ -206,6 +208,7 @@ export function SalaryStructures({
                   value={structureForm.employee_id}
                   onChange={(e) => setStructureForm({...structureForm, employee_id: e.target.value})}
                   disabled={!!selectedStructure}
+                  data-agent="payroll-salary-employee-id-input"
                   placeholder="Enter employee ID (e.g. EMP-0004)..."
                   className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-md px-3 py-2 text-xs text-slate-900 dark:text-white outline-none disabled:opacity-60"
                 />
@@ -218,6 +221,7 @@ export function SalaryStructures({
                     type="number" 
                     value={structureForm.basic_salary}
                     onChange={(e) => setStructureForm({...structureForm, basic_salary: e.target.value})}
+                    data-agent="payroll-salary-basic-salary-input"
                     placeholder="e.g. 5000"
                     className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-md px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
                   />
@@ -229,8 +233,9 @@ export function SalaryStructures({
                     type="number" 
                     value={structureForm.hra}
                     onChange={(e) => setStructureForm({...structureForm, hra: e.target.value})}
+                    data-agent="payroll-salary-hra-input"
                     placeholder="e.g. 1500"
-                    className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-md px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
+                    className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-850 rounded-md px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
                   />
                 </div>
               </div>
@@ -242,6 +247,7 @@ export function SalaryStructures({
                     type="number" 
                     value={structureForm.overtime_rate}
                     onChange={(e) => setStructureForm({...structureForm, overtime_rate: e.target.value})}
+                    data-agent="payroll-salary-ot-rate-input"
                     className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-md px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
                   />
                 </div>
@@ -252,6 +258,7 @@ export function SalaryStructures({
                     type="number" 
                     value={structureForm.tax_percentage}
                     onChange={(e) => setStructureForm({...structureForm, tax_percentage: e.target.value})}
+                    data-agent="payroll-salary-tax-percentage-input"
                     className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-md px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
                   />
                 </div>
@@ -264,6 +271,7 @@ export function SalaryStructures({
                     type="number" 
                     value={structureForm.pf_percentage}
                     onChange={(e) => setStructureForm({...structureForm, pf_percentage: e.target.value})}
+                    data-agent="payroll-salary-pf-percentage-input"
                     className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-md px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
                   />
                 </div>
@@ -274,6 +282,7 @@ export function SalaryStructures({
                     type="number" 
                     value={structureForm.esi_percentage}
                     onChange={(e) => setStructureForm({...structureForm, esi_percentage: e.target.value})}
+                    data-agent="payroll-salary-esi-percentage-input"
                     className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-md px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
                   />
                 </div>
@@ -301,6 +310,7 @@ export function SalaryStructures({
                     onStructureSubmit(parsedData);
                   }}
                   disabled={structurePending}
+                  data-agent="payroll-salary-modal-save-btn"
                   className="bg-[#0a66c2] hover:bg-[#084e96] text-white shadow-md shadow-blue-500/15 rounded-md text-xs font-bold py-2 px-4 cursor-pointer"
                 >
                   Save profile

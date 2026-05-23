@@ -16,7 +16,7 @@ interface EcosystemPostsProps {
 
 export function EcosystemPosts({ user, isOwner = false }: EcosystemPostsProps) {
   const queryClient = useQueryClient();
-  
+
   const { data, isLoading } = useQuery({
     queryKey: ['user-posts', user.id],
     queryFn: () => postService.getUserPosts(user.id),
@@ -71,14 +71,14 @@ export function EcosystemPosts({ user, isOwner = false }: EcosystemPostsProps) {
 
   if (posts.length === 0) {
     return (
-      <div className="bg-card border border-border rounded-lg p-12 text-center shadow-sm">
+      <div className="bg-card border border-border rounded-sm p-12 text-center shadow-sm">
         <div className="w-16 h-16 rounded-full bg-muted/20 flex items-center justify-center mx-auto mb-4">
           <MessageSquare className="w-8 h-8 text-muted-foreground opacity-20" />
         </div>
         <h3 className="text-lg font-bold text-foreground mb-2">No posts yet</h3>
         <p className="text-sm text-muted-foreground">
-          {isOwner 
-            ? "Share your thoughts and updates with the community." 
+          {isOwner
+            ? "Share your thoughts and updates with the community."
             : `${user.first_name} hasn't posted anything yet.`}
         </p>
       </div>
@@ -86,19 +86,32 @@ export function EcosystemPosts({ user, isOwner = false }: EcosystemPostsProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-      {posts.map((post) => (
-        <PostCard 
-            key={post.id} 
-            post={post} 
-            onLike={(id) => likeMutation.mutate(id)}
-            onNavigateToProfile={(uid) => {
+    <div className="relative">
+      {/* Scrollable container — shows ~1 row of posts, scroll to see more */}
+      <div
+        className="overflow-y-auto scroll-smooth scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+        style={{ maxHeight: '520px' }}
+      >
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {posts.map((post) => (
+            <PostCard
+              key={post.id}
+              post={post}
+              onLike={(id) => likeMutation.mutate(id)}
+              onNavigateToProfile={(uid) => {
                 if (uid !== user.id) {
-                    window.location.href = `/dashboard/member/${uid}`;
+                  window.location.href = `/dashboard/member/${uid}`;
                 }
-            }}
-        />
-      ))}
+              }}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Bottom fade hint — shows only if there are more than 2 posts */}
+      {posts.length > 2 && (
+        <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-[#F4F2EE] dark:from-[#06080C] to-transparent pointer-events-none" />
+      )}
     </div>
   );
 }

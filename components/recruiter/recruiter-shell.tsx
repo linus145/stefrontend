@@ -15,20 +15,27 @@ import { MessagesView } from '@/components/dashboard/messages/messages-view';
 import { GlobalLoader } from '@/components/ui/global-loader';
 import { useQuery } from '@tanstack/react-query';
 import { jobsService } from '@/services/jobs.service';
+import { PremiumLocker } from '@/components/ui/premium-locker';
 
 export function RecruiterShell() {
-  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { user, isAuthenticated, isLoading: authLoading, userSubscription } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<RecruiterSection>('overview');
 
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
 
-  // Check if user has a company
+  // Check if user has an active premium plan
+  const isPremium = !!(userSubscription &&
+                    userSubscription.status === 'active' &&
+                    userSubscription.plan_details &&
+                    Number(userSubscription.plan_details.price) > 0);
+
+  // Check if user has a company (only when authenticated and premium)
   const { data: companyCheck, isLoading: companyLoading } = useQuery({
     queryKey: ['company-check'],
     queryFn: jobsService.checkCompany,
-    enabled: isAuthenticated,
+    enabled: !!(isAuthenticated && isPremium),
   });
 
   // Redirect if not authenticated
@@ -40,10 +47,10 @@ export function RecruiterShell() {
 
   // Redirect to register if no company
   React.useEffect(() => {
-    if (!companyLoading && companyCheck && !companyCheck.data.has_company) {
+    if (isPremium && !companyLoading && companyCheck && !companyCheck.data.has_company) {
       router.replace('/recruiter/register');
     }
-  }, [companyLoading, companyCheck, router]);
+  }, [isPremium, companyLoading, companyCheck, router]);
 
   const handleTabChange = (tab: RecruiterSection, jobId?: string) => {
     setActiveTab(tab);
@@ -56,7 +63,36 @@ export function RecruiterShell() {
     setActiveTab('applications');
   };
 
-  if (authLoading || companyLoading || !isAuthenticated || !companyCheck?.data?.has_company) {
+  if (authLoading) {
+    return <GlobalLoader />;
+  }
+
+  if (!isAuthenticated) {
+    return <GlobalLoader />;
+  }
+
+  // Guard recruiter platform for premium subscribers only
+  if (!isPremium) {
+    return (
+      <div className="flex min-h-screen bg-background pt-16">
+        <PremiumLocker
+          title="Recruiter Platform"
+          description="Access the premium Recruiter dashboard to post jobs, manage applicants, use autonomous AI screening, and streamline hiring."
+          features={[
+            "AI Hiring Agent Console",
+            "Job Postings & ATS Integration",
+            "AI Candidate Screening & Scoring",
+            "Interactive Applicant Evaluation",
+            "Full Hiring Workflow & Onboarding",
+            "Advanced Team-based Access Control"
+          ]}
+          backPath="/dashboard"
+        />
+      </div>
+    );
+  }
+
+  if (companyLoading || !companyCheck?.data?.has_company) {
     return <GlobalLoader />;
   }
 

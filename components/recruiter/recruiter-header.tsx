@@ -8,6 +8,8 @@ import Link from 'next/link';
 import { RecruiterSection } from './recruiter-sidebar';
 import { NotificationPopover } from '@/components/dashboard/notifications/notification-popover';
 import { AgentUIController } from '@/agent/ui/AgentUIController';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
 
 interface RecruiterHeaderProps {
   companyName: string;
@@ -35,6 +37,18 @@ export function RecruiterHeader({
   onMobileMenuToggle
 }: RecruiterHeaderProps) {
   const [showMore, setShowMore] = useState(false);
+  const { userSubscription } = useAuth();
+  const hasPremium = userSubscription && userSubscription.plan_details?.price > 0 && userSubscription.status === 'active';
+
+  const handleAgentClick = () => {
+    if (!hasPremium) {
+      toast.error("Premium feature locked", {
+        description: "Please activate your premium subscription to unlock AI Recruiting Agent and agentic flows."
+      });
+      return;
+    }
+    AgentUIController.getInstance().toggleSidebar();
+  };
 
   return (
     <header className={cn(
@@ -173,7 +187,7 @@ export function RecruiterHeader({
 
         {/* AI Agent Header Button */}
         <button
-          onClick={() => AgentUIController.getInstance().toggleSidebar()}
+          onClick={handleAgentClick}
           className="p-2 hover:bg-muted text-muted-foreground hover:text-blue-500 rounded-sm transition-all hover:scale-110 active:scale-95 border border-border shadow-sm flex items-center justify-center shrink-0 group relative"
           title="AI Recruiting Agent"
         >
@@ -198,7 +212,10 @@ export function RecruiterHeader({
             strokeWidth="2.2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="w-5 h-5 group-hover:rotate-12 transition-transform text-blue-500 dark:text-blue-400 high-glow-pulse"
+            className={cn(
+              "w-5 h-5 group-hover:rotate-12 transition-transform text-blue-500 dark:text-blue-400",
+              hasPremium && "high-glow-pulse"
+            )}
           >
             <path d="M12 8V4H8" />
             <rect width="16" height="12" x="4" y="8" rx="2" />

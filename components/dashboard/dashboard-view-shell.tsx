@@ -8,19 +8,20 @@ import { Feed } from '@/components/dashboard/feed';
 import { EcosystemContent } from '@/components/dashboard/ecosystem-content';
 import { MessagesView } from '@/components/dashboard/messages/messages-view';
 import { NetworkView } from '@/components/dashboard/network/network-view';
-import { SettingsView } from '@/components/dashboard/settings/settings-view';
+import { SettingsView } from '@/components/dashboard/settings/settings/settings-view';
 import { DashboardHeader } from '@/components/dashboard/dashboard-header';
 import { JobsView } from '@/components/dashboard/jobs/jobs-view';
 import { NewsView } from '@/components/dashboard/news/news-view';
 import { NotificationsView } from '@/components/dashboard/notifications/notifications-view';
 import { GlobalLoader } from '@/components/ui/global-loader';
 import { DashboardThemeProvider } from '@/context/DashboardThemeContext';
-import { Briefcase, Newspaper, Users } from 'lucide-react';
+import { Briefcase, Newspaper, Users, ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { MobileBottomNav } from '@/components/dashboard/mobile-bottom-nav';
 import { MobilePostView } from '@/components/dashboard/post/mobile-post-view';
 import { useQueryClient } from '@tanstack/react-query';
 import { DashboardSection } from './dashboard-header';
+import { PricingTable } from '@/components/Public/pricing/pricing-table';
 
 export function DashboardViewShell() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -50,6 +51,20 @@ export function DashboardViewShell() {
 
       window.addEventListener('popstate', handlePopState);
       return () => window.removeEventListener('popstate', handlePopState);
+    }
+  }, [isLoading, isAuthenticated]);
+
+  // Support deep-linking to specific dashboard sections (e.g. section=premium from premium-locker)
+  useEffect(() => {
+    if (!isLoading && isAuthenticated && typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const section = params.get('section');
+      if (section && ['dashboard', 'Profile', 'jobs', 'news', 'messages', 'network', 'settings', 'hire', 'notifications', 'premium'].includes(section)) {
+        setActiveSection(section as DashboardSection);
+        // Strip the query param to keep the URL clean
+        const newUrl = window.location.pathname;
+        window.history.replaceState(null, '', newUrl);
+      }
     }
   }, [isLoading, isAuthenticated]);
 
@@ -146,6 +161,21 @@ export function DashboardViewShell() {
         );
       case 'notifications':
         return <NotificationsView />;
+      case 'premium':
+        return (
+          <div className="flex-1 p-4 sm:p-8 max-w-6xl mx-auto space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500 w-full overflow-y-auto">
+            <div className="flex items-center">
+              <button
+                onClick={() => handleSectionChange('dashboard')}
+                className="group flex items-center gap-2 px-4 py-2 rounded-sm border border-border bg-card/50 backdrop-blur-sm text-muted-foreground hover:text-primary hover:border-primary/30 transition-all text-xs font-bold shadow-sm cursor-pointer"
+              >
+                <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+                Back to Feed
+              </button>
+            </div>
+            <PricingTable />
+          </div>
+        );
       case 'create-post':
         return (
           <MobilePostView

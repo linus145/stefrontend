@@ -1,16 +1,18 @@
 'use client';
 
 import React from 'react';
-import { Search, Bell, Heart, MessageSquare, Loader2, UserPlus, UserMinus, Home, Briefcase, Users, Newspaper, Network as NetworkIcon, Menu, Settings, User, LogOut, ChevronDown, Wallet, Rocket, ArrowUpCircle, HelpCircle } from 'lucide-react';
+import { Search, Bell, Heart, MessageSquare, Loader2, UserPlus, UserMinus, Home, Briefcase, Users, Newspaper, Network as NetworkIcon, Menu, Settings, User, LogOut, ChevronDown, Wallet, Rocket, ArrowUpCircle, HelpCircle, Sparkles, Crown } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 import { ThemeToggle } from './theme-toggle';
 import { postService } from '@/services/post.service';
+import { toast } from 'sonner';
 import { notificationService } from '@/services/notification.service';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { formatDistanceToNow } from 'date-fns';
 import { api } from '@/lib/api';
-export type DashboardSection = 'dashboard' | 'Profile' | 'messages' | 'network' | 'settings' | 'jobs' | 'news' | 'hire' | 'create-post' | 'notifications';
+import { axiosInstance } from '@/lib/axios';
+export type DashboardSection = 'dashboard' | 'Profile' | 'messages' | 'network' | 'settings' | 'jobs' | 'news' | 'hire' | 'create-post' | 'notifications' | 'premium';
 import { getOptimizedImage } from '@/lib/imagekit';
 
 import { GlobalSearch } from './global-search';
@@ -29,12 +31,17 @@ export function DashboardHeader({
    activeSection,
    onSectionChange,
 }: DashboardHeaderProps) {
-   const { user } = useAuth();
+   const { user, userSubscription, fetchSubscription } = useAuth();
+   const isPremium = !!(userSubscription &&
+                     userSubscription.status === 'active' &&
+                     userSubscription.plan_details &&
+                     Number(userSubscription.plan_details.price) > 0);
    const queryClient = useQueryClient();
    const [showNotifications, setShowNotifications] = React.useState(false);
    const [showProfileMenu, setShowProfileMenu] = React.useState(false);
    const [isMenuLocked, setIsMenuLocked] = React.useState(false);
    const [showMobileProfileSidebar, setShowMobileProfileSidebar] = React.useState(false);
+   const [isActivating, setIsActivating] = React.useState(false);
    const { logout } = useAuth();
 
    const { data: notifications } = useQuery({
@@ -63,6 +70,29 @@ export function DashboardHeader({
       }
    };
 
+   const handleActivateSub = async (e: React.MouseEvent) => {
+      e.stopPropagation();
+      setIsActivating(true);
+      try {
+         const response = await axiosInstance.post('/subscription/my-subscription/', {
+            action: 'activate',
+         });
+         if (response.data) {
+            await fetchSubscription();
+            toast.success('Subscription activated successfully!', {
+               description: `Welcome to the ${userSubscription?.plan_details?.name || 'Premium Plan'}! All premium features are now unlocked.`,
+            });
+         }
+      } catch (error: any) {
+         console.error('Error activating subscription:', error);
+         toast.error(
+            error.response?.data?.error || 'Failed to activate subscription. Please try again.'
+         );
+      } finally {
+         setIsActivating(false);
+      }
+   };
+
    const toggleMenu = (e: React.MouseEvent) => {
       e.stopPropagation();
       const nextLocked = !isMenuLocked;
@@ -82,9 +112,14 @@ export function DashboardHeader({
                >
                   {/* Profile Header */}
                   <div className="p-6 border-b border-border">
-                     <div className="flex items-center gap-3 mb-3">
-                        <div className="w-12 h-12 rounded-full border-2 border-primary p-0.5">
-                           <div className="w-full h-full rounded-full bg-background overflow-hidden">
+                     <div className="flex items-start gap-3 mb-3 pt-1">
+                        <div className={cn(
+                           "w-12 h-12 rounded-full shrink-0 flex items-center justify-center p-[2px] transition-all",
+                           isPremium
+                              ? "bg-[conic-gradient(from_0deg,#4285F4,#EA4335,#FBBC05,#34A853,#4285F4)] animate-[spin_5s_linear_infinite]"
+                              : "border-2 border-primary"
+                        )}>
+                           <div className="w-full h-full rounded-full bg-background overflow-hidden flex items-center justify-center">
                               {user?.profile?.profile_image_url ? (
                                  <img
                                     src={`${getOptimizedImage(user.profile.profile_image_url)}&v=${user.updated_at ? new Date(user.updated_at).getTime() : Date.now()}`}
@@ -92,15 +127,34 @@ export function DashboardHeader({
                                     className="w-full h-full object-cover rounded-full"
                                  />
                               ) : (
-                                 <div className="w-full h-full bg-primary flex items-center justify-center text-sm font-bold text-white uppercase">
+                                 <div className="w-full h-full bg-primary flex items-center justify-center text-sm font-bold text-white uppercase rounded-full">
                                     {user?.first_name?.[0] || 'U'}
                                  </div>
                               )}
                            </div>
                         </div>
-                        <div className="min-w-0">
+                        <div className="min-w-0 flex-1">
                            <p className="text-sm font-bold text-foreground truncate">{user?.first_name} {user?.last_name}</p>
                            <p className="text-[10px] text-muted-foreground truncate font-medium">{user?.email}</p>
+                           <div className="mt-2.5 pt-2 border-t border-border/30 space-y-1">
+                              <div className="flex items-center justify-between text-[9px] font-bold text-muted-foreground uppercase tracking-wider">
+                                 <span>Plan Status</span>
+                                 {isPremium ? (
+                                    <span className="text-[10px] font-extrabold bg-gradient-to-r from-[#4285F4] via-[#EA4335] to-[#FBBC05] bg-clip-text text-transparent uppercase tracking-normal">
+                                       {userSubscription?.plan_details?.name || 'Premium'}
+                                    </span>
+                                 ) : userSubscription?.status === 'pending' && userSubscription?.plan_details ? (
+                                    <span className="text-[10px] font-extrabold text-amber-500 animate-pulse uppercase tracking-normal">
+                                       {userSubscription?.plan_details?.name} (Pending)
+                                    </span>
+                                 ) : (
+                                    <span className="text-[9px] font-bold text-muted-foreground/60 uppercase">
+                                       Free Tier
+                                    </span>
+                                 )}
+                              </div>
+                              <div className="h-[2px] w-full rounded-full bg-gradient-to-r from-[#4285F4] via-[#EA4335] via-[#FBBC05] to-[#34A853]" />
+                           </div>
                         </div>
                      </div>
                   </div>
@@ -113,6 +167,50 @@ export function DashboardHeader({
                      >
                         <User className="w-5 h-5" />
                         View Profile
+                     </button>
+                     {userSubscription?.status === 'pending' && userSubscription?.plan_details && (
+                        <div className="px-5 py-3.5 mx-4 my-2 bg-amber-500/10 border border-amber-500/20 rounded flex flex-col gap-2 shadow-sm animate-in fade-in duration-300">
+                           <p className="text-[11px] text-amber-700 dark:text-amber-400 font-bold leading-normal">
+                              Your {userSubscription?.plan_details?.name} is pending activation.
+                           </p>
+                           <button
+                              onClick={handleActivateSub}
+                              disabled={isActivating}
+                              className="w-full h-8 bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-bold rounded flex items-center justify-center gap-1.5 transition-all cursor-pointer disabled:opacity-75 active:scale-[0.98]"
+                           >
+                              {isActivating ? (
+                                 <>
+                                    <Loader2 className="w-3 h-3 animate-spin" />
+                                    <span>Activating...</span>
+                                 </>
+                              ) : (
+                                 <span>Activate Plan Now</span>
+                              )}
+                           </button>
+                        </div>
+                     )}
+                     <button
+                        onClick={() => {
+                           onSectionChange('settings');
+                           const url = new URL(window.location.href);
+                           url.searchParams.set('tab', 'Billing');
+                           window.history.replaceState(null, '', url.pathname + url.search);
+                           window.dispatchEvent(new Event('settings-tab-change'));
+                           setShowMobileProfileSidebar(false);
+                        }}
+                        className={cn(
+                           "w-[calc(100%-32px)] mx-4 my-2 flex items-center gap-3.5 px-4 py-3 text-[13px] font-bold rounded transition-all shadow-sm border",
+                           isPremium
+                              ? "text-violet-600 dark:text-violet-400 bg-violet-50/50 dark:bg-violet-500/5 hover:bg-violet-500/10 dark:hover:bg-violet-500/20 border border-violet-600/30 dark:border-violet-400/30"
+                              : "text-amber-600 dark:text-amber-400 bg-amber-50/50 dark:bg-amber-500/5 hover:bg-amber-500/10 dark:hover:bg-amber-500/20 border border-amber-600/30 dark:border-amber-400/30"
+                        )}
+                     >
+                        {isPremium ? (
+                           <Sparkles className="w-5 h-5 text-violet-600 dark:text-violet-400 shrink-0" />
+                        ) : (
+                           <Crown className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0" />
+                        )}
+                        {isPremium ? "Manage / Upgrade Plan" : "Try Premium"}
                      </button>
                      <button
                         onClick={() => { onSectionChange('settings'); setShowMobileProfileSidebar(false); }}
@@ -164,9 +262,14 @@ export function DashboardHeader({
                {/* Left: Profile Avatar */}
                <button
                   onClick={() => setShowMobileProfileSidebar(true)}
-                  className="w-9 h-9 rounded-full border-2 border-muted-foreground/30 p-0.5 hover:border-primary transition-all active:scale-95 shrink-0"
+                  className={cn(
+                     "w-9 h-9 rounded-full transition-all active:scale-95 shrink-0 flex items-center justify-center p-[2px]",
+                     isPremium
+                        ? "bg-[conic-gradient(from_0deg,#4285F4,#EA4335,#FBBC05,#34A853,#4285F4)] animate-[spin_5s_linear_infinite]"
+                        : "border-2 border-muted-foreground/30 hover:border-primary"
+                  )}
                >
-                  <div className="w-full h-full rounded-full bg-background overflow-hidden">
+                  <div className="w-full h-full rounded-full bg-background overflow-hidden flex items-center justify-center">
                      {user?.profile?.profile_image_url ? (
                         <img
                            src={`${getOptimizedImage(user.profile.profile_image_url)}&v=${user.updated_at ? new Date(user.updated_at).getTime() : Date.now()}`}
@@ -174,7 +277,7 @@ export function DashboardHeader({
                            className="w-full h-full object-cover rounded-full"
                         />
                      ) : (
-                        <div className="w-full h-full bg-primary flex items-center justify-center text-[10px] font-bold text-white uppercase">
+                        <div className="w-full h-full bg-primary flex items-center justify-center text-[10px] font-bold text-white uppercase rounded-full">
                            {user?.first_name?.[0] || 'U'}
                         </div>
                      )}
@@ -192,15 +295,19 @@ export function DashboardHeader({
                </div>
 
                {/* Right: Message Icon */}
-               <button
-                  onClick={() => onSectionChange('messages')}
-                  className="w-9 h-9 flex items-center justify-center rounded-full text-muted-foreground hover:text-primary transition-all active:scale-95 shrink-0"
-               >
-                  <MessageSquare className={cn(
-                     "w-5 h-5",
-                     activeSection === 'messages' && "text-primary"
-                  )} />
-               </button>
+               {activeSection !== 'premium' ? (
+                  <button
+                     onClick={() => onSectionChange('messages')}
+                     className="w-9 h-9 flex items-center justify-center rounded-full text-muted-foreground hover:text-primary transition-all active:scale-95 shrink-0"
+                  >
+                     <MessageSquare className={cn(
+                        "w-5 h-5",
+                        activeSection === 'messages' && "text-primary"
+                     )} />
+                  </button>
+               ) : (
+                  <div className="w-9 h-9" />
+               )}
             </div>
 
             {/* ═══ DESKTOP HEADER (hidden lg:flex) ═══ */}
@@ -219,12 +326,15 @@ export function DashboardHeader({
                      </div>
                   </div>
 
-                  <GlobalSearch onSectionChange={onSectionChange} />
+                  {activeSection !== 'premium' && <GlobalSearch onSectionChange={onSectionChange} />}
                </div>
 
                {/* Center Section: Navigation Tabs — truly centered */}
-               <div className="flex-1 flex items-center justify-center h-full min-w-0">
-                  <nav className="hidden lg:flex items-center gap-0 xl:gap-1 h-full min-w-0 xl:-translate-x-12 transition-transform">
+               {activeSection === 'premium' ? (
+                  <div className="flex-1" />
+               ) : (
+                  <div className="flex-1 flex items-center justify-center h-full min-w-0">
+                     <nav className="hidden lg:flex items-center gap-0 xl:gap-1 h-full min-w-0 xl:-translate-x-12 transition-transform">
                      <button
                         onClick={() => onSectionChange('dashboard')}
                         className="relative h-full flex flex-col items-center justify-center px-2 xl:px-3 group/tab min-w-[52px]"
@@ -329,6 +439,14 @@ export function DashboardHeader({
                         href="/recruiter"
                         target="_blank"
                         rel="noopener noreferrer"
+                        onClick={(e) => {
+                           if (!isPremium) {
+                              e.preventDefault();
+                              toast.error("Upgrade to Premium", {
+                                 description: "You need an active premium subscription to access the recruiter platform and AI hiring features."
+                              });
+                           }
+                        }}
                         className="relative h-full flex flex-col items-center justify-center px-2 xl:px-3 group/tab min-w-[52px]"
                      >
                         <div className="relative">
@@ -349,6 +467,7 @@ export function DashboardHeader({
                   </nav>
 
                </div>
+               )}
 
                {/* Right Section: Actions / Profile */}
                <div className="flex items-center gap-2 sm:gap-3 shrink-0 h-full">
@@ -378,23 +497,26 @@ export function DashboardHeader({
                         className="relative mb-0.5"
                      >
                         <div className={cn(
-                           "w-7 h-7 lg:w-6 lg:h-6 rounded-full border p-0.5 relative z-10 transition-all duration-300",
-                           (activeSection === 'Profile' || activeSection === 'settings' || showProfileMenu) ? "border-primary" : "border-muted-foreground/30 group-hover/profile:border-foreground"
-                        )}>
-                           <div className="w-full h-full rounded-full bg-background overflow-hidden">
-                              {user?.profile?.profile_image_url ? (
-                                 <img
-                                    src={`${getOptimizedImage(user.profile.profile_image_url)}&v=${user.updated_at ? new Date(user.updated_at).getTime() : Date.now()}`}
-                                    alt="Profile"
-                                    className="w-full h-full object-cover rounded-full"
-                                 />
-                              ) : (
-                                 <div className="w-full h-full bg-primary flex items-center justify-center text-[10px] font-bold text-white uppercase">
-                                    {user?.first_name?.[0] || 'U'}
-                                 </div>
-                              )}
-                           </div>
-                        </div>
+                            "w-7 h-7 lg:w-6 lg:h-6 rounded-full relative z-10 transition-all duration-300 flex items-center justify-center p-[1.5px]",
+                            isPremium 
+                              ? "bg-[conic-gradient(from_0deg,#4285F4,#EA4335,#FBBC05,#34A853,#4285F4)] animate-[spin_5s_linear_infinite]" 
+                              : "border border-muted-foreground/30 group-hover/profile:border-foreground",
+                            !isPremium && (activeSection === 'Profile' || activeSection === 'settings' || showProfileMenu) && "border-primary"
+                         )}>
+                            <div className="w-full h-full rounded-full bg-background overflow-hidden flex items-center justify-center">
+                               {user?.profile?.profile_image_url ? (
+                                  <img
+                                     src={`${getOptimizedImage(user.profile.profile_image_url)}&v=${user.updated_at ? new Date(user.updated_at).getTime() : Date.now()}`}
+                                     alt="Profile"
+                                     className="w-full h-full object-cover rounded-full"
+                                  />
+                               ) : (
+                                  <div className="w-full h-full bg-primary flex items-center justify-center text-[10px] font-bold text-white uppercase rounded-full">
+                                     {user?.first_name?.[0] || 'U'}
+                                  </div>
+                               )}
+                            </div>
+                         </div>
                      </div>
 
                      <div
@@ -418,11 +540,52 @@ export function DashboardHeader({
 
                      {showProfileMenu && (
                         <div className="absolute top-full right-0 mt-1 w-52 bg-card border border-border rounded-md shadow-xl py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                           <div className="px-4 py-2 mb-1 border-b border-border/50">
+                           <div className="px-4 py-2.5 mb-1 border-b border-border/50">
                               <p className="text-[11px] font-bold text-foreground truncate">{user?.first_name} {user?.last_name}</p>
                               <p className="text-[9px] text-muted-foreground truncate font-medium">{user?.email}</p>
+                              <div className="mt-2.5 pt-2 border-t border-border/30 space-y-1">
+                                 <div className="flex items-center justify-between text-[9px] font-bold text-muted-foreground uppercase tracking-wider">
+                                    <span>Plan Status</span>
+                                    {isPremium ? (
+                                       <span className="text-[10px] font-extrabold bg-gradient-to-r from-[#4285F4] via-[#EA4335] to-[#FBBC05] bg-clip-text text-transparent uppercase tracking-normal">
+                                          {userSubscription?.plan_details?.name || 'Premium'}
+                                       </span>
+                                    ) : userSubscription?.status === 'pending' && userSubscription?.plan_details ? (
+                                       <span className="text-[10px] font-extrabold text-amber-500 animate-pulse uppercase tracking-normal">
+                                          {userSubscription?.plan_details?.name} (Pending)
+                                       </span>
+                                    ) : (
+                                       <span className="text-[9px] font-bold text-muted-foreground/60 uppercase">
+                                          Free Tier
+                                       </span>
+                                    )}
+                                 </div>
+                                 <div className="h-[2px] w-full rounded-full bg-gradient-to-r from-[#4285F4] via-[#EA4335] via-[#FBBC05] to-[#34A853]" />
+                              </div>
                            </div>
 
+                           {userSubscription?.status === 'pending' && userSubscription?.plan_details && (
+                              <div className="px-3 py-2 mx-2 my-1.5 bg-amber-500/10 border border-amber-500/20 rounded flex flex-col gap-2 animate-in fade-in duration-300">
+                                 <p className="text-[10px] text-amber-700 dark:text-amber-400 font-bold leading-normal">
+                                    Your {userSubscription?.plan_details?.name} is ready.
+                                 </p>
+                                 <button
+                                    onClick={handleActivateSub}
+                                    disabled={isActivating}
+                                    className="w-full h-7 bg-amber-500 hover:bg-amber-600 text-white text-[10px] font-bold rounded flex items-center justify-center gap-1 transition-all cursor-pointer disabled:opacity-75 active:scale-[0.98]"
+                                 >
+                                    {isActivating ? (
+                                       <>
+                                          <Loader2 className="w-3 h-3 animate-spin" />
+                                          <span>Activating...</span>
+                                       </>
+                                    ) : (
+                                       <span>Activate Plan Now</span>
+                                    )}
+                                 </button>
+                              </div>
+                           )}
+ 
                            <button
                               onClick={() => {
                                  onSectionChange('Profile');
@@ -433,6 +596,30 @@ export function DashboardHeader({
                            >
                               <User className="w-4 h-4 transition-colors group-hover/item:text-primary" />
                               Profile
+                           </button>
+                           <button
+                              onClick={() => {
+                                 onSectionChange('settings');
+                                 const url = new URL(window.location.href);
+                                 url.searchParams.set('tab', 'Billing');
+                                 window.history.replaceState(null, '', url.pathname + url.search);
+                                 window.dispatchEvent(new Event('settings-tab-change'));
+                                 setShowProfileMenu(false);
+                                 setIsMenuLocked(false);
+                              }}
+                              className={cn(
+                                 "w-[calc(100%-16px)] mx-2 my-1 flex items-center gap-3 px-3 py-2 text-[12px] font-bold rounded transition-all border group/item shadow-sm",
+                                 isPremium
+                                    ? "text-violet-600 dark:text-violet-400 bg-violet-50/50 dark:bg-violet-500/5 hover:bg-violet-500/10 dark:hover:bg-violet-500/20 border-violet-600/30 dark:border-violet-400/30"
+                                    : "text-amber-600 dark:text-amber-400 bg-amber-50/50 dark:bg-amber-500/5 hover:bg-amber-500/10 dark:hover:bg-amber-500/20 border-amber-600/30 dark:border-amber-400/30"
+                              )}
+                           >
+                              {isPremium ? (
+                                 <Sparkles className="w-4 h-4 text-violet-600 dark:text-violet-400 group-hover/item:scale-110 transition-transform shrink-0" />
+                              ) : (
+                                 <Crown className="w-4 h-4 text-amber-600 dark:text-amber-400 group-hover/item:scale-110 transition-transform shrink-0" />
+                              )}
+                              {isPremium ? "Manage / Upgrade Plan" : "Try Premium"}
                            </button>
 
                            <button

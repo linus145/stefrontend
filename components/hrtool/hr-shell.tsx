@@ -9,6 +9,7 @@ import { GlobalLoader } from '@/components/ui/global-loader';
 import { LocalLoader } from '@/components/ui/local-loader';
 import { useQuery } from '@tanstack/react-query';
 import { jobsService } from '@/services/jobs.service';
+import { PremiumLocker } from '@/components/ui/premium-locker';
 
 // Lazy load tabs to keep main bundle small
 const DashboardTab = React.lazy(() => import('@/components/hrtool/tabs/dashboard/dashboard-tab').then(m => ({ default: m.DashboardTab })));
@@ -22,7 +23,7 @@ const OrgTab = React.lazy(() => import('@/components/hrtool/tabs/organisation/or
 const TemplatesTab = React.lazy(() => import('@/components/hrtool/tabs/templates/templates-tab').then(m => ({ default: m.TemplatesTab })));
 
 export function HRShell() {
-  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { user, isAuthenticated, isLoading: authLoading, userSubscription } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<HRSection>('dashboard');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
@@ -31,6 +32,9 @@ export function HRShell() {
     }
     return false;
   });
+
+  // HR Tools require Growth (12000) or Enterprise (18000) plan
+  const hasPremium = userSubscription && Number(userSubscription.plan_details?.price) >= 12000 && userSubscription.status === 'active';
 
   const handleSidebarCollapse = (collapsed: boolean) => {
     setIsSidebarCollapsed(collapsed);
@@ -71,6 +75,24 @@ export function HRShell() {
   const renderContent = () => {
     if (companyLoading) return <LocalLoader />;
     if (!companyCheck?.data?.has_company) return <div className="flex-1 flex items-center justify-center">No company found</div>;
+
+    if (!hasPremium) {
+      return (
+        <PremiumLocker
+          title="HR Management Suite"
+          description="Manage employee onboarding, automated document flows, attendance tracking, late/early summaries, leaves, and custom payslip structures."
+          features={[
+            "Automated Onboarding Workflows",
+            "Leave Requests & Approvals",
+            "Attendance Event Log & Late Tracking",
+            "Payslips & Salary Structure Builder",
+            "Organization Tree & Org Charts",
+            "Role-based Team & Employee Portals"
+          ]}
+          backPath="/recruiter"
+        />
+      );
+    }
 
     return (
       <React.Suspense fallback={<LocalLoader />}>

@@ -105,7 +105,7 @@ export function PostCard({ post, onLike, onNavigateToProfile }: PostCardProps) {
   }
 
   return (
-    <div className="bg-card border border-border/60 rounded-md shadow-sm transition-all group overflow-hidden hover:shadow-md flex flex-col h-full">
+    <div className="bg-card border border-border/60 rounded-sm shadow-sm transition-all group overflow-hidden hover:shadow-md flex flex-col h-full">
       {/* Header */}
       <div className="p-3 sm:p-4 pb-2">
         <div className="flex items-start justify-between">

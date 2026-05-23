@@ -16,6 +16,8 @@ import { cn } from '@/lib/utils';
 import { ThemeToggle } from '@/components/dashboard/theme-toggle';
 import { NotificationPopover } from '@/components/dashboard/notifications/notification-popover';
 import { AgentUIController } from '@/agent/ui/AgentUIController';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
 
 interface InterviewHeaderProps {
   companyName: string;
@@ -24,6 +26,19 @@ interface InterviewHeaderProps {
 }
 
 export function AIInterviewsHeader({ companyName, activeSection, onSectionChange }: InterviewHeaderProps) {
+  const { userSubscription } = useAuth();
+  const hasPremium = userSubscription && Number(userSubscription.plan_details?.price) >= 12000 && userSubscription.status === 'active';
+
+  const handleAgentClick = () => {
+    if (!hasPremium) {
+      toast.error("Premium feature locked", {
+        description: "Please activate your premium subscription to unlock AI Recruiting Agent and agentic flows."
+      });
+      return;
+    }
+    AgentUIController.getInstance().toggleSidebar();
+  };
+
   const navItems = [
     { id: 'pipeline', label: 'Pipeline', icon: Users2 },
     { id: 'configuration', label: 'Configuration', icon: BrainCircuit },
@@ -85,7 +100,7 @@ export function AIInterviewsHeader({ companyName, activeSection, onSectionChange
 
         {/* AI Agent Header Button */}
         <button
-          onClick={() => AgentUIController.getInstance().toggleSidebar()}
+          onClick={handleAgentClick}
           className="p-2 hover:bg-muted text-muted-foreground hover:text-blue-500 rounded-sm transition-all hover:scale-110 active:scale-95 border border-border shadow-sm flex items-center justify-center shrink-0 group relative"
           title="AI Recruiting Agent"
         >
@@ -110,7 +125,10 @@ export function AIInterviewsHeader({ companyName, activeSection, onSectionChange
             strokeWidth="2.2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="w-5 h-5 group-hover:rotate-12 transition-transform text-blue-500 dark:text-blue-400 high-glow-pulse"
+            className={cn(
+              "w-5 h-5 group-hover:rotate-12 transition-transform text-blue-500 dark:text-blue-400",
+              hasPremium && "high-glow-pulse"
+            )}
           >
             <path d="M12 8V4H8" />
             <rect width="16" height="12" x="4" y="8" rx="2" />

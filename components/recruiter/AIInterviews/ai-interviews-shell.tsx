@@ -11,12 +11,16 @@ import { EvaluationView } from './evaluation/evaluation-view';
 import { GlobalLoader } from '@/components/ui/global-loader';
 import { useQuery } from '@tanstack/react-query';
 import { jobsService } from '@/services/jobs.service';
+import { PremiumLocker } from '@/components/ui/premium-locker';
 
 export function AIInterviewsShell() {
-  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { user, isAuthenticated, isLoading: authLoading, userSubscription } = useAuth();
   const router = useRouter();
 
   const [activeSection, setActiveSection] = useState('pipeline');
+
+  // Interview Pipeline requires Growth (12000) or Enterprise (18000) plan
+  const hasPremium = userSubscription && Number(userSubscription.plan_details?.price) >= 12000 && userSubscription.status === 'active';
 
   // Check if user has a company
   const { data: companyCheck, isLoading: companyLoading } = useQuery({
@@ -55,6 +59,24 @@ export function AIInterviewsShell() {
   const company = companyCheck.data.company!;
 
   const renderContent = () => {
+    if (!hasPremium) {
+      return (
+        <PremiumLocker
+          title="AI Interviews Engine"
+          description="Automate talent screening, generate candidate evaluation reports, and schedule interviews autonomously using conversational agents."
+          features={[
+            "AI Interview Pipeline",
+            "Resume Screening & Scoring",
+            "Candidate Evaluation Reports",
+            "Recruiter Collaboration Panel",
+            "Interview Scheduling System",
+            "Hiring Analytics & Insights"
+          ]}
+          backPath="/recruiter"
+        />
+      );
+    }
+
     switch (activeSection) {
       case 'pipeline':
         return (

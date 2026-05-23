@@ -13,6 +13,7 @@ import { AgentActView } from './AgentActView';
 import { AgentPlanView } from './AgentPlanView';
 import { AgentGoalInput } from './AgentGoalInput';
 import { aiAgentService } from '@/services/ai-agents.service';
+import { useAuth } from '@/hooks/useAuth';
 
 export const AgentSidebar: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -42,6 +43,23 @@ export const AgentSidebar: React.FC = () => {
   const [isModeMenuOpen, setIsModeMenuOpen] = useState(false);
   const [showHistoryView, setShowHistoryView] = useState(false);
   const [executionHistory, setExecutionHistory] = useState<any[]>([]);
+
+  // Subscription-based tiered agent lock
+  const { userSubscription } = useAuth();
+  const agentPlanPrice = (userSubscription?.status === 'active' && userSubscription?.plan_details)
+    ? Number(userSubscription.plan_details.price) : 0;
+
+  // Free & Basic (< 12000): No agent access at all (neither Plan nor Act mode)
+  const isAgentFullyLocked = agentPlanPrice < 12000;
+  // Growth (< 18000): Only Plan/Conversational mode, Act mode locked
+  const isActModeLocked = agentPlanPrice < 18000;
+
+  // Force PLAN mode when Act is locked; if fully locked, still default to PLAN (UI will show lock)
+  useEffect(() => {
+    if (isActModeLocked && sidebarMode === 'ACT') {
+      setSidebarMode('PLAN');
+    }
+  }, [isActModeLocked, sidebarMode]);
 
   // Resizing state
   const [sidebarWidth, setSidebarWidth] = useState<number>(360);
@@ -665,6 +683,8 @@ export const AgentSidebar: React.FC = () => {
               handleStop={handleStop}
               handleResume={handleResume}
               handlePlanSendMessage={handlePlanSendMessage}
+              isAgentFullyLocked={isAgentFullyLocked}
+              isActModeLocked={isActModeLocked}
             />
           )}
 

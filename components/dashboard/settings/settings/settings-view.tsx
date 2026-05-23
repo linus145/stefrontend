@@ -11,35 +11,67 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { PrivacyTab } from './privacy-tab';
-import { NotificationsTab } from './notifications-tab';
-import { SecurityTab } from './security-tab';
+import { PrivacyTab } from '../privacy/privacy-tab';
+import { NotificationsTab } from '../notification/notifications-tab';
+import { SecurityTab } from '../security/security-tab';
+import { BillingTab } from '../billing/billing-tab';
+import { ProfileEditForm } from '../../profile/profile-edit-form';
 
-type SettingsTab = 'Privacy' | 'Notifications' | 'Security';
+type SettingsTab = 'Account' | 'Privacy' | 'Notifications' | 'Security' | 'Billing';
 
 export function SettingsView({ isCollapsed }: { isCollapsed?: boolean }) {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<SettingsTab>('Privacy');
+  const [activeTab, setActiveTab] = useState<SettingsTab>('Account');
   const [showMobileDetail, setShowMobileDetail] = useState(false);
 
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const checkTab = () => {
+        const params = new URLSearchParams(window.location.search);
+        const tab = params.get('tab');
+        if (tab && ['Account', 'Privacy', 'Notifications', 'Security', 'Billing'].includes(tab)) {
+          setActiveTab(tab as SettingsTab);
+          // If on mobile, expand the tab detail view directly
+          setShowMobileDetail(true);
+        }
+      };
+
+      checkTab();
+      window.addEventListener('settings-tab-change', checkTab);
+      return () => window.removeEventListener('settings-tab-change', checkTab);
+    }
+  }, []);
+
   const menuItems: { id: SettingsTab; icon: React.ReactNode; label: string; description: string }[] = [
-    { 
-      id: 'Privacy', 
-      icon: <Eye className="w-5 h-5" />, 
+    {
+      id: 'Account',
+      icon: <User className="w-5 h-5" />,
+      label: 'My Account',
+      description: 'Manage your profile details and professional identity'
+    },
+    {
+      id: 'Privacy',
+      icon: <Eye className="w-5 h-5" />,
       label: 'Privacy & Visibility',
       description: 'Control your visibility and who can see your activity'
     },
-    { 
-      id: 'Notifications', 
-      icon: <Bell className="w-5 h-5" />, 
+    {
+      id: 'Notifications',
+      icon: <Bell className="w-5 h-5" />,
       label: 'Notifications',
       description: 'Configure how you receive alerts and updates'
     },
-    { 
-      id: 'Security', 
-      icon: <Shield className="w-5 h-5" />, 
+    {
+      id: 'Security',
+      icon: <Shield className="w-5 h-5" />,
       label: 'Security & Login',
       description: 'Protect your account with password and 2FA'
+    },
+    {
+      id: 'Billing',
+      icon: <CreditCard className="w-5 h-5" />,
+      label: 'Billing & Plans',
+      description: 'View pricing, features and manage your subscriptions'
     },
   ];
 
@@ -69,7 +101,7 @@ export function SettingsView({ isCollapsed }: { isCollapsed?: boolean }) {
               className="w-full flex items-center justify-between p-4 rounded-sm border border-border bg-card hover:bg-muted/30 transition-all text-left group"
             >
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                <div className="w-10 h-10 rounded-full bg-[#0a66c2]/10 flex items-center justify-center text-[#0a66c2] group-hover:scale-110 transition-transform">
                   {item.icon}
                 </div>
                 <div>
@@ -80,7 +112,7 @@ export function SettingsView({ isCollapsed }: { isCollapsed?: boolean }) {
               <ChevronDown className="w-4 h-4 text-muted-foreground -rotate-90" />
             </button>
           ))}
-          
+
           {/* Sign Out - Hidden as already available in profile dropdown */}
           {/* 
           <button className="w-full flex items-center gap-4 p-4 rounded-sm border border-border bg-card text-destructive hover:bg-destructive/5 transition-all text-left mt-8">
@@ -102,7 +134,7 @@ export function SettingsView({ isCollapsed }: { isCollapsed?: boolean }) {
         !showMobileDetail ? "hidden" : "flex"
       )}>
         <div className="sticky top-0 z-30 bg-background/80 backdrop-blur-md border-b border-border p-4 flex items-center gap-4">
-          <button 
+          <button
             onClick={() => setShowMobileDetail(false)}
             className="p-2 hover:bg-muted rounded-full transition-colors"
           >
@@ -114,6 +146,9 @@ export function SettingsView({ isCollapsed }: { isCollapsed?: boolean }) {
         </div>
         <div className="flex-1 p-6">
           <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as SettingsTab)} className="w-full">
+            <TabsContent value="Account">
+              {user && <ProfileEditForm initialUser={user} isSettingsTab={true} />}
+            </TabsContent>
             <TabsContent value="Privacy">
               <PrivacyTab />
             </TabsContent>
@@ -122,6 +157,9 @@ export function SettingsView({ isCollapsed }: { isCollapsed?: boolean }) {
             </TabsContent>
             <TabsContent value="Security">
               <SecurityTab />
+            </TabsContent>
+            <TabsContent value="Billing">
+              <BillingTab />
             </TabsContent>
           </Tabs>
         </div>
@@ -138,13 +176,13 @@ export function SettingsView({ isCollapsed }: { isCollapsed?: boolean }) {
               className={cn(
                 "w-full flex items-center gap-3 px-4 py-3 rounded-sm text-sm font-medium transition-all group",
                 activeTab === item.id
-                  ? "bg-primary/10 text-primary border border-primary/20 shadow-sm"
+                  ? "bg-[#0a66c2]/10 text-[#0a66c2] border border-[#0a66c2]/20 shadow-sm"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
               )}
             >
               <div className={cn(
                 "transition-colors",
-                activeTab === item.id ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+                activeTab === item.id ? "text-[#0a66c2]" : "text-muted-foreground group-hover:text-foreground"
               )}>
                 {item.icon}
               </div>
@@ -155,9 +193,15 @@ export function SettingsView({ isCollapsed }: { isCollapsed?: boolean }) {
       </div>
 
       {/* Desktop Main Content */}
-      <div className="hidden md:flex flex-1 p-4 sm:p-6 lg:p-10">
-        <div className="max-w-3xl mx-auto space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500 w-full">
+      <div className="hidden md:flex flex-1 p-4 sm:p-6 lg:p-10 overflow-y-auto">
+        <div className={cn(
+          "mx-auto space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500 w-full transition-all duration-300",
+          activeTab === 'Billing' ? "max-w-6xl" : activeTab === 'Account' ? "max-w-4xl" : "max-w-3xl"
+        )}>
           <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as SettingsTab)} className="w-full">
+            <TabsContent value="Account">
+              {user && <ProfileEditForm initialUser={user} isSettingsTab={true} />}
+            </TabsContent>
             <TabsContent value="Privacy">
               <PrivacyTab />
             </TabsContent>
@@ -167,18 +211,23 @@ export function SettingsView({ isCollapsed }: { isCollapsed?: boolean }) {
             <TabsContent value="Security">
               <SecurityTab />
             </TabsContent>
+            <TabsContent value="Billing">
+              <BillingTab />
+            </TabsContent>
           </Tabs>
 
           {/* Footer Actions */}
-          <div className="pt-6 sm:pt-8 border-t border-border flex flex-col sm:flex-row justify-end gap-3 sticky bottom-0 bg-background/80 backdrop-blur-sm z-20 py-4 -mx-4 sm:-mx-6 lg:-mx-10 px-4 sm:px-6 lg:px-10">
-            <Button variant="ghost" className="rounded-sm font-bold text-xs text-muted-foreground uppercase tracking-widest px-6 h-11">
-              Discard
-            </Button>
-            <Button className="rounded-sm bg-primary text-primary-foreground font-bold text-xs uppercase tracking-widest px-8 h-11 shadow-md hover:translate-y-[-1px] active:scale-95 transition-all">
-              <Save className="w-4 h-4 mr-2" />
-              Save Changes
-            </Button>
-          </div>
+          {activeTab !== 'Billing' && activeTab !== 'Account' && (
+            <div className="pt-6 sm:pt-8 border-t border-border flex flex-col sm:flex-row justify-end gap-3 sticky bottom-0 bg-background/80 backdrop-blur-sm z-20 py-4 -mx-4 sm:-mx-6 lg:-mx-10 px-4 sm:px-6 lg:px-10">
+              <Button variant="ghost" className="rounded-sm font-bold text-xs text-muted-foreground uppercase tracking-widest px-6 h-11">
+                Discard
+              </Button>
+              <Button className="rounded-sm bg-[#0a66c2] hover:bg-[#004182] text-white font-bold text-xs uppercase tracking-widest px-8 h-11 shadow-md shadow-[#0a66c2]/10 hover:translate-y-[-1px] active:scale-95 transition-all">
+                <Save className="w-4 h-4 mr-2" />
+                Save Changes
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -188,19 +237,19 @@ export function SettingsView({ isCollapsed }: { isCollapsed?: boolean }) {
 function SettingsField({ label, value, icon }: { label: string; value: string; icon?: React.ReactNode }) {
   return (
     <div className="space-y-2 group">
-      <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest ml-1 transition-colors group-focus-within:text-primary">
+      <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest ml-1 transition-colors group-focus-within:text-[#0a66c2]">
         {label}
       </label>
       <div className="relative">
         {icon && (
-          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors">
+          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-[#0a66c2] transition-colors">
             {icon}
           </div>
         )}
         <Input
           defaultValue={value}
           className={cn(
-            "h-11 bg-background border-border rounded-sm focus:ring-1 focus:ring-primary/40 transition-all shadow-sm text-sm",
+            "h-11 bg-background border-border rounded-sm focus:ring-1 focus:ring-[#0a66c2]/40 transition-all shadow-sm text-sm",
             icon && "pl-11"
           )}
         />

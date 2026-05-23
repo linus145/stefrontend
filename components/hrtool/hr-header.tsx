@@ -7,6 +7,8 @@ import { ThemeToggle } from '@/components/dashboard/theme-toggle';
 import Link from 'next/link';
 import { NotificationPopover } from '@/components/dashboard/notifications/notification-popover';
 import { AgentUIController } from '@/agent/ui/AgentUIController';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
 
 export type HRSection = 
   | 'dashboard' 
@@ -50,6 +52,19 @@ export function HRHeader({
   activeTab,
   onTabChange,
 }: HRHeaderProps) {
+  const { userSubscription } = useAuth();
+  const hasPremium = userSubscription && Number(userSubscription.plan_details?.price) >= 12000 && userSubscription.status === 'active';
+
+  const handleAgentClick = () => {
+    if (!hasPremium) {
+      toast.error("Premium feature locked", {
+        description: "Please activate your premium subscription to unlock AI Recruiting Agent and agentic flows."
+      });
+      return;
+    }
+    AgentUIController.getInstance().toggleSidebar();
+  };
+
   return (
     <header className={cn(
       "fixed top-0 flex items-center justify-between px-4 sm:px-6 lg:px-8 z-40",
@@ -74,7 +89,7 @@ export function HRHeader({
         
         {/* AI Agent Header Button */}
         <button
-          onClick={() => AgentUIController.getInstance().toggleSidebar()}
+          onClick={handleAgentClick}
           className="p-2 hover:bg-muted text-muted-foreground hover:text-blue-500 rounded-sm transition-all hover:scale-110 active:scale-95 border border-border shadow-sm flex items-center justify-center shrink-0 group relative"
           title="AI Recruiting Agent"
         >
@@ -99,7 +114,10 @@ export function HRHeader({
             strokeWidth="2.2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="w-5 h-5 group-hover:rotate-12 transition-transform text-blue-500 dark:text-blue-400 high-glow-pulse"
+            className={cn(
+              "w-5 h-5 group-hover:rotate-12 transition-transform text-blue-500 dark:text-blue-400",
+              hasPremium && "high-glow-pulse"
+            )}
           >
             <path d="M12 8V4H8" />
             <rect width="16" height="12" x="4" y="8" rx="2" />

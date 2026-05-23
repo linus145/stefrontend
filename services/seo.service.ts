@@ -14,6 +14,9 @@ export interface PageSEOResponse {
     og_description?: string | null;
     og_image?: string | null;
     og_type?: string | null;
+    page_type?: string | null;
+    is_noindex?: boolean | null;
+    is_nofollow?: boolean | null;
   } | null;
 }
 

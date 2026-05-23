@@ -6,12 +6,13 @@ import { aiService } from '@/services/ai.service';
 import {
   X, Sparkles, ChevronDown, ChevronUp, ChevronRight,
   Bot, FileText, Target, MessageSquare, Send,
-  Search, BrainCircuit, History, AlertCircle, Zap, CheckCircle2, Trash2
+  Search, BrainCircuit, History, AlertCircle, Zap, CheckCircle2, Trash2, Lock
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { AgentTaskModal } from '../aiagents/AgentTaskModal';
 import { toast } from 'sonner';
 import { AgentUIController } from '@/agent/ui/AgentUIController';
+import { useAuth } from '@/hooks/useAuth';
 
 /** Converts any string to Title Case — first letter capital, rest lowercase. */
 function toTitleCase(str: string): string {
@@ -37,6 +38,16 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
   const [isAutoRefreshing, setIsAutoRefreshing] = useState(false);
   const [processingTime, setProcessingTime] = useState(0);
   const queryClient = useQueryClient();
+
+  // Subscription-based tiered feature locks
+  const { userSubscription } = useAuth();
+  const planPrice = (userSubscription?.status === 'active' && userSubscription?.plan_details)
+    ? Number(userSubscription.plan_details.price) : 0;
+
+  // Metrics (strengths, concerns, trust score, ATS score) unlock at Growth (12000)
+  const isMetricsLocked = planPrice < 12000;
+  // Deploy Agent unlocks only at Enterprise (18000)
+  const isAgentDeployLocked = planPrice < 18000;
 
   // Sync visibility with AgentUIController
   useEffect(() => {
@@ -270,9 +281,16 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
                             )}
                           </div>
                           <div className="flex items-center gap-3">
-                            <div className="flex items-center gap-1 text-[11px] font-bold text-indigo-500">
+                            <div className={cn("flex items-center gap-1 text-[11px] font-bold text-indigo-500 relative", isMetricsLocked && "select-none")}>
                               <Target className="w-3 h-3" />
-                              {cand.score}% match
+                              {isMetricsLocked ? (
+                                <span className="relative">
+                                  <span className="blur-[5px] pointer-events-none">{cand.score}% match</span>
+                                  <Lock className="w-3 h-3 text-amber-500 absolute -right-4 top-0" />
+                                </span>
+                              ) : (
+                                <>{cand.score}% match</>
+                              )}
                             </div>
                             {ai?.startup_fit && (
                               <div className={cn(
@@ -286,13 +304,29 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
                           </div>
                         </div>
 
-                        <div className="flex flex-col items-end shrink-0">
-                          <div className="text-[20px] font-black text-slate-900 dark:text-white leading-none">
-                            {cand.score}<span className="text-[12px] opacity-30">%</span>
-                          </div>
-                          <div className="text-[9px] font-bold text-slate-400 tracking-tighter mt-1">
-                            Fit score
-                          </div>
+                        <div className="flex flex-col items-end shrink-0 relative">
+                          {isMetricsLocked ? (
+                            <>
+                              <div className="text-[20px] font-black text-slate-900 dark:text-white leading-none blur-[5px] select-none pointer-events-none">
+                                {cand.score}<span className="text-[12px] opacity-30">%</span>
+                              </div>
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="flex items-center gap-1 bg-indigo-500/10 border border-indigo-500/20 rounded-sm px-1.5 py-0.5">
+                                  <Lock className="w-2.5 h-2.5 text-indigo-500" />
+                                  <span className="text-[7px] font-black text-indigo-600 dark:text-indigo-400 tracking-wide">Growth Plan</span>
+                                </div>
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              <div className="text-[20px] font-black text-slate-900 dark:text-white leading-none">
+                                {cand.score}<span className="text-[12px] opacity-30">%</span>
+                              </div>
+                              <div className="text-[9px] font-bold text-slate-400 tracking-tighter mt-1">
+                                Fit score
+                              </div>
+                            </>
+                          )}
                         </div>
                       </div>
 
@@ -309,33 +343,49 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
                         <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800 animate-in fade-in duration-500">
 
                           {/* Strengths & Concerns */}
-                          <div className="grid grid-cols-1 gap-4">
-                            {ai.strengths?.length > 0 && (
-                              <div className="space-y-2">
-                                <p className="text-[10px] font-black text-emerald-500 tracking-widest flex items-center gap-1.5">
-                                  <CheckCircle2 className="w-3 h-3" /> Key strengths
-                                </p>
-                                <div className="flex flex-wrap gap-1.5">
-                                  {ai.strengths.map((s: string, i: number) => (
-                                    <span key={i} className="bg-emerald-500/5 text-emerald-600 dark:text-emerald-400 text-[11px] font-bold px-2 py-1 rounded-sm border border-emerald-500/10">
-                                      {toTitleCase(s)}
-                                    </span>
-                                  ))}
+                          <div className="relative">
+                            <div className={cn("grid grid-cols-1 gap-4", isMetricsLocked && "blur-[6px] select-none pointer-events-none")}>
+                              {ai.strengths?.length > 0 && (
+                                <div className="space-y-2">
+                                  <p className="text-[10px] font-black text-emerald-500 tracking-widest flex items-center gap-1.5">
+                                    <CheckCircle2 className="w-3 h-3" /> Key strengths
+                                  </p>
+                                  <div className="flex flex-wrap gap-1.5">
+                                    {ai.strengths.map((s: string, i: number) => (
+                                      <span key={i} className="bg-emerald-500/5 text-emerald-600 dark:text-emerald-400 text-[11px] font-bold px-2 py-1 rounded-sm border border-emerald-500/10">
+                                        {toTitleCase(s)}
+                                      </span>
+                                    ))}
+                                  </div>
                                 </div>
-                              </div>
-                            )}
+                              )}
 
-                            {ai.concerns?.length > 0 && (
-                              <div className="space-y-2">
-                                <p className="text-[10px] font-black text-rose-500 tracking-widest flex items-center gap-1.5">
-                                  <AlertCircle className="w-3 h-3" /> Potential concerns
-                                </p>
-                                <div className="flex flex-wrap gap-1.5">
-                                  {ai.concerns.map((c: string, i: number) => (
-                                    <span key={i} className="bg-rose-500/5 text-rose-600 dark:text-rose-400 text-[11px] font-bold px-2 py-1 rounded-sm border border-rose-500/10">
-                                      {toTitleCase(c)}
-                                    </span>
-                                  ))}
+                              {ai.concerns?.length > 0 && (
+                                <div className="space-y-2">
+                                  <p className="text-[10px] font-black text-rose-500 tracking-widest flex items-center gap-1.5">
+                                    <AlertCircle className="w-3 h-3" /> Potential concerns
+                                  </p>
+                                  <div className="flex flex-wrap gap-1.5">
+                                    {ai.concerns.map((c: string, i: number) => (
+                                      <span key={i} className="bg-rose-500/5 text-rose-600 dark:text-rose-400 text-[11px] font-bold px-2 py-1 rounded-sm border border-rose-500/10">
+                                        {toTitleCase(c)}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                            {/* Premium overlay for Free/Basic users */}
+                            {isMetricsLocked && (
+                              <div className="absolute inset-0 flex items-center justify-center z-10">
+                                <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border border-indigo-500/20 rounded-sm px-4 py-3 flex flex-col items-center gap-2 shadow-lg">
+                                  <div className="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center">
+                                    <Lock className="w-4 h-4 text-indigo-500" />
+                                  </div>
+                                  <p className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 tracking-widest">GROWTH PLAN</p>
+                                  <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium text-center leading-relaxed max-w-[200px]">
+                                    Candidate insights unlock with the Growth Plan.
+                                  </p>
                                 </div>
                               </div>
                             )}
@@ -382,14 +432,29 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
 
                           {/* Stats Row */}
                           <div className="grid grid-cols-2 gap-3 pt-2">
-                            <div className="bg-slate-50 dark:bg-slate-900/50 p-2.5 rounded-sm border border-slate-100 dark:border-slate-800">
+                            <div className="bg-slate-50 dark:bg-slate-900/50 p-2.5 rounded-sm border border-slate-100 dark:border-slate-800 relative">
                               <p className="text-[9px] font-bold text-slate-400 tracking-widest mb-1">Trust score</p>
-                              <div className="flex items-center justify-between">
-                                <span className="text-sm font-black text-slate-700 dark:text-slate-300">{ai.trust_score}%</span>
+                              {isMetricsLocked ? (
+                                <>
+                                  <div className="flex items-center justify-between blur-[5px] select-none pointer-events-none">
+                                    <span className="text-sm font-black text-slate-700 dark:text-slate-300">{ai.trust_score}%</span>
+                                    <div className="w-12 h-1 bg-slate-200 dark:bg-slate-700 rounded-sm overflow-hidden">
+                                      <div className="h-full bg-indigo-500" style={{ width: `${ai.trust_score}%` }} />
+                                    </div>
+                                  </div>
+                                  <div className="absolute bottom-1.5 right-2 flex items-center gap-1 bg-indigo-500/10 border border-indigo-500/20 rounded-sm px-1 py-0.5">
+                                    <Lock className="w-2 h-2 text-indigo-500" />
+                                    <span className="text-[7px] font-black text-indigo-600 dark:text-indigo-400">Growth</span>
+                                  </div>
+                                </>
+                              ) : (
+                                <div className="flex items-center justify-between">
+                                  <span className="text-sm font-black text-slate-700 dark:text-slate-300">{ai.trust_score}%</span>
                                   <div className="w-12 h-1 bg-slate-200 dark:bg-slate-700 rounded-sm overflow-hidden">
-                                  <div className="h-full bg-indigo-500" style={{ width: `${ai.trust_score}%` }} />
+                                    <div className="h-full bg-indigo-500" style={{ width: `${ai.trust_score}%` }} />
+                                  </div>
                                 </div>
-                              </div>
+                              )}
                             </div>
                             <div className="bg-slate-50 dark:bg-slate-900/50 p-2.5 rounded-sm border border-slate-100 dark:border-slate-800">
                               <p className="text-[9px] font-bold text-slate-400 tracking-widest mb-1">Recommended</p>
@@ -460,13 +525,34 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
+                            if (isAgentDeployLocked) {
+                              toast.error('Deploy Agent is available on the Enterprise AI OS plan.', {
+                                description: 'Upgrade to Enterprise to unlock autonomous agentic AI execution.'
+                              });
+                              return;
+                            }
                             setAgentModalOpen(true);
                             setSelectedCandidateName(cand.name);
                           }}
-                          className="flex items-center justify-center gap-2 p-2.5 bg-indigo-600 rounded-sm text-[11px] font-bold text-white hover:bg-indigo-500 transition-all shadow-[0_0_15px_rgba(79,70,229,0.3)]"
+                          className={cn(
+                            "flex items-center justify-center gap-2 p-2.5 rounded-sm text-[11px] font-bold transition-all",
+                            isAgentDeployLocked
+                              ? "bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400 cursor-not-allowed"
+                              : "bg-indigo-600 text-white hover:bg-indigo-500 shadow-[0_0_15px_rgba(79,70,229,0.3)]"
+                          )}
                         >
-                          <Zap className="w-3.5 h-3.5 fill-current" />
-                          Deploy agent
+                          {isAgentDeployLocked ? (
+                            <>
+                              <Lock className="w-3.5 h-3.5" />
+                              Deploy agent
+                              <span className="text-[7px] font-black bg-violet-500/10 text-violet-600 dark:text-violet-400 px-1 py-0.5 rounded-sm border border-violet-500/20 ml-1">Enterprise</span>
+                            </>
+                          ) : (
+                            <>
+                              <Zap className="w-3.5 h-3.5 fill-current" />
+                              Deploy agent
+                            </>
+                          )}
                         </button>
                       </div>
                     )}

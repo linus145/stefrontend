@@ -6,10 +6,12 @@ import { ArrowLeft, Clock, Calendar, User, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Metadata } from 'next';
 import { getPageMetadata } from '@/lib/seo';
+import { SEOStructuredData } from '@/components/Public/seo-structured-data';
 
 interface BlogPageProps {
   params: Promise<{ slug: string }>;
 }
+
 
 export async function generateMetadata({ params }: BlogPageProps): Promise<Metadata> {
   const { slug } = await params;
@@ -52,8 +54,59 @@ export default async function BlogDetailPage({ params }: BlogPageProps) {
     );
   }
 
+  const breadcrumbData = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    'itemListElement': [
+      {
+        '@type': 'ListItem',
+        'position': 1,
+        'name': 'Home',
+        'item': 'https://b2linq.com'
+      },
+      {
+        '@type': 'ListItem',
+        'position': 2,
+        'name': 'Blogs',
+        'item': 'https://b2linq.com/blogs'
+      },
+      {
+        '@type': 'ListItem',
+        'position': 3,
+        'name': blog.title,
+        'item': `https://b2linq.com/blogs/${slug}`
+      }
+    ]
+  };
+
+  const blogPostData = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    'headline': blog.title,
+    'description': blog.excerpt,
+    'image': blog.image || 'https://b2linq.com/logo.png',
+    'datePublished': blog.date || new Date().toISOString(),
+    'author': {
+      '@type': 'Person',
+      'name': blog.author || 'B2linq Expert'
+    },
+    'publisher': {
+      '@type': 'Organization',
+      'name': 'B2linq',
+      'logo': {
+        '@type': 'ImageObject',
+        'url': 'https://b2linq.com/logo.png'
+      }
+    },
+    'mainEntityOfPage': {
+      '@type': 'WebPage',
+      '@id': `https://b2linq.com/blogs/${slug}`
+    }
+  };
+
   return (
     <div className="bg-white text-slate-900 min-h-screen font-sans selection:bg-indigo-100">
+      <SEOStructuredData data={[breadcrumbData, blogPostData]} />
       <Header />
       
       {/* Dynamic Background */}

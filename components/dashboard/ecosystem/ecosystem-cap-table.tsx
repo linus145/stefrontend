@@ -11,7 +11,7 @@ export function EcosystemCapTable({ user, isOwner = false }: EcosystemCapTablePr
   const isFounder = user.role === 'FOUNDER';
 
   return (
-    <div className="bg-card border border-border rounded-lg p-6 shadow-sm transition-all group hover:border-primary/20">
+    <div className="bg-card border border-border rounded-sm p-6 shadow-sm transition-all group hover:border-primary/20">
       <div className="flex items-center gap-2.5 mb-6">
         <PieChart className="w-4 h-4 text-primary" />
         <h2 className="text-lg font-semibold text-foreground tracking-tight">

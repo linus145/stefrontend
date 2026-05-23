@@ -14,13 +14,18 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { User } from '@/types/user.types';
 import { getOptimizedImage } from '@/lib/imagekit';
+import { cn } from '@/lib/utils';
+
+import { useAuth } from '@/hooks/useAuth';
 
 interface ProfileEditFormProps {
   initialUser: User;
+  isSettingsTab?: boolean;
 }
 
-export function ProfileEditForm({ initialUser }: ProfileEditFormProps) {
+export function ProfileEditForm({ initialUser, isSettingsTab = false }: ProfileEditFormProps) {
   const router = useRouter();
+  const { fetchProfile } = useAuth();
   const [isUpdating, setIsUpdating] = useState(false);
   const [formData, setFormData] = useState({
     first_name: initialUser.first_name || '',
@@ -86,8 +91,11 @@ export function ProfileEditForm({ initialUser }: ProfileEditFormProps) {
       };
       await userService.updateProfile(payload);
       toast.success('Profile updated successfully');
-      router.push('/dashboard');
-      router.refresh(); // Ensure the layout/other components get fresh data
+      await fetchProfile();
+      if (!isSettingsTab) {
+        router.push('/dashboard');
+        router.refresh(); // Ensure the layout/other components get fresh data
+      }
     } catch (error: any) {
       toast.error('Update failed', {
         description: error.response?.data?.message || 'Please check your inputs and try again.'
@@ -102,20 +110,27 @@ export function ProfileEditForm({ initialUser }: ProfileEditFormProps) {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <button
-            onClick={() => router.back()}
-            className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors mb-2 group w-fit"
-          >
-            <ArrowLeft className="w-3 h-3 group-hover:-translate-x-1 transition-transform" />
-            Back to Dashboard
-          </button>
+          {!isSettingsTab && (
+            <button
+              onClick={() => router.back()}
+              className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors mb-2 group w-fit"
+            >
+              <ArrowLeft className="w-3 h-3 group-hover:-translate-x-1 transition-transform" />
+              Back to Dashboard
+            </button>
+          )}
           <h1 className="text-xl sm:text-2xl font-semibold text-foreground tracking-tight">Edit Profile</h1>
           <p className="text-sm text-muted-foreground">Manage your identity and digital presence across the B2linq platform.</p>
         </div>
         <Button
           onClick={handleSubmit}
           disabled={isUpdating}
-          className="bg-primary text-primary-foreground hover:opacity-90 px-6 sm:px-8 h-11 rounded-md font-bold text-xs shadow-lg shadow-primary/20 transition-all flex items-center gap-2 w-full sm:w-auto justify-center"
+          className={cn(
+            "text-primary-foreground px-6 sm:px-8 h-11 rounded-md font-bold text-xs transition-all flex items-center gap-2 w-full sm:w-auto justify-center",
+            isSettingsTab
+              ? "bg-[#0a66c2] hover:bg-[#004182] shadow-lg shadow-[#0a66c2]/20"
+              : "bg-primary hover:opacity-90 shadow-lg shadow-primary/20"
+          )}
         >
           {isUpdating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
           Save Changes
@@ -126,7 +141,7 @@ export function ProfileEditForm({ initialUser }: ProfileEditFormProps) {
         {/* Section 1: Identity */}
         <div className="space-y-4">
           <div className="flex items-center gap-2 px-1">
-            <UserIcon className="w-4 h-4 text-primary" />
+            <UserIcon className={cn("w-4 h-4", isSettingsTab ? "text-[#0a66c2]" : "text-primary")} />
             <h2 className="text-[13px] font-bold uppercase tracking-widest text-foreground opacity-80">Identity</h2>
           </div>
           <div className="bg-card border border-border rounded-lg p-6 shadow-sm space-y-6">
@@ -175,7 +190,7 @@ export function ProfileEditForm({ initialUser }: ProfileEditFormProps) {
                 <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide ml-1">Mobile Number</label>
                 <div className="relative">
                   <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-2 pr-2 border-r border-border/50 select-none">
-                    <span className="text-[13px] font-bold text-primary">+91</span>
+                    <span className={cn("text-[13px] font-bold", isSettingsTab ? "text-[#0a66c2]" : "text-primary")}>+91</span>
                   </div>
                   <Input
                     name="phone_number"
@@ -193,7 +208,7 @@ export function ProfileEditForm({ initialUser }: ProfileEditFormProps) {
         {/* Section 2: Narrative */}
         <div className="space-y-4">
           <div className="flex items-center gap-2 px-1">
-            <Shield className="w-4 h-4 text-primary opacity-70" />
+            <Shield className={cn("w-4 h-4 opacity-70", isSettingsTab ? "text-[#0a66c2]" : "text-primary")} />
             <h2 className="text-[13px] font-bold uppercase tracking-widest text-foreground opacity-80">Professional Narrative</h2>
           </div>
           <div className="bg-card border border-border rounded-lg p-6 shadow-sm">
@@ -214,7 +229,7 @@ export function ProfileEditForm({ initialUser }: ProfileEditFormProps) {
         <div className="space-y-4">
           <div className="flex items-center justify-between px-1">
             <div className="flex items-center gap-2">
-              <Briefcase className="w-4 h-4 text-primary opacity-70" />
+              <Briefcase className={cn("w-4 h-4 opacity-70", isSettingsTab ? "text-[#0a66c2]" : "text-primary")} />
               <h2 className="text-[13px] font-bold uppercase tracking-widest text-foreground opacity-80">Experience</h2>
             </div>
             <Button
@@ -299,7 +314,7 @@ export function ProfileEditForm({ initialUser }: ProfileEditFormProps) {
         <div className="space-y-4">
           <div className="flex items-center justify-between px-1">
             <div className="flex items-center gap-2">
-              <GraduationCap className="w-4 h-4 text-primary opacity-70" />
+              <GraduationCap className={cn("w-4 h-4 opacity-70", isSettingsTab ? "text-[#0a66c2]" : "text-primary")} />
               <h2 className="text-[13px] font-bold uppercase tracking-widest text-foreground opacity-80">Education</h2>
             </div>
             <Button
@@ -392,7 +407,7 @@ export function ProfileEditForm({ initialUser }: ProfileEditFormProps) {
         {/* Section 5: Metadata */}
         <div className="space-y-4">
           <div className="flex items-center gap-2 px-1">
-            <Globe className="w-4 h-4 text-primary opacity-50" />
+            <Globe className={cn("w-4 h-4 opacity-50", isSettingsTab ? "text-[#0a66c2]" : "text-primary")} />
             <h2 className="text-[13px] font-bold uppercase tracking-widest text-foreground opacity-80">Additional Information</h2>
           </div>
           <div className="bg-card border border-border rounded-lg p-6 shadow-sm space-y-6">
@@ -424,10 +439,10 @@ export function ProfileEditForm({ initialUser }: ProfileEditFormProps) {
                 </div>
               </div>
               <div className="space-y-4">
-                <div className="p-6 bg-primary/5 border border-primary/20 rounded-lg">
+                <div className={cn("p-6 border rounded-lg", isSettingsTab ? "bg-[#0a66c2]/5 border-[#0a66c2]/20" : "bg-primary/5 border border-primary/20")}>
                   <div className="flex items-start gap-4">
                     <div className="mt-1">
-                      <ImageIcon className="w-5 h-5 text-primary opacity-70" />
+                      <ImageIcon className={cn("w-5 h-5 opacity-70", isSettingsTab ? "text-[#0a66c2]" : "text-primary")} />
                     </div>
                     <div>
                       <h4 className="text-sm font-bold text-foreground mb-1">Visual Identity Management</h4>
@@ -448,7 +463,27 @@ export function ProfileEditForm({ initialUser }: ProfileEditFormProps) {
           <Button
             type="button"
             variant="ghost"
-            onClick={() => router.back()}
+            onClick={() => {
+              if (isSettingsTab) {
+                setFormData({
+                  first_name: initialUser.first_name || '',
+                  last_name: initialUser.last_name || '',
+                  email: initialUser.email || '',
+                  phone_number: (initialUser.phone_number || '').replace(/^\+91/, ''),
+                  headline: initialUser.profile?.headline || '',
+                  bio: initialUser.profile?.bio || '',
+                  location: initialUser.profile?.location || '',
+                  profile_image_url: initialUser.profile?.profile_image_url || '',
+                  banner_image_url: initialUser.profile?.banner_image_url || '',
+                  resume_url: (initialUser.profile as any)?.resume_url || '',
+                  education: (initialUser.profile as any)?.education || [],
+                  experience: (initialUser.profile as any)?.experience || [],
+                });
+                toast.success('Changes discarded');
+              } else {
+                router.back();
+              }
+            }}
             className="text-muted-foreground hover:text-foreground px-8 h-12 rounded-md font-bold text-xs transition-all active:scale-95 w-full sm:w-auto"
           >
             Discard Changes
@@ -456,7 +491,12 @@ export function ProfileEditForm({ initialUser }: ProfileEditFormProps) {
           <Button
             type="submit"
             disabled={isUpdating}
-            className="bg-primary text-primary-foreground hover:opacity-90 px-10 h-12 rounded-md font-bold text-[13px] shadow-xl shadow-primary/20 transition-all flex items-center gap-2 justify-center w-full sm:w-auto"
+            className={cn(
+              "text-primary-foreground px-10 h-12 rounded-md font-bold text-[13px] transition-all flex items-center gap-2 justify-center w-full sm:w-auto",
+              isSettingsTab
+                ? "bg-[#0a66c2] hover:bg-[#004182] shadow-xl shadow-[#0a66c2]/20"
+                : "bg-primary hover:opacity-90 shadow-xl shadow-primary/20"
+            )}
           >
             {isUpdating && <Loader2 className="w-4 h-4 animate-spin" />}
             Update Profile

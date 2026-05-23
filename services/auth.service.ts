@@ -42,5 +42,33 @@ export const authService = {
 
   verifyOtp: (email: string, otp: string): Promise<BaseAPIResponse<AuthResponsePayload>> => {
     return api.post<BaseAPIResponse<AuthResponsePayload>>('/auth/verify-otp/', { email, otp });
+  },
+
+  request2FAOTPs: (secondaryEmail: string, thirdEmail: string): Promise<BaseAPIResponse<any>> => {
+    return api.post<BaseAPIResponse<any>>('/auth/request-2fa-otps/', { secondary_email: secondaryEmail, third_email: thirdEmail });
+  },
+
+  verify2FAOTPs: (secondaryOtp: string, thirdOtp: string): Promise<BaseAPIResponse<any>> => {
+    return api.post<BaseAPIResponse<any>>('/auth/verify-2fa-otps/', { secondary_otp: secondaryOtp, third_otp: thirdOtp });
+  },
+
+  requestSecondary2FAOTP: (secondaryEmail: string): Promise<BaseAPIResponse<any>> => {
+    return api.post<BaseAPIResponse<any>>('/auth/request-secondary-2fa-otp/', { secondary_email: secondaryEmail });
+  },
+
+  verifySecondary2FAOTP: (secondaryOtp: string): Promise<BaseAPIResponse<any>> => {
+    return api.post<BaseAPIResponse<any>>('/auth/verify-secondary-2fa-otp/', { secondary_otp: secondaryOtp });
+  },
+
+  requestThird2FAOTP: (thirdEmail: string): Promise<BaseAPIResponse<any>> => {
+    return api.post<BaseAPIResponse<any>>('/auth/request-third-2fa-otp/', { third_email: thirdEmail });
+  },
+
+  verifyThird2FAOTP: (thirdOtp: string): Promise<BaseAPIResponse<any>> => {
+    return api.post<BaseAPIResponse<any>>('/auth/verify-third-2fa-otp/', { third_otp: thirdOtp });
+  },
+
+  disable2FA: (): Promise<BaseAPIResponse<any>> => {
+    return api.post<BaseAPIResponse<any>>('/auth/disable-2fa/', {});
   }
 };

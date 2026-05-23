@@ -1,5 +1,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
+import { Lock } from 'lucide-react';
+import { toast } from 'sonner';
 
 export interface AgentGoalInputProps {
   goal: string;
@@ -16,6 +18,10 @@ export interface AgentGoalInputProps {
   handleStop: () => void;
   handleResume: () => void;
   handlePlanSendMessage: () => Promise<void>;
+  /** Free & Basic: entire agent is locked (no Plan or Act) */
+  isAgentFullyLocked?: boolean;
+  /** Growth: Act mode locked, Plan mode available */
+  isActModeLocked?: boolean;
 }
 
 export const AgentGoalInput: React.FC<AgentGoalInputProps> = ({
@@ -32,7 +38,9 @@ export const AgentGoalInput: React.FC<AgentGoalInputProps> = ({
   handleStart,
   handleStop,
   handleResume,
-  handlePlanSendMessage
+  handlePlanSendMessage,
+  isAgentFullyLocked = false,
+  isActModeLocked = false
 }) => {
   return (
     <div className="p-3 border-t border-border bg-background space-y-2 shrink-0 animate-in fade-in duration-300">
@@ -45,19 +53,24 @@ export const AgentGoalInput: React.FC<AgentGoalInputProps> = ({
       {/* Composite Input Box styled like Gemini interface */}
       <div className={cn(
         "w-full bg-card border border-border rounded-sm p-2.5 flex flex-col gap-2 relative transition-all focus-within:ring-1 focus-within:ring-blue-500",
-        isWaitingForInput && sidebarMode === 'ACT' && "border-blue-500 ring-1 ring-blue-500/20"
+        isWaitingForInput && sidebarMode === 'ACT' && "border-blue-500 ring-1 ring-blue-500/20",
+        isAgentFullyLocked && "opacity-50 pointer-events-none"
       )}>
         {/* Textarea Input */}
         <textarea
           value={goal}
           onChange={(e) => setGoal(e.target.value)}
           placeholder={
-            sidebarMode === 'ACT'
-              ? (isWaitingForInput ? "Type your answer here..." : "e.g. Hire a Senior Next.js Developer...")
-              : "Plan campaigns, candidate rules, question pools..."
+            isAgentFullyLocked
+              ? "Agent requires Growth Plan or higher..."
+              : sidebarMode === 'ACT'
+                ? (isWaitingForInput ? "Type your answer here..." : "e.g. Hire a Senior Next.js Developer...")
+                : "Plan campaigns, candidate rules, question pools..."
           }
-          className="bg-transparent border-0 outline-none focus:ring-0 p-1 text-xs font-semibold w-full resize-none text-foreground placeholder:text-muted-foreground/60 min-h-[48px] max-h-[120px] scrollbar-none"
+          disabled={isAgentFullyLocked}
+          className="bg-transparent border-0 outline-none focus:ring-0 p-1 text-xs font-semibold w-full resize-none text-foreground placeholder:text-muted-foreground/60 min-h-[48px] max-h-[120px] scrollbar-none disabled:cursor-not-allowed"
           onKeyDown={(e) => {
+            if (isAgentFullyLocked) return;
             if (e.key === 'Enter' && !e.shiftKey) {
               e.preventDefault();
               if (sidebarMode === 'ACT') {
@@ -68,6 +81,21 @@ export const AgentGoalInput: React.FC<AgentGoalInputProps> = ({
             }
           }}
         />
+
+        {/* Fully locked overlay for Free/Basic users */}
+        {isAgentFullyLocked && (
+          <div className="absolute inset-0 flex items-center justify-center z-10 rounded-sm bg-background/60 backdrop-blur-[2px]">
+            <div className="flex flex-col items-center gap-2 px-4 py-3">
+              <div className="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center">
+                <Lock className="w-4 h-4 text-indigo-500" />
+              </div>
+              <p className="text-[9px] font-black text-indigo-600 dark:text-indigo-400 tracking-widest">GROWTH PLAN REQUIRED</p>
+              <p className="text-[9px] text-slate-500 dark:text-slate-400 font-medium text-center max-w-[180px] leading-relaxed">
+                Agent features unlock with the Growth Plan.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Bottom Actions Bar */}
         <div className="flex items-center justify-between border-t border-border/45 pt-1.5 shrink-0">
@@ -94,30 +122,61 @@ export const AgentGoalInput: React.FC<AgentGoalInputProps> = ({
                     className="fixed inset-0 z-40" 
                     onClick={() => setIsModeMenuOpen(false)}
                   />
-                  <div className="absolute bottom-full left-0 mb-1.5 w-40 bg-popover border border-border rounded-sm shadow-xl p-1 z-50 flex flex-col animate-in fade-in slide-in-from-bottom-1 duration-200">
+                  <div className="absolute bottom-full left-0 mb-1.5 w-48 bg-popover border border-border rounded-sm shadow-xl p-1 z-50 flex flex-col animate-in fade-in slide-in-from-bottom-1 duration-200">
+                    {/* Act (Autonomous) — locked for Growth and below */}
                     <button
                       onClick={() => {
+                        if (isActModeLocked) {
+                          toast.error('Act Mode (Autonomous) is available on the Enterprise AI OS plan.', {
+                            description: 'Upgrade to Enterprise to unlock autonomous agent execution.'
+                          });
+                          setIsModeMenuOpen(false);
+                          return;
+                        }
                         setSidebarMode('ACT');
                         setIsModeMenuOpen(false);
                       }}
                       className={cn(
                         "w-full text-left px-2 py-1.5 rounded-sm text-[10px] font-bold flex items-center gap-1.5 transition-colors text-black dark:text-white",
-                        sidebarMode === 'ACT' ? "bg-blue-600/10 text-blue-600 hover:text-blue-600" : "hover:bg-muted"
+                        sidebarMode === 'ACT' && !isActModeLocked ? "bg-blue-600/10 text-blue-600 hover:text-blue-600" : "hover:bg-muted",
+                        isActModeLocked && "opacity-60"
                       )}
                     >
                       <span>Act (Autonomous)</span>
+                      {isActModeLocked && (
+                        <span className="ml-auto flex items-center gap-0.5 bg-violet-500/10 border border-violet-500/20 rounded-sm px-1.5 py-0.5">
+                          <Lock className="w-2.5 h-2.5 text-violet-500" />
+                          <span className="text-[7px] font-black text-violet-600 dark:text-violet-400 tracking-wide">Enterprise</span>
+                        </span>
+                      )}
                     </button>
+
+                    {/* Plan (Conversational) — locked for Free/Basic */}
                     <button
                       onClick={() => {
+                        if (isAgentFullyLocked) {
+                          toast.error('Agent features require the Growth Plan or higher.', {
+                            description: 'Upgrade to Growth Plan to unlock conversational AI agent.'
+                          });
+                          setIsModeMenuOpen(false);
+                          return;
+                        }
                         setSidebarMode('PLAN');
                         setIsModeMenuOpen(false);
                       }}
                       className={cn(
                         "w-full text-left px-2 py-1.5 rounded-sm text-[10px] font-bold flex items-center gap-1.5 transition-colors text-black dark:text-white",
-                        sidebarMode === 'PLAN' ? "bg-blue-600/10 text-blue-600 hover:text-blue-600" : "hover:bg-muted"
+                        sidebarMode === 'PLAN' && !isAgentFullyLocked ? "bg-blue-600/10 text-blue-600 hover:text-blue-600" : "hover:bg-muted",
+                        isAgentFullyLocked && "opacity-60"
                       )}
                     >
                       <span>Plan (Conversational)</span>
+                      {isAgentFullyLocked && (
+                        <span className="ml-auto flex items-center gap-0.5 bg-indigo-500/10 border border-indigo-500/20 rounded-sm px-1.5 py-0.5">
+                          <Lock className="w-2.5 h-2.5 text-indigo-500" />
+                          <span className="text-[7px] font-black text-indigo-600 dark:text-indigo-400 tracking-wide">Growth</span>
+                        </span>
+                      )}
                     </button>
                   </div>
                 </>
@@ -147,7 +206,7 @@ export const AgentGoalInput: React.FC<AgentGoalInputProps> = ({
             )}
             <button
               onClick={() => sidebarMode === 'ACT' ? handleStart() : handlePlanSendMessage()}
-              disabled={!goal.trim()}
+              disabled={!goal.trim() || isAgentFullyLocked}
               className="p-1.5 bg-foreground text-background hover:bg-blue-500 hover:text-white rounded-sm transition-all disabled:opacity-20 disabled:cursor-not-allowed active:scale-95 flex items-center justify-center"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>

@@ -24,9 +24,9 @@ export function EcosystemAbout({ user, isOwner = false }: EcosystemAboutProps) {
     }
     return dateString;
   };
-  
+
   // Dynamic tags
-  const tags = isFounder 
+  const tags = isFounder
     ? (profile && 'primary_industry' in profile ? [profile.primary_industry, ...(profile.skills || [])] : [])
     : (profile && 'preferred_industries' in profile ? profile.preferred_industries : []);
 
@@ -37,13 +37,13 @@ export function EcosystemAbout({ user, isOwner = false }: EcosystemAboutProps) {
   return (
     <div className="space-y-6">
       {/* Bio & Tags */}
-      <div className="bg-card border border-border rounded-lg p-6 shadow-sm transition-all hover:border-primary/20">
+      <div className="bg-card border border-border rounded-sm p-6 shadow-sm transition-all hover:border-primary/20">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-foreground tracking-tight">About</h2>
           {resumeUrl && (
-            <a 
-              href={resumeUrl} 
-              target="_blank" 
+            <a
+              href={resumeUrl}
+              target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-primary/10 text-primary text-[11px] font-bold uppercase tracking-wider hover:bg-primary/20 transition-all"
             >
@@ -58,7 +58,7 @@ export function EcosystemAbout({ user, isOwner = false }: EcosystemAboutProps) {
 
         <div className="flex flex-wrap gap-2">
           {tags.length > 0 ? tags.map((tag, idx) => (
-            <span 
+            <span
               key={idx}
               className="px-3 py-1 rounded-lg bg-muted/50 border border-border text-primary text-[10px] font-semibold tracking-tight"
             >
@@ -71,7 +71,7 @@ export function EcosystemAbout({ user, isOwner = false }: EcosystemAboutProps) {
       </div>
 
       {/* Experience Section */}
-      <div className="bg-card border border-border rounded-lg p-6 shadow-sm transition-all hover:border-primary/20">
+      <div className="bg-card border border-border rounded-sm p-6 shadow-sm transition-all hover:border-primary/20">
         <div className="flex items-center gap-2 mb-6">
           <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500">
             <Briefcase className="w-5 h-5" />
@@ -104,7 +104,7 @@ export function EcosystemAbout({ user, isOwner = false }: EcosystemAboutProps) {
       </div>
 
       {/* Education Section */}
-      <div className="bg-card border border-border rounded-lg p-6 shadow-sm transition-all hover:border-primary/20">
+      <div className="bg-card border border-border rounded-sm p-6 shadow-sm transition-all hover:border-primary/20">
         <div className="flex items-center gap-2 mb-6">
           <div className="p-2 rounded-lg bg-amber-500/10 text-amber-500">
             <GraduationCap className="w-5 h-5" />

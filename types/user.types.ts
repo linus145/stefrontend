@@ -14,4 +14,7 @@ export interface User {
   profile_image_url?: string | null;
   created_at: string;
   updated_at: string;
+  is_2fa_enabled?: boolean;
+  secondary_email?: string | null;
+  third_email?: string | null;
 }

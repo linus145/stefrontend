@@ -6,11 +6,14 @@ import { User } from '@/types/user.types';
 import { authService } from '@/services/auth.service';
 import { userService } from '@/services/user.service';
 import { toast } from 'sonner';
+import { api } from '@/lib/api';
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  userSubscription: any | null;
+  fetchSubscription: () => Promise<void>;
   login: (email: string, password: string, redirectTo?: string) => Promise<void>;
   employeeLogin: (email: string, password: string, redirectTo?: string) => Promise<void>;
   googleLogin: (token: string, redirectTo?: string) => Promise<void>;
@@ -28,16 +31,29 @@ const PUBLIC_PATHS = ['/login', '/register', '/'];
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [userSubscription, setUserSubscription] = useState<any>(null);
   const router = useRouter();
   const pathname = usePathname();
   const hasInitialized = useRef(false);
+
+  const fetchSubscription = async () => {
+    try {
+      const response = await api.get<any>('/subscription/my-subscription/');
+      setUserSubscription(response);
+    } catch (error) {
+      console.error('Error fetching subscription in AuthProvider:', error);
+      setUserSubscription(null);
+    }
+  };
 
   const fetchProfile = async () => {
     try {
       const response = await userService.getProfile();
       setUser(response.data);
+      await fetchSubscription();
     } catch (error) {
       setUser(null);
+      setUserSubscription(null);
     }
   };
 
@@ -46,6 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const resp = await authService.login(email, password);
       setUser(resp.data.user);
+      await fetchSubscription();
 
       toast.success('Successfully logged in.');
       router.replace(redirectTo);
@@ -65,6 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const resp = await authService.employeeLogin(email, password);
       setUser(resp.data.user);
+      await fetchSubscription();
 
       toast.success('Successfully logged in to Employee Portal.');
       router.replace(redirectTo);
@@ -83,6 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const resp = await authService.googleLogin(token);
       setUser(resp.data.user);
+      await fetchSubscription();
 
       toast.success('Successfully logged in with Google.');
       router.replace(redirectTo);
@@ -116,6 +135,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const resp = await authService.verifyOtp(email, otp);
       setUser(resp.data.user);
+      await fetchSubscription();
       toast.success('Verification successful.');
       router.replace(redirectTo);
     } catch (error: any) {
@@ -142,6 +162,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       // Clear all state immediately
       setUser(null);
+      setUserSubscription(null);
       // Clean up any local demo storage
       if (typeof window !== 'undefined') {
         localStorage.removeItem('demo_employee_user');
@@ -165,6 +186,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const response = await userService.getProfile();
         setUser(response.data);
+        await fetchSubscription();
         // If authenticated user lands on home page (e.g., browser reopen), go to dashboard
         if (pathname === '/') {
           router.replace('/dashboard');
@@ -174,6 +196,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Explicitly call logout to clear potentially invalid cookies
         await authService.logout().catch(() => { });
         setUser(null);
+        setUserSubscription(null);
       } finally {
         setIsLoading(false);
       }
@@ -191,8 +214,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [pathname, isLoading, user, router]);
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, employeeLogin, googleLogin, requestOtp, verifyOtp, logout, fetchProfile }}>
+    <AuthContext.Provider value={{
+      user,
+      isAuthenticated: !!user,
+      isLoading,
+      userSubscription,
+      fetchSubscription,
+      login,
+      employeeLogin,
+      googleLogin,
+      requestOtp,
+      verifyOtp,
+      logout,
+      fetchProfile
+    }}>
       {children}
     </AuthContext.Provider>
   );
 }
+

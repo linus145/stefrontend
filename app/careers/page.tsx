@@ -4,11 +4,12 @@ import { CareersList } from '@/components/Public/careers/careers-list';
 import { Metadata } from 'next';
 import { publicService } from '@/services/public.service';
 import { getPageMetadata } from '@/lib/seo';
+import { SEOStructuredData } from '@/components/Public/seo-structured-data';
 
 export async function generateMetadata(): Promise<Metadata> {
   return getPageMetadata('/careers', {
-    title: 'Careers | B2linq Platform',
-    description: 'Join the team building the future of startup execution.',
+    title: 'Join the Pioneers of Autonomous Hiring | B2linq Careers',
+    description: 'Help us build the next generation of recruitment infrastructure. Explore open roles and shape the future of autonomous agentic work.',
   });
 }
 
@@ -21,9 +22,53 @@ export default async function CareersPage() {
     jobs = [];
   }
 
+  const breadcrumbData = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    'itemListElement': [
+      {
+        '@type': 'ListItem',
+        'position': 1,
+        'name': 'Home',
+        'item': 'https://b2linq.com'
+      },
+      {
+        '@type': 'ListItem',
+        'position': 2,
+        'name': 'Careers',
+        'item': 'https://b2linq.com/careers'
+      }
+    ]
+  };
+
+  // Dynamically map active jobs into Schema.org JobPosting format
+  const jobPostingSchemas = jobs.map((job: any) => ({
+    '@context': 'https://schema.org',
+    '@type': 'JobPosting',
+    'title': job.role,
+    'description': job.description || `Position for ${job.role} in our ${job.department} department.`,
+    'datePosted': job.created_at || new Date().toISOString(),
+    'hiringOrganization': {
+      '@type': 'Organization',
+      'name': 'B2linq',
+      'sameAs': 'https://b2linq.com'
+    },
+    'jobLocation': {
+      '@type': 'Place',
+      'address': {
+        '@type': 'PostalAddress',
+        'addressLocality': job.location || 'Remote',
+        'addressCountry': 'US'
+      }
+    },
+    'employmentType': job.job_type || 'FULL_TIME'
+  }));
+
   return (
     <div className="bg-white text-slate-900 overflow-hidden min-h-screen font-sans selection:bg-indigo-100">
+      <SEOStructuredData data={[breadcrumbData, ...jobPostingSchemas]} />
       <Header />
+
       
       <div className="fixed inset-0 z-0 bg-[radial-gradient(ellipse_at_top,rgba(79,70,229,0.05)_0%,transparent_50%)] pointer-events-none" />
 

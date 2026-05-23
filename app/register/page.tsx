@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function RegisterPage() {
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-between bg-[#f3f4fc] dark:bg-[#0b0c15] p-6 sm:p-10 overflow-hidden font-sans">
+    <div className="relative flex min-h-screen flex-col items-center justify-between bg-[#f3f4fc] dark:bg-[#0b0c15] p-4 sm:p-6 overflow-hidden font-sans">
       {/* Top Left Branding Logo & Name (Static, no navigation) */}
       <div className="absolute left-6 top-6 z-20 flex items-center gap-2">
         <div className="w-5.5 h-5.5 rounded-md bg-[#5e3be1] flex items-center justify-center shadow-md shadow-[#5e3be1]/30">
@@ -27,9 +27,9 @@ export default function RegisterPage() {
       <div className="absolute top-[-20%] right-[-20%] w-[60%] h-[60%] rounded-full bg-gradient-to-br from-[#805ad5]/15 to-[#d53f8c]/5 blur-[120px] pointer-events-none z-0"></div>
       <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-gradient-to-tr from-[#3182ce]/10 to-[#805ad5]/5 blur-[100px] pointer-events-none z-0"></div>
 
-      <div className="z-10 w-full max-w-[395px] flex-1 flex flex-col justify-center items-center py-8">
+      <div className="z-10 w-full max-w-[395px] flex-1 flex flex-col justify-center items-center py-2">
         {/* Branding Header */}
-        <div className="mb-5 text-center space-y-1.5 mt-10 flex flex-col items-center">
+        <div className="mb-3 text-center space-y-1.5 mt-2 flex flex-col items-center">
           <div className="flex items-center justify-center gap-2">
             {/* Custom Premium Logo Shape matching B2Linq Rocket */}
             <div className="w-6 h-6 rounded-md bg-[#5e3be1] flex items-center justify-center shadow-lg shadow-[#5e3be1]/30">

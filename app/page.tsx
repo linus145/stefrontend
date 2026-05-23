@@ -14,8 +14,8 @@ import { getPageMetadata } from '@/lib/seo';
 
 export async function generateMetadata(): Promise<Metadata> {
   return getPageMetadata('/', {
-    title: 'B2linq Platform | Autonomous Agentic Infrastructure',
-    description: 'The infrastructure for the next generation of founders, matching talent and capital seamlessly.',
+    title: 'B2linq Platform | Autonomous Hiring Orchestration',
+    description: 'Deploy specialized AI agents that autonomously source talent, screen capabilities, conduct structured voice interviews, and deliver precise hiring verdicts in minutes—from sourcing to handshake.',
   });
 }
 

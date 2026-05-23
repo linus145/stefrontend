@@ -5,15 +5,17 @@ import { MissionSection } from '@/components/aboutus/mission-section';
 import { Metadata } from 'next';
 import { publicService } from '@/services/public.service';
 import { getPageMetadata } from '@/lib/seo';
+import { SEOStructuredData } from '@/components/Public/seo-structured-data';
 
 export async function generateMetadata(): Promise<Metadata> {
   return getPageMetadata('/aboutus', {
-    title: 'About Us | B2linq Platform',
-    description: 'Learn about the mission and vision of B2linq.',
+    title: 'About Us | B2linq Autonomous Hiring Platform',
+    description: 'Learn about our mission to eliminate manual recruiting bottlenecks and build the leading autonomous agentic infrastructure connecting exceptional talent and teams.',
   });
 }
 
 export default async function AboutPage() {
+
   let aboutData = null;
   
   try {
@@ -44,8 +46,28 @@ export default async function AboutPage() {
     };
   }
 
+  const breadcrumbData = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    'itemListElement': [
+      {
+        '@type': 'ListItem',
+        'position': 1,
+        'name': 'Home',
+        'item': 'https://b2linq.com'
+      },
+      {
+        '@type': 'ListItem',
+        'position': 2,
+        'name': 'About Us',
+        'item': 'https://b2linq.com/aboutus'
+      }
+    ]
+  };
+
   return (
     <div className="bg-white text-slate-900 overflow-hidden min-h-screen font-sans selection:bg-indigo-100">
+      <SEOStructuredData data={breadcrumbData} />
       <Header />
       
       {/* Subtle radial glow */}
@@ -74,3 +96,4 @@ export default async function AboutPage() {
     </div>
   );
 }
+

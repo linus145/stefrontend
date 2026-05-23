@@ -6,8 +6,8 @@ import { getPageMetadata } from '@/lib/seo';
 
 export async function generateMetadata(): Promise<Metadata> {
   return getPageMetadata('/book-demo', {
-    title: 'Book Custom Demo | B2linq Platform',
-    description: 'Book a custom demo of our autonomous hiring orchestration engine.',
+    title: 'Book a Demo | B2linq Autonomous Hiring Orchestration',
+    description: 'Schedule a live custom demonstration of our autonomous hiring flow. Observe specialized AI agents sourcing, screening, and interviewing candidates in real-time.',
   });
 }
 

@@ -7,8 +7,8 @@ import { getPageMetadata } from '@/lib/seo';
 
 export async function generateMetadata(): Promise<Metadata> {
   return getPageMetadata('/blogs', {
-    title: 'Blog | B2linq Platform',
-    description: 'Insights, guides, and news from the B2linq team.',
+    title: 'Recruitment & AI Sourcing Insights | B2linq Blog',
+    description: 'Read the latest insights, guides, and news from the B2linq team on autonomous hiring pipelines, conversational AI screening, and HR automation.',
   });
 }
 

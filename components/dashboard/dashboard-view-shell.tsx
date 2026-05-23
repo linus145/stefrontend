@@ -81,6 +81,17 @@ export function DashboardViewShell() {
     }, 450);
   };
 
+  useEffect(() => {
+    const handleCustomSectionChange = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (customEvent.detail && typeof customEvent.detail === 'string') {
+        handleSectionChange(customEvent.detail as DashboardSection);
+      }
+    };
+    window.addEventListener('dashboard-section-change', handleCustomSectionChange);
+    return () => window.removeEventListener('dashboard-section-change', handleCustomSectionChange);
+  }, [activeSection, selectedProfileId]);
+
   const handleProfileNavigate = (userId: string) => {
     handleSectionChange('Profile', userId);
   };

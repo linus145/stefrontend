@@ -4,8 +4,10 @@ import React, { useState } from 'react';
 import {
   User, Lock, Bell, Eye, EyeOff, Shield, Camera,
   Mail, Phone, Save, Trash2, Smartphone,
-  MapPin, Globe, CreditCard, LogOut, ChevronDown, CheckCircle2
+  MapPin, Globe, CreditCard, LogOut, ChevronDown, CheckCircle2,
+  HelpCircle
 } from 'lucide-react';
+import { HelpTab } from '../help/help-tab';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -17,7 +19,7 @@ import { SecurityTab } from '../security/security-tab';
 import { BillingTab } from '../billing/billing-tab';
 import { ProfileEditForm } from '../../profile/profile-edit-form';
 
-type SettingsTab = 'Account' | 'Privacy' | 'Notifications' | 'Security' | 'Billing';
+type SettingsTab = 'Account' | 'Privacy' | 'Notifications' | 'Security' | 'Billing' | 'Help';
 
 export function SettingsView({ isCollapsed }: { isCollapsed?: boolean }) {
   const { user } = useAuth();
@@ -72,6 +74,12 @@ export function SettingsView({ isCollapsed }: { isCollapsed?: boolean }) {
       icon: <CreditCard className="w-5 h-5" />,
       label: 'Billing & Plans',
       description: 'View pricing, features and manage your subscriptions'
+    },
+    {
+      id: 'Help',
+      icon: <HelpCircle className="w-5 h-5" />,
+      label: 'Help & Support',
+      description: 'Find contact numbers and request help from our team'
     },
   ];
 
@@ -161,6 +169,9 @@ export function SettingsView({ isCollapsed }: { isCollapsed?: boolean }) {
             <TabsContent value="Billing">
               <BillingTab />
             </TabsContent>
+            <TabsContent value="Help">
+              <HelpTab />
+            </TabsContent>
           </Tabs>
         </div>
       </div>
@@ -213,6 +224,9 @@ export function SettingsView({ isCollapsed }: { isCollapsed?: boolean }) {
             </TabsContent>
             <TabsContent value="Billing">
               <BillingTab />
+            </TabsContent>
+            <TabsContent value="Help">
+              <HelpTab />
             </TabsContent>
           </Tabs>
 

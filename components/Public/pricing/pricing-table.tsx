@@ -183,7 +183,13 @@ export function PricingTable() {
       if (response.data) {
         setUserSub(response.data);
         await fetchSubscription();
-        toast.success(`Successfully activated ${plan.name}!`);
+        if (Number(plan.price) === 0) {
+          toast.success(`Successfully activated ${plan.name}!`);
+        } else {
+          toast.success(`Selected ${plan.name}!`, {
+            description: "UPI manual payment proof is required. Please upload your verification screenshot below to activate.",
+          });
+        }
       }
     } catch (err: any) {
       console.error('Error updating subscription:', err);

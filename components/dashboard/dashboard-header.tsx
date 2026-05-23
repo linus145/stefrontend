@@ -70,28 +70,134 @@ export function DashboardHeader({
       }
    };
 
-   const handleActivateSub = async (e: React.MouseEvent) => {
-      e.stopPropagation();
-      setIsActivating(true);
-      try {
-         const response = await axiosInstance.post('/subscription/my-subscription/', {
-            action: 'activate',
-         });
-         if (response.data) {
-            await fetchSubscription();
-            toast.success('Subscription activated successfully!', {
-               description: `Welcome to the ${userSubscription?.plan_details?.name || 'Premium Plan'}! All premium features are now unlocked.`,
-            });
-         }
-      } catch (error: any) {
-         console.error('Error activating subscription:', error);
-         toast.error(
-            error.response?.data?.error || 'Failed to activate subscription. Please try again.'
-         );
-      } finally {
-         setIsActivating(false);
-      }
-   };
+    const handleGoToBilling = (e?: React.MouseEvent) => {
+       if (e) e.stopPropagation();
+       onSectionChange('settings');
+       const url = new URL(window.location.href);
+       url.searchParams.set('tab', 'Billing');
+       window.history.replaceState(null, '', url.pathname + url.search);
+       window.dispatchEvent(new Event('settings-tab-change'));
+       setShowProfileMenu(false);
+       setShowMobileProfileSidebar(false);
+    };
+
+    const handleActivateSub = async (e: React.MouseEvent) => {
+       e.stopPropagation();
+       // Prevent self-activation of premium subscriptions via header
+       if (Number(userSubscription?.plan_details?.price ?? 0) > 0) {
+          toast.error("Verification Required", {
+             description: "Premium plans must be verified manually by an administrator. Routing to billing uploader...",
+          });
+          handleGoToBilling();
+          return;
+       }
+
+       setIsActivating(true);
+       try {
+          const response = await axiosInstance.post('/subscription/my-subscription/', {
+             action: 'activate',
+          });
+          if (response.data) {
+             await fetchSubscription();
+             toast.success('Subscription activated successfully!', {
+                description: `Welcome to the ${userSubscription?.plan_details?.name || 'Premium Plan'}! All premium features are now unlocked.`,
+             });
+          }
+       } catch (error: any) {
+          console.error('Error activating subscription:', error);
+          toast.error(
+             error.response?.data?.error || 'Failed to activate subscription. Please try again.'
+          );
+       } finally {
+          setIsActivating(false);
+       }
+    };
+
+    const renderPendingSubBox = (isMobile: boolean) => {
+       if (!userSubscription?.plan_details) return null;
+       
+       const planPrice = Number(userSubscription.plan_details.price ?? 0);
+       const isFreePlan = planPrice === 0;
+       const isVerified = userSubscription.is_payment_verified ?? false;
+       const latestPayment = userSubscription.latest_payment && userSubscription.latest_payment.plan === userSubscription.plan
+           ? userSubscription.latest_payment
+           : null;
+       
+       const isPendingSub = !isFreePlan ? !isVerified : userSubscription.status === 'pending';
+       if (!isPendingSub) return null;
+       
+       const paddingClass = isMobile ? "px-5 py-3.5 mx-4 my-2" : "px-3 py-2 mx-2 my-1.5";
+       const fontTitleClass = isMobile ? "text-[11px]" : "text-[10px]";
+       const fontBtnClass = isMobile ? "text-[11px] h-8" : "text-[10px] h-7";
+
+       if (!isFreePlan) {
+          if (latestPayment?.status === 'pending') {
+             return (
+                <div className={cn(paddingClass, "bg-amber-500/10 border border-amber-500/20 rounded flex flex-col gap-2 shadow-sm animate-in fade-in duration-300")}>
+                   <p className={cn(fontTitleClass, "text-amber-700 dark:text-amber-400 font-bold leading-normal")}>
+                      Payment verification is under progress for {userSubscription.plan_details.name}.
+                   </p>
+                   <button
+                      onClick={(e) => handleGoToBilling(e)}
+                      className={cn(fontBtnClass, "w-full bg-amber-500 hover:bg-amber-600 text-white font-bold rounded flex items-center justify-center gap-1 transition-all cursor-pointer active:scale-[0.98]")}
+                   >
+                      <span>View Status</span>
+                   </button>
+                </div>
+             );
+          } else if (latestPayment?.status === 'rejected') {
+             return (
+                <div className={cn(paddingClass, "bg-rose-500/10 border border-rose-500/20 rounded flex flex-col gap-2 shadow-sm animate-in fade-in duration-300")}>
+                   <p className={cn(fontTitleClass, "text-rose-700 dark:text-rose-400 font-bold leading-normal")}>
+                      Verification Rejected! Please re-submit proof.
+                   </p>
+                   <button
+                      onClick={(e) => handleGoToBilling(e)}
+                      className={cn(fontBtnClass, "w-full bg-rose-500 hover:bg-rose-600 text-white font-bold rounded flex items-center justify-center gap-1 transition-all cursor-pointer active:scale-[0.98]")}
+                   >
+                      <span>Resolve Now</span>
+                   </button>
+                </div>
+             );
+          } else {
+             return (
+                <div className={cn(paddingClass, "bg-amber-500/10 border border-amber-500/20 rounded flex flex-col gap-2 shadow-sm animate-in fade-in duration-300")}>
+                   <p className={cn(fontTitleClass, "text-amber-700 dark:text-amber-400 font-bold leading-normal")}>
+                      Payment Verification Required for {userSubscription.plan_details.name}.
+                   </p>
+                   <button
+                      onClick={(e) => handleGoToBilling(e)}
+                      className={cn(fontBtnClass, "w-full bg-amber-500 hover:bg-amber-600 text-white font-bold rounded flex items-center justify-center gap-1 transition-all cursor-pointer active:scale-[0.98]")}
+                   >
+                      <span>Verify Payment</span>
+                   </button>
+                </div>
+             );
+          }
+       } else {
+          return (
+             <div className={cn(paddingClass, "bg-amber-500/10 border border-amber-500/20 rounded flex flex-col gap-2 shadow-sm animate-in fade-in duration-300")}>
+                <p className={cn(fontTitleClass, "text-amber-700 dark:text-amber-400 font-bold leading-normal")}>
+                   Your Free Tier is pending activation.
+                </p>
+                <button
+                   onClick={handleActivateSub}
+                   disabled={isActivating}
+                   className={cn(fontBtnClass, "w-full bg-amber-500 hover:bg-amber-600 text-white font-bold rounded flex items-center justify-center gap-1.5 transition-all cursor-pointer disabled:opacity-75 active:scale-[0.98]")}
+                >
+                   {isActivating ? (
+                      <>
+                         <Loader2 className="w-3 h-3 animate-spin" />
+                         <span>Activating...</span>
+                      </>
+                   ) : (
+                      <span>Activate Plan Now</span>
+                   )}
+                </button>
+             </div>
+          );
+       }
+    };
 
    const toggleMenu = (e: React.MouseEvent) => {
       e.stopPropagation();
@@ -168,27 +274,7 @@ export function DashboardHeader({
                         <User className="w-5 h-5" />
                         View Profile
                      </button>
-                     {userSubscription?.status === 'pending' && userSubscription?.plan_details && (
-                        <div className="px-5 py-3.5 mx-4 my-2 bg-amber-500/10 border border-amber-500/20 rounded flex flex-col gap-2 shadow-sm animate-in fade-in duration-300">
-                           <p className="text-[11px] text-amber-700 dark:text-amber-400 font-bold leading-normal">
-                              Your {userSubscription?.plan_details?.name} is pending activation.
-                           </p>
-                           <button
-                              onClick={handleActivateSub}
-                              disabled={isActivating}
-                              className="w-full h-8 bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-bold rounded flex items-center justify-center gap-1.5 transition-all cursor-pointer disabled:opacity-75 active:scale-[0.98]"
-                           >
-                              {isActivating ? (
-                                 <>
-                                    <Loader2 className="w-3 h-3 animate-spin" />
-                                    <span>Activating...</span>
-                                 </>
-                              ) : (
-                                 <span>Activate Plan Now</span>
-                              )}
-                           </button>
-                        </div>
-                     )}
+                     {renderPendingSubBox(true)}
                      <button
                         onClick={() => {
                            onSectionChange('settings');
@@ -564,27 +650,7 @@ export function DashboardHeader({
                               </div>
                            </div>
 
-                           {userSubscription?.status === 'pending' && userSubscription?.plan_details && (
-                              <div className="px-3 py-2 mx-2 my-1.5 bg-amber-500/10 border border-amber-500/20 rounded flex flex-col gap-2 animate-in fade-in duration-300">
-                                 <p className="text-[10px] text-amber-700 dark:text-amber-400 font-bold leading-normal">
-                                    Your {userSubscription?.plan_details?.name} is ready.
-                                 </p>
-                                 <button
-                                    onClick={handleActivateSub}
-                                    disabled={isActivating}
-                                    className="w-full h-7 bg-amber-500 hover:bg-amber-600 text-white text-[10px] font-bold rounded flex items-center justify-center gap-1 transition-all cursor-pointer disabled:opacity-75 active:scale-[0.98]"
-                                 >
-                                    {isActivating ? (
-                                       <>
-                                          <Loader2 className="w-3 h-3 animate-spin" />
-                                          <span>Activating...</span>
-                                       </>
-                                    ) : (
-                                       <span>Activate Plan Now</span>
-                                    )}
-                                 </button>
-                              </div>
-                           )}
+                           {renderPendingSubBox(false)}
  
                            <button
                               onClick={() => {

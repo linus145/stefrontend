@@ -31,7 +31,29 @@ export const AgentSidebar: React.FC = () => {
   const [pendingResponse, setPendingResponse] = useState<string | null>(null);
   const [lastQuestion, setLastQuestion] = useState('');
   const [availableOptions, setAvailableOptions] = useState<string[]>([]);
-  const [sidebarMode, setSidebarMode] = useState<'ACT' | 'PLAN'>('ACT');
+  const [sidebarMode, setSidebarMode] = useState<'ACT' | 'PLAN'>(() => {
+    if (typeof window !== 'undefined') {
+      const hasActiveContext = localStorage.getItem('agent_llm_context') || 
+                               localStorage.getItem('agent_active_plan') ||
+                               localStorage.getItem('agent_cross_tab_continuation');
+      if (hasActiveContext) {
+        return 'ACT';
+      }
+      const savedMode = localStorage.getItem('agent_sidebar_mode');
+      if (savedMode === 'ACT' || savedMode === 'PLAN') {
+        return savedMode;
+      }
+    }
+    return 'ACT';
+  });
+
+  const changeSidebarMode = (mode: 'ACT' | 'PLAN') => {
+    setSidebarMode(mode);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('agent_sidebar_mode', mode);
+    }
+  };
+
   const [planMessages, setPlanMessages] = useState<Array<{ id: string; sender: 'bot' | 'user'; text: string }>>([
     {
       id: 'init',
@@ -45,21 +67,37 @@ export const AgentSidebar: React.FC = () => {
   const [executionHistory, setExecutionHistory] = useState<any[]>([]);
 
   // Subscription-based tiered agent lock
-  const { userSubscription } = useAuth();
+  const { userSubscription, isLoading } = useAuth();
   const agentPlanPrice = (userSubscription?.status === 'active' && userSubscription?.plan_details)
     ? Number(userSubscription.plan_details.price) : 0;
 
   // Free & Basic (< 12000): No agent access at all (neither Plan nor Act mode)
-  const isAgentFullyLocked = agentPlanPrice < 12000;
+  const isAgentFullyLocked = !isLoading && agentPlanPrice < 12000;
   // Growth (< 18000): Only Plan/Conversational mode, Act mode locked
-  const isActModeLocked = agentPlanPrice < 18000;
+  const isActModeLocked = !isLoading && agentPlanPrice < 18000;
 
   // Force PLAN mode when Act is locked; if fully locked, still default to PLAN (UI will show lock)
   useEffect(() => {
-    if (isActModeLocked && sidebarMode === 'ACT') {
+    if (isActModeLocked) {
       setSidebarMode('PLAN');
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('agent_sidebar_mode', 'PLAN');
+      }
+      const controller = AgentController.getInstance();
+      if (controller.getIsRunning()) {
+        controller.stopAgent();
+        setIsRunning(false);
+        setStatus('Stopped');
+      }
     }
-  }, [isActModeLocked, sidebarMode]);
+  }, [isActModeLocked]);
+
+  // Synchronize sidebar mode with running state
+  useEffect(() => {
+    if (isRunning && !isActModeLocked) {
+      setSidebarMode('ACT');
+    }
+  }, [isRunning, isActModeLocked]);
 
   // Resizing state
   const [sidebarWidth, setSidebarWidth] = useState<number>(360);
@@ -225,36 +263,42 @@ export const AgentSidebar: React.FC = () => {
     setIsRunning(activeRunning);
     if (activeRunning) {
       setStatus('Running...');
+      if (!isActModeLocked) {
+        setSidebarMode('ACT');
+      }
     } else {
       if (typeof window !== 'undefined') {
         const planData = localStorage.getItem('agent_active_plan');
         const llmData = localStorage.getItem('agent_llm_context');
         if (planData || llmData) {
           setStatus('Stopped');
+          if (!isActModeLocked) {
+            setSidebarMode('ACT');
+          }
         }
       }
     }
 
     const stream = AgentRealtimeStream.getInstance();
 
-    stream.on('status', (msg: string) => {
+    const onStatus = (msg: string) => {
       setStatus(msg);
       addLog(msg, 'info');
       setIsRunning(controller.getIsRunning());
-    });
+    };
 
-    stream.on('task_start', (task: AgentTask) => {
+    const onTaskStart = (task: AgentTask) => {
       setTasks(prev => [...prev, task]);
       setIsRunning(true);
       addLog(`Starting task: ${task.description}`, 'task');
-    });
+    };
 
-    stream.on('action_start', (action: any) => {
+    const onActionStart = (action: any) => {
       addLog(`Executing ${action.type} on ${action.selector || 'page'}`, 'action');
       setIsRunning(controller.getIsRunning());
-    });
+    };
 
-    stream.on('goal_complete', (goal: string) => {
+    const onGoalComplete = (goal: string) => {
       setStatus('Goal Completed');
       setIsRunning(false);
       
@@ -268,9 +312,9 @@ export const AgentSidebar: React.FC = () => {
         }
       }
       addLog(`Successfully completed goal: ${cleanGoal}`, 'success');
-    });
+    };
 
-    stream.on('task_failed', ({ task, error }: any) => {
+    const onTaskFailed = ({ task, error }: any) => {
       setStatus(error === 'Execution terminated' ? 'Stopped' : 'Error');
       setIsRunning(false);
       if (error === 'Execution terminated') {
@@ -278,12 +322,19 @@ export const AgentSidebar: React.FC = () => {
       } else {
         addLog(`Task failed: ${task.description} - ${error}`, 'error');
       }
-    });
+    };
 
-    stream.on('task_paused', (task: AgentTask) => {
+    const onTaskPaused = (task: AgentTask) => {
       setStatus('Waiting for input...');
       addLog(`Task paused: ${task.description}`, 'info');
-    });
+    };
+
+    stream.on('status', onStatus);
+    stream.on('task_start', onTaskStart);
+    stream.on('action_start', onActionStart);
+    stream.on('goal_complete', onGoalComplete);
+    stream.on('task_failed', onTaskFailed);
+    stream.on('task_paused', onTaskPaused);
 
     const handleAskUser = (e: any) => {
       setIsWaitingForInput(true);
@@ -308,6 +359,12 @@ export const AgentSidebar: React.FC = () => {
       window.removeEventListener('agent-ui-toggle', handleToggle);
       window.removeEventListener('agent-ask-user', handleAskUser);
       window.removeEventListener('agent-screening-completed', handleScreeningCompleted);
+      stream.off('status', onStatus);
+      stream.off('task_start', onTaskStart);
+      stream.off('action_start', onActionStart);
+      stream.off('goal_complete', onGoalComplete);
+      stream.off('task_failed', onTaskFailed);
+      stream.off('task_paused', onTaskPaused);
     };
   }, []);
 
@@ -676,7 +733,7 @@ export const AgentSidebar: React.FC = () => {
               availableOptions={availableOptions}
               isModeMenuOpen={isModeMenuOpen}
               setIsModeMenuOpen={setIsModeMenuOpen}
-              setSidebarMode={setSidebarMode}
+              setSidebarMode={changeSidebarMode}
               isRunning={isRunning}
               status={status}
               handleStart={handleStart}

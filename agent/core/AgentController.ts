@@ -68,7 +68,7 @@ export class AgentController {
       if (continuation) {
         console.log('[AgentController] Pending cross-tab continuation detected. Clearing legacy/stale plans for fresh handover.');
         localStorage.removeItem('agent_active_plan');
-        localStorage.removeItem('agent_llm_context');
+        // Do NOT clear agent_llm_context so we preserve execution context and history
       }
     }
 
@@ -85,6 +85,16 @@ export class AgentController {
         }
       });
     }
+  }
+
+  private getTabId(): string {
+    if (typeof window === 'undefined') return '';
+    let tabId = sessionStorage.getItem('agent_tab_id');
+    if (!tabId) {
+      tabId = 'tab_' + Math.random().toString(36).substring(2, 11) + '_' + Date.now();
+      sessionStorage.setItem('agent_tab_id', tabId);
+    }
+    return tabId;
   }
 
   public static getInstance(): AgentController {
@@ -125,6 +135,10 @@ export class AgentController {
     if (this.isRunning) return;
     this.isRunning = true;
 
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('agent_active_tab_id', this.getTabId());
+    }
+
     // Track original goal for clean completion message
     // If it's a continuation, we keep the existing originalGoal
     if (!goal.toLowerCase().includes('regarding my previous request')) {
@@ -156,7 +170,13 @@ export class AgentController {
 
   public stopAgent() {
     this.isRunning = false;
-    localStorage.removeItem('agent_llm_context'); // Clear memory on manual stop
+    this.persistLLMContext(); // Persist Stopped state so we can resume later
+    if (typeof window !== 'undefined') {
+      const activeTabId = localStorage.getItem('agent_active_tab_id');
+      if (activeTabId === this.getTabId()) {
+        localStorage.removeItem('agent_active_tab_id');
+      }
+    }
     this.stream.emit('task_failed', { task: { description: 'Manual Stop' }, error: 'Execution terminated' });
   }
 
@@ -170,6 +190,9 @@ export class AgentController {
     }
 
     this.isRunning = true;
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('agent_active_tab_id', this.getTabId());
+    }
 
     if (this.llmGoal) {
       this._isLLMMode = true;
@@ -196,6 +219,7 @@ export class AgentController {
     try {
       while (this.isRunning && this.llmIteration < AgentController.MAX_LLM_ITERATIONS) {
         this.llmIteration++;
+        this.persistLLMContext(); // Persist at the start of each iteration
         this.stream.emit('status', `Iteration ${this.llmIteration}/${AgentController.MAX_LLM_ITERATIONS} — Observing page...`);
 
         // Small delay to let page settle after last action
@@ -363,6 +387,12 @@ export class AgentController {
       this._isWaitingForUser = false;
       const finalStatus = this.llmActionHistory.some(a => a.error) ? 'failed' : 'success';
       await this.updateBackendExecution(finalStatus, this.llmActionHistory);
+      if (typeof window !== 'undefined') {
+        const activeTabId = localStorage.getItem('agent_active_tab_id');
+        if (activeTabId === this.getTabId()) {
+          localStorage.removeItem('agent_active_tab_id');
+        }
+      }
     }
   }
 
@@ -404,6 +434,10 @@ export class AgentController {
             timestamp: Date.now(),
             sourceUrl: window.location.href,
           }));
+          const activeTabId = localStorage.getItem('agent_active_tab_id');
+          if (activeTabId === this.getTabId()) {
+            localStorage.removeItem('agent_active_tab_id');
+          }
         }
 
         window.open(action.value, '_blank');
@@ -433,6 +467,8 @@ export class AgentController {
       goal: this.llmGoal,
       originalGoal: this.originalGoal,
       history: this.llmActionHistory,
+      iteration: this.llmIteration,
+      isRunning: this.isRunning,
       timestamp: Date.now()
     }));
   }
@@ -442,24 +478,40 @@ export class AgentController {
     const data = localStorage.getItem('agent_llm_context');
     if (!data) return;
 
+    // If there is a pending cross-tab handover, let checkCrossTabContinuation handle it
+    if (localStorage.getItem('agent_cross_tab_continuation')) {
+      console.log('[AgentController] Pending cross-tab continuation found. Skipping loadLLMContext resume.');
+      return;
+    }
+
     try {
       const context = JSON.parse(data);
       const age = Date.now() - (context.timestamp || 0);
 
-      // Only pick up if it's very fresh (less than 30s)
-      if (age < 30000) {
+      // Only pick up if it's very fresh (less than 5 minutes)
+      if (age < 5 * 60 * 1000) {
         this.originalGoal = context.originalGoal || context.goal;
+        this.llmGoal = context.goal;
         this.llmActionHistory = context.history || [];
-        localStorage.removeItem('agent_llm_context'); // Clear it so we don't loop
+        this.llmIteration = context.iteration || 0;
         
-        this.stream.emit('status', `🔄 Resuming autonomous goal: ${this.originalGoal}`);
-        setTimeout(() => {
-          if (!this.isRunning) {
-            this.isRunning = true;
-            this._isLLMMode = true;
-            this.runLLMLoop(context.goal);
+        if (context.isRunning) {
+          // Guard: only resume if this tab is the active agent tab
+          const activeTabId = localStorage.getItem('agent_active_tab_id');
+          if (activeTabId && activeTabId !== this.getTabId()) {
+            console.log(`[AgentController] Suppressing resume in tab ${this.getTabId()} because active tab is ${activeTabId}`);
+            return;
           }
-        }, 1000);
+
+          this.stream.emit('status', `🔄 Resuming autonomous goal: ${this.originalGoal}`);
+          this.isRunning = true;
+          this._isLLMMode = true;
+          setTimeout(() => {
+            this.runLLMLoop(this.llmGoal, undefined, true);
+          }, 1000);
+        } else {
+          this.stream.emit('status', `Stopped: ${this.originalGoal}`);
+        }
       } else {
         localStorage.removeItem('agent_llm_context');
       }
@@ -544,34 +596,45 @@ export class AgentController {
 
       // Only pick up continuations that are less than 5 minutes old
       if (age > 5 * 60 * 1000) {
-        // console.log('[AgentController] Cross-tab continuation expired, ignoring');
         localStorage.removeItem('agent_cross_tab_continuation');
         return;
       }
 
       // Allow same-page continuation if it's very recent (less than 30s) to handle reloads
       if (continuation.sourceUrl && window.location.href === continuation.sourceUrl && age > 30000) {
-        // console.log('[AgentController] Same page as source and not a fresh reload, ignoring');
         return;
       }
 
       // Clear it immediately so we don't pick it up again
       localStorage.removeItem('agent_cross_tab_continuation');
 
-      // console.log('[AgentController] 🔄 Cross-tab continuation detected! Starting LLM agent...');
       this.stream.emit('status', '🔄 Agent handover detected from previous tab — continuing autonomously...');
 
+      // Load context from localStorage if present to preserve execution memory and chain
+      const contextData = localStorage.getItem('agent_llm_context');
+      if (contextData) {
+        try {
+          const context = JSON.parse(contextData);
+          this.originalGoal = context.originalGoal || context.goal;
+          this.llmGoal = context.goal;
+          this.llmActionHistory = context.history || [];
+          this.llmIteration = context.iteration || 0;
+        } catch (e) {
+          console.error('[AgentController] Error loading context during handover:', e);
+        }
+      }
+
+      // Claim active tab status!
+      localStorage.setItem('agent_active_tab_id', this.getTabId());
+
+      this.isRunning = true;
+      this._isLLMMode = true;
       // Give the page a moment to fully render before starting
       setTimeout(() => {
-        if (!this.isRunning) {
-          this.isRunning = true;
-          this._isLLMMode = true;
-          this.runLLMLoop(continuation.goal);
-        }
+        this.runLLMLoop(this.llmGoal || continuation.goal, undefined, true);
       }, 1000);
 
     } catch (e) {
-      // console.error('[AgentController] Failed to parse cross-tab continuation:', e);
       localStorage.removeItem('agent_cross_tab_continuation');
     }
   }
@@ -753,6 +816,12 @@ export class AgentController {
     this.isRunning = false;
     this._isWaitingForUser = false;
     this._isLLMMode = false;
+    if (typeof window !== 'undefined') {
+      const activeTabId = localStorage.getItem('agent_active_tab_id');
+      if (activeTabId === this.getTabId()) {
+        localStorage.removeItem('agent_active_tab_id');
+      }
+    }
     this.stream.emit('status', 'Agent stopped');
   }
 

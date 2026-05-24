@@ -258,6 +258,7 @@ export function PayrollRuns({
             <div className="bg-white dark:bg-[#121320] border border-slate-100 dark:border-slate-800/80 rounded-md w-full max-w-md shadow-2xl p-6 relative overflow-hidden animate-in fade-in zoom-in-95 duration-300">
               <button 
                 onClick={() => setIsNewRunOpen(false)}
+                data-agent="payroll-new-run-close-btn"
                 className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer"
               >
                 <X className="h-5 w-5" />
@@ -291,7 +292,7 @@ export function PayrollRuns({
                     <option value="12">December</option>
                   </select>
                 </div>
-
+ 
                 <div className="space-y-1.5">
                   <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Payroll year</label>
                   <select 
@@ -305,10 +306,11 @@ export function PayrollRuns({
                     <option value="2027">2027</option>
                   </select>
                 </div>
-
+ 
                 <div className="pt-2 flex items-center justify-end gap-3">
                   <Button 
                     onClick={() => setIsNewRunOpen(false)}
+                    data-agent="payroll-new-run-cancel-btn"
                     className="border border-slate-200 bg-transparent text-slate-600 rounded-md text-xs font-bold py-2 px-4 cursor-pointer"
                   >
                     Cancel

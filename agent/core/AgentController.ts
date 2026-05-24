@@ -417,6 +417,11 @@ export class AgentController {
         window.location.href = action.value;
         break;
 
+      case 'click-skill':
+        if (!action.value) throw new Error('No skill name for click-skill');
+        await this.executor.execute({ type: 'click-skill', value: action.value });
+        break;
+
       default:
         console.warn(`[AgentController] Unknown LLM action type: ${action.action_type}`);
     }

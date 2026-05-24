@@ -100,12 +100,12 @@ export function InteractiveChatAgent() {
   const [showResult, setShowResult] = useState(false);
   const [agentName, setAgentName] = useState(PROMPTS[0].agentName);
   const [isDark, setIsDark] = useState(true);
-  
+
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
 
   const startSimulation = (idx: number) => {
     if (isProcessing) return;
-    
+
     const config = PROMPTS[idx];
     setSelectedPromptIdx(idx);
     setInputValue(config.userPrompt);
@@ -118,7 +118,7 @@ export function InteractiveChatAgent() {
     // 1. Simulate thought processing
     setTimeout(() => {
       setCurrentThought(config.thoughts);
-      
+
       // 2. Play CLI Logs one by one
       let currentLogIdx = 0;
       const logInterval = setInterval(() => {
@@ -155,8 +155,8 @@ export function InteractiveChatAgent() {
   const stepCount = visibleLogs.length;
 
   // Theme Class Mappings
-  const bgMain = isDark 
-    ? 'bg-zinc-900 border-zinc-700 text-white shadow-2xl' 
+  const bgMain = isDark
+    ? 'bg-zinc-900 border-zinc-700 text-white shadow-2xl'
     : 'bg-white border-zinc-300 text-zinc-900 shadow-xl';
   const textHeading = isDark ? 'text-white' : 'text-zinc-900';
   const textDesc = isDark ? 'text-zinc-400' : 'text-zinc-500';
@@ -165,13 +165,13 @@ export function InteractiveChatAgent() {
   const bgItem = isDark ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-zinc-350';
   const textBody = isDark ? 'text-zinc-300' : 'text-zinc-700';
   const textMuted = isDark ? 'text-zinc-500' : 'text-zinc-400';
-  const bgInput = isDark 
-    ? 'bg-zinc-900 border-zinc-700 text-zinc-500' 
+  const bgInput = isDark
+    ? 'bg-zinc-900 border-zinc-700 text-zinc-500'
     : 'bg-white border-zinc-300 text-zinc-800';
 
   return (
     <div className={`w-full border rounded-sm p-6 sm:p-8 relative overflow-hidden transition-all duration-500 ${bgMain}`}>
-      
+
       {/* Accent gradients */}
       {isDark && <div className="absolute -right-20 -top-20 h-40 w-40 rounded-full blur-[80px] bg-indigo-500/10 -z-10" />}
 
@@ -189,11 +189,10 @@ export function InteractiveChatAgent() {
           {/* Light/Dark Mode Selector Toggle Button */}
           <button
             onClick={() => setIsDark(!isDark)}
-            className={`h-8 px-3 rounded-sm flex items-center gap-1.5 text-xs font-semibold border transition-all duration-200 cursor-pointer ${
-              isDark 
-                ? 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-white' 
-                : 'bg-zinc-50 border-zinc-300 text-zinc-650 hover:text-zinc-900 hover:bg-zinc-100'
-            }`}
+            className={`h-8 px-3 rounded-sm flex items-center gap-1.5 text-xs font-semibold border transition-all duration-200 cursor-pointer ${isDark
+              ? 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-white'
+              : 'bg-zinc-50 border-zinc-300 text-zinc-650 hover:text-zinc-900 hover:bg-zinc-100'
+              }`}
             title="Toggle theme view"
           >
             {isDark ? (
@@ -210,9 +209,8 @@ export function InteractiveChatAgent() {
           </button>
 
           {/* HUD Stats */}
-          <div className={`flex items-center gap-3 border rounded-sm px-3.5 py-1.5 text-[10px] font-bold shadow-inner ${
-            isDark ? 'bg-zinc-950 border-zinc-800 text-zinc-400' : 'bg-zinc-50 border-zinc-300 text-zinc-500'
-          }`}>
+          <div className={`flex items-center gap-3 border rounded-sm px-3.5 py-1.5 text-[10px] font-bold shadow-inner ${isDark ? 'bg-zinc-950 border-zinc-800 text-zinc-400' : 'bg-zinc-50 border-zinc-300 text-zinc-500'
+            }`}>
             <div className={`flex items-center gap-1 border-r pr-2.5 ${isDark ? 'border-zinc-800' : 'border-zinc-200'}`}>
               <span className="text-indigo-500 font-black">Agent OS</span> Online
             </div>
@@ -230,13 +228,12 @@ export function InteractiveChatAgent() {
             key={idx}
             onClick={() => startSimulation(idx)}
             disabled={isProcessing}
-            className={`flex items-center gap-2 px-3.5 py-2 rounded-sm border text-xs font-bold transition-all duration-300 cursor-pointer ${
-              selectedPromptIdx === idx
-                ? 'border-indigo-500 bg-indigo-500/10 text-indigo-400 dark:text-indigo-300 shadow-sm'
-                : isDark 
-                  ? 'border-slate-800 bg-slate-950 text-slate-400 hover:text-white hover:border-slate-700'
-                  : 'border-slate-200 bg-slate-50 text-slate-500 hover:text-slate-900 hover:bg-slate-100 hover:border-slate-300'
-            } disabled:opacity-50`}
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-sm border text-xs font-bold transition-all duration-300 cursor-pointer ${selectedPromptIdx === idx
+              ? 'border-indigo-500 bg-indigo-500/10 text-indigo-400 dark:text-indigo-300 shadow-sm'
+              : isDark
+                ? 'border-slate-800 bg-slate-950 text-slate-400 hover:text-white hover:border-slate-700'
+                : 'border-slate-200 bg-slate-50 text-slate-500 hover:text-slate-900 hover:bg-slate-100 hover:border-slate-300'
+              } disabled:opacity-50`}
           >
             {p.icon}
             <span>{p.title}</span>
@@ -246,10 +243,10 @@ export function InteractiveChatAgent() {
 
       {/* Grid: Left Simulator, Right Chat Console */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-        
+
         {/* LEFT SIDE: REAL APPLICATION SIMULATOR (7 cols) */}
         <div className={`lg:col-span-7 border rounded-sm p-5 sm:p-6 min-h-[380px] max-h-[380px] overflow-hidden shadow-inner flex flex-col justify-between relative transition-colors duration-500 ${bgConsole}`}>
-          
+
           {/* Header */}
           <div className={`flex items-center justify-between border-b pb-3 mb-4 shrink-0 ${borderSep}`}>
             <div className="flex items-center gap-2">
@@ -266,7 +263,7 @@ export function InteractiveChatAgent() {
 
           {/* Simulator Content Area */}
           <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar">
-            
+
             {/* 1. JOB POSTING SIMULATOR */}
             {selectedPromptIdx === 0 && (
               <div className="space-y-4">
@@ -280,37 +277,33 @@ export function InteractiveChatAgent() {
                         </span>
                       )}
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-3 text-[10px]">
                       <div className="space-y-1">
                         <span className="text-slate-500 block uppercase font-bold">Role Title</span>
-                        <div className={`h-9 px-3 border rounded-sm flex items-center font-semibold truncate ${
-                          isDark ? 'bg-slate-900 border-slate-850 text-slate-300' : 'bg-white border-slate-200 text-slate-700 shadow-sm'
-                        }`}>
+                        <div className={`h-9 px-3 border rounded-sm flex items-center font-semibold truncate ${isDark ? 'bg-slate-900 border-slate-850 text-slate-300' : 'bg-white border-slate-200 text-slate-700 shadow-sm'
+                          }`}>
                           {stepCount >= 2 ? "Senior React Engineer" : ""}
                         </div>
                       </div>
                       <div className="space-y-1">
                         <span className="text-slate-500 block uppercase font-bold">Location</span>
-                        <div className={`h-9 px-3 border rounded-sm flex items-center font-semibold ${
-                          isDark ? 'bg-slate-900 border-slate-850 text-slate-300' : 'bg-white border-slate-200 text-slate-700 shadow-sm'
-                        }`}>
+                        <div className={`h-9 px-3 border rounded-sm flex items-center font-semibold ${isDark ? 'bg-slate-900 border-slate-850 text-slate-300' : 'bg-white border-slate-200 text-slate-700 shadow-sm'
+                          }`}>
                           {stepCount >= 2 ? "Bangalore (Hybrid)" : ""}
                         </div>
                       </div>
                       <div className="space-y-1">
                         <span className="text-slate-500 block uppercase font-bold">Department</span>
-                        <div className={`h-9 px-3 border rounded-sm flex items-center font-semibold ${
-                          isDark ? 'bg-slate-900 border-slate-850 text-slate-300' : 'bg-white border-slate-200 text-slate-700 shadow-sm'
-                        }`}>
+                        <div className={`h-9 px-3 border rounded-sm flex items-center font-semibold ${isDark ? 'bg-slate-900 border-slate-850 text-slate-300' : 'bg-white border-slate-200 text-slate-700 shadow-sm'
+                          }`}>
                           {stepCount >= 2 ? "Engineering" : ""}
                         </div>
                       </div>
                       <div className="space-y-1">
                         <span className="text-slate-500 block uppercase font-bold">Budget Plan</span>
-                        <div className={`h-9 px-3 border rounded-sm flex items-center font-semibold ${
-                          isDark ? 'bg-slate-900 border-slate-850 text-slate-300' : 'bg-white border-slate-200 text-slate-700 shadow-sm'
-                        }`}>
+                        <div className={`h-9 px-3 border rounded-sm flex items-center font-semibold ${isDark ? 'bg-slate-900 border-slate-850 text-slate-300' : 'bg-white border-slate-200 text-slate-700 shadow-sm'
+                          }`}>
                           {stepCount >= 2 ? "₹25,00,000 / year" : ""}
                         </div>
                       </div>
@@ -318,9 +311,8 @@ export function InteractiveChatAgent() {
 
                     <div className="space-y-1">
                       <span className="text-slate-500 block uppercase font-bold text-[10px]">AI Generated Description Preview</span>
-                      <div className={`border rounded-sm p-3 text-[9px] font-mono min-h-20 leading-relaxed overflow-hidden ${
-                        isDark ? 'bg-slate-900 border-slate-850 text-slate-400' : 'bg-white border-slate-200 text-slate-600 shadow-sm'
-                      }`}>
+                      <div className={`border rounded-sm p-3 text-[9px] font-mono min-h-20 leading-relaxed overflow-hidden ${isDark ? 'bg-slate-900 border-slate-850 text-slate-400' : 'bg-white border-slate-200 text-slate-600 shadow-sm'
+                        }`}>
                         {stepCount >= 4 ? (
                           <>
                             <span className="text-indigo-500 dark:text-indigo-400 font-bold block">## JD Summary</span>
@@ -340,7 +332,7 @@ export function InteractiveChatAgent() {
                     <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto text-emerald-500 shadow-lg shadow-emerald-500/5">
                       <Check className="w-6 h-6 stroke-[3]" />
                     </div>
-                    
+
                     <div className="space-y-1">
                       <h4 className={`text-sm font-bold ${textHeading}`}>Job Successfully Posted!</h4>
                       <p className="text-[10px] text-slate-500">The agent completed JD generation and distributed the post live.</p>
@@ -467,7 +459,7 @@ export function InteractiveChatAgent() {
                     <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto text-emerald-500 shadow-lg shadow-emerald-500/5">
                       <Check className="w-6 h-6 stroke-[3]" />
                     </div>
-                    
+
                     <div className="space-y-1">
                       <h4 className={`text-sm font-bold ${textHeading}`}>Payroll Disbursed!</h4>
                       <p className="text-[10px] text-slate-500">The Bank Settlement Agent completed the batch IMPS settlement run.</p>
@@ -550,7 +542,7 @@ export function InteractiveChatAgent() {
                     <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto text-emerald-400 shadow-lg shadow-emerald-500/5">
                       <Check className="w-6 h-6 stroke-[3]" />
                     </div>
-                    
+
                     <div className="space-y-1">
                       <h4 className={`text-sm font-bold ${textHeading}`}>David Miller Onboarded!</h4>
                       <p className="text-[10px] text-slate-500">The Onboarding Coordinator completed credentials provisioning and NDA dispatch.</p>
@@ -636,7 +628,7 @@ export function InteractiveChatAgent() {
                 </div>
               </div>
             )}
-            
+
           </div>
 
           {/* Footer stats / helper */}
@@ -649,10 +641,10 @@ export function InteractiveChatAgent() {
 
         {/* RIGHT SIDE: CHAT CONSOLE AND CLI LOGS (5 cols) */}
         <div className={`lg:col-span-5 border rounded-sm p-4 min-h-[380px] max-h-[380px] overflow-hidden shadow-inner relative flex flex-col justify-between transition-colors duration-500 ${bgConsole}`}>
-          
+
           {/* Chat logs area */}
           <div ref={chatContainerRef} className="space-y-4 overflow-y-auto pr-1 flex-1 no-scrollbar text-xs">
-            
+
             {/* User message block */}
             <div className="flex gap-2.5 items-start">
               <div className="w-7 h-7 rounded-sm bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-500 font-bold shrink-0 text-[10px]">
@@ -691,7 +683,7 @@ export function InteractiveChatAgent() {
                   {visibleLogs.map((logItem, idx) => (
                     <div key={idx} className={
                       logItem?.type === 'success' ? 'text-emerald-500 font-semibold' :
-                      logItem?.type === 'warning' ? 'text-amber-500 font-medium' : isDark ? 'text-slate-400' : 'text-slate-600'
+                        logItem?.type === 'warning' ? 'text-amber-500 font-medium' : isDark ? 'text-slate-400' : 'text-slate-600'
                     }>
                       {logItem?.log}
                     </div>

@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { 
-  Bot, Sparkles, Loader2, CheckCircle2, Play, MessageSquare, 
+import {
+  Bot, Sparkles, Loader2, CheckCircle2, Play, MessageSquare,
   Send, Sliders, ChevronRight, Terminal, HelpCircle, User, Zap, Mail
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -13,12 +13,12 @@ export function AgentConsole() {
   const [isExecuting, setIsExecuting] = useState(false);
   const [executionStep, setExecutionStep] = useState(0);
   const [executionLogs, setExecutionLogs] = useState<string[]>([]);
-  
+
   // Chat state for PLAN mode
   const [chatMessages, setChatMessages] = useState<Array<{ sender: 'user' | 'bot'; text: string }>>([
-    { 
-      sender: 'bot', 
-      text: "Welcome to Plan Mode! 👋 I am your hiring strategy assistant. How can I help you plan your next campaign, draft interview questions, or plan candidate criteria today?" 
+    {
+      sender: 'bot',
+      text: "Welcome to Plan Mode! 👋 I am your hiring strategy assistant. How can I help you plan your next campaign, draft interview questions, or plan candidate criteria today?"
     }
   ]);
   const [inputMessage, setInputMessage] = useState('');
@@ -95,7 +95,7 @@ export function AgentConsole() {
     // Simulated planning replies based on keywords
     setTimeout(() => {
       let botReply = "I have reviewed your request. Let's build a structured strategy for this: \n\n1. Target the top candidate networks with focused skills.\n2. Filter profiles by verified workspace experience.\n3. Trigger conversational pre-screening rounds to evaluate aptitudes automatically.\n\nWould you like me to generate specific interview rounds for this role?";
-      
+
       const lower = userMsg.toLowerCase();
       if (lower.includes('react') || lower.includes('frontend') || lower.includes('developer') || lower.includes('engineer')) {
         botReply = "Here is a customized planning structure for a Senior Frontend role:\n\n• **Core Evaluation**: React hook architectures, Next.js hydration, and state managers.\n• **Interview Strategy**: Round 1 (Technical MCQ) → Round 2 (System Design) → Round 3 (Conversational HR Screening).\n• **Sourcing Targets**: Target profiles with 4+ years of active TypeScript/React project history.";
@@ -126,8 +126,8 @@ export function AgentConsole() {
             onClick={() => setMode('ACT')}
             className={cn(
               "px-5 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2",
-              mode === 'ACT' 
-                ? "bg-indigo-600 text-white shadow-[0_0_15px_rgba(79,70,229,0.4)]" 
+              mode === 'ACT'
+                ? "bg-indigo-600 text-white shadow-[0_0_15px_rgba(79,70,229,0.4)]"
                 : "text-slate-400 hover:text-slate-200"
             )}
           >
@@ -138,8 +138,8 @@ export function AgentConsole() {
             onClick={() => setMode('PLAN')}
             className={cn(
               "px-5 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2",
-              mode === 'PLAN' 
-                ? "bg-indigo-600 text-white shadow-[0_0_15px_rgba(79,70,229,0.4)]" 
+              mode === 'PLAN'
+                ? "bg-indigo-600 text-white shadow-[0_0_15px_rgba(79,70,229,0.4)]"
                 : "text-slate-400 hover:text-slate-200"
             )}
           >
@@ -163,8 +163,8 @@ export function AgentConsole() {
                     onClick={() => !isExecuting && setSelectedAgent(agent.id)}
                     className={cn(
                       "flex items-start gap-4 p-4 rounded-xl border-2 transition-all text-left w-full disabled:opacity-50",
-                      selectedAgent === agent.id 
-                        ? "border-indigo-500/80 bg-indigo-500/[0.03]" 
+                      selectedAgent === agent.id
+                        ? "border-indigo-500/80 bg-indigo-500/[0.03]"
                         : "border-slate-800 bg-[#13151D] hover:border-slate-700"
                     )}
                     disabled={isExecuting}
@@ -286,8 +286,8 @@ export function AgentConsole() {
             {/* Thread List */}
             <div className="flex-1 p-4 overflow-y-auto custom-scrollbar space-y-4">
               {chatMessages.map((msg, idx) => (
-                <div 
-                  key={idx} 
+                <div
+                  key={idx}
                   className={cn(
                     "flex gap-3 max-w-[85%] animate-in fade-in slide-in-from-bottom-2 duration-200",
                     msg.sender === 'user' ? "ml-auto flex-row-reverse" : "mr-auto"
@@ -296,8 +296,8 @@ export function AgentConsole() {
                   {/* Icon */}
                   <div className={cn(
                     "w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border shadow-sm",
-                    msg.sender === 'user' 
-                      ? "bg-indigo-600/10 border-indigo-500/20 text-indigo-400" 
+                    msg.sender === 'user'
+                      ? "bg-indigo-600/10 border-indigo-500/20 text-indigo-400"
                       : "bg-[#1A1D27] border-slate-800 text-slate-300"
                   )}>
                     {msg.sender === 'user' ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
@@ -306,15 +306,15 @@ export function AgentConsole() {
                   {/* Bubble */}
                   <div className={cn(
                     "p-3.5 rounded-xl text-xs leading-relaxed",
-                    msg.sender === 'user' 
-                      ? "bg-indigo-600 text-white rounded-tr-none" 
+                    msg.sender === 'user'
+                      ? "bg-indigo-600 text-white rounded-tr-none"
                       : "bg-[#1A1D27] text-slate-200 border border-slate-800/50 rounded-tl-none whitespace-pre-wrap"
                   )}>
                     {msg.text}
                   </div>
                 </div>
               ))}
-              
+
               {isBotTyping && (
                 <div className="flex gap-3 max-w-[85%] mr-auto items-center animate-pulse">
                   <div className="w-8 h-8 rounded-lg bg-[#1A1D27] border border-slate-800 flex items-center justify-center text-slate-300 shrink-0">

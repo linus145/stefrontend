@@ -269,20 +269,20 @@ export function PostJobForm({ editJob, onClose, onSuccess }: PostJobFormProps) {
           {/* Job Type + Work Mode */}
           <div className="grid grid-cols-2 gap-4">
             <FormField label="Job Type" id="job_type">
-              <SelectField id="job_type" value={formData.job_type!} onChange={handleChange} options={JOB_TYPE_OPTIONS} disabled={isSubmitting} />
+              <SelectField id="job_type" value={formData.job_type!} onChange={handleChange} options={JOB_TYPE_OPTIONS} disabled={isSubmitting} dataAgent="job-type-select" />
             </FormField>
             <FormField label="Work Mode" id="work_mode">
-              <SelectField id="work_mode" value={formData.work_mode!} onChange={handleChange} options={WORK_MODE_OPTIONS} disabled={isSubmitting} />
+              <SelectField id="work_mode" value={formData.work_mode!} onChange={handleChange} options={WORK_MODE_OPTIONS} disabled={isSubmitting} dataAgent="job-work-mode-select" />
             </FormField>
           </div>
 
           {/* Category + Experience */}
           <div className="grid grid-cols-2 gap-4">
             <FormField label="Job Category" id="job_category">
-              <SelectField id="job_category" value={formData.job_category!} onChange={handleChange} options={JOB_CATEGORY_OPTIONS} disabled={isSubmitting} />
+              <SelectField id="job_category" value={formData.job_category!} onChange={handleChange} options={JOB_CATEGORY_OPTIONS} disabled={isSubmitting} dataAgent="job-category-select" />
             </FormField>
             <FormField label="Experience Level" id="experience_level">
-              <SelectField id="experience_level" value={formData.experience_level!} onChange={handleChange} options={EXPERIENCE_OPTIONS} disabled={isSubmitting} />
+              <SelectField id="experience_level" value={formData.experience_level!} onChange={handleChange} options={EXPERIENCE_OPTIONS} disabled={isSubmitting} dataAgent="job-experience-level-select" />
             </FormField>
           </div>
 
@@ -298,6 +298,7 @@ export function PostJobForm({ editJob, onClose, onSuccess }: PostJobFormProps) {
                   disabled={isSubmitting}
                   value={formData.location}
                   onChange={handleChange}
+                  data-agent="job-location-input"
                   placeholder="Bangalore, India"
                   className="w-full rounded-sm bg-background border border-border text-foreground pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground"
                 />
@@ -313,6 +314,7 @@ export function PostJobForm({ editJob, onClose, onSuccess }: PostJobFormProps) {
                   disabled={isSubmitting}
                   value={formData.department}
                   onChange={handleChange}
+                  data-agent="job-department-input"
                   placeholder="e.g. Engineering"
                   className="w-full rounded-sm bg-background border border-border text-foreground pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground"
                 />
@@ -329,6 +331,7 @@ export function PostJobForm({ editJob, onClose, onSuccess }: PostJobFormProps) {
                 disabled={isSubmitting}
                 value={formData.salary_min ?? ''}
                 onChange={handleChange}
+                data-agent="job-salary-min-input"
                 placeholder="30000"
                 className="w-full rounded-sm bg-background border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground"
               />
@@ -340,6 +343,7 @@ export function PostJobForm({ editJob, onClose, onSuccess }: PostJobFormProps) {
                 disabled={isSubmitting}
                 value={formData.salary_max ?? ''}
                 onChange={handleChange}
+                data-agent="job-salary-max-input"
                 placeholder="80000"
                 className="w-full rounded-sm bg-background border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground"
               />
@@ -350,6 +354,7 @@ export function PostJobForm({ editJob, onClose, onSuccess }: PostJobFormProps) {
                 disabled={isSubmitting}
                 value={formData.currency}
                 onChange={handleChange}
+                data-agent="job-currency-input"
                 placeholder="INR"
                 className="w-full rounded-sm bg-background border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground"
               />
@@ -370,6 +375,7 @@ export function PostJobForm({ editJob, onClose, onSuccess }: PostJobFormProps) {
                   disabled={isSubmitting}
                   value={formData.open_positions}
                   onChange={(e) => setFormData(prev => ({ ...prev, open_positions: parseInt(e.target.value) || 1 }))}
+                  data-agent="job-open-positions-input"
                   className="w-full rounded-sm bg-background border border-border text-foreground pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground"
                 />
               </div>
@@ -383,6 +389,7 @@ export function PostJobForm({ editJob, onClose, onSuccess }: PostJobFormProps) {
                     disabled={isSubmitting}
                     value={formData.hr_profile || ''}
                     onChange={(e) => setFormData(prev => ({ ...prev, hr_profile: e.target.value || null }))}
+                    data-agent="job-hr-profile-select"
                     className="w-full rounded-sm bg-background border border-border text-foreground px-4 py-2 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none appearance-none transition-colors"
                   >
                     <option value="">Select HR profile (Fallback to default)...</option>
@@ -557,6 +564,7 @@ export function PostJobForm({ editJob, onClose, onSuccess }: PostJobFormProps) {
               disabled={isSubmitting}
               value={formData.deadline ?? ''}
               onChange={handleChange}
+              data-agent="job-deadline-input"
               className="w-full rounded-sm bg-background border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none"
             />
           </FormField>
@@ -570,6 +578,7 @@ export function PostJobForm({ editJob, onClose, onSuccess }: PostJobFormProps) {
                 onChange={handleChange}
                 options={isEditing ? [...STATUS_OPTIONS, { value: 'CLOSED', label: 'Closed — Stop accepting applications' }] : STATUS_OPTIONS}
                 disabled={isSubmitting}
+                dataAgent="job-status-select"
               />
             </FormField>
             <FormField label="Hiring Status" id="hiring_status">
@@ -579,6 +588,7 @@ export function PostJobForm({ editJob, onClose, onSuccess }: PostJobFormProps) {
                 onChange={handleChange}
                 options={HIRING_STATUS_OPTIONS}
                 disabled={isSubmitting}
+                dataAgent="job-hiring-status-select"
               />
             </FormField>
           </div>
@@ -634,12 +644,13 @@ function FormField({ label, id, error, children }: {
   );
 }
 
-function SelectField({ id, value, onChange, options, disabled }: {
+function SelectField({ id, value, onChange, options, disabled, dataAgent }: {
   id: string;
   value: string;
   onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   options: { value: string; label: string }[];
   disabled?: boolean;
+  dataAgent?: string;
 }) {
   return (
     <div className="relative">
@@ -648,6 +659,7 @@ function SelectField({ id, value, onChange, options, disabled }: {
         disabled={disabled}
         value={value}
         onChange={onChange}
+        data-agent={dataAgent}
         className="w-full rounded-sm bg-background border border-border text-foreground px-4 py-2 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none appearance-none transition-colors"
       >
         {options.map(opt => (

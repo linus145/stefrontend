@@ -1,6 +1,6 @@
 import React from 'react';
-import { 
-  Bot, Sparkles, Activity, CheckCircle2, ChevronRight, 
+import {
+  Bot, Sparkles, Activity, CheckCircle2, ChevronRight,
   Terminal, BarChart3, Settings, Play, Briefcase, Mail, FileText
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -41,7 +41,7 @@ export default function AIAgentsDashboard() {
   return (
     <div className="min-h-screen bg-[#0F111A] text-slate-200 font-sans p-6 lg:p-10">
       <div className="max-w-7xl mx-auto space-y-8">
-        
+
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
@@ -53,7 +53,7 @@ export default function AIAgentsDashboard() {
             </div>
             <p className="text-slate-400 font-medium ml-1">Manage and monitor your autonomous recruitment workforce.</p>
           </div>
-          
+
           <button className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-[0_0_20px_rgba(79,70,229,0.3)]">
             <Play className="w-4 h-4 fill-current" />
             Deploy New Agent
@@ -82,7 +82,7 @@ export default function AIAgentsDashboard() {
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          
+
           {/* Active Agents List */}
           <div className="lg:col-span-2 space-y-6">
             <div className="bg-[#1A1D27] border border-slate-800/60 rounded-2xl overflow-hidden">
@@ -90,7 +90,7 @@ export default function AIAgentsDashboard() {
                 <h2 className="text-lg font-bold text-white">Deployed Agents</h2>
                 <button className="text-sm font-semibold text-indigo-400 hover:text-indigo-300">View Logs</button>
               </div>
-              
+
               <div className="divide-y divide-slate-800/60">
                 {agents.map((agent) => (
                   <div key={agent.id} className="p-6 flex items-center justify-between hover:bg-slate-800/20 transition-colors cursor-pointer group">
@@ -111,7 +111,7 @@ export default function AIAgentsDashboard() {
                         <p className="text-sm text-slate-400 font-medium">{agent.role}</p>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center gap-8">
                       <div className="text-right hidden sm:block">
                         <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider mb-1">Tasks Done</p>
@@ -134,7 +134,7 @@ export default function AIAgentsDashboard() {
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Live</span>
               </div>
             </div>
-            
+
             <div className="flex-1 space-y-6 overflow-y-auto pr-2 custom-scrollbar">
               {[
                 { time: 'Just now', text: 'Auto-Poster Agent published "Senior Dev" to LinkedIn.', icon: <CheckCircle2 className="w-4 h-4 text-emerald-500" /> },

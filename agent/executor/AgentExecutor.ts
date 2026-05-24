@@ -336,7 +336,7 @@ export class AgentExecutor {
       }
 
       // Fallback: search all elements (more expensive but thorough)
-      const allElements = document.querySelectorAll('div, span, p, h1, h2, h3, h4, h5, h6, li');
+      const allElements = document.querySelectorAll('div, span, p, h1, h2, h3, h4, h5, h6, li, label');
       for (const el of Array.from(allElements)) {
         // Only return if it's a leaf-ish element or has the text directly
         if (el.children.length < 5 && el.textContent?.toLowerCase().includes(targetText)) {

@@ -213,7 +213,7 @@ export class StateObserver {
       seen.add(key);
     });
 
-    return elements.slice(0, 80); // Increased to 80 to capture all pipeline + round elements
+    return elements.slice(0, 120); // Increased to 120 to capture all pipeline, round, and form elements
   }
 
   /**

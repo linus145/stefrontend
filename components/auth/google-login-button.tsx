@@ -46,7 +46,7 @@ export function GoogleLoginButton() {
       <button
         type="button"
         onClick={handleGoogleClick}
-        className="flex items-center justify-center gap-2.5 border border-slate-200/80 dark:border-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-800/40 h-[44px] rounded-lg text-xs font-bold text-slate-700 dark:text-slate-300 bg-white dark:bg-[#121320] transition-all duration-300 w-full cursor-pointer"
+        className="flex items-center justify-center gap-2.5 border border-slate-200/80 dark:border-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-800/40 h-[44px] rounded-sm text-xs font-bold text-slate-700 dark:text-slate-300 bg-white dark:bg-[#121320] transition-all duration-300 w-full cursor-pointer"
       >
         {/* High-fidelity Google G Vector */}
         <svg className="w-4 h-4" viewBox="0 0 24 24">

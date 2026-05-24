@@ -105,9 +105,7 @@ export function RegisterForm() {
 
   return (
     <div className="w-full pb-10">
-      <div className="relative w-full rounded-2xl bg-white dark:bg-[#121320] shadow-[0_20px_50px_rgba(94,59,225,0.04)] border border-slate-200/50 dark:border-slate-800/40 overflow-hidden transition-all duration-500">
-        {/* Top decorative thin accent gradient */}
-        <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#5e3be1] to-transparent opacity-80" />
+      <div className="relative w-full rounded-sm bg-white dark:bg-[#121320] shadow-[0_20px_40px_rgba(0,0,0,0.08)] dark:shadow-[0_20px_40px_rgba(0,0,0,0.3)] border border-slate-200 dark:border-slate-800 overflow-hidden transition-all duration-500">
         
         <div className="p-6 sm:p-7 flex flex-col gap-5">
           <div className="text-center">
@@ -120,7 +118,7 @@ export function RegisterForm() {
           </div>
           
           {generalError && (
-            <div className="p-3 rounded-lg bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 text-red-600 dark:text-red-400 text-xs font-semibold animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="p-3 rounded-sm bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 text-red-600 dark:text-red-400 text-xs font-semibold animate-in fade-in slide-in-from-top-2 duration-300">
               {generalError}
             </div>
           )}
@@ -143,7 +141,7 @@ export function RegisterForm() {
                         value={formData.first_name}
                         onChange={handleChange}
                         className={cn(
-                          "w-full rounded-lg bg-[#f8fafc] dark:bg-[#151624] border text-slate-900 dark:text-white pl-10 pr-4 py-2.5 text-sm transition-all focus:ring-1 focus:ring-[#5e3be1] focus:border-[#5e3be1] outline-none",
+                          "w-full rounded-sm bg-[#f8fafc] dark:bg-[#151624] border text-slate-900 dark:text-white pl-10 pr-4 py-2.5 text-sm transition-all focus:ring-1 focus:ring-[#5e3be1] focus:border-[#5e3be1] outline-none",
                           errors.first_name ? 'border-red-400 dark:border-red-500/50' : 'border-slate-200 dark:border-slate-800'
                         )}
                       />
@@ -159,7 +157,7 @@ export function RegisterForm() {
                       value={formData.last_name}
                       onChange={handleChange}
                       className={cn(
-                        "w-full rounded-lg bg-[#f8fafc] dark:bg-[#151624] border text-slate-900 dark:text-white px-4 py-2.5 text-sm transition-all focus:ring-1 focus:ring-[#5e3be1] focus:border-[#5e3be1] outline-none",
+                        "w-full rounded-sm bg-[#f8fafc] dark:bg-[#151624] border text-slate-900 dark:text-white px-4 py-2.5 text-sm transition-all focus:ring-1 focus:ring-[#5e3be1] focus:border-[#5e3be1] outline-none",
                         errors.last_name ? 'border-red-400 dark:border-red-500/50' : 'border-slate-200 dark:border-slate-800'
                       )}
                     />
@@ -179,7 +177,7 @@ export function RegisterForm() {
                       disabled={isSubmitting}
                       value={formData.role}
                       onChange={handleChange}
-                      className="w-full rounded-lg bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white pl-10 pr-4 py-2.5 text-sm outline-none appearance-none font-semibold cursor-pointer"
+                      className="w-full rounded-sm bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white pl-10 pr-4 py-2.5 text-sm outline-none appearance-none font-semibold cursor-pointer"
                     >
                       <option value="FOUNDER">Founder</option>
                       <option value="CO_FOUNDER">Co-Founder</option>
@@ -211,14 +209,14 @@ export function RegisterForm() {
                       value={formData.email}
                       onChange={handleChange}
                       className={cn(
-                        "w-full rounded-lg bg-[#f8fafc] dark:bg-[#151624] border text-slate-900 dark:text-white pl-10 pr-4 py-2.5 text-sm transition-all focus:ring-1 focus:ring-[#5e3be1] focus:border-[#5e3be1] outline-none",
+                        "w-full rounded-sm bg-[#f8fafc] dark:bg-[#151624] border text-slate-900 dark:text-white pl-10 pr-4 py-2.5 text-sm transition-all focus:ring-1 focus:ring-[#5e3be1] focus:border-[#5e3be1] outline-none",
                         errors.email ? 'border-red-400 dark:border-red-500/50' : 'border-slate-200 dark:border-slate-800'
                       )}
                     />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-4">
                   <div className="space-y-1.5">
                     <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider" htmlFor="password">
                       Password
@@ -235,7 +233,7 @@ export function RegisterForm() {
                         value={formData.password}
                         onChange={handleChange}
                         className={cn(
-                          "w-full rounded-lg bg-[#f8fafc] dark:bg-[#151624] border text-slate-900 dark:text-white pl-10 pr-10 py-2.5 text-sm transition-all focus:ring-1 focus:ring-[#5e3be1] focus:border-[#5e3be1] outline-none",
+                          "w-full rounded-sm bg-[#f8fafc] dark:bg-[#151624] border text-slate-900 dark:text-white pl-10 pr-10 py-2.5 text-sm transition-all focus:ring-1 focus:ring-[#5e3be1] focus:border-[#5e3be1] outline-none",
                           errors.password ? 'border-red-400 dark:border-red-500/50' : 'border-slate-200 dark:border-slate-800'
                         )}
                       />
@@ -251,20 +249,32 @@ export function RegisterForm() {
 
                   <div className="space-y-1.5">
                     <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider" htmlFor="confirm_password">
-                      Confirm
+                      Confirm Password
                     </label>
-                    <input
-                      id="confirm_password"
-                      type={showPassword ? 'text' : 'password'}
-                      placeholder="••••••••"
-                      disabled={isSubmitting}
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      className={cn(
-                        "w-full rounded-lg bg-[#f8fafc] dark:bg-[#151624] border text-slate-900 dark:text-white px-4 py-2.5 text-sm transition-all focus:ring-1 focus:ring-[#5e3be1] focus:border-[#5e3be1] outline-none",
-                        errors.confirm_password ? 'border-red-400 dark:border-red-500/50' : 'border-slate-200 dark:border-slate-800'
-                      )}
-                    />
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <Lock className="h-4 w-4" />
+                      </div>
+                      <input
+                        id="confirm_password"
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder="••••••••"
+                        disabled={isSubmitting}
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        className={cn(
+                          "w-full rounded-sm bg-[#f8fafc] dark:bg-[#151624] border text-slate-900 dark:text-white pl-10 pr-10 py-2.5 text-sm transition-all focus:ring-1 focus:ring-[#5e3be1] focus:border-[#5e3be1] outline-none",
+                          errors.confirm_password ? 'border-red-400 dark:border-red-500/50' : 'border-slate-200 dark:border-slate-800'
+                        )}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </>
@@ -289,7 +299,7 @@ export function RegisterForm() {
                       disabled={isSubmitting}
                       value={otp}
                       onChange={(e) => setOtp(e.target.value)}
-                      className="w-full rounded-lg bg-[#f8fafc] dark:bg-[#151624] border border-slate-200/80 dark:border-slate-800/80 text-slate-900 dark:text-white pl-10 pr-4 py-2.5 text-sm outline-none tracking-[0.5em] font-mono text-center"
+                      className="w-full rounded-sm bg-[#f8fafc] dark:bg-[#151624] border border-slate-200/80 dark:border-slate-800/80 text-slate-900 dark:text-white pl-10 pr-4 py-2.5 text-sm outline-none tracking-[0.5em] font-mono text-center"
                     />
                   </div>
                 </div>
@@ -306,7 +316,7 @@ export function RegisterForm() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full flex items-center justify-center gap-2 rounded-lg bg-[#5e3be1] hover:bg-[#4b2ec7] py-3 text-sm font-bold text-white shadow-lg shadow-[#5e3be1]/20 transition-all duration-300 disabled:opacity-70 mt-2 cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 rounded-sm bg-[#5e3be1] hover:bg-[#4b2ec7] py-3 text-sm font-bold text-white shadow-lg shadow-[#5e3be1]/20 transition-all duration-300 disabled:opacity-70 mt-2 cursor-pointer"
             >
               {isSubmitting ? (isVerifying ? 'Verifying...' : 'Creating Account...') : (isVerifying ? 'Verify & Continue' : 'Create Account')}
             </button>
@@ -326,7 +336,7 @@ export function RegisterForm() {
             </div>
             <button
               type="button"
-              className="flex items-center justify-center gap-2 border border-slate-200/80 dark:border-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-800/40 h-[44px] rounded-lg text-xs font-bold text-slate-700 dark:text-slate-300 bg-white dark:bg-[#121320] transition-all duration-300 w-full cursor-pointer"
+              className="flex items-center justify-center gap-2 border border-slate-200/80 dark:border-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-800/40 h-[44px] rounded-sm text-xs font-bold text-slate-700 dark:text-slate-300 bg-white dark:bg-[#121320] transition-all duration-300 w-full cursor-pointer"
             >
               <svg className="w-4 h-4 text-slate-900 dark:text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />

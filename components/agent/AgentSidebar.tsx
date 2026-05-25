@@ -31,21 +31,24 @@ export const AgentSidebar: React.FC = () => {
   const [pendingResponse, setPendingResponse] = useState<string | null>(null);
   const [lastQuestion, setLastQuestion] = useState('');
   const [availableOptions, setAvailableOptions] = useState<string[]>([]);
-  const [sidebarMode, setSidebarMode] = useState<'ACT' | 'PLAN'>(() => {
+  const [sidebarMode, setSidebarMode] = useState<'ACT' | 'PLAN'>('ACT');
+
+  // Load sidebar mode on mount to avoid SSR hydration mismatch
+  useEffect(() => {
     if (typeof window !== 'undefined') {
       const hasActiveContext = localStorage.getItem('agent_llm_context') || 
                                localStorage.getItem('agent_active_plan') ||
                                localStorage.getItem('agent_cross_tab_continuation');
       if (hasActiveContext) {
-        return 'ACT';
+        setSidebarMode('ACT');
+        return;
       }
       const savedMode = localStorage.getItem('agent_sidebar_mode');
       if (savedMode === 'ACT' || savedMode === 'PLAN') {
-        return savedMode;
+        setSidebarMode(savedMode);
       }
     }
-    return 'ACT';
-  });
+  }, []);
 
   const changeSidebarMode = (mode: 'ACT' | 'PLAN') => {
     setSidebarMode(mode);

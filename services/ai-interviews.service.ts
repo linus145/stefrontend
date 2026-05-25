@@ -41,7 +41,9 @@ export const aiInterviewsService = {
     round_category: string;
     question_format: string; 
     programming_language: string; 
-    count: number 
+    count: number;
+    coding_topics?: string[];
+    coding_frameworks?: string[];
   }) => {
     return api.post<any>('/AIrounds/generate-questions/', data);
   },

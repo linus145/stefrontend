@@ -21,7 +21,9 @@ interface RoundConfig {
   programming_language: string;
   max_questions: number;
   timer_seconds: number;
-  questions?: { text: string; marks: number; ideal_answer?: string }[];
+  questions?: { text: string; marks: number; ideal_answer?: string; mcq_options?: any[]; question_type?: string }[];
+  selected_topics?: string[];
+  selected_frameworks?: string[];
 }
 
 interface InterviewConfigViewProps {
@@ -41,6 +43,23 @@ const DEFAULT_FORMATS = [
 ];
 const DEFAULT_LANGS = [{ label: "Python", value: "PYTHON" }];
 
+const SUGGESTED_TOPICS: Record<string, string[]> = {
+  ENTRY: ['Variables & Types', 'Conditional Logic', 'Loops & Iterations', 'String Manipulation', 'Basic Arrays', 'Simple Functions'],
+  MID: ['Recursion', 'Object-Oriented Design', 'Exceptions & File I/O', 'Data Structures (Stacks/Queues/HashMaps)', 'Searching & Sorting', 'API Handling'],
+  SENIOR: ['Dynamic Programming', 'Graph Algorithms', 'Trees & BST', 'Concurrency & Threading', 'SQL & Database Queries', 'Code Optimization'],
+  LEAD: ['System Design Coding', 'Design Patterns', 'Scalability & Load Snips', 'Secure Cryptography', 'Distributed Algorithms']
+};
+
+const SUGGESTED_FRAMEWORKS: Record<string, string[]> = {
+  PYTHON: ['Django', 'Flask', 'FastAPI', 'Pandas & NumPy', 'PyTorch'],
+  JAVASCRIPT: ['React', 'Node.js', 'Express', 'Next.js', 'Vue.js'],
+  TYPESCRIPT: ['NestJS', 'React with TS', 'Next.js with TS', 'Express with TS'],
+  JAVA: ['Spring Boot', 'Hibernate', 'Spring Security'],
+  'C++': ['Qt', 'Boost', 'STL Library'],
+  'C#': ['.NET Core', 'ASP.NET MVC', 'Entity Framework'],
+  GO: ['Gin', 'Echo', 'Fiber', 'GORM']
+};
+
 export function InterviewConfigView({ initialApplicationId, initialSessionId, onBack }: InterviewConfigViewProps) {
   const [step, setStep] = useState(1);
   const [selectedJobId, setSelectedJobId] = useState('');
@@ -48,7 +67,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [rounds, setRounds] = useState<RoundConfig[]>([
-    { id: '1', title: 'TECHNICAL_SCREENING', type: 'TECHNICAL', difficulty: 'MID', round_category: 'NON_CODING', question_format: 'TEXT', programming_language: '', max_questions: 5, timer_seconds: 600, questions: [] }
+    { id: '1', title: 'TECHNICAL_SCREENING', type: 'TECHNICAL', difficulty: 'MID', round_category: 'NON_CODING', question_format: 'TEXT', programming_language: '', max_questions: 5, timer_seconds: 600, questions: [], selected_topics: [], selected_frameworks: [] }
   ]);
 
   // Fetch recruiter's jobs
@@ -87,7 +106,9 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
     strategy_tiers: DEFAULT_TIERS,
     difficulty_levels: DEFAULT_LEVELS,
     question_formats: DEFAULT_FORMATS,
-    programming_languages: DEFAULT_LANGS
+    programming_languages: DEFAULT_LANGS,
+    suggested_topics: SUGGESTED_TOPICS,
+    suggested_frameworks: SUGGESTED_FRAMEWORKS
   };
 
   const applications = appsResponse?.data || [];
@@ -145,10 +166,14 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
               programming_language: rnd.programming_language || '',
               max_questions: rnd.max_questions || 5,
               timer_seconds: rnd.timer_seconds || 600,
+              selected_topics: rnd.settings?.coding_topics || [],
+              selected_frameworks: rnd.settings?.coding_frameworks || [],
               questions: rnd.questions?.map((q: any) => ({
                 text: q.question_text || q.text || q,
                 marks: q.marks || 10,
-                ideal_answer: q.ideal_answer
+                ideal_answer: q.ideal_answer,
+                mcq_options: q.mcq_options || undefined,
+                question_type: q.question_type || undefined
               })) || [],
             })));
           }
@@ -177,7 +202,9 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
       programming_language: '',
       max_questions: 5,
       timer_seconds: 600,
-      questions: []
+      questions: [],
+      selected_topics: [],
+      selected_frameworks: []
     };
     setRounds([...rounds, newRound]);
   };
@@ -215,7 +242,6 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
 
     const toastId = toast.loading("AI is analyzing resume and architecting questions...");
     setIsGenerating(true);
-
     try {
       const response = await aiInterviewsService.generateQuestions({
         application_id: selectedApplicationIds[0],
@@ -225,13 +251,15 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
         round_category: round.round_category,
         question_format: round.question_format,
         programming_language: round.programming_language,
-        count: round.max_questions
+        count: round.max_questions,
+        coding_topics: round.selected_topics || [],
+        coding_frameworks: round.selected_frameworks || []
       });
 
       if (response.status === 'success' && response.data?.task_id) {
         const taskId = response.data.task_id;
         let attempts = 0;
-        const maxAttempts = 30; // Max 60 seconds polling
+        const maxAttempts = 60; // Max 120 seconds polling
 
         while (attempts < maxAttempts) {
           attempts++;
@@ -246,6 +274,8 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
               questions: taskData.questions.map((q: any) => ({
                 text: typeof q === 'object' ? q.question : q,
                 ideal_answer: typeof q === 'object' ? q.ideal_answer : undefined,
+                mcq_options: typeof q === 'object' ? q.mcq_options : undefined,
+                question_type: typeof q === 'object' ? q.question_type : round.question_format,
                 marks: 10
               }))
             });
@@ -266,6 +296,8 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
           questions: response.data.questions.map((q: any) => ({
             text: typeof q === 'object' ? q.question : q,
             ideal_answer: typeof q === 'object' ? q.ideal_answer : undefined,
+            mcq_options: typeof q === 'object' ? q.mcq_options : undefined,
+            question_type: typeof q === 'object' ? q.question_type : round.question_format,
             marks: 10
           }))
         });
@@ -294,7 +326,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
       for (const appId of selectedApplicationIds) {
         const response = await aiInterviewsService.configureInterview({
           job_application_id: appId,
-          rounds: rounds.map(({ title, type, difficulty, round_category, question_format, programming_language, max_questions, timer_seconds, questions }) => ({
+          rounds: rounds.map(({ title, type, difficulty, round_category, question_format, programming_language, max_questions, timer_seconds, questions, selected_topics, selected_frameworks }) => ({
             title,
             type,
             difficulty,
@@ -303,10 +335,16 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
             programming_language,
             max_questions,
             timer_seconds,
+            settings: {
+              coding_topics: selected_topics || [],
+              coding_frameworks: selected_frameworks || []
+            },
             questions: questions?.map(q => ({
               text: q.text,
               marks: q.marks,
-              ideal_answer: q.ideal_answer
+              ideal_answer: q.ideal_answer,
+              mcq_options: q.mcq_options || null,
+              question_type: q.question_type || round_category
             })) || []
           }))
         });
@@ -643,20 +681,167 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                       </div>
 
                       {round.question_format === 'CODE' && (
-                        <div className="space-y-2">
-                          <label className="text-[13px] font-semibold text-foreground">Language <span className="text-[10px] opacity-50">(Optional)</span></label>
-                          <select
-                            value={round.programming_language}
-                            onChange={(e) => updateRound(round.id, { programming_language: e.target.value })}
-                            data-agent={`programming-language-select-${index}`}
-                            className="w-full bg-muted/10 border border-border rounded-sm py-3 px-4 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-blue-600 transition-all appearance-none"
-                          >
-                            <option value="">Auto-detect</option>
-                            {metadata.programming_languages.map((l: any) => (
-                              <option key={l.value} value={l.value}>{l.label}</option>
-                            ))}
-                          </select>
-                        </div>
+                        <>
+                          <div className="space-y-2">
+                            <label className="text-[13px] font-semibold text-foreground">Language <span className="text-[10px] opacity-50">(Optional)</span></label>
+                            <select
+                              value={round.programming_language}
+                              onChange={(e) => {
+                                const newLang = e.target.value;
+                                updateRound(round.id, {
+                                  programming_language: newLang,
+                                  selected_frameworks: [] // Reset frameworks when language changes
+                                });
+                              }}
+                              data-agent={`programming-language-select-${index}`}
+                              className="w-full bg-muted/10 border border-border rounded-sm py-3 px-4 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-blue-600 transition-all appearance-none"
+                            >
+                              <option value="">Auto-detect</option>
+                              {metadata.programming_languages.map((l: any) => (
+                                <option key={l.value} value={l.value}>{l.label}</option>
+                              ))}
+                            </select>
+                          </div>
+
+                          {/* Focus Topics (Optional) */}
+                          <div className="md:col-span-2 space-y-3">
+                            <div>
+                              <label className="text-[13px] font-semibold text-foreground">Focus Topics <span className="text-[10px] opacity-50">(Optional)</span></label>
+                              <p className="text-[10px] text-muted-foreground mt-0.5">Select specific topics to assess for this round.</p>
+                            </div>
+
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                              {(() => {
+                                const suggested = (metadata.suggested_topics || SUGGESTED_TOPICS)[round.difficulty] || [];
+                                const selected = round.selected_topics || [];
+                                const custom = selected.filter(t => !suggested.includes(t));
+                                const allTopics = [...suggested, ...custom];
+
+                                return allTopics.map((topic) => {
+                                  const isChecked = selected.includes(topic);
+                                  return (
+                                    <label
+                                      key={topic}
+                                      className={cn(
+                                        "flex items-center gap-2 p-3 rounded-sm border cursor-pointer transition-all text-[11px] font-bold select-none active:scale-[0.98]",
+                                        isChecked
+                                          ? "bg-blue-600/10 border-blue-600/30 text-blue-600 shadow-sm shadow-blue-600/5"
+                                          : "bg-muted/5 border-border hover:border-blue-600/20 text-muted-foreground hover:text-foreground"
+                                      )}
+                                    >
+                                      <input
+                                        type="checkbox"
+                                        checked={isChecked}
+                                        onChange={() => {
+                                          let updated;
+                                          if (isChecked) {
+                                            updated = selected.filter(t => t !== topic);
+                                          } else {
+                                            updated = [...selected, topic];
+                                          }
+                                          updateRound(round.id, { selected_topics: updated });
+                                        }}
+                                        className="rounded border-border text-blue-600 focus:ring-blue-600 w-3.5 h-3.5 animate-none"
+                                      />
+                                      <span className="truncate">{topic}</span>
+                                    </label>
+                                  );
+                                });
+                              })()}
+                            </div>
+
+                            {/* Custom Topic Input */}
+                            <div className="mt-2.5">
+                              <input
+                                type="text"
+                                placeholder="+ Add Custom Topic (Press Enter)"
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    const input = e.currentTarget;
+                                    const val = input.value.trim();
+                                    if (val && !(round.selected_topics || []).includes(val)) {
+                                      updateRound(round.id, { selected_topics: [...(round.selected_topics || []), val] });
+                                      input.value = '';
+                                    }
+                                  }
+                                }}
+                                className="bg-muted/10 border border-dashed border-border rounded-sm px-3 py-2 text-[11px] font-semibold w-full max-w-xs focus:outline-none focus:border-blue-600 transition-all placeholder:opacity-50"
+                              />
+                            </div>
+                          </div>
+
+                          {/* Focus Frameworks (Optional, dependent on selected language) */}
+                          {round.programming_language && (
+                            <div className="md:col-span-2 space-y-3 pt-2">
+                              <div>
+                                <label className="text-[13px] font-semibold text-foreground">Target Frameworks <span className="text-[10px] opacity-50">(Optional)</span></label>
+                                <p className="text-[10px] text-muted-foreground mt-0.5">Select specific frameworks for {round.programming_language}.</p>
+                              </div>
+
+                              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                                {(() => {
+                                  const langKey = round.programming_language.toUpperCase();
+                                  const suggested = (metadata.suggested_frameworks || SUGGESTED_FRAMEWORKS)[langKey] || [];
+                                  const selected = round.selected_frameworks || [];
+                                  const custom = selected.filter(f => !suggested.includes(f));
+                                  const allFrameworks = [...suggested, ...custom];
+
+                                  return allFrameworks.map((framework) => {
+                                    const isChecked = selected.includes(framework);
+                                    return (
+                                      <label
+                                        key={framework}
+                                        className={cn(
+                                          "flex items-center gap-2 p-3 rounded-sm border cursor-pointer transition-all text-[11px] font-bold select-none active:scale-[0.98]",
+                                          isChecked
+                                            ? "bg-teal-600/10 border-teal-600/30 text-teal-600 shadow-sm shadow-teal-600/5"
+                                            : "bg-muted/5 border-border hover:border-teal-600/20 text-muted-foreground hover:text-foreground"
+                                        )}
+                                      >
+                                        <input
+                                          type="checkbox"
+                                          checked={isChecked}
+                                          onChange={() => {
+                                            let updated;
+                                            if (isChecked) {
+                                              updated = selected.filter(f => f !== framework);
+                                            } else {
+                                              updated = [...selected, framework];
+                                            }
+                                            updateRound(round.id, { selected_frameworks: updated });
+                                          }}
+                                          className="rounded border-border text-teal-600 focus:ring-teal-600 w-3.5 h-3.5 animate-none"
+                                        />
+                                        <span className="truncate">{framework}</span>
+                                      </label>
+                                    );
+                                  });
+                                })()}
+                              </div>
+
+                              {/* Custom Framework Input */}
+                              <div className="mt-2.5">
+                                <input
+                                  type="text"
+                                  placeholder="+ Add Custom Framework (Press Enter)"
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      e.preventDefault();
+                                      const input = e.currentTarget;
+                                      const val = input.value.trim();
+                                      if (val && !(round.selected_frameworks || []).includes(val)) {
+                                        updateRound(round.id, { selected_frameworks: [...(round.selected_frameworks || []), val] });
+                                        input.value = '';
+                                      }
+                                    }
+                                  }}
+                                  className="bg-muted/10 border border-dashed border-border rounded-sm px-3 py-2 text-[11px] font-semibold w-full max-w-xs focus:outline-none focus:border-teal-600 transition-all placeholder:opacity-50"
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </>
                       )}
 
                       <div className="space-y-2">
@@ -751,6 +936,35 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                                         className="w-full bg-muted/10 border border-border rounded-sm py-3 px-4 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-blue-600 transition-all min-h-[60px]"
                                       />
                                     </div>
+
+                                    {typeof q === 'object' && q.mcq_options && q.mcq_options.length > 0 && (
+                                      <div className="space-y-2 border border-border/60 bg-blue-600/[0.01] p-4 rounded-sm">
+                                        <label className="text-[10px] font-bold text-muted-foreground block uppercase tracking-wider opacity-60">MCQ Options Preview</label>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                          {q.mcq_options.map((opt: any, optIdx: number) => (
+                                            <div
+                                              key={optIdx}
+                                              className={cn(
+                                                "flex items-center gap-2.5 p-3 rounded-sm border text-xs font-semibold transition-all",
+                                                opt.is_correct
+                                                  ? "bg-emerald-600/10 border-emerald-600/30 text-emerald-600 shadow-sm"
+                                                  : "bg-muted/10 border-border/50 text-muted-foreground"
+                                              )}
+                                            >
+                                              <span className={cn(
+                                                "w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold border shrink-0 transition-all",
+                                                opt.is_correct
+                                                  ? "bg-emerald-600 border-emerald-600 text-white"
+                                                  : "border-border/80 text-muted-foreground bg-muted/20"
+                                              )}>
+                                                {opt.label || String.fromCharCode(65 + optIdx)}
+                                              </span>
+                                              <span className="truncate">{opt.text}</span>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    )}
 
                                     <div>
                                       <label className="text-[10px] font-bold text-blue-600 block mb-1 uppercase tracking-wider opacity-60 flex items-center gap-2">

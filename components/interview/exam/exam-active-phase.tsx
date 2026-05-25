@@ -193,7 +193,7 @@ export function ExamActivePhase({
                             </span>
                             <div className="flex-1">
                               <p className="text-sm leading-relaxed whitespace-pre-wrap">{currentQuestion.question_text}</p>
-                              {currentQuestion.question_type === 'MCQ' && currentQuestion.mcq_options && (
+                              {(currentQuestion.question_type === 'MCQ' || currentRound.question_format === 'MCQ') && currentQuestion.mcq_options && (
                                 <div className="mt-4 space-y-2">
                                   {currentQuestion.mcq_options.map((opt: any, i: number) => (
                                     <label
@@ -226,7 +226,8 @@ export function ExamActivePhase({
                         </div>
 
                         {/* Answer Area */}
-                        {currentQuestion.question_type === 'TEXT' && 
+                        {(currentQuestion.question_type === 'TEXT' || currentRound.question_format === 'TEXT' || currentQuestion.question_type === 'NON_CODING') && 
+                         currentRound.question_format !== 'MCQ' &&
                          currentRound.question_format !== 'CODE' && 
                          !currentRound.designation_display.toLowerCase().includes('coding') && (
                           <div className="p-8">

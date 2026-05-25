@@ -52,7 +52,7 @@ export const AgentGoalInput: React.FC<AgentGoalInputProps> = ({
 
       {/* Composite Input Box styled like Gemini interface */}
       <div className={cn(
-        "w-full bg-card border border-border rounded-sm p-2.5 flex flex-col gap-2 relative transition-all focus-within:ring-1 focus-within:ring-blue-500",
+        "w-full bg-card border border-border rounded-[4px] p-2.5 flex flex-col gap-2 relative transition-all focus-within:ring-1 focus-within:ring-blue-500",
         isWaitingForInput && sidebarMode === 'ACT' && "border-blue-500 ring-1 ring-blue-500/20",
         isAgentFullyLocked && "opacity-50 pointer-events-none"
       )}>
@@ -84,9 +84,9 @@ export const AgentGoalInput: React.FC<AgentGoalInputProps> = ({
 
         {/* Fully locked overlay for Free/Basic users */}
         {isAgentFullyLocked && (
-          <div className="absolute inset-0 flex items-center justify-center z-10 rounded-sm bg-background/60 backdrop-blur-[2px]">
+          <div className="absolute inset-0 flex items-center justify-center z-10 rounded-[4px] bg-background/60 backdrop-blur-[2px]">
             <div className="flex flex-col items-center gap-2 px-4 py-3">
-              <div className="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-[3px] bg-indigo-500/10 flex items-center justify-center">
                 <Lock className="w-4 h-4 text-indigo-500" />
               </div>
               <p className="text-[9px] font-black text-indigo-600 dark:text-indigo-400 tracking-widest">GROWTH PLAN REQUIRED</p>
@@ -101,7 +101,7 @@ export const AgentGoalInput: React.FC<AgentGoalInputProps> = ({
         <div className="flex items-center justify-between border-t border-border/45 pt-1.5 shrink-0">
           {/* Left side actions: Plus sign and Dropdown selector */}
           <div className="flex items-center gap-1.5 relative">
-            <button className="p-1 hover:bg-muted rounded-sm transition-colors text-foreground/60 hover:text-foreground">
+            <button className="p-1 hover:bg-muted rounded-[3px] transition-colors text-foreground/60 hover:text-foreground">
               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
             </button>
 
@@ -109,7 +109,7 @@ export const AgentGoalInput: React.FC<AgentGoalInputProps> = ({
             <div className="relative">
               <button
                 onClick={() => setIsModeMenuOpen(!isModeMenuOpen)}
-                className="flex items-center gap-1.5 px-3 py-1 bg-muted/80 hover:bg-muted border border-border rounded-sm text-[10px] font-bold text-black dark:text-white transition-all shadow-sm"
+                className="flex items-center gap-1.5 px-3 py-1 bg-muted/80 hover:bg-muted border border-border rounded-[3px] text-[10px] font-bold text-black dark:text-white transition-all shadow-sm"
               >
                 <span>{sidebarMode === 'ACT' ? 'Act Mode' : 'Plan Mode'}</span>
                 <svg xmlns="http://www.w3.org/2000/svg" width="6" height="6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" className={cn("transition-transform duration-200", isModeMenuOpen ? "rotate-180" : "")}><polyline points="18 15 12 9 6 15"/></svg>
@@ -122,7 +122,7 @@ export const AgentGoalInput: React.FC<AgentGoalInputProps> = ({
                     className="fixed inset-0 z-40" 
                     onClick={() => setIsModeMenuOpen(false)}
                   />
-                  <div className="absolute bottom-full left-0 mb-1.5 w-48 bg-popover border border-border rounded-sm shadow-xl p-1 z-50 flex flex-col animate-in fade-in slide-in-from-bottom-1 duration-200">
+                  <div className="absolute bottom-full left-0 mb-1.5 w-48 bg-popover border border-border rounded-[4px] shadow-xl p-1 z-50 flex flex-col animate-in fade-in slide-in-from-bottom-1 duration-200">
                     {/* Act (Autonomous) — locked for Growth and below */}
                     <button
                       onClick={() => {
@@ -137,14 +137,14 @@ export const AgentGoalInput: React.FC<AgentGoalInputProps> = ({
                         setIsModeMenuOpen(false);
                       }}
                       className={cn(
-                        "w-full text-left px-2 py-1.5 rounded-sm text-[10px] font-bold flex items-center gap-1.5 transition-colors text-black dark:text-white",
+                        "w-full text-left px-2 py-1.5 rounded-[3px] text-[10px] font-bold flex items-center gap-1.5 transition-colors text-black dark:text-white",
                         sidebarMode === 'ACT' && !isActModeLocked ? "bg-blue-600/10 text-blue-600 hover:text-blue-600" : "hover:bg-muted",
                         isActModeLocked && "opacity-60"
                       )}
                     >
                       <span>Act (Autonomous)</span>
                       {isActModeLocked && (
-                        <span className="ml-auto flex items-center gap-0.5 bg-violet-500/10 border border-violet-500/20 rounded-sm px-1.5 py-0.5">
+                        <span className="ml-auto flex items-center gap-0.5 bg-violet-500/10 border border-violet-500/20 rounded-[3px] px-1.5 py-0.5">
                           <Lock className="w-2.5 h-2.5 text-violet-500" />
                           <span className="text-[7px] font-black text-violet-600 dark:text-violet-400 tracking-wide">Enterprise</span>
                         </span>
@@ -165,14 +165,14 @@ export const AgentGoalInput: React.FC<AgentGoalInputProps> = ({
                         setIsModeMenuOpen(false);
                       }}
                       className={cn(
-                        "w-full text-left px-2 py-1.5 rounded-sm text-[10px] font-bold flex items-center gap-1.5 transition-colors text-black dark:text-white",
+                        "w-full text-left px-2 py-1.5 rounded-[3px] text-[10px] font-bold flex items-center gap-1.5 transition-colors text-black dark:text-white",
                         sidebarMode === 'PLAN' && !isAgentFullyLocked ? "bg-blue-600/10 text-blue-600 hover:text-blue-600" : "hover:bg-muted",
                         isAgentFullyLocked && "opacity-60"
                       )}
                     >
                       <span>Plan (Conversational)</span>
                       {isAgentFullyLocked && (
-                        <span className="ml-auto flex items-center gap-0.5 bg-indigo-500/10 border border-indigo-500/20 rounded-sm px-1.5 py-0.5">
+                        <span className="ml-auto flex items-center gap-0.5 bg-indigo-500/10 border border-indigo-500/20 rounded-[3px] px-1.5 py-0.5">
                           <Lock className="w-2.5 h-2.5 text-indigo-500" />
                           <span className="text-[7px] font-black text-indigo-600 dark:text-indigo-400 tracking-wide">Growth</span>
                         </span>
@@ -189,7 +189,7 @@ export const AgentGoalInput: React.FC<AgentGoalInputProps> = ({
             {isRunning && sidebarMode === 'ACT' && (
               <button
                 onClick={handleStop}
-                className="p-1.5 bg-red-600/10 text-red-600 hover:bg-red-600 hover:text-white rounded-sm transition-all active:scale-95 flex items-center justify-center"
+                className="p-1.5 bg-red-600/10 text-red-600 hover:bg-red-600 hover:text-white rounded-[3px] transition-all active:scale-95 flex items-center justify-center"
                 title="Stop Agent"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect width="18" height="18" x="3" y="3" rx="2" /></svg>
@@ -198,7 +198,7 @@ export const AgentGoalInput: React.FC<AgentGoalInputProps> = ({
             {!isRunning && status === 'Stopped' && sidebarMode === 'ACT' && (
               <button
                 onClick={handleResume}
-                className="p-1.5 bg-emerald-600/10 text-emerald-600 hover:bg-emerald-600 hover:text-white rounded-sm transition-all active:scale-95 flex items-center justify-center"
+                className="p-1.5 bg-emerald-600/10 text-emerald-600 hover:bg-emerald-600 hover:text-white rounded-[3px] transition-all active:scale-95 flex items-center justify-center"
                 title="Continue Agent"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="m5 3 14 9-14 9V3z" /></svg>
@@ -207,7 +207,7 @@ export const AgentGoalInput: React.FC<AgentGoalInputProps> = ({
             <button
               onClick={() => sidebarMode === 'ACT' ? handleStart() : handlePlanSendMessage()}
               disabled={!goal.trim() || isAgentFullyLocked}
-              className="p-1.5 bg-foreground text-background hover:bg-blue-500 hover:text-white rounded-sm transition-all disabled:opacity-20 disabled:cursor-not-allowed active:scale-95 flex items-center justify-center"
+              className="p-1.5 bg-foreground text-background hover:bg-blue-500 hover:text-white rounded-[3px] transition-all disabled:opacity-20 disabled:cursor-not-allowed active:scale-95 flex items-center justify-center"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
             </button>

@@ -19,22 +19,22 @@ import { format, formatDistanceToNow } from 'date-fns';
 
 export function DashboardTab() {
   const { data: employeesRes, isLoading: employeesLoading } = useQuery({
-    queryKey: ['dashboard-employees'],
+    queryKey: ['employees', 'dashboard'],
     queryFn: () => hrEmployeeService.getEmployees(),
   });
 
   const { data: departmentsRes, isLoading: deptsLoading } = useQuery({
-    queryKey: ['dashboard-departments'],
+    queryKey: ['departments', 'dashboard'],
     queryFn: () => hrOrgService.getDepartments(),
   });
 
   const { data: designationsRes, isLoading: desigsLoading } = useQuery({
-    queryKey: ['dashboard-designations'],
+    queryKey: ['designations', 'dashboard'],
     queryFn: () => hrOrgService.getDesignations(),
   });
 
   const { data: leaveRequestsRes, isLoading: leavesLoading } = useQuery({
-    queryKey: ['dashboard-leaves'],
+    queryKey: ['leave-requests', 'dashboard'],
     queryFn: () => hrLeaveService.getLeaveRequests(),
   });
 

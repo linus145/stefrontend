@@ -547,6 +547,7 @@ export const AgentSidebar: React.FC = () => {
         controller.sendPlaywrightResponse(answer);
       }
     } else {
+      addLog(`USER GOAL: ${finalGoal}`, 'info');
       setIsRunning(true);
       AgentController.getInstance().startGoal(finalGoal);
       setGoal('');
@@ -631,9 +632,9 @@ export const AgentSidebar: React.FC = () => {
           <div className="p-3 border-b border-border flex justify-between items-center bg-muted/40 shrink-0">
             <div>
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+                <div className="w-2 h-2 rounded-sm bg-blue-500 animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
                 <h2 className="text-[14px] font-bold text-foreground tracking-tight">
-                  Ahrmagent1
+                  HR Agent
                 </h2>
               </div>
               <p className="text-[10px] text-foreground/70 mt-0.5 font-semibold">Autonomous executor</p>
@@ -644,12 +645,12 @@ export const AgentSidebar: React.FC = () => {
               <div className="relative flex items-center group">
                 <button
                   onClick={handleNewChat}
-                  className="p-1 hover:bg-muted rounded-sm transition-colors text-foreground/50 hover:text-foreground shrink-0 border border-border shadow-sm flex items-center justify-center relative hover:text-blue-600 hover:border-blue-600/20"
+                  className="p-1 hover:bg-muted rounded-[3px] transition-colors text-foreground/50 hover:text-foreground shrink-0 border border-border shadow-sm flex items-center justify-center relative hover:text-blue-600 hover:border-blue-600/20"
                   title="New Chat"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                 </button>
-                <div className="absolute right-full top-1/2 -translate-y-1/2 mr-2.5 px-2 py-0.5 bg-foreground text-background text-[9px] font-bold rounded-sm opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-200 whitespace-nowrap shadow-md z-40 border border-border/10">
+                <div className="absolute right-full top-1/2 -translate-y-1/2 mr-2.5 px-2 py-0.5 bg-foreground text-background text-[9px] font-bold rounded-[3px] opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-200 whitespace-nowrap shadow-md z-40 border border-border/10">
                   new chat
                 </div>
               </div>
@@ -659,7 +660,7 @@ export const AgentSidebar: React.FC = () => {
                 <button
                   onClick={() => setShowHistoryView(!showHistoryView)}
                   className={cn(
-                    "p-1 hover:bg-muted rounded-sm transition-colors text-foreground/50 hover:text-foreground shrink-0 border border-border shadow-sm flex items-center justify-center relative",
+                    "p-1 hover:bg-muted rounded-[3px] transition-colors text-foreground/50 hover:text-foreground shrink-0 border border-border shadow-sm flex items-center justify-center relative",
                     showHistoryView && "bg-blue-600/10 text-blue-600 border-blue-600/20"
                   )}
                   title="Toggle Agent History"
@@ -669,7 +670,7 @@ export const AgentSidebar: React.FC = () => {
                 
                 {/* Tooltip */}
                 {!showHistoryView && (
-                  <div className="absolute right-full top-1/2 -translate-y-1/2 mr-2.5 px-2 py-0.5 bg-foreground text-background text-[9px] font-bold rounded-sm opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-200 whitespace-nowrap shadow-md z-40 border border-border/10">
+                  <div className="absolute right-full top-1/2 -translate-y-1/2 mr-2.5 px-2 py-0.5 bg-foreground text-background text-[9px] font-bold rounded-[3px] opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-200 whitespace-nowrap shadow-md z-40 border border-border/10">
                     history
                   </div>
                 )}
@@ -678,7 +679,7 @@ export const AgentSidebar: React.FC = () => {
               {/* Close arrow — slides sidebar back to the right */}
               <button
                 onClick={() => AgentUIController.getInstance().toggleSidebar()}
-                className="p-1.5 hover:bg-muted rounded-sm transition-colors text-foreground hover:text-blue-500 border border-border shadow-sm shrink-0"
+                className="p-1.5 hover:bg-muted rounded-[3px] transition-colors text-foreground hover:text-blue-500 border border-border shadow-sm shrink-0"
                 title="Close sidebar"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
@@ -688,8 +689,8 @@ export const AgentSidebar: React.FC = () => {
 
 
           {/* Scrollable middle container */}
-          <div className="flex-1 overflow-y-auto p-3 space-y-3.5 scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-            {showHistoryView ? (
+          {showHistoryView ? (
+            <div className="flex-1 overflow-y-auto p-3 space-y-3.5 scrollbar-thin scrollbar-thumb-border">
               <AgentHistoryView
                 planMessages={planMessages}
                 executionHistory={executionHistory}
@@ -697,7 +698,9 @@ export const AgentSidebar: React.FC = () => {
                 onDeleteExecution={handleDeleteExecution}
                 onClose={() => setShowHistoryView(false)}
               />
-            ) : sidebarMode === 'ACT' ? (
+            </div>
+          ) : sidebarMode === 'ACT' ? (
+            <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 space-y-3.5 scrollbar-thin scrollbar-thumb-border">
               <AgentActView
                 status={status}
                 isAwaking={isAwaking}
@@ -713,15 +716,18 @@ export const AgentSidebar: React.FC = () => {
                 getProgressBarClass={getProgressBarClass}
                 availableOptions={availableOptions}
                 handleStart={handleStart}
+                isRunning={isRunning}
               />
-            ) : (
+            </div>
+          ) : (
+            <div ref={planScrollRef} className="flex-1 overflow-y-auto p-3 space-y-3.5 scrollbar-thin scrollbar-thumb-border">
               <AgentPlanView
                 planMessages={planMessages}
                 isPlanBotTyping={isPlanBotTyping}
                 planScrollRef={planScrollRef}
               />
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Goal Input - LOCKED at bottom, hidden in history mode */}
           {!showHistoryView && (
@@ -750,7 +756,7 @@ export const AgentSidebar: React.FC = () => {
             <div className="flex items-center justify-between text-[10px] font-bold text-foreground/60">
               <span className="opacity-60 text-foreground/80">v1.0.0-alpha</span>
               <div className="flex items-center space-x-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_5px_rgba(16,185,129,0.5)]" />
+                <span className="w-1.5 h-1.5 rounded-[1px] bg-emerald-500 shadow-[0_0_5px_rgba(16,185,129,0.5)]" />
                 <span className="text-foreground/80">Autonomous engine ready</span>
               </div>
             </div>

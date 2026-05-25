@@ -12,7 +12,7 @@ import {
   ShieldCheck, Calendar, Check, X, ShieldAlert, ArrowRight, Download 
 } from 'lucide-react';
 
-export default function ApprovalsPage() {
+export function PayrollApprovalsClient() {
   const queryClient = useQueryClient();
   const [selectedRun, setSelectedRun] = React.useState<any | null>(null);
 

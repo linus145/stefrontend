@@ -254,11 +254,6 @@ export class AgentController {
         // Show the LLM's thinking
         if (action.thinking) {
           this.stream.emit('status', `🧠 ${action.thinking}`);
-          try {
-            await api.post('/autonomousagent1/chat/history/', { sender: 'bot', text: `🧠 [Thinking]: ${action.thinking}` });
-          } catch (e) {
-            console.error("Failed to save agent thinking to chat history:", e);
-          }
         }
 
         // 3. CHECK — is the goal complete?
@@ -275,12 +270,7 @@ export class AgentController {
           this._isWaitingForUser = true;
           this._userResponse = null;
 
-          // Save agent's question to conversational chat history
-          try {
-            await api.post('/autonomousagent1/chat/history/', { sender: 'bot', text: `🤖 [Autonomous Question]: ${action.value}` });
-          } catch (e) {
-            console.error("Failed to save agent question to chat history:", e);
-          }
+          // Do not save agent's question to conversational chat history in ACT mode
 
           // Dispatch event so the sidebar shows the question
           window.dispatchEvent(new CustomEvent('agent-ask-user', {
@@ -302,12 +292,7 @@ export class AgentController {
             userResponse = reply;
             this._userResponse = null;
 
-            // Save user response to conversational chat history
-            try {
-              await api.post('/autonomousagent1/chat/history/', { sender: 'user', text: reply });
-            } catch (e) {
-              console.error("Failed to save user response to chat history:", e);
-            }
+            // Do not save user response to conversational chat history in ACT mode
 
             // Record in history
             this.llmActionHistory.push({
@@ -707,11 +692,7 @@ export class AgentController {
 
           if (action.type === 'ask_user') {
             this.lastQuestion = action.message || '';
-            try {
-              await api.post('/autonomousagent1/chat/history/', { sender: 'bot', text: `🤖 [Plan Question]: ${this.lastQuestion}` });
-            } catch (e) {
-              console.error("Failed to save agent plan question to chat history:", e);
-            }
+            // Do not save agent plan question to conversational chat history in ACT mode
             task.status = 'paused';
             this.persistPlan();
             this.stream.emit('task_paused', task);

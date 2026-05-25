@@ -6,30 +6,47 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Plus, X } from 'lucide-react';
 
-interface TaxSlabsProps {
-  taxConfigs: any;
-  taxForm: {
-    slab_name: string;
-    percentage: string;
-    min_amount: string;
-    max_amount: string;
-  };
-  setTaxForm: (form: any) => void;
-  isTaxModalOpen: boolean;
-  setIsTaxModalOpen: (open: boolean) => void;
-  onTaxSubmit: (data: any) => void;
-  taxPending: boolean;
-}
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { hrPayrollService } from '@/services/hr';
+import { toast } from 'sonner';
+import { LocalLoader } from '@/components/ui/local-loader';
 
-export function TaxSlabs({
-  taxConfigs,
-  taxForm,
-  setTaxForm,
-  isTaxModalOpen,
-  setIsTaxModalOpen,
-  onTaxSubmit,
-  taxPending
-}: TaxSlabsProps) {
+export function TaxSlabs() {
+  const queryClient = useQueryClient();
+  const [isTaxModalOpen, setIsTaxModalOpen] = useState(false);
+  const [taxForm, setTaxForm] = useState({
+    slab_name: '',
+    percentage: '',
+    min_amount: '',
+    max_amount: ''
+  });
+
+  // Queries
+  const { data: taxConfigs, isLoading: isLoadingTax } = useQuery({
+    queryKey: ['payroll-tax-configs'],
+    queryFn: () => hrPayrollService.getTaxConfigs(),
+  });
+
+  // Mutations
+  const taxMutation = useMutation({
+    mutationFn: (data: any) => hrPayrollService.createTaxConfig(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['payroll-tax-configs'] });
+      setIsTaxModalOpen(false);
+      toast.success('Tax bracket registered successfully!');
+    },
+    onError: () => {
+      toast.error('Failed to create custom tax config.');
+    }
+  });
+
+  const onTaxSubmit = (data: any) => taxMutation.mutate(data);
+  const taxPending = taxMutation.isPending;
+
+  if (isLoadingTax) {
+    return <LocalLoader />;
+  }
   
   return (
     <div className="space-y-4 animate-in fade-in duration-300">
@@ -90,8 +107,8 @@ export function TaxSlabs({
 
       {/* Tax Slab addition Modal */}
       {isTaxModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800/80 rounded-md w-full max-w-md shadow-2xl p-6 relative overflow-hidden animate-in zoom-in-95 duration-300">
+        <div className="fixed inset-0 bg-slate-900/15 dark:bg-black/40 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200 pointer-events-none">
+          <div className="bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800/80 rounded-md w-full max-w-md shadow-2xl p-6 relative overflow-hidden animate-in zoom-in-95 duration-300 pointer-events-auto">
             <button 
               onClick={() => setIsTaxModalOpen(false)}
               className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer"

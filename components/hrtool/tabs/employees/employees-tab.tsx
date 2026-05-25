@@ -150,6 +150,8 @@ export function EmployeesTab() {
       hrEmployeeService.updateEmployee(id, { employment_type }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employees'] });
+      queryClient.invalidateQueries({ queryKey: ['departments'] });
+      queryClient.invalidateQueries({ queryKey: ['designations'] });
       toast.success('Employment type updated manually');
     },
     onError: () => toast.error('Failed to update employment type')
@@ -159,6 +161,8 @@ export function EmployeesTab() {
     mutationFn: (id: string) => hrEmployeeService.deleteEmployee(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employees'] });
+      queryClient.invalidateQueries({ queryKey: ['departments'] });
+      queryClient.invalidateQueries({ queryKey: ['designations'] });
       toast.success('Employee removed successfully');
       setDeleteTarget(null);
     },
@@ -284,6 +288,7 @@ export function EmployeesTab() {
             className="pl-10 h-10 bg-white border border-border ring-offset-background focus-visible:ring-1 focus-visible:ring-[#0a66c2]/50 focus-visible:border-[#0a66c2]/50 rounded-sm text-sm font-medium placeholder:text-muted-foreground/60 shadow-sm transition-all"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
+            data-agent="employee-search-input"
           />
         </div>
 
@@ -297,6 +302,7 @@ export function EmployeesTab() {
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleApplyFilters();
               }}
+              data-agent="employee-type-filter"
               className="h-10 w-full bg-white border border-border focus-visible:ring-1 focus-visible:ring-[#0a66c2]/50 focus-visible:border-[#0a66c2]/50 rounded-sm text-[11px] font-bold text-muted-foreground px-3 shadow-sm transition-all focus:outline-none cursor-pointer"
             >
               <option value="ALL">All Types</option>
@@ -316,6 +322,7 @@ export function EmployeesTab() {
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleApplyFilters();
               }}
+              data-agent="employee-designation-filter"
               className="h-10 w-full bg-white border border-border focus-visible:ring-1 focus-visible:ring-[#0a66c2]/50 focus-visible:border-[#0a66c2]/50 rounded-sm text-[11px] font-bold text-muted-foreground px-3 shadow-sm transition-all focus:outline-none cursor-pointer"
             >
               <option value="ALL">All Designations</option>
@@ -333,6 +340,7 @@ export function EmployeesTab() {
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleApplyFilters();
               }}
+              data-agent="employee-department-filter"
               className="h-10 w-full bg-white border border-border focus-visible:ring-1 focus-visible:ring-[#0a66c2]/50 focus-visible:border-[#0a66c2]/50 rounded-sm text-[11px] font-bold text-muted-foreground px-3 shadow-sm transition-all focus:outline-none cursor-pointer"
             >
               <option value="ALL">All Departments</option>
@@ -344,19 +352,21 @@ export function EmployeesTab() {
 
           {/* Sort / Ordering */}
           <DropdownMenu>
-            <DropdownMenuTrigger className="h-10 px-4 flex items-center justify-center gap-2 rounded-sm text-[11px] font-bold border border-border bg-white hover:bg-blue-50/30 text-muted-foreground transition-all outline-none whitespace-nowrap shadow-sm">
+            <DropdownMenuTrigger data-agent="employee-sort-trigger" className="h-10 px-4 flex items-center justify-center gap-2 rounded-sm text-[11px] font-bold border border-border bg-white hover:bg-blue-50/30 text-muted-foreground transition-all outline-none whitespace-nowrap shadow-sm">
               <Calendar className="h-3.5 w-3.5 text-[#0a66c2]" />
               {orderingInput === '-created_at' ? 'Newest' : 'Oldest'}
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="rounded-sm border-border/50 bg-card/95 backdrop-blur-md shadow-xl min-w-[160px]">
               <DropdownMenuItem
                 onClick={() => handleSortChange('-created_at')}
+                data-agent="employee-sort-newest-btn"
                 className={cn("text-xs font-semibold py-2.5 cursor-pointer focus:bg-[#0a66c2]/10", orderingInput === '-created_at' ? "text-[#0a66c2] bg-[#0a66c2]/5" : "")}
               >
                 Newest First
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => handleSortChange('created_at')}
+                data-agent="employee-sort-oldest-btn"
                 className={cn("text-xs font-semibold py-2.5 cursor-pointer focus:bg-[#0a66c2]/10", orderingInput === 'created_at' ? "text-[#0a66c2] bg-[#0a66c2]/5" : "")}
               >
                 Oldest First
@@ -376,6 +386,7 @@ export function EmployeesTab() {
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') handleApplyFilters();
                 }}
+                data-agent="employee-start-date-input"
               />
             </div>
             <span className="text-muted-foreground/50 font-medium">-</span>
@@ -389,6 +400,7 @@ export function EmployeesTab() {
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') handleApplyFilters();
                 }}
+                data-agent="employee-end-date-input"
               />
             </div>
           </div>
@@ -409,7 +421,7 @@ export function EmployeesTab() {
             </thead>
             <tbody>
               {employees?.data?.results?.map((employee: any) => (
-                <tr key={employee.id} className="border-b border-border/40 hover:bg-muted/20 transition-colors group">
+                <tr key={employee.id} data-agent="employee-row" className="border-b border-border/40 hover:bg-muted/20 transition-colors group">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-9 w-9 border border-border/50 shadow-sm rounded-sm">
@@ -419,7 +431,7 @@ export function EmployeesTab() {
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col">
-                        <span className="font-bold text-[13px] text-foreground group-hover:text-[#0a66c2] transition-colors">{employee.first_name} {employee.last_name}</span>
+                        <span data-agent="employee-name" className="font-bold text-[13px] text-foreground group-hover:text-[#0a66c2] transition-colors">{employee.first_name} {employee.last_name}</span>
                         <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">ID: {employee.employee_id}</span>
                       </div>
                     </div>
@@ -452,18 +464,10 @@ export function EmployeesTab() {
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-1.5">
-                      {employee.job_application && (
-                        <button
-                          onClick={() => rescheduleMutation.mutate(employee.job_application)}
-                          className="w-7 h-7 flex items-center justify-center rounded-sm bg-purple-600/5 text-purple-600 hover:bg-purple-600 hover:text-white transition-all active:scale-95 border border-purple-600/10"
-                          title="Reschedule Interview"
-                        >
-                          <RefreshCw className={cn("h-3 w-3", rescheduleMutation.isPending && "animate-spin")} />
-                        </button>
-                      )}
                       
                       <button
                         onClick={() => setSelectedEmployeeId(employee.id)}
+                        data-agent="employee-details-btn"
                         className="w-7 h-7 flex items-center justify-center rounded-sm bg-blue-500/5 text-blue-600 hover:bg-blue-600 hover:text-white transition-all active:scale-95 border border-blue-500/10"
                         title="View Details"
                       >
@@ -473,6 +477,7 @@ export function EmployeesTab() {
                       <button
                         onClick={() => sendCredentialsMutation.mutate(employee.id)}
                         disabled={sendCredentialsMutation.isPending}
+                        data-agent="employee-send-link-btn"
                         className="w-7 h-7 flex items-center justify-center rounded-sm bg-emerald-500/5 text-emerald-600 hover:bg-emerald-600 hover:text-white transition-all active:scale-95 border border-emerald-500/10 disabled:opacity-50"
                         title="Send Email Link"
                       >
@@ -480,14 +485,8 @@ export function EmployeesTab() {
                       </button>
 
                       <button
-                        className="w-7 h-7 flex items-center justify-center rounded-sm bg-indigo-500/5 text-indigo-600 hover:bg-indigo-600 hover:text-white transition-all active:scale-95 border border-indigo-500/10"
-                        title="Start Interview"
-                      >
-                        <BrainCircuit className="h-3 w-3" />
-                      </button>
-
-                      <button
                         onClick={() => setDeleteTarget({ id: employee.id, name: `${employee.first_name} ${employee.last_name}` })}
+                        data-agent="employee-delete-btn"
                         className="w-7 h-7 flex items-center justify-center rounded-sm bg-red-500/5 text-red-600 hover:bg-red-600 hover:text-white transition-all active:scale-95 border border-red-500/10"
                         title="Delete Employee"
                       >
@@ -510,6 +509,7 @@ export function EmployeesTab() {
             size="sm"
             onClick={() => setPage(p => Math.max(1, p - 1))}
             disabled={page === 1 || isLoading}
+            data-agent="employee-pagination-prev"
             className="text-xs h-8 px-4 rounded-sm border-border text-muted-foreground shadow-sm hover:bg-muted"
           >
             Previous
@@ -522,6 +522,7 @@ export function EmployeesTab() {
             size="sm"
             onClick={() => setPage(p => p + 1)}
             disabled={!employees?.data?.next || isLoading}
+            data-agent="employee-pagination-next"
             className="text-xs h-8 px-4 rounded-sm border-border text-muted-foreground shadow-sm hover:bg-muted"
           >
             Next
@@ -539,12 +540,13 @@ export function EmployeesTab() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-2">
-            <AlertDialogCancel className="rounded-sm text-xs font-semibold h-9 px-5 border-border/60 hover:bg-muted/50">
+            <AlertDialogCancel data-agent="employee-delete-cancel-btn" className="rounded-sm text-xs font-semibold h-9 px-5 border-border/60 hover:bg-muted/50">
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteConfirm}
               disabled={deleteEmployeeMutation.isPending}
+              data-agent="employee-delete-confirm-btn"
               className="rounded-sm text-xs font-semibold h-9 px-5 bg-red-600 text-white hover:bg-red-700 shadow-lg shadow-red-500/20 transition-all"
             >
               {deleteEmployeeMutation.isPending ? 'Removing...' : 'Remove Employee'}

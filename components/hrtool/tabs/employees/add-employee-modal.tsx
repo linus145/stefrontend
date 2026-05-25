@@ -76,6 +76,8 @@ export function AddEmployeeModal({ open, onOpenChange }: AddEmployeeModalProps) 
     mutationFn: (data: any) => hrEmployeeService.addManualEmployee(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employees'] });
+      queryClient.invalidateQueries({ queryKey: ['departments'] });
+      queryClient.invalidateQueries({ queryKey: ['designations'] });
       toast.success('Employee created successfully');
       onOpenChange(false);
     },

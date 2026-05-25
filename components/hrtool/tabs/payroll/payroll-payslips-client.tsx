@@ -12,7 +12,7 @@ import {
   Download, FileText, Search, Calendar, ChevronRight
 } from 'lucide-react';
 
-export default function PayslipsPage() {
+export function PayrollPayslipsClient() {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
 
@@ -133,7 +133,7 @@ export default function PayslipsPage() {
                         href={`${process.env.NEXT_PUBLIC_API_URL || ''}/api/payroll/payslips/${item.id}/download/`}
                         download
                         title="Download"
-                        className="inline-flex items-center justify-center border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/40 text-slate-600 dark:text-slate-450 font-bold text-[10px] h-8 w-8 p-0 rounded-md cursor-pointer transition-all duration-300"
+                        className="inline-flex items-center justify-center border border-slate-200 dark:border-slate-800 hover:bg-slate-55 dark:hover:bg-slate-800/40 text-slate-600 dark:text-slate-450 font-bold text-[10px] h-8 w-8 p-0 rounded-md cursor-pointer transition-all duration-300"
                       >
                         <Download className="h-3.5 w-3.5" />
                       </a>

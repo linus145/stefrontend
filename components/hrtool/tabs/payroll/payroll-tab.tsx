@@ -8,7 +8,7 @@ export function PayrollTab() {
   const router = useRouter();
 
   useEffect(() => {
-    router.push('/payroll/dashboard');
+    router.push('/Hrtools/payroll/dashboard');
   }, [router]);
 
   return (

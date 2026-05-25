@@ -9,7 +9,7 @@ import { Landmark, Cpu, Save, RefreshCw } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
-export default function SettingsPage() {
+export function PayrollSettingsClient() {
   const queryClient = useQueryClient();
   
   const { data: settingsRes, isLoading } = useQuery({

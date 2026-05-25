@@ -8,64 +8,129 @@ import {
   CreditCard, Play, Download, CheckCircle2, AlertCircle, 
   ArrowRight, ShieldAlert, X, Check, Calendar, RotateCcw, Trash2, Mail
 } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { hrPayrollService } from '@/services/hr';
+import { toast } from 'sonner';
 
-interface PayrollRunsProps {
-  payrolls: any;
-  isLoadingPayrolls: boolean;
-  selectedRun: any;
-  setSelectedRun: (run: any) => void;
-  runRecords: any[];
-  isLoadingRecords: boolean;
-  onApproveRun: (id: string) => void;
-  onRejectRun: (id: string) => void;
-  approvePending: boolean;
-  rejectPending: boolean;
-  onRerunRun: (id: string) => void;
-  onDeleteRun: (id: string) => void;
-  rerunPending: boolean;
-  deletePending: boolean;
-  isNewRunOpen: boolean;
-  setIsNewRunOpen: (open: boolean) => void;
-  newRunMonth: string;
-  setNewRunMonth: (m: string) => void;
-  newRunYear: string;
-  setNewRunYear: (y: string) => void;
-  onCompileSubmit: () => void;
-  compilePending: boolean;
-  onClaimTabRedirect: () => void;
-  page?: number;
-  setPage?: React.Dispatch<React.SetStateAction<number>>;
-}
+export function PayrollRuns() {
+  const queryClient = useQueryClient();
+  const [selectedRun, setSelectedRun] = useState<any>(null);
+  const [runRecords, setRunRecords] = useState<any[]>([]);
+  const [isLoadingRecords, setIsLoadingRecords] = useState(false);
 
-export function PayrollRuns({
-  payrolls,
-  isLoadingPayrolls,
-  selectedRun,
-  setSelectedRun,
-  runRecords,
-  isLoadingRecords,
-  onApproveRun,
-  onRejectRun,
-  approvePending,
-  rejectPending,
-  onRerunRun,
-  onDeleteRun,
-  rerunPending,
-  deletePending,
-  isNewRunOpen,
-  setIsNewRunOpen,
-  newRunMonth,
-  setNewRunMonth,
-  newRunYear,
-  setNewRunYear,
-  onCompileSubmit,
-  compilePending,
-  onClaimTabRedirect,
-  page,
-  setPage
-}: PayrollRunsProps) {
+  // Modals / Forms state
+  const [isNewRunOpen, setIsNewRunOpen] = useState(false);
+  const [newRunMonth, setNewRunMonth] = useState('5');
+  const [newRunYear, setNewRunYear] = useState('2026');
+  const [page, setPage] = useState(1);
+
+  // Queries
+  const { data: payrolls, isLoading: isLoadingPayrolls } = useQuery({
+    queryKey: ['payrolls', page],
+    queryFn: () => hrPayrollService.getPayrolls({ page }),
+  });
+
+  // Fetch records when a payroll run is clicked
+  useEffect(() => {
+    if (selectedRun) {
+      setIsLoadingRecords(true);
+      hrPayrollService.getPayrollRecords(selectedRun.id)
+        .then(res => {
+          if (res.data) {
+            setRunRecords(res.data);
+          }
+        })
+        .catch(() => {
+          toast.error("Failed to load payroll details");
+        })
+        .finally(() => {
+          setIsLoadingRecords(false);
+        });
+    }
+  }, [selectedRun]);
+
+  // Mutations
+  const generateMutation = useMutation({
+    mutationFn: (data: { month: number; year: number }) => 
+      hrPayrollService.generatePayroll(data.month, data.year),
+    onSuccess: (res: any) => {
+      queryClient.invalidateQueries({ queryKey: ['payrolls'] });
+      queryClient.invalidateQueries({ queryKey: ['payroll-analytics'] });
+      queryClient.invalidateQueries({ queryKey: ['payroll-approvals'] });
+      setIsNewRunOpen(false);
+      toast.success(res.message || 'Payroll generated successfully in Draft mode.');
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.error || 'Failed to generate payroll run.');
+    }
+  });
+
+  const approveMutation = useMutation({
+    mutationFn: (id: string) => hrPayrollService.approvePayroll(id),
+    onSuccess: (res: any) => {
+      queryClient.invalidateQueries({ queryKey: ['payrolls'] });
+      queryClient.invalidateQueries({ queryKey: ['payroll-analytics'] });
+      setSelectedRun(null);
+      toast.success(res.message || 'Payroll approved, finalized and paid successfully!');
+    },
+    onError: () => {
+      toast.error('Failed to approve payroll cycle.');
+    }
+  });
+
+  const rejectMutation = useMutation({
+    mutationFn: (id: string) => hrPayrollService.rejectPayroll(id),
+    onSuccess: (res: any) => {
+      queryClient.invalidateQueries({ queryKey: ['payrolls'] });
+      queryClient.invalidateQueries({ queryKey: ['payroll-analytics'] });
+      setSelectedRun(null);
+      toast.success(res.message || 'Payroll cycle rejected back to draft.');
+    },
+    onError: () => {
+      toast.error('Failed to reject payroll cycle.');
+    }
+  });
+
+  const rerunMutation = useMutation({
+    mutationFn: (id: string) => hrPayrollService.rerunPayroll(id),
+    onSuccess: (res: any) => {
+      queryClient.invalidateQueries({ queryKey: ['payrolls'] });
+      queryClient.invalidateQueries({ queryKey: ['payroll-analytics'] });
+      queryClient.invalidateQueries({ queryKey: ['payroll-approvals'] });
+      setSelectedRun(null);
+      toast.success(res.message || 'Payroll recalculation started successfully.');
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.error || 'Failed to rerun payroll.');
+    }
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => hrPayrollService.deletePayroll(id),
+    onSuccess: (res: any) => {
+      queryClient.invalidateQueries({ queryKey: ['payrolls'] });
+      queryClient.invalidateQueries({ queryKey: ['payroll-analytics'] });
+      queryClient.invalidateQueries({ queryKey: ['payroll-approvals'] });
+      setSelectedRun(null);
+      toast.success('Payroll cycle permanently hard deleted.');
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.error || 'Failed to delete payroll.');
+    }
+  });
+
+  const onApproveRun = (id: string) => approveMutation.mutate(id);
+  const onRejectRun = (id: string) => rejectMutation.mutate(id);
+  const approvePending = approveMutation.isPending;
+  const rejectPending = rejectMutation.isPending;
+  const onRerunRun = (id: string) => rerunMutation.mutate(id);
+  const onDeleteRun = (id: string) => deleteMutation.mutate(id);
+  const rerunPending = rerunMutation.isPending;
+  const deletePending = deleteMutation.isPending;
+  const onCompileSubmit = () => generateMutation.mutate({ month: parseInt(newRunMonth), year: parseInt(newRunYear) });
+  const compilePending = generateMutation.isPending;
+  const onClaimTabRedirect = () => { window.location.href = '/Hrtools/payroll/reimbursements'; };
   
   const { data: settingsRes } = useQuery({
     queryKey: ['payroll-settings'],
@@ -108,7 +173,7 @@ export function PayrollRuns({
     }
   };
 
-  const rawList = payrolls?.data?.results || payrolls?.data || [];
+  const rawList = (Array.isArray(payrolls?.data?.results) ? payrolls.data.results : (Array.isArray(payrolls?.data) ? payrolls.data : [])) as any[];
   const sortedRuns = [...rawList].sort((a: any, b: any) => {
     const yearA = a.year || 0;
     const yearB = b.year || 0;
@@ -189,7 +254,7 @@ export function PayrollRuns({
                             }
                           }}
                           disabled={rerunPending}
-                          data-agent={`payroll-rerun-btn-${run.id}`}
+                          data-agent={`payroll-rerun-btn-${getMonthName(run.month)}-${run.year}`}
                           title="Rerun"
                           className="border border-amber-500/20 hover:bg-amber-500/5 text-amber-600 bg-transparent rounded-md font-bold text-xs h-7.5 w-7.5 p-0 cursor-pointer transition-all duration-300 inline-flex items-center justify-center"
                         >
@@ -203,7 +268,7 @@ export function PayrollRuns({
                             }
                           }}
                           disabled={deletePending}
-                          data-agent={`payroll-delete-btn-${run.id}`}
+                          data-agent={`payroll-delete-btn-${getMonthName(run.month)}-${run.year}`}
                           title="Delete"
                           className="border border-red-500/20 hover:bg-red-500/5 text-red-600 bg-transparent rounded-md font-bold text-xs h-7.5 w-7.5 p-0 cursor-pointer transition-all duration-300 inline-flex items-center justify-center"
                         >
@@ -211,7 +276,7 @@ export function PayrollRuns({
                         </Button>
                         <Button 
                           onClick={() => setSelectedRun(run)}
-                          data-agent={`payroll-review-sheet-btn-${run.id}`}
+                          data-agent={`payroll-review-sheet-btn-${getMonthName(run.month)}-${run.year}`}
                           className="border border-[#0a66c2]/20 hover:bg-[#0a66c2]/5 text-[#0a66c2] dark:text-[#3b8fd9] dark:hover:bg-[#0a66c2]/10 bg-transparent rounded-md font-bold text-xs h-7.5 px-3 cursor-pointer transition-all duration-300 inline-flex items-center gap-1"
                         >
                           Review sheet <ArrowRight className="h-3 w-3" />
@@ -254,8 +319,8 @@ export function PayrollRuns({
 
         {/* Start New Run Dialog */}
         {isNewRunOpen && (
-          <div className="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-white dark:bg-[#121320] border border-slate-100 dark:border-slate-800/80 rounded-md w-full max-w-md shadow-2xl p-6 relative overflow-hidden animate-in fade-in zoom-in-95 duration-300">
+          <div className="fixed inset-0 bg-slate-900/15 dark:bg-black/40 z-50 flex items-center justify-center p-4 pointer-events-none">
+            <div className="bg-white dark:bg-[#121320] border border-slate-100 dark:border-slate-800/80 rounded-md w-full max-w-md shadow-2xl p-6 relative overflow-hidden animate-in fade-in zoom-in-95 duration-300 pointer-events-auto">
               <button 
                 onClick={() => setIsNewRunOpen(false)}
                 data-agent="payroll-new-run-close-btn"
@@ -364,7 +429,7 @@ export function PayrollRuns({
                 }
               }}
               disabled={rerunPending}
-              data-agent={`payroll-drilldown-rerun-btn-${selectedRun.id}`}
+              data-agent={`payroll-drilldown-rerun-btn-${getMonthName(selectedRun.month)}-${selectedRun.year}`}
               className="bg-amber-600 hover:bg-amber-700 text-white shadow-md shadow-amber-500/15 rounded-md text-xs font-bold py-2 px-4 cursor-pointer flex items-center gap-1.5 transition-all duration-300 h-9"
             >
               <RotateCcw className="h-3.5 w-3.5" /> Rerun Compilation

@@ -21,6 +21,9 @@ const PayrollTab = React.lazy(() => import('@/components/hrtool/tabs/payroll/pay
 const PerformanceTab = React.lazy(() => import('@/components/hrtool/tabs/performance/performance-tab').then(m => ({ default: m.PerformanceTab })));
 const OrgTab = React.lazy(() => import('@/components/hrtool/tabs/organisation/org-tab').then(m => ({ default: m.OrgTab })));
 const TemplatesTab = React.lazy(() => import('@/components/hrtool/tabs/templates/templates-tab').then(m => ({ default: m.TemplatesTab })));
+const AgentSettingsTab = React.lazy(() => import('@/components/hrtool/tabs/agentsetting/agent-settings-tab').then(m => ({ default: m.AgentSettingsTab })));
+const AgentSchedulingTab = React.lazy(() => import('@/components/hrtool/tabs/scheduling/agent-scheduling-tab').then(m => ({ default: m.AgentSchedulingTab })));
+
 
 export function HRShell() {
   const { user, isAuthenticated, isLoading: authLoading, userSubscription } = useAuth();
@@ -115,6 +118,8 @@ export function HRShell() {
           />
         )}
         {activeTab === 'payroll' && <PayrollTab />}
+        {activeTab === 'agent-settings' && <AgentSettingsTab />}
+        {activeTab === 'agent-scheduling' && <AgentSchedulingTab />}
         {activeTab === 'templates' && <TemplatesTab />}
         {activeTab === 'performance' && <PerformanceTab />}
         {activeTab === 'organization' && <OrgTab />}

@@ -5,27 +5,52 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { X, Check } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { hrPayrollService } from '@/services/hr';
+import { toast } from 'sonner';
+import { LocalLoader } from '@/components/ui/local-loader';
 
-interface ExpenseClaimsProps {
-  reimbursements: any;
-  isLoadingReimbursements: boolean;
-  onApproveClaim: (id: string) => void;
-  onRejectClaim: (id: string) => void;
-}
+export function ExpenseClaims() {
+  const queryClient = useQueryClient();
 
-export function ExpenseClaims({
-  reimbursements,
-  isLoadingReimbursements,
-  onApproveClaim,
-  onRejectClaim
-}: ExpenseClaimsProps) {
-  
+  const { data: reimbursements, isLoading: isLoadingReimbursements } = useQuery({
+    queryKey: ['payroll-reimbursements'],
+    queryFn: () => hrPayrollService.getReimbursements(),
+  });
+
+  const approveReimbursementMutation = useMutation({
+    mutationFn: (id: string) => hrPayrollService.approveReimbursement(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['payroll-reimbursements'] });
+      toast.success('Expense claim approved successfully!');
+    },
+    onError: () => {
+      toast.error('Failed to approve reimbursement request.');
+    }
+  });
+
+  const rejectReimbursementMutation = useMutation({
+    mutationFn: (id: string) => hrPayrollService.rejectReimbursement(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['payroll-reimbursements'] });
+      toast.success('Expense claim rejected successfully.');
+    },
+    onError: () => {
+      toast.error('Failed to reject reimbursement request.');
+    }
+  });
+
+  const onApproveClaim = (id: string) => approveReimbursementMutation.mutate(id);
+  const onRejectClaim = (id: string) => rejectReimbursementMutation.mutate(id);
+
   const { data: settingsRes } = useQuery({
     queryKey: ['payroll-settings'],
     queryFn: () => hrPayrollService.getSettingsConfigs(),
   });
+
+  if (isLoadingReimbursements) {
+    return <LocalLoader />;
+  }
 
   const getCurrencySymbol = (code: string) => {
     switch (code?.toUpperCase()) {

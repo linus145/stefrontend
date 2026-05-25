@@ -37,6 +37,10 @@ export type HRSection =
   | 'payroll-approvals'
   | 'payroll-reports'
   | 'payroll-settings'
+  | 'agent-settings'
+  | 'agent-scheduling'
+  | 'scheduling'
+  | 'settings'
   | 'performance' 
   | 'organization'
   | 'templates';

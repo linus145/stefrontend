@@ -131,6 +131,8 @@ export function EmployeeDetailsView({ employeeId, onBack }: EmployeeDetailsViewP
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employees'] });
       queryClient.invalidateQueries({ queryKey: ['employee-detail', employeeId] });
+      queryClient.invalidateQueries({ queryKey: ['departments'] });
+      queryClient.invalidateQueries({ queryKey: ['designations'] });
       toast.success('Employee profile and bank details updated successfully.');
       onBack();
     },

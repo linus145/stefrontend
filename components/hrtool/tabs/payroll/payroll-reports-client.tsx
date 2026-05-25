@@ -8,7 +8,7 @@ import { LocalLoader } from '@/components/ui/local-loader';
 import { BarChart3, Users, Landmark, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-export default function ReportsPage() {
+export function PayrollReportsClient() {
   const { data: reportsRes, isLoading } = useQuery({
     queryKey: ['payroll-reports'],
     queryFn: () => hrPayrollService.getReportsAnalytics(),

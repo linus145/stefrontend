@@ -16,7 +16,9 @@ import {
   CreditCard,
   UserCheck,
   ChevronDown,
-  Files
+  Files,
+  Clock,
+  Settings
 } from 'lucide-react';
 import { HRSection } from './hr-header';
 
@@ -72,6 +74,22 @@ const NAVIGATION_ITEMS: { id: HRSection; label: string; icon: any; subItems?: { 
       { id: 'payroll-settings', label: 'Settings' }
     ]
   },
+  {
+    id: 'scheduling' as any,
+    label: 'Scheduling',
+    icon: Clock,
+    subItems: [
+      { id: 'agent-scheduling', label: 'Agent Scheduling' }
+    ]
+  },
+  {
+    id: 'settings' as any,
+    label: 'Settings',
+    icon: Settings,
+    subItems: [
+      { id: 'agent-settings', label: 'Agent Settings' }
+    ]
+  },
   { id: 'templates', label: 'Templates', icon: Files },
   { id: 'performance', label: 'Performance', icon: BarChart3 },
   { id: 'organization', label: 'Organization', icon: Building2 },
@@ -93,6 +111,8 @@ export function HRSidebar({
     leave: false,
     attendance: false,
     payroll: false,
+    scheduling: false,
+    settings: false,
   });
 
   const toggleExpand = (itemId: string) => {
@@ -113,12 +133,22 @@ export function HRSidebar({
     if (activeTab.startsWith('payroll-')) {
       setExpandedItems(prev => ({ ...prev, payroll: true }));
     }
+    if (activeTab === 'agent-settings') {
+      setExpandedItems(prev => ({ ...prev, settings: true }));
+    }
+    if (activeTab === 'agent-scheduling') {
+      setExpandedItems(prev => ({ ...prev, scheduling: true }));
+    }
   }, [activeTab]);
 
   const handleNavigation = (tabId: HRSection) => {
     if (tabId.startsWith('payroll-')) {
       const subRoute = tabId.replace('payroll-', '');
-      router.push(`/payroll/${subRoute}`);
+      router.push(`/Hrtools/payroll/${subRoute}`);
+    } else if (tabId === 'agent-settings') {
+      router.push('/Hrtools/agentsettings');
+    } else if (tabId === 'agent-scheduling') {
+      router.push('/Hrtools/scheduling');
     } else {
       router.push(`/Hrtools?tab=${tabId}`);
     }

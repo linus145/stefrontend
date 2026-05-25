@@ -5,43 +5,60 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Edit2, X } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
-import { hrPayrollService } from '@/services/hr';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { hrPayrollService, hrEmployeeService } from '@/services/hr';
+import { toast } from 'sonner';
 
-interface SalaryStructuresProps {
-  structures: any;
-  isLoadingStructures: boolean;
-  selectedStructure: any;
-  setSelectedStructure: (structure: any) => void;
-  structureForm: {
-    employee_id: string;
-    basic_salary: string;
-    hra: string;
-    overtime_rate: string;
-    tax_percentage: string;
-    pf_percentage: string;
-    esi_percentage: string;
-    status: string;
-  };
-  setStructureForm: (form: any) => void;
-  isStructureModalOpen: boolean;
-  setIsStructureModalOpen: (open: boolean) => void;
-  onStructureSubmit: (data: any) => void;
-  structurePending: boolean;
-}
+export function SalaryStructures() {
+  const queryClient = useQueryClient();
+  const [selectedStructure, setSelectedStructure] = useState<any>(null);
+  const [isStructureModalOpen, setIsStructureModalOpen] = useState(false);
+  const [structureForm, setStructureForm] = useState({
+    employee_id: '',
+    basic_salary: '',
+    hra: '',
+    overtime_rate: '',
+    tax_percentage: '',
+    pf_percentage: '',
+    esi_percentage: '',
+    status: 'ACTIVE'
+  });
 
-export function SalaryStructures({
-  structures,
-  isLoadingStructures,
-  selectedStructure,
-  setSelectedStructure,
-  structureForm,
-  setStructureForm,
-  isStructureModalOpen,
-  setIsStructureModalOpen,
-  onStructureSubmit,
-  structurePending
-}: SalaryStructuresProps) {
+  // Queries
+  const { data: structures, isLoading: isLoadingStructures } = useQuery({
+    queryKey: ['payroll-structures'],
+    queryFn: () => hrPayrollService.getSalaryStructures(),
+  });
+
+  const { data: employeesRes } = useQuery({
+    queryKey: ['payroll-employees-list'],
+    queryFn: () => hrEmployeeService.getEmployees({ limit: 100 }),
+  });
+
+  const employeesList = employeesRes?.data?.results || [];
+
+  // Mutations
+  const structureMutation = useMutation({
+    mutationFn: (data: any) => {
+      if (selectedStructure) {
+        return hrPayrollService.updateSalaryStructure(selectedStructure.id, data);
+      }
+      return hrPayrollService.createSalaryStructure(data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['payroll-structures'] });
+      setIsStructureModalOpen(false);
+      setSelectedStructure(null);
+      toast.success('Salary structure configured successfully!');
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.error || 'Failed to configure salary structure.');
+    }
+  });
+
+  const onStructureSubmit = (data: any) => structureMutation.mutate(data);
+  const structurePending = structureMutation.isPending;
   
   const { data: settingsRes } = useQuery({
     queryKey: ['payroll-settings'],
@@ -185,8 +202,8 @@ export function SalaryStructures({
 
       {/* Compensation Profile Modal */}
       {isStructureModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800/80 rounded-md w-full max-w-lg shadow-2xl p-6 relative overflow-hidden animate-in zoom-in-95 duration-300">
+        <div className="fixed inset-0 bg-slate-900/15 dark:bg-black/40 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200 pointer-events-none">
+          <div className="bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800/80 rounded-md w-full max-w-lg shadow-2xl p-6 relative overflow-hidden animate-in zoom-in-95 duration-300 pointer-events-auto">
             <button 
               onClick={() => setIsStructureModalOpen(false)}
               className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer"
@@ -202,16 +219,29 @@ export function SalaryStructures({
             <div className="space-y-4">
               
               <div className="space-y-1.5">
-                <label className="text-[11px] font-bold text-slate-500 tracking-wide">Employee ID</label>
-                <input 
-                  type="text" 
-                  value={structureForm.employee_id}
-                  onChange={(e) => setStructureForm({...structureForm, employee_id: e.target.value})}
-                  disabled={!!selectedStructure}
-                  data-agent="payroll-salary-employee-id-input"
-                  placeholder="Enter employee ID (e.g. EMP-0004)..."
-                  className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-md px-3 py-2 text-xs text-slate-900 dark:text-white outline-none disabled:opacity-60"
-                />
+                <label className="text-[11px] font-bold text-slate-500 tracking-wide">Employee</label>
+                {selectedStructure ? (
+                  <input 
+                    type="text" 
+                    value={`${selectedStructure.employee_name || ''} ${selectedStructure.employee_last_name || ''} (${selectedStructure.employee_code || ''})`}
+                    disabled
+                    className="w-full bg-[#f8fafc]/80 dark:bg-[#151624]/80 border border-slate-200 dark:border-slate-800 rounded-md px-3 py-2 text-xs text-slate-900 dark:text-white outline-none disabled:opacity-60 font-semibold"
+                  />
+                ) : (
+                  <select
+                    value={structureForm.employee_id}
+                    onChange={(e) => setStructureForm({...structureForm, employee_id: e.target.value})}
+                    data-agent="payroll-salary-employee-id-input"
+                    className="w-full h-9 bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-850 rounded-md px-3 py-2 text-xs text-slate-900 dark:text-white outline-none cursor-pointer font-semibold"
+                  >
+                    <option value="">Select an employee...</option>
+                    {employeesList.map((emp: any) => (
+                      <option key={emp.id} value={emp.employee_id || emp.id}>
+                        {emp.first_name} {emp.last_name} ({emp.employee_id || 'No ID'})
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">

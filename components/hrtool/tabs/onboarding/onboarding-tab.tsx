@@ -31,6 +31,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { User, BrainCircuit } from 'lucide-react';
+import { EmployeeDetailsView } from '../employees/employee-details-view';
 
 export function OnboardingTab() {
   const queryClient = useQueryClient();
@@ -40,6 +41,7 @@ export function OnboardingTab() {
   const [endDate, setEndDate] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
   const [activateTarget, setActivateTarget] = useState<{ id: string; name: string } | null>(null);
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(null);
 
   const { data: employees, isLoading } = useQuery({
     queryKey: ['onboarding-employees', search, ordering, startDate, endDate],
@@ -135,6 +137,15 @@ export function OnboardingTab() {
     </div>
   );
 
+  if (selectedEmployeeId) {
+    return (
+      <EmployeeDetailsView
+        employeeId={selectedEmployeeId}
+        onBack={() => setSelectedEmployeeId(null)}
+      />
+    );
+  }
+
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
       <div>
@@ -206,7 +217,7 @@ export function OnboardingTab() {
       {isLoading ? renderSkeletons() : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {employees?.data?.results?.map((employee: any) => (
-            <Card key={employee.id} className="group overflow-hidden hover:shadow-2xl hover:shadow-blue-500/5 transition-all duration-500 border-border/40 bg-card/40 backdrop-blur-md rounded-sm">
+            <Card key={employee.id} data-agent="onboarding-card" className="group overflow-hidden hover:shadow-2xl hover:shadow-blue-500/5 transition-all duration-500 border-border/40 bg-card/40 backdrop-blur-md rounded-sm">
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex gap-4">
@@ -217,7 +228,7 @@ export function OnboardingTab() {
                       </AvatarFallback>
                     </Avatar>
                     <div className="min-w-0">
-                      <CardTitle className="text-[15px] font-bold tracking-tight truncate group-hover:text-[#0a66c2] transition-colors">{employee.first_name} {employee.last_name}</CardTitle>
+                      <CardTitle data-agent="employee-name" className="text-[15px] font-bold tracking-tight truncate group-hover:text-[#0a66c2] transition-colors">{employee.first_name} {employee.last_name}</CardTitle>
                       <p className="text-[11px] font-medium text-[#0a66c2]/70 mt-0.5">{employee.designation_detail?.title || 'Team Member'}</p>
                     </div>
                   </div>
@@ -225,28 +236,37 @@ export function OnboardingTab() {
                     {employee.job_application && (
                       <button
                         onClick={() => rescheduleMutation.mutate(employee.job_application)}
-                        data-agent={`onboarding-move-back-btn-${employee.id}`}
+                        data-agent="onboarding-move-back-btn"
                         className="w-8 h-8 flex items-center justify-center rounded-sm bg-purple-600/5 text-purple-600 hover:bg-purple-600 hover:text-white transition-all active:scale-95 border border-purple-600/10"
-                        title="Move back to Recruitment"
+                        title="Move back to Interview Pipeline"
+                        aria-label="Move back to Interview Pipeline"
                       >
                         <RefreshCw className={cn("h-3.5 w-3.5", rescheduleMutation.isPending && "animate-spin")} />
                       </button>
                     )}
                     <DropdownMenu>
-                      <DropdownMenuTrigger data-agent={`onboarding-more-trigger-${employee.id}`} className="w-8 h-8 flex items-center justify-center rounded-sm bg-muted/30 text-muted-foreground hover:text-foreground transition-all border border-border/30 outline-none">
+                      <DropdownMenuTrigger data-agent="onboarding-more-trigger" className="w-8 h-8 flex items-center justify-center rounded-sm bg-muted/30 text-muted-foreground hover:text-foreground transition-all border border-border/30 outline-none">
                         <MoreHorizontal className="h-4 w-4" />
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="rounded-sm border-border/50 bg-card/95 backdrop-blur-md min-w-[140px] shadow-xl">
-                        <DropdownMenuItem data-agent={`onboarding-details-btn-${employee.id}`} className="text-xs font-semibold py-2 cursor-pointer focus:bg-[#0a66c2]/10 focus:text-[#0a66c2] transition-colors rounded-none">
+                        <DropdownMenuItem 
+                          onClick={() => setSelectedEmployeeId(employee.id)}
+                          data-agent="onboarding-details-btn" 
+                          className="text-xs font-semibold py-2 cursor-pointer focus:bg-[#0a66c2]/10 focus:text-[#0a66c2] transition-colors rounded-none"
+                        >
                           <User className="mr-2 h-3.5 w-3.5 opacity-60" /> Details
                         </DropdownMenuItem>
-                        <DropdownMenuItem data-agent={`onboarding-interview-btn-${employee.id}`} className="text-xs font-semibold py-2 cursor-pointer focus:bg-[#0a66c2]/10 focus:text-[#0a66c2] transition-colors rounded-none">
+                        <DropdownMenuItem 
+                          onClick={() => toast.info(`Interview details are available under Recruiter -> Interview Pipeline tab for ${employee.first_name}.`)}
+                          data-agent="onboarding-interview-btn" 
+                          className="text-xs font-semibold py-2 cursor-pointer focus:bg-[#0a66c2]/10 focus:text-[#0a66c2] transition-colors rounded-none"
+                        >
                           <BrainCircuit className="mr-2 h-3.5 w-3.5 opacity-60" /> Interview
                         </DropdownMenuItem>
                         <DropdownMenuSeparator className="bg-border/40" />
                         <DropdownMenuItem
                           onClick={() => setDeleteTarget({ id: employee.id, name: `${employee.first_name} ${employee.last_name}` })}
-                          data-agent={`onboarding-delete-btn-${employee.id}`}
+                          data-agent="onboarding-delete-btn"
                           className="text-xs font-semibold py-2 cursor-pointer text-red-600 focus:bg-red-50 focus:text-red-700 transition-colors rounded-none"
                         >
                           <Trash2 className="mr-2 h-3.5 w-3.5 opacity-60" /> Delete
@@ -278,7 +298,7 @@ export function OnboardingTab() {
 
                   <Button
                     onClick={() => setActivateTarget({ id: employee.id, name: `${employee.first_name} ${employee.last_name}` })}
-                    data-agent={`onboarding-add-to-employees-btn-${employee.id}`}
+                    data-agent="onboarding-add-to-employees-btn"
                     className="w-full bg-[#0a66c2]/10 hover:bg-[#0a66c2]/20 text-[#0a66c2] border border-[#0a66c2]/20 shadow-none font-bold tracking-wide transition-all h-9 text-xs rounded-sm"
                   >
                     <UserCheck className="mr-2 h-4 w-4" /> Add to Employees

@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
-export default function PayrollDashboardPage() {
+export function PayrollDashboardClient() {
   const { data: analytics, isLoading: isAnalyticsLoading } = useQuery({
     queryKey: ['payroll-analytics'],
     queryFn: () => hrPayrollService.getDashboardAnalytics(),
@@ -77,7 +77,7 @@ export default function PayrollDashboardPage() {
           <p className="text-xs text-slate-500 font-semibold mt-0.5">Comprehensive real-time startup payouts ledger & compliance monitoring.</p>
         </div>
         <div className="flex items-center gap-2">
-          <Link href="/payroll/runs">
+          <Link href="/Hrtools/payroll/runs">
             <Button className="bg-[#0a66c2] hover:bg-[#084e96] text-white shadow-md shadow-blue-500/10 rounded-md py-2 px-4 font-bold text-xs flex items-center gap-1.5 cursor-pointer transition-all duration-300">
               Run payroll ledger <ChevronRight className="h-4 w-4" />
             </Button>
@@ -181,7 +181,7 @@ export default function PayrollDashboardPage() {
                       <Badge className={`${getStatusBadgeColor(run.status)} font-bold text-[9px] px-2 py-0.5 rounded-md border shadow-none`}>
                         {run.status}
                       </Badge>
-                      <Link href="/payroll/runs">
+                      <Link href="/Hrtools/payroll/runs">
                         <Button className="h-7 px-2.5 bg-transparent border border-slate-200 dark:border-slate-800 hover:bg-slate-55 text-slate-700 dark:text-slate-300 rounded-md text-[10px] font-extrabold cursor-pointer">
                           View
                         </Button>
@@ -203,7 +203,7 @@ export default function PayrollDashboardPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4 pt-0 space-y-2">
-              <Link href="/payroll/runs" className="block">
+              <Link href="/Hrtools/payroll/runs" className="block">
                 <div className="p-3 bg-[#f8fafc] dark:bg-[#151624] hover:bg-[#0a66c2]/5 dark:hover:bg-[#0a66c2]/10 border border-slate-200/50 dark:border-slate-805 rounded-md transition-all flex items-center justify-between cursor-pointer group">
                   <div>
                     <h5 className="text-xs font-bold text-slate-800 dark:text-white">Process Payroll Run</h5>
@@ -213,7 +213,7 @@ export default function PayrollDashboardPage() {
                 </div>
               </Link>
 
-              <Link href="/payroll/salary-structures" className="block">
+              <Link href="/Hrtools/payroll/salary-structures" className="block">
                 <div className="p-3 bg-[#f8fafc] dark:bg-[#151624] hover:bg-[#0a66c2]/5 dark:hover:bg-[#0a66c2]/10 border border-slate-200/50 dark:border-slate-805 rounded-md transition-all flex items-center justify-between cursor-pointer group">
                   <div>
                     <h5 className="text-xs font-bold text-slate-800 dark:text-white">Configure Compensation</h5>
@@ -223,7 +223,7 @@ export default function PayrollDashboardPage() {
                 </div>
               </Link>
 
-              <Link href="/payroll/reimbursements" className="block">
+              <Link href="/Hrtools/payroll/reimbursements" className="block">
                 <div className="p-3 bg-[#f8fafc] dark:bg-[#151624] hover:bg-[#0a66c2]/5 dark:hover:bg-[#0a66c2]/10 border border-slate-200/50 dark:border-slate-805 rounded-md transition-all flex items-center justify-between cursor-pointer group">
                   <div>
                     <h5 className="text-xs font-bold text-slate-800 dark:text-white">Verify Expense Claims</h5>

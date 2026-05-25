@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { hrPayrollService } from '@/services/hr';
+import { hrPayrollService, hrEmployeeService } from '@/services/hr';
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { LocalLoader } from '@/components/ui/local-loader';
 import { Plus, X, Sparkles, AlertCircle } from 'lucide-react';
 
-export default function AdjustmentsPage() {
+export function PayrollAdjustmentsClient() {
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
   const [form, setForm] = useState({
@@ -24,6 +24,13 @@ export default function AdjustmentsPage() {
     queryKey: ['payroll-adjustments'],
     queryFn: () => hrPayrollService.getPayrollAdjustments(),
   });
+
+  const { data: employeesRes } = useQuery({
+    queryKey: ['payroll-employees-list'],
+    queryFn: () => hrEmployeeService.getEmployees({ limit: 100 }),
+  });
+
+  const employeesList = employeesRes?.data?.results || [];
 
   const mutation = useMutation({
     mutationFn: (data: any) => hrPayrollService.createPayrollAdjustment(data),
@@ -116,8 +123,8 @@ export default function AdjustmentsPage() {
 
       {/* Adjustments Entry Dialog */}
       {isOpen && (
-        <div className="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800/80 rounded-md w-full max-w-md shadow-2xl p-6 relative overflow-hidden animate-in zoom-in-95 duration-300">
+        <div className="fixed inset-0 bg-slate-900/15 dark:bg-black/40 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200 pointer-events-none">
+          <div className="bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800/80 rounded-md w-full max-w-md shadow-2xl p-6 relative overflow-hidden animate-in zoom-in-95 duration-300 pointer-events-auto">
             <button 
               onClick={() => setIsOpen(false)}
               className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer"
@@ -132,14 +139,20 @@ export default function AdjustmentsPage() {
             
             <div className="space-y-4">
               <div className="space-y-1.5">
-                <label className="text-[11px] font-bold text-slate-500 tracking-wide uppercase">Employee ID (UUID)</label>
-                <input 
-                  type="text" 
+                <label className="text-[11px] font-bold text-slate-500 tracking-wide uppercase">Employee</label>
+                <select
                   value={form.employee_id}
                   onChange={(e) => setForm({...form, employee_id: e.target.value})}
-                  placeholder="Enter employee UUID key..."
-                  className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-md px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
-                />
+                  data-agent="payroll-adjustment-employee-id-select"
+                  className="w-full h-9 bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-850 rounded-md px-3 py-2 text-xs text-slate-900 dark:text-white outline-none cursor-pointer font-semibold"
+                >
+                  <option value="">Select an employee...</option>
+                  {employeesList.map((emp: any) => (
+                    <option key={emp.id} value={emp.employee_id || emp.id}>
+                      {emp.first_name} {emp.last_name} ({emp.employee_id || 'No ID'})
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="space-y-1.5">

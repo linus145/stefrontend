@@ -28,4 +28,6 @@ export interface ExamData {
   status: string;
   expires_at: string | null;
   rounds: Round[];
+  deepgram_api_key?: string;
+  gemini_api_key?: string;
 }

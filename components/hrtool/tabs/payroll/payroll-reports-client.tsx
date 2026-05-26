@@ -27,7 +27,7 @@ export function PayrollReportsClient() {
           <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Reports & Ledger Summaries</h2>
           <p className="text-xs text-slate-500 font-semibold mt-0.5">Generate statutory tax reports, monitor startup payout graphs, and download payroll balances.</p>
         </div>
-        <Button className="bg-[#0a66c2] hover:bg-[#084e96] text-white shadow-sm rounded-md text-xs font-bold py-2 px-3 flex items-center gap-1.5 cursor-pointer">
+        <Button className="bg-[#0a66c2] hover:bg-[#084e96] text-white shadow-sm rounded-sm text-xs font-bold py-2 px-3 flex items-center gap-1.5 cursor-pointer">
           <Download className="h-4 w-4" /> Export CSV Ledger
         </Button>
       </div>
@@ -35,7 +35,7 @@ export function PayrollReportsClient() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         
         {/* Active Headcount Card */}
-        <Card className="bg-white dark:bg-[#121320] border border-slate-150 rounded-md shadow-sm">
+        <Card className="bg-white dark:bg-[#121320] border border-slate-150 rounded-sm shadow-sm">
           <CardHeader className="p-4 flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-xs font-extrabold text-slate-800 dark:text-slate-200 uppercase">Headcount Audit</CardTitle>
             <Users className="h-4.5 w-4.5 text-[#0a66c2]" />
@@ -47,7 +47,7 @@ export function PayrollReportsClient() {
         </Card>
 
         {/* Headcount Department Breakdown */}
-        <Card className="bg-white dark:bg-[#121320] border border-slate-150 rounded-md shadow-sm">
+        <Card className="bg-white dark:bg-[#121320] border border-slate-150 rounded-sm shadow-sm">
           <CardHeader className="p-4 flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-xs font-extrabold text-slate-800 dark:text-slate-200 uppercase">Departmental breakdown</CardTitle>
             <Landmark className="h-4.5 w-4.5 text-[#0a66c2]" />

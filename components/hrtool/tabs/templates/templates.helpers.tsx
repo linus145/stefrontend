@@ -276,7 +276,7 @@ export const renderDocumentTheme = (category: string, content: string, variables
             </div>
             
             <div className="text-left sm:text-right space-y-1">
-              <Badge className="bg-indigo-50 dark:bg-indigo-950/40 text-indigo-750 dark:text-indigo-300 border border-indigo-100/50 dark:border-indigo-900/60 shadow-none text-[8px] font-extrabold uppercase rounded-md px-2 py-0.5 tracking-wider">
+              <Badge className="bg-indigo-50 dark:bg-indigo-950/40 text-indigo-750 dark:text-indigo-300 border border-indigo-100/50 dark:border-indigo-900/60 shadow-none text-[8px] font-extrabold uppercase rounded-sm px-2 py-0.5 tracking-wider">
                 Strictly Confidential
               </Badge>
               <div className="text-[9px] text-slate-400 font-medium uppercase">Ref: {getCompanyAbbreviation(variables['organization_name'])}/OFFER/2026/{(variables['employee_id'] || 'TEMP')}</div>
@@ -327,7 +327,7 @@ export const renderDocumentTheme = (category: string, content: string, variables
 
   if (category === 'JOINING_LETTER') {
     return (
-      <div className="relative border-2 border-double border-slate-250 dark:border-slate-850 bg-white dark:bg-[#0c0d19] p-8 shadow-xl min-h-[450px] font-sans flex flex-col justify-between rounded-md transition-all duration-300">
+      <div className="relative border-2 border-double border-slate-250 dark:border-slate-850 bg-white dark:bg-[#0c0d19] p-8 shadow-xl min-h-[450px] font-sans flex flex-col justify-between rounded-sm transition-all duration-300">
         {/* Triple Border Visual Accents */}
         <div className="absolute inset-1 border border-slate-100 dark:border-slate-900 pointer-events-none rounded" />
         
@@ -361,7 +361,7 @@ export const renderDocumentTheme = (category: string, content: string, variables
         {/* Footing Stamps & Signatures */}
         <div className="relative z-10 mt-12 pt-6 border-t border-slate-100 dark:border-slate-900 flex flex-col sm:flex-row justify-between items-center sm:items-end gap-6 text-[10px]">
           {/* Official Stamp Overlay */}
-          <div className="border-2 border-indigo-200/50 dark:border-indigo-900/30 text-indigo-400/80 rounded-md px-3 py-1 font-bold text-[8px] tracking-widest uppercase transform -rotate-2 select-none bg-indigo-50/20 dark:bg-[#151624]/20">
+          <div className="border-2 border-indigo-200/50 dark:border-indigo-900/30 text-indigo-400/80 rounded-sm px-3 py-1 font-bold text-[8px] tracking-widest uppercase transform -rotate-2 select-none bg-indigo-50/20 dark:bg-[#151624]/20">
             OFFICIALLY APPROVED
           </div>
 
@@ -385,7 +385,7 @@ export const renderDocumentTheme = (category: string, content: string, variables
 
   // DEFAULT / PAYROLL category
   return (
-    <div className="relative bg-white dark:bg-[#0c0d19] border border-slate-200/80 dark:border-slate-800 rounded-md shadow-xl p-8 min-h-[450px] font-sans flex flex-col justify-between transition-all duration-300">
+    <div className="relative bg-white dark:bg-[#0c0d19] border border-slate-200/80 dark:border-slate-800 rounded-sm shadow-xl p-8 min-h-[450px] font-sans flex flex-col justify-between transition-all duration-300">
       <div>
         {/* Clean Corporate Grid Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start gap-4 border-b border-slate-100 dark:border-slate-900 pb-5 mb-6">
@@ -402,7 +402,7 @@ export const renderDocumentTheme = (category: string, content: string, variables
           </div>
           
           <div className="text-right">
-            <Badge className="bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-100/50 dark:border-emerald-900/60 shadow-none text-[8px] font-bold uppercase rounded-md px-2 py-0.5">
+            <Badge className="bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-100/50 dark:border-emerald-900/60 shadow-none text-[8px] font-bold uppercase rounded-sm px-2 py-0.5">
               Verified Statement
             </Badge>
             <div className="text-[8px] text-slate-450 dark:text-slate-400 font-bold uppercase tracking-wider mt-1.5">
@@ -418,7 +418,7 @@ export const renderDocumentTheme = (category: string, content: string, variables
 
         {/* Premium Salary Slip Breakdown card */}
         {(variables['basic_salary'] || variables['hra'] || variables['annual_salary']) && (
-          <div className="mt-8 bg-slate-50 dark:bg-[#121322] border border-slate-150 dark:border-slate-850 rounded-xl overflow-hidden shadow-inner">
+          <div className="mt-8 bg-slate-50 dark:bg-[#121322] border border-slate-150 dark:border-slate-850 rounded-sm overflow-hidden shadow-inner">
             <div className="bg-slate-100/50 dark:bg-[#1a1c30] px-4 py-2 border-b border-slate-150 dark:border-slate-850 flex justify-between items-center">
               <span className="text-[8px] font-extrabold text-slate-500 uppercase tracking-widest">Compensation Details</span>
               <span className="text-[9px] font-bold text-emerald-600 dark:text-emerald-450">INR (₹)</span>

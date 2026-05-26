@@ -74,6 +74,21 @@ const NAVIGATION_ITEMS: { id: HRSection; label: string; icon: any; subItems?: { 
       { id: 'payroll-settings', label: 'Settings' }
     ]
   },
+  { id: 'templates', label: 'Templates', icon: Files },
+  {
+    id: 'performance',
+    label: 'Performance',
+    icon: BarChart3,
+    subItems: [
+      { id: 'performance-dashboard', label: 'Dashboard' },
+      { id: 'performance-kpi', label: 'KPI Overview' },
+      { id: 'performance-goals', label: 'Employee Goals' },
+      { id: 'performance-appraisal', label: 'Appraisal Engine' },
+      { id: 'performance-analytics', label: 'Performance Analytics' },
+      { id: 'performance-ai-insights', label: 'AI Insights' },
+      { id: 'performance-logs', label: 'Performance Logs' }
+    ]
+  },
   {
     id: 'scheduling' as any,
     label: 'Scheduling',
@@ -90,8 +105,6 @@ const NAVIGATION_ITEMS: { id: HRSection; label: string; icon: any; subItems?: { 
       { id: 'agent-settings', label: 'Agent Settings' }
     ]
   },
-  { id: 'templates', label: 'Templates', icon: Files },
-  { id: 'performance', label: 'Performance', icon: BarChart3 },
   { id: 'organization', label: 'Organization', icon: Building2 },
 ];
 
@@ -113,6 +126,7 @@ export function HRSidebar({
     payroll: false,
     scheduling: false,
     settings: false,
+    performance: false,
   });
 
   const toggleExpand = (itemId: string) => {
@@ -138,6 +152,9 @@ export function HRSidebar({
     }
     if (activeTab === 'agent-scheduling') {
       setExpandedItems(prev => ({ ...prev, scheduling: true }));
+    }
+    if (activeTab.startsWith('performance-')) {
+      setExpandedItems(prev => ({ ...prev, performance: true }));
     }
   }, [activeTab]);
 

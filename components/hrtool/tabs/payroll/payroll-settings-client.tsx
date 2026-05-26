@@ -69,7 +69,7 @@ export function PayrollSettingsClient() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           
           {/* General Configurations */}
-          <Card className="bg-white dark:bg-[#121320] border border-slate-150 rounded-md shadow-sm">
+          <Card className="bg-white dark:bg-[#121320] border border-slate-150 rounded-sm shadow-sm">
             <CardHeader className="p-4 flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-xs font-extrabold text-slate-800 dark:text-slate-200 uppercase">Payout Parameters</CardTitle>
               <Landmark className="h-4.5 w-4.5 text-[#0a66c2]" />
@@ -81,7 +81,7 @@ export function PayrollSettingsClient() {
                 <select
                   value={formState.currency}
                   onChange={(e) => setFormState({ ...formState, currency: e.target.value })}
-                  className="w-full h-9 px-3 text-xs bg-slate-50 dark:bg-[#1c1d30] border border-slate-200 dark:border-slate-800 rounded-md font-bold focus:outline-none focus:border-[#0a66c2]"
+                  className="w-full h-9 px-3 text-xs bg-slate-50 dark:bg-[#1c1d30] border border-slate-200 dark:border-slate-800 rounded-sm font-bold focus:outline-none focus:border-[#0a66c2]"
                 >
                   <option value="INR">INR (₹ - Indian Rupee)</option>
                   <option value="USD">USD ($ - US Dollar)</option>
@@ -99,7 +99,7 @@ export function PayrollSettingsClient() {
                     step="0.01"
                     value={formState.statutory_pf_percentage}
                     onChange={(e) => setFormState({ ...formState, statutory_pf_percentage: parseFloat(e.target.value) || 0 })}
-                    className="w-full h-9 px-3 text-xs bg-slate-50 dark:bg-[#1c1d30] border border-slate-200 dark:border-slate-800 rounded-md font-bold focus:outline-none focus:border-[#0a66c2]"
+                    className="w-full h-9 px-3 text-xs bg-slate-50 dark:bg-[#1c1d30] border border-slate-200 dark:border-slate-800 rounded-sm font-bold focus:outline-none focus:border-[#0a66c2]"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -109,7 +109,7 @@ export function PayrollSettingsClient() {
                     step="0.01"
                     value={formState.statutory_esi_percentage}
                     onChange={(e) => setFormState({ ...formState, statutory_esi_percentage: parseFloat(e.target.value) || 0 })}
-                    className="w-full h-9 px-3 text-xs bg-slate-50 dark:bg-[#1c1d30] border border-slate-200 dark:border-slate-800 rounded-md font-bold focus:outline-none focus:border-[#0a66c2]"
+                    className="w-full h-9 px-3 text-xs bg-slate-50 dark:bg-[#1c1d30] border border-slate-200 dark:border-slate-800 rounded-sm font-bold focus:outline-none focus:border-[#0a66c2]"
                   />
                 </div>
               </div>
@@ -118,7 +118,7 @@ export function PayrollSettingsClient() {
           </Card>
 
           {/* Automation Configurations */}
-          <Card className="bg-white dark:bg-[#121320] border border-slate-150 rounded-md shadow-sm">
+          <Card className="bg-white dark:bg-[#121320] border border-slate-150 rounded-sm shadow-sm">
             <CardHeader className="p-4 flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-xs font-extrabold text-slate-800 dark:text-slate-200 uppercase">Automation & Compliance</CardTitle>
               <Cpu className="h-4.5 w-4.5 text-[#0a66c2]" />
@@ -131,7 +131,7 @@ export function PayrollSettingsClient() {
                   <button
                     type="button"
                     onClick={() => setFormState({ ...formState, automation_enabled: true })}
-                    className={`flex-1 h-9 rounded-md font-extrabold text-xs transition-all border ${
+                    className={`flex-1 h-9 rounded-sm font-extrabold text-xs transition-all border ${
                       formState.automation_enabled
                         ? 'bg-[#0a66c2] text-white border-[#0a66c2]'
                         : 'bg-white dark:bg-[#1c1d30] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800'
@@ -142,7 +142,7 @@ export function PayrollSettingsClient() {
                   <button
                     type="button"
                     onClick={() => setFormState({ ...formState, automation_enabled: false })}
-                    className={`flex-1 h-9 rounded-md font-extrabold text-xs transition-all border ${
+                    className={`flex-1 h-9 rounded-sm font-extrabold text-xs transition-all border ${
                       !formState.automation_enabled
                         ? 'bg-[#0a66c2] text-white border-[#0a66c2]'
                         : 'bg-white dark:bg-[#1c1d30] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800'
@@ -155,7 +155,7 @@ export function PayrollSettingsClient() {
 
               <div className="flex items-center justify-between text-xs pt-2">
                 <span className="text-slate-550 font-bold uppercase">Compliance status:</span>
-                <Badge className="bg-[#0a66c2]/10 text-[#0a66c2] border-none font-black text-[9px] px-2.5 py-1 rounded-md">
+                <Badge className="bg-[#0a66c2]/10 text-[#0a66c2] border-none font-black text-[9px] px-2.5 py-1 rounded-sm">
                   COMPLIANT
                 </Badge>
               </div>
@@ -169,7 +169,7 @@ export function PayrollSettingsClient() {
           <Button
             type="submit"
             disabled={updateMutation.isPending}
-            className="bg-[#0a66c2] hover:bg-[#084e96] text-white font-extrabold text-xs px-4 h-9 rounded-md shadow-sm flex items-center gap-2"
+            className="bg-[#0a66c2] hover:bg-[#084e96] text-white font-extrabold text-xs px-4 h-9 rounded-sm shadow-sm flex items-center gap-2"
           >
             {updateMutation.isPending ? (
               <>

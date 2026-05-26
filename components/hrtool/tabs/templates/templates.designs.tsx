@@ -68,7 +68,7 @@ export const renderThemedDocument = (
           <div className="flex flex-col sm:flex-row justify-between items-start gap-4 border-b border-slate-100 dark:border-slate-800 pb-5 mb-6">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <div className="h-7 w-7 rounded-md bg-gradient-to-tr from-[#0a66c2] to-indigo-400 flex items-center justify-center text-white font-black text-xs shadow-md uppercase">
+                <div className="h-7 w-7 rounded-sm bg-gradient-to-tr from-[#0a66c2] to-indigo-400 flex items-center justify-center text-white font-black text-xs shadow-md uppercase">
                   {orgName[0]}
                 </div>
                 <span className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-tight">
@@ -78,7 +78,7 @@ export const renderThemedDocument = (
               <span className="text-[9px] text-slate-450 dark:text-slate-400 font-bold uppercase tracking-widest block">Corporate HR Operations</span>
             </div>
             <div className="text-left sm:text-right space-y-1">
-              <Badge className="bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-100/50 dark:border-blue-900/60 shadow-none text-[8px] font-extrabold uppercase rounded-md px-2 py-0.5 tracking-wider">
+              <Badge className="bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-100/50 dark:border-blue-900/60 shadow-none text-[8px] font-extrabold uppercase rounded-sm px-2 py-0.5 tracking-wider">
                 Confidential
               </Badge>
               <div className="text-[9px] text-slate-400 font-medium uppercase">Ref: {getCompanyAbbreviation(orgName)}/DOC/2026/{empId}</div>
@@ -126,7 +126,7 @@ export const renderThemedDocument = (
   // ── DESIGN 2: Executive Premium ──────────────────────────────────────────
   if (themeId === 'executive') {
     return (
-      <div className="relative overflow-hidden bg-[#1a1a2e] text-slate-200 p-8 shadow-2xl min-h-[480px] font-sans flex flex-col justify-between rounded-md border border-amber-900/20 transition-all duration-300">
+      <div className="relative overflow-hidden bg-[#1a1a2e] text-slate-200 p-8 shadow-2xl min-h-[480px] font-sans flex flex-col justify-between rounded-sm border border-amber-900/20 transition-all duration-300">
         {/* Gold corner accents */}
         <div className="absolute top-0 left-0 w-20 h-20 border-t-2 border-l-2 border-amber-500/40 pointer-events-none rounded-tl-md" />
         <div className="absolute bottom-0 right-0 w-20 h-20 border-b-2 border-r-2 border-amber-500/40 pointer-events-none rounded-br-md" />
@@ -203,14 +203,14 @@ export const renderThemedDocument = (
   // ── DESIGN 3: Modern Gradient ────────────────────────────────────────────
   if (themeId === 'gradient') {
     return (
-      <div className="relative overflow-hidden bg-white dark:bg-[#0c0d19] shadow-xl min-h-[480px] font-sans flex flex-col justify-between rounded-xl border border-slate-200/50 dark:border-slate-800 transition-all duration-300">
+      <div className="relative overflow-hidden bg-white dark:bg-[#0c0d19] shadow-xl min-h-[480px] font-sans flex flex-col justify-between rounded-sm border border-slate-200/50 dark:border-slate-800 transition-all duration-300">
         {/* Gradient Header Banner */}
         <div className="bg-gradient-to-r from-violet-600 via-fuchsia-500 to-pink-500 px-8 pt-7 pb-6 relative overflow-hidden">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIyMCIgY3k9IjIwIiByPSIxIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMSkiLz48L3N2Zz4=')] opacity-50" />
           <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start gap-3">
             <div>
               <div className="flex items-center gap-2.5 mb-1.5">
-                <div className="h-8 w-8 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center text-white font-black text-sm border border-white/10 uppercase">
+                <div className="h-8 w-8 rounded-sm bg-white/20 backdrop-blur-sm flex items-center justify-center text-white font-black text-sm border border-white/10 uppercase">
                   {orgName[0]}
                 </div>
                 <span className="text-base font-black text-white uppercase tracking-tight drop-shadow-sm">
@@ -240,7 +240,7 @@ export const renderThemedDocument = (
         <div className="px-8 pb-6">
           <div className="pt-5 border-t border-slate-100 dark:border-slate-900 flex flex-col sm:flex-row justify-between items-center sm:items-end gap-6">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-violet-500/20">
+              <div className="h-10 w-10 rounded-sm bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-violet-500/20">
                 <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -280,7 +280,7 @@ export const renderThemedDocument = (
   // ── DESIGN 4: Minimal Elegant ────────────────────────────────────────────
   // (default fallback)
   return (
-    <div className="relative bg-white dark:bg-[#0c0d19] min-h-[480px] font-serif flex flex-col justify-between transition-all duration-300 border border-slate-200 dark:border-slate-800 rounded-md">
+    <div className="relative bg-white dark:bg-[#0c0d19] min-h-[480px] font-serif flex flex-col justify-between transition-all duration-300 border border-slate-200 dark:border-slate-800 rounded-sm">
       {/* Thin top line */}
       <div className="h-[3px] w-full bg-slate-800 dark:bg-slate-200 rounded-t-md" />
 

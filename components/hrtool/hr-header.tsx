@@ -42,6 +42,13 @@ export type HRSection =
   | 'scheduling'
   | 'settings'
   | 'performance' 
+  | 'performance-dashboard'
+  | 'performance-kpi'
+  | 'performance-goals'
+  | 'performance-appraisal'
+  | 'performance-analytics'
+  | 'performance-ai-insights'
+  | 'performance-logs'
   | 'organization'
   | 'templates';
 

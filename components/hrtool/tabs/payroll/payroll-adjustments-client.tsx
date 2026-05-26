@@ -61,13 +61,13 @@ export function PayrollAdjustmentsClient() {
         </div>
         <Button 
           onClick={() => setIsOpen(true)}
-          className="bg-[#0a66c2] hover:bg-[#084e96] text-white shadow-sm rounded-md text-xs font-bold py-2 px-3 flex items-center gap-1 cursor-pointer transition-all duration-300"
+          className="bg-[#0a66c2] hover:bg-[#084e96] text-white shadow-sm rounded-sm text-xs font-bold py-2 px-3 flex items-center gap-1 cursor-pointer transition-all duration-300"
         >
           <Plus className="h-4 w-4" /> Add manual adjustment
         </Button>
       </div>
 
-      <Card className="bg-white dark:bg-[#121320] border border-slate-150 rounded-md shadow-sm overflow-hidden">
+      <Card className="bg-white dark:bg-[#121320] border border-slate-150 rounded-sm shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -102,14 +102,14 @@ export function PayrollAdjustmentsClient() {
                       </div>
                     </td>
                     <td className="py-3 px-4">
-                      <Badge className="bg-[#0a66c2]/10 text-[#0a66c2] border-none font-bold text-[9px] px-2 py-0.5 rounded-md">
+                      <Badge className="bg-[#0a66c2]/10 text-[#0a66c2] border-none font-bold text-[9px] px-2 py-0.5 rounded-sm">
                         {toSentenceCase(item.adjustment_type)}
                       </Badge>
                     </td>
                     <td className="py-3 px-4 text-xs font-extrabold text-slate-900 dark:text-white">${parseFloat(item.amount || 0).toLocaleString()}</td>
                     <td className="py-3 px-4 text-xs font-semibold text-slate-450 truncate max-w-xs">{item.description}</td>
                     <td className="py-3 px-4 text-right">
-                      <Badge className="bg-emerald-100 text-emerald-800 border-none font-bold text-[9px] px-2 py-0.5 rounded-md">
+                      <Badge className="bg-emerald-100 text-emerald-800 border-none font-bold text-[9px] px-2 py-0.5 rounded-sm">
                         Processed
                       </Badge>
                     </td>
@@ -124,7 +124,7 @@ export function PayrollAdjustmentsClient() {
       {/* Adjustments Entry Dialog */}
       {isOpen && (
         <div className="fixed inset-0 bg-slate-900/15 dark:bg-black/40 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200 pointer-events-none">
-          <div className="bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800/80 rounded-md w-full max-w-md shadow-2xl p-6 relative overflow-hidden animate-in zoom-in-95 duration-300 pointer-events-auto">
+          <div className="bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800/80 rounded-sm w-full max-w-md shadow-2xl p-6 relative overflow-hidden animate-in zoom-in-95 duration-300 pointer-events-auto">
             <button 
               onClick={() => setIsOpen(false)}
               className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer"
@@ -144,7 +144,7 @@ export function PayrollAdjustmentsClient() {
                   value={form.employee_id}
                   onChange={(e) => setForm({...form, employee_id: e.target.value})}
                   data-agent="payroll-adjustment-employee-id-select"
-                  className="w-full h-9 bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-850 rounded-md px-3 py-2 text-xs text-slate-900 dark:text-white outline-none cursor-pointer font-semibold"
+                  className="w-full h-9 bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-850 rounded-sm px-3 py-2 text-xs text-slate-900 dark:text-white outline-none cursor-pointer font-semibold"
                 >
                   <option value="">Select an employee...</option>
                   {employeesList.map((emp: any) => (
@@ -160,7 +160,7 @@ export function PayrollAdjustmentsClient() {
                 <select 
                   value={form.adjustment_type} 
                   onChange={(e) => setForm({...form, adjustment_type: e.target.value})}
-                  className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-md px-3 py-2 text-xs text-slate-900 dark:text-white outline-none cursor-pointer"
+                  className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-sm px-3 py-2 text-xs text-slate-900 dark:text-white outline-none cursor-pointer"
                 >
                   <option value="BONUS">Bonus Reward</option>
                   <option value="INCENTIVE">Direct Incentive</option>
@@ -176,7 +176,7 @@ export function PayrollAdjustmentsClient() {
                   value={form.amount}
                   onChange={(e) => setForm({...form, amount: e.target.value})}
                   placeholder="e.g. 1000"
-                  className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-md px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
+                  className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-sm px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
                 />
               </div>
 
@@ -186,14 +186,14 @@ export function PayrollAdjustmentsClient() {
                   value={form.description}
                   onChange={(e) => setForm({...form, description: e.target.value})}
                   placeholder="Provide explicit audit notes..."
-                  className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-md px-3 py-2 text-xs text-slate-900 dark:text-white outline-none h-16 resize-none"
+                  className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-sm px-3 py-2 text-xs text-slate-900 dark:text-white outline-none h-16 resize-none"
                 />
               </div>
 
               <div className="pt-2 flex items-center justify-end gap-3">
                 <Button 
                   onClick={() => setIsOpen(false)}
-                  className="border border-slate-200 bg-transparent text-slate-600 rounded-md text-xs font-bold py-2 px-4 cursor-pointer"
+                  className="border border-slate-200 bg-transparent text-slate-600 rounded-sm text-xs font-bold py-2 px-4 cursor-pointer"
                 >
                   Cancel
                 </Button>
@@ -208,7 +208,7 @@ export function PayrollAdjustmentsClient() {
                     mutation.mutate(parsedData);
                   }}
                   disabled={mutation.isPending}
-                  className="bg-[#0a66c2] hover:bg-[#084e96] text-white shadow-md shadow-blue-500/15 rounded-md text-xs font-bold py-2 px-4 cursor-pointer"
+                  className="bg-[#0a66c2] hover:bg-[#084e96] text-white shadow-md shadow-blue-500/15 rounded-sm text-xs font-bold py-2 px-4 cursor-pointer"
                 >
                   Post adjustment
                 </Button>

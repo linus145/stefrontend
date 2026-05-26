@@ -86,7 +86,7 @@ export function ExpenseClaims() {
         <p className="text-xs text-slate-500 font-medium">Employee expense claims requesting HR validation to add to next month payroll payout.</p>
       </div>
 
-      <Card className="bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800/40 rounded-lg overflow-hidden shadow-sm">
+      <Card className="bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800/40 rounded-sm overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -118,7 +118,7 @@ export function ExpenseClaims() {
                       <p className="text-xs font-bold text-slate-900 dark:text-white">{claim.employee_name} {claim.employee_last_name}</p>
                     </td>
                     <td className="py-3 px-4">
-                      <Badge className="bg-blue-500/10 text-blue-600 border-none font-bold text-[9px] rounded-md shadow-none border">
+                      <Badge className="bg-blue-500/10 text-blue-600 border-none font-bold text-[9px] rounded-sm shadow-none border">
                         {toSentenceCase(claim.category)}
                       </Badge>
                     </td>
@@ -126,7 +126,7 @@ export function ExpenseClaims() {
                     <td className="py-3 px-4 text-xs text-slate-500 dark:text-slate-400 max-w-xs truncate">{claim.description || 'N/A'}</td>
                     <td className="py-3 px-4 text-xs text-slate-400">{new Date(claim.created_at).toLocaleDateString()}</td>
                     <td className="py-3 px-4">
-                      <Badge className={`${getStatusBadgeColor(claim.approval_status)} font-bold text-[9px] px-2 py-0.5 rounded-md border shadow-none`}>
+                      <Badge className={`${getStatusBadgeColor(claim.approval_status)} font-bold text-[9px] px-2 py-0.5 rounded-sm border shadow-none`}>
                         {toSentenceCase(claim.approval_status)}
                       </Badge>
                     </td>

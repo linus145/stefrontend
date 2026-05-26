@@ -76,12 +76,12 @@ export function PayrollPayslipsClient() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by employee name..."
-            className="pl-9 h-10 w-full rounded-md border border-slate-200 dark:border-slate-850 outline-none bg-white dark:bg-[#121320]"
+            className="pl-9 h-10 w-full rounded-sm border border-slate-200 dark:border-slate-850 outline-none bg-white dark:bg-[#121320]"
           />
         </div>
       </div>
 
-      <Card className="bg-white dark:bg-[#121320] border border-slate-150 rounded-md shadow-sm overflow-hidden">
+      <Card className="bg-white dark:bg-[#121320] border border-slate-150 rounded-sm shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -133,7 +133,7 @@ export function PayrollPayslipsClient() {
                         href={`${process.env.NEXT_PUBLIC_API_URL || ''}/api/payroll/payslips/${item.id}/download/`}
                         download
                         title="Download"
-                        className="inline-flex items-center justify-center border border-slate-200 dark:border-slate-800 hover:bg-slate-55 dark:hover:bg-slate-800/40 text-slate-600 dark:text-slate-450 font-bold text-[10px] h-8 w-8 p-0 rounded-md cursor-pointer transition-all duration-300"
+                        className="inline-flex items-center justify-center border border-slate-200 dark:border-slate-800 hover:bg-slate-55 dark:hover:bg-slate-800/40 text-slate-600 dark:text-slate-450 font-bold text-[10px] h-8 w-8 p-0 rounded-sm cursor-pointer transition-all duration-300"
                       >
                         <Download className="h-3.5 w-3.5" />
                       </a>
@@ -154,7 +154,7 @@ export function PayrollPayslipsClient() {
             size="sm"
             onClick={() => setPage(p => Math.max(1, p - 1))}
             disabled={page === 1 || isLoading}
-            className="text-xs h-8 px-4 rounded-md border-slate-200 dark:border-slate-800 text-slate-500 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800/50"
+            className="text-xs h-8 px-4 rounded-sm border-slate-200 dark:border-slate-800 text-slate-500 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800/50"
           >
             Previous
           </Button>
@@ -166,7 +166,7 @@ export function PayrollPayslipsClient() {
             size="sm"
             onClick={() => setPage(p => p + 1)}
             disabled={!payslipsRes?.data?.next || isLoading}
-            className="text-xs h-8 px-4 rounded-md border-slate-200 dark:border-slate-800 text-slate-500 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800/50"
+            className="text-xs h-8 px-4 rounded-sm border-slate-200 dark:border-slate-800 text-slate-500 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800/50"
           >
             Next
           </Button>

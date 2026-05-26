@@ -105,13 +105,13 @@ export function SalaryStructures() {
             setIsStructureModalOpen(true);
           }}
           data-agent="payroll-salary-add-btn"
-          className="bg-[#0a66c2] hover:bg-[#084e96] text-white shadow-sm rounded-md text-xs font-bold py-2 px-3 flex items-center gap-1 cursor-pointer transition-all duration-300"
+          className="bg-[#0a66c2] hover:bg-[#084e96] text-white shadow-sm rounded-sm text-xs font-bold py-2 px-3 flex items-center gap-1 cursor-pointer transition-all duration-300"
         >
           <Plus className="h-4 w-4" /> Add compensation profile
         </Button>
       </div>
 
-      <Card className="bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800/40 rounded-md overflow-hidden shadow-sm">
+      <Card className="bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800/40 rounded-sm overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -166,7 +166,7 @@ export function SalaryStructures() {
                     <td className="py-3 px-4 text-xs text-slate-500 font-semibold">{str.pf_percentage}%</td>
                     <td className="py-3 px-4 text-xs text-slate-500 font-semibold">{str.esi_percentage}%</td>
                     <td className="py-3 px-4">
-                      <Badge className={`font-bold text-[9px] px-2 py-0.5 rounded-md border shadow-none ${str.status === 'ACTIVE' ? 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400' : 'bg-slate-100 text-slate-800'}`}>
+                      <Badge className={`font-bold text-[9px] px-2 py-0.5 rounded-sm border shadow-none ${str.status === 'ACTIVE' ? 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400' : 'bg-slate-100 text-slate-800'}`}>
                         {toSentenceCase(str.status)}
                       </Badge>
                     </td>
@@ -187,7 +187,7 @@ export function SalaryStructures() {
                           setIsStructureModalOpen(true);
                         }}
                         data-agent={`payroll-salary-edit-btn-${str.id}`}
-                        className="border border-[#0a66c2]/10 bg-transparent hover:bg-[#0a66c2]/5 text-[#0a66c2] dark:text-[#3b8fd9] font-bold text-[10px] py-1.5 h-8 rounded-md cursor-pointer transition-all duration-300 flex items-center gap-1 inline-flex"
+                        className="border border-[#0a66c2]/10 bg-transparent hover:bg-[#0a66c2]/5 text-[#0a66c2] dark:text-[#3b8fd9] font-bold text-[10px] py-1.5 h-8 rounded-sm cursor-pointer transition-all duration-300 flex items-center gap-1 inline-flex"
                       >
                         <Edit2 className="h-3 w-3" /> Edit profile
                       </Button>
@@ -203,7 +203,7 @@ export function SalaryStructures() {
       {/* Compensation Profile Modal */}
       {isStructureModalOpen && (
         <div className="fixed inset-0 bg-slate-900/15 dark:bg-black/40 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200 pointer-events-none">
-          <div className="bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800/80 rounded-md w-full max-w-lg shadow-2xl p-6 relative overflow-hidden animate-in zoom-in-95 duration-300 pointer-events-auto">
+          <div className="bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800/80 rounded-sm w-full max-w-lg shadow-2xl p-6 relative overflow-hidden animate-in zoom-in-95 duration-300 pointer-events-auto">
             <button 
               onClick={() => setIsStructureModalOpen(false)}
               className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer"
@@ -225,14 +225,14 @@ export function SalaryStructures() {
                     type="text" 
                     value={`${selectedStructure.employee_name || ''} ${selectedStructure.employee_last_name || ''} (${selectedStructure.employee_code || ''})`}
                     disabled
-                    className="w-full bg-[#f8fafc]/80 dark:bg-[#151624]/80 border border-slate-200 dark:border-slate-800 rounded-md px-3 py-2 text-xs text-slate-900 dark:text-white outline-none disabled:opacity-60 font-semibold"
+                    className="w-full bg-[#f8fafc]/80 dark:bg-[#151624]/80 border border-slate-200 dark:border-slate-800 rounded-sm px-3 py-2 text-xs text-slate-900 dark:text-white outline-none disabled:opacity-60 font-semibold"
                   />
                 ) : (
                   <select
                     value={structureForm.employee_id}
                     onChange={(e) => setStructureForm({...structureForm, employee_id: e.target.value})}
                     data-agent="payroll-salary-employee-id-input"
-                    className="w-full h-9 bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-850 rounded-md px-3 py-2 text-xs text-slate-900 dark:text-white outline-none cursor-pointer font-semibold"
+                    className="w-full h-9 bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-850 rounded-sm px-3 py-2 text-xs text-slate-900 dark:text-white outline-none cursor-pointer font-semibold"
                   >
                     <option value="">Select an employee...</option>
                     {employeesList.map((emp: any) => (
@@ -253,7 +253,7 @@ export function SalaryStructures() {
                     onChange={(e) => setStructureForm({...structureForm, basic_salary: e.target.value})}
                     data-agent="payroll-salary-basic-salary-input"
                     placeholder="e.g. 5000"
-                    className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-md px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
+                    className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-sm px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
                   />
                 </div>
 
@@ -265,7 +265,7 @@ export function SalaryStructures() {
                     onChange={(e) => setStructureForm({...structureForm, hra: e.target.value})}
                     data-agent="payroll-salary-hra-input"
                     placeholder="e.g. 1500"
-                    className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-850 rounded-md px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
+                    className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-850 rounded-sm px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
                   />
                 </div>
               </div>
@@ -278,7 +278,7 @@ export function SalaryStructures() {
                     value={structureForm.overtime_rate}
                     onChange={(e) => setStructureForm({...structureForm, overtime_rate: e.target.value})}
                     data-agent="payroll-salary-ot-rate-input"
-                    className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-md px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
+                    className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-sm px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
                   />
                 </div>
 
@@ -289,7 +289,7 @@ export function SalaryStructures() {
                     value={structureForm.tax_percentage}
                     onChange={(e) => setStructureForm({...structureForm, tax_percentage: e.target.value})}
                     data-agent="payroll-salary-tax-percentage-input"
-                    className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-md px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
+                    className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-sm px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
                   />
                 </div>
               </div>
@@ -302,7 +302,7 @@ export function SalaryStructures() {
                     value={structureForm.pf_percentage}
                     onChange={(e) => setStructureForm({...structureForm, pf_percentage: e.target.value})}
                     data-agent="payroll-salary-pf-percentage-input"
-                    className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-md px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
+                    className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-sm px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
                   />
                 </div>
 
@@ -313,7 +313,7 @@ export function SalaryStructures() {
                     value={structureForm.esi_percentage}
                     onChange={(e) => setStructureForm({...structureForm, esi_percentage: e.target.value})}
                     data-agent="payroll-salary-esi-percentage-input"
-                    className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-md px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
+                    className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-sm px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
                   />
                 </div>
               </div>
@@ -321,7 +321,7 @@ export function SalaryStructures() {
               <div className="pt-2 flex items-center justify-end gap-3">
                 <Button 
                   onClick={() => setIsStructureModalOpen(false)}
-                  className="border border-slate-200 bg-transparent text-slate-600 rounded-md text-xs font-bold py-2 px-4 cursor-pointer"
+                  className="border border-slate-200 bg-transparent text-slate-600 rounded-sm text-xs font-bold py-2 px-4 cursor-pointer"
                 >
                   Cancel
                 </Button>
@@ -341,7 +341,7 @@ export function SalaryStructures() {
                   }}
                   disabled={structurePending}
                   data-agent="payroll-salary-modal-save-btn"
-                  className="bg-[#0a66c2] hover:bg-[#084e96] text-white shadow-md shadow-blue-500/15 rounded-md text-xs font-bold py-2 px-4 cursor-pointer"
+                  className="bg-[#0a66c2] hover:bg-[#084e96] text-white shadow-md shadow-blue-500/15 rounded-sm text-xs font-bold py-2 px-4 cursor-pointer"
                 >
                   Save profile
                 </Button>

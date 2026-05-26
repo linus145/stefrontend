@@ -78,7 +78,7 @@ export function PayrollDashboardClient() {
         </div>
         <div className="flex items-center gap-2">
           <Link href="/Hrtools/payroll/runs">
-            <Button className="bg-[#0a66c2] hover:bg-[#084e96] text-white shadow-md shadow-blue-500/10 rounded-md py-2 px-4 font-bold text-xs flex items-center gap-1.5 cursor-pointer transition-all duration-300">
+            <Button className="bg-[#0a66c2] hover:bg-[#084e96] text-white shadow-md shadow-blue-500/10 rounded-sm py-2 px-4 font-bold text-xs flex items-center gap-1.5 cursor-pointer transition-all duration-300">
               Run payroll ledger <ChevronRight className="h-4 w-4" />
             </Button>
           </Link>
@@ -87,7 +87,7 @@ export function PayrollDashboardClient() {
 
       {/* Analytics KPI Matrix */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-        <Card className="bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800/40 rounded-md shadow-sm">
+        <Card className="bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800/40 rounded-sm shadow-sm">
           <CardContent className="p-4 flex items-center justify-between">
             <div className="space-y-1">
               <span className="text-[11px] font-bold text-slate-400 tracking-wide uppercase">Total disbursed</span>
@@ -98,13 +98,13 @@ export function PayrollDashboardClient() {
                 <TrendingUp className="h-3 w-3 text-emerald-500" /> +8.4% MoM growth
               </p>
             </div>
-            <div className="w-10 h-10 rounded-md bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-sm bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
               <DollarSign className="h-5 w-5" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800/40 rounded-md shadow-sm">
+        <Card className="bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800/40 rounded-sm shadow-sm">
           <CardContent className="p-4 flex items-center justify-between">
             <div className="space-y-1">
               <span className="text-[11px] font-bold text-slate-400 tracking-wide uppercase">Taxes withheld</span>
@@ -113,13 +113,13 @@ export function PayrollDashboardClient() {
               </h3>
               <p className="text-[10px] text-slate-400 font-semibold">TDS deposits automatic track</p>
             </div>
-            <div className="w-10 h-10 rounded-md bg-[#0a66c2]/10 text-[#0a66c2] dark:bg-[#0a66c2]/20 dark:text-[#3b8fd9] flex items-center justify-center">
+            <div className="w-10 h-10 rounded-sm bg-[#0a66c2]/10 text-[#0a66c2] dark:bg-[#0a66c2]/20 dark:text-[#3b8fd9] flex items-center justify-center">
               <Percent className="h-4.5 w-4.5" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800/40 rounded-md shadow-sm">
+        <Card className="bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800/40 rounded-sm shadow-sm">
           <CardContent className="p-4 flex items-center justify-between">
             <div className="space-y-1">
               <span className="text-[11px] font-bold text-slate-400 tracking-wide uppercase">PF & insurance</span>
@@ -128,13 +128,13 @@ export function PayrollDashboardClient() {
               </h3>
               <p className="text-[10px] text-slate-400 font-semibold">Ready for compliance submission</p>
             </div>
-            <div className="w-10 h-10 rounded-md bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-sm bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center">
               <ShieldAlert className="h-4.5 w-4.5" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800/40 rounded-md shadow-sm">
+        <Card className="bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800/40 rounded-sm shadow-sm">
           <CardContent className="p-4 flex items-center justify-between">
             <div className="space-y-1">
               <span className="text-[11px] font-bold text-slate-400 tracking-wide uppercase">Pending approvals</span>
@@ -143,7 +143,7 @@ export function PayrollDashboardClient() {
               </h3>
               <p className="text-[10px] text-amber-500 font-semibold">Requires executive sign-off</p>
             </div>
-            <div className="w-10 h-10 rounded-md bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-sm bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center">
               <AlertCircle className="h-5 w-5" />
             </div>
           </CardContent>
@@ -153,7 +153,7 @@ export function PayrollDashboardClient() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Recent Runs Card */}
-        <Card className="bg-white dark:bg-[#121320] border border-slate-150 lg:col-span-2 rounded-md shadow-sm">
+        <Card className="bg-white dark:bg-[#121320] border border-slate-150 lg:col-span-2 rounded-sm shadow-sm">
           <CardHeader className="pb-2 p-4">
             <CardTitle className="text-xs font-extrabold text-slate-800 dark:text-slate-200 uppercase flex items-center gap-1.5">
               <Activity className="h-4.5 w-4.5 text-[#0a66c2]" /> Recent payroll execution runs
@@ -167,7 +167,7 @@ export function PayrollDashboardClient() {
                 {recentRuns.map((run: any) => (
                   <div key={run.id} className="py-3 flex items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-md bg-[#0a66c2]/10 flex items-center justify-center text-[#0a66c2]">
+                      <div className="w-8 h-8 rounded-sm bg-[#0a66c2]/10 flex items-center justify-center text-[#0a66c2]">
                         <CreditCard className="h-4 w-4" />
                       </div>
                       <div>
@@ -178,11 +178,11 @@ export function PayrollDashboardClient() {
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
-                      <Badge className={`${getStatusBadgeColor(run.status)} font-bold text-[9px] px-2 py-0.5 rounded-md border shadow-none`}>
+                      <Badge className={`${getStatusBadgeColor(run.status)} font-bold text-[9px] px-2 py-0.5 rounded-sm border shadow-none`}>
                         {run.status}
                       </Badge>
                       <Link href="/Hrtools/payroll/runs">
-                        <Button className="h-7 px-2.5 bg-transparent border border-slate-200 dark:border-slate-800 hover:bg-slate-55 text-slate-700 dark:text-slate-300 rounded-md text-[10px] font-extrabold cursor-pointer">
+                        <Button className="h-7 px-2.5 bg-transparent border border-slate-200 dark:border-slate-800 hover:bg-slate-55 text-slate-700 dark:text-slate-300 rounded-sm text-[10px] font-extrabold cursor-pointer">
                           View
                         </Button>
                       </Link>
@@ -196,7 +196,7 @@ export function PayrollDashboardClient() {
 
         {/* Quick Actions Panel */}
         <div className="space-y-6">
-          <Card className="bg-white dark:bg-[#121320] border border-slate-150 rounded-md shadow-sm">
+          <Card className="bg-white dark:bg-[#121320] border border-slate-150 rounded-sm shadow-sm">
             <CardHeader className="p-4">
               <CardTitle className="text-xs font-extrabold text-slate-800 dark:text-slate-200 uppercase flex items-center gap-1.5">
                 <Calendar className="h-4.5 w-4.5 text-[#0a66c2]" /> Quick Actions
@@ -204,7 +204,7 @@ export function PayrollDashboardClient() {
             </CardHeader>
             <CardContent className="p-4 pt-0 space-y-2">
               <Link href="/Hrtools/payroll/runs" className="block">
-                <div className="p-3 bg-[#f8fafc] dark:bg-[#151624] hover:bg-[#0a66c2]/5 dark:hover:bg-[#0a66c2]/10 border border-slate-200/50 dark:border-slate-805 rounded-md transition-all flex items-center justify-between cursor-pointer group">
+                <div className="p-3 bg-[#f8fafc] dark:bg-[#151624] hover:bg-[#0a66c2]/5 dark:hover:bg-[#0a66c2]/10 border border-slate-200/50 dark:border-slate-805 rounded-sm transition-all flex items-center justify-between cursor-pointer group">
                   <div>
                     <h5 className="text-xs font-bold text-slate-800 dark:text-white">Process Payroll Run</h5>
                     <p className="text-[10px] text-slate-400 mt-0.5">Calculate monthly attendance payouts.</p>
@@ -214,7 +214,7 @@ export function PayrollDashboardClient() {
               </Link>
 
               <Link href="/Hrtools/payroll/salary-structures" className="block">
-                <div className="p-3 bg-[#f8fafc] dark:bg-[#151624] hover:bg-[#0a66c2]/5 dark:hover:bg-[#0a66c2]/10 border border-slate-200/50 dark:border-slate-805 rounded-md transition-all flex items-center justify-between cursor-pointer group">
+                <div className="p-3 bg-[#f8fafc] dark:bg-[#151624] hover:bg-[#0a66c2]/5 dark:hover:bg-[#0a66c2]/10 border border-slate-200/50 dark:border-slate-805 rounded-sm transition-all flex items-center justify-between cursor-pointer group">
                   <div>
                     <h5 className="text-xs font-bold text-slate-800 dark:text-white">Configure Compensation</h5>
                     <p className="text-[10px] text-slate-400 mt-0.5">Add basic salary or allowance rules.</p>
@@ -224,7 +224,7 @@ export function PayrollDashboardClient() {
               </Link>
 
               <Link href="/Hrtools/payroll/reimbursements" className="block">
-                <div className="p-3 bg-[#f8fafc] dark:bg-[#151624] hover:bg-[#0a66c2]/5 dark:hover:bg-[#0a66c2]/10 border border-slate-200/50 dark:border-slate-805 rounded-md transition-all flex items-center justify-between cursor-pointer group">
+                <div className="p-3 bg-[#f8fafc] dark:bg-[#151624] hover:bg-[#0a66c2]/5 dark:hover:bg-[#0a66c2]/10 border border-slate-200/50 dark:border-slate-805 rounded-sm transition-all flex items-center justify-between cursor-pointer group">
                   <div>
                     <h5 className="text-xs font-bold text-slate-800 dark:text-white">Verify Expense Claims</h5>
                     <p className="text-[10px] text-slate-400 mt-0.5">Approve outstanding reimbursement files.</p>

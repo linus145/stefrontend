@@ -20,9 +20,12 @@ export const hrEmployeeService = {
   deleteEmployee: (id: string): Promise<void> =>
     api.delete<any>(`/employees/employees/${id}/`),
 
-  sendCredentials: (id: string): Promise<BaseAPIResponse<any>> =>
-    api.post<any>(`/employees/employees/${id}/send-credentials/`).then(res => ({ status: 'success', message: '', data: res })),
+  sendCredentials: (id: string, data?: { password?: string; portal_username?: string }): Promise<BaseAPIResponse<any>> =>
+    api.post<any>(`/employees/employees/${id}/send-credentials/`, data || {}).then(res => ({ status: 'success', message: '', data: res })),
 
   changeCredentials: (data: { portal_username?: string; password?: string }): Promise<BaseAPIResponse<any>> =>
     api.post<any>('/employees/employees/change-credentials/', data).then(res => ({ status: 'success', message: 'Credentials updated successfully.', data: res })),
+
+  getMyProfile: (): Promise<BaseAPIResponse<any>> =>
+    api.get<any>('/employees/employees/me/').then(res => ({ status: 'success', message: '', data: res })),
 };

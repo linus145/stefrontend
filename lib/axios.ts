@@ -36,6 +36,8 @@ axiosInstance.interceptors.response.use(
       originalRequest.url?.includes('auth/login') ||
       originalRequest.url?.includes('auth/token/refresh') ||
       originalRequest.url?.includes('auth/register') ||
+      originalRequest.url?.includes('employees/login') ||
+      originalRequest.url?.includes('employees/logout') ||
       originalRequest.url?.includes('exam-login') ||
       originalRequest.url?.includes('exam-submit') ||
       originalRequest.url?.includes('exam-complete');

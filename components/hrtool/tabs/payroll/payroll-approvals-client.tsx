@@ -102,7 +102,7 @@ export function PayrollApprovalsClient() {
       <div className="space-y-6 animate-in fade-in duration-300">
         
         {/* Drilldown Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50 dark:bg-[#121320]/60 p-4 rounded-md border border-slate-200/50 dark:border-slate-800/50">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50 dark:bg-[#121320]/60 p-4 rounded-sm border border-slate-200/50 dark:border-slate-800/50">
           <div>
             <button 
               onClick={() => setSelectedRun(null)}
@@ -113,7 +113,7 @@ export function PayrollApprovalsClient() {
             </button>
             <h3 className="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-3">
               Payroll drill sheet: {getMonthName(selectedRun.month)} {selectedRun.year}
-              <Badge className={`${getStatusBadgeColor(selectedRun.status)} font-bold text-[9px] px-2 py-0.5 rounded-md border`}>
+              <Badge className={`${getStatusBadgeColor(selectedRun.status)} font-bold text-[9px] px-2 py-0.5 rounded-sm border`}>
                 {toSentenceCase(selectedRun.status)}
               </Badge>
             </h3>
@@ -125,7 +125,7 @@ export function PayrollApprovalsClient() {
               onClick={() => rejectMutation.mutate(selectedRun.id)}
               disabled={rejectMutation.isPending}
               data-agent={`payroll-run-reject-btn-${selectedRun.id}`}
-              className="border border-red-500/20 bg-transparent hover:bg-red-500/5 text-red-600 rounded-md text-xs font-bold py-2 px-4 cursor-pointer transition-all duration-300"
+              className="border border-red-500/20 bg-transparent hover:bg-red-500/5 text-red-600 rounded-sm text-xs font-bold py-2 px-4 cursor-pointer transition-all duration-300"
             >
               Reject run
             </Button>
@@ -133,7 +133,7 @@ export function PayrollApprovalsClient() {
               onClick={() => approveMutation.mutate(selectedRun.id)}
               disabled={approveMutation.isPending}
               data-agent={`payroll-run-approve-btn-${selectedRun.id}`}
-              className="bg-[#0a66c2] hover:bg-[#084e96] text-white shadow-md shadow-blue-500/15 rounded-md text-xs font-bold py-2 px-4 cursor-pointer transition-all duration-300 flex items-center gap-1.5"
+              className="bg-[#0a66c2] hover:bg-[#084e96] text-white shadow-md shadow-blue-500/15 rounded-sm text-xs font-bold py-2 px-4 cursor-pointer transition-all duration-300 flex items-center gap-1.5"
             >
               <Check className="h-4 w-4" /> Approve & issue payslips
             </Button>
@@ -141,7 +141,7 @@ export function PayrollApprovalsClient() {
         </div>
 
         {/* Drilldown Records Table */}
-        <Card className="bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800/40 rounded-md overflow-hidden shadow-sm">
+        <Card className="bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800/40 rounded-sm overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
@@ -194,7 +194,7 @@ export function PayrollApprovalsClient() {
                       <td className="py-3 px-4 text-xs text-red-500/90 font-bold">-{currencySymbol}{parseFloat(rec.deductions || 0).toLocaleString()}</td>
                       <td className="py-3 px-4 text-xs text-emerald-600 dark:text-emerald-400 font-extrabold">{currencySymbol}{parseFloat(rec.net_salary || 0).toLocaleString()}</td>
                       <td className="py-3 px-4">
-                        <Badge className={`${getStatusBadgeColor(rec.status)} font-bold text-[9px] px-2 py-0.5 rounded-md`}>
+                        <Badge className={`${getStatusBadgeColor(rec.status)} font-bold text-[9px] px-2 py-0.5 rounded-sm`}>
                           {toSentenceCase(rec.status)}
                         </Badge>
                       </td>
@@ -222,13 +222,13 @@ export function PayrollApprovalsClient() {
       {isLoading ? (
         <LocalLoader />
       ) : list.length === 0 ? (
-        <Card className="bg-slate-50 dark:bg-[#121320] border border-dashed border-slate-200 dark:border-slate-800 p-8 text-center rounded-md">
+        <Card className="bg-slate-50 dark:bg-[#121320] border border-dashed border-slate-200 dark:border-slate-800 p-8 text-center rounded-sm">
           <ShieldCheck className="h-10 w-10 mx-auto text-emerald-500 opacity-60 mb-2" />
           <p className="text-xs font-bold text-slate-700 dark:text-slate-250">No cycles awaiting approval</p>
           <p className="text-[11px] text-slate-400 mt-0.5">All generated payroll runs are either fully disbursed or in drafting modes.</p>
         </Card>
       ) : (
-        <Card className="bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800/40 rounded-md overflow-hidden shadow-sm">
+        <Card className="bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800/40 rounded-sm overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
@@ -245,7 +245,7 @@ export function PayrollApprovalsClient() {
                   <tr key={run.id} className="border-b border-slate-100 dark:border-slate-800/60 hover:bg-slate-50/50 dark:hover:bg-slate-800/10 transition-colors">
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-md bg-[#0a66c2]/10 text-[#0a66c2] flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-sm bg-[#0a66c2]/10 text-[#0a66c2] flex items-center justify-center">
                           <Calendar className="h-4 w-4" />
                         </div>
                         <span className="text-xs font-bold text-slate-900 dark:text-white">
@@ -260,7 +260,7 @@ export function PayrollApprovalsClient() {
                       {run.processed_at ? new Date(run.processed_at).toLocaleDateString() : 'Draft mode'}
                     </td>
                     <td className="py-3 px-4">
-                      <Badge className={`${getStatusBadgeColor(run.status)} font-bold text-[9px] px-2 py-0.5 rounded-md border shadow-none`}>
+                      <Badge className={`${getStatusBadgeColor(run.status)} font-bold text-[9px] px-2 py-0.5 rounded-sm border shadow-none`}>
                         {toSentenceCase(run.status)}
                       </Badge>
                     </td>
@@ -268,7 +268,7 @@ export function PayrollApprovalsClient() {
                       <Button 
                         onClick={() => setSelectedRun(run)}
                         data-agent={`payroll-approvals-review-sheet-btn-${run.id}`}
-                        className="border border-[#0a66c2]/20 hover:bg-[#0a66c2]/5 text-[#0a66c2] dark:text-[#3b8fd9] dark:hover:bg-[#0a66c2]/10 bg-transparent rounded-md font-bold text-xs h-7.5 px-3 cursor-pointer transition-all duration-300 inline-flex items-center gap-1"
+                        className="border border-[#0a66c2]/20 hover:bg-[#0a66c2]/5 text-[#0a66c2] dark:text-[#3b8fd9] dark:hover:bg-[#0a66c2]/10 bg-transparent rounded-sm font-bold text-xs h-7.5 px-3 cursor-pointer transition-all duration-300 inline-flex items-center gap-1"
                       >
                         Review sheet <ArrowRight className="h-3 w-3" />
                       </Button>

@@ -25,7 +25,7 @@ export function NewTemplateDialog({
 
   return (
     <div className="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-[#121320] border border-slate-100 dark:border-slate-800 rounded-md w-full max-w-2xl shadow-2xl p-6 relative animate-in fade-in zoom-in-95 duration-300">
+      <div className="bg-white dark:bg-[#121320] border border-slate-100 dark:border-slate-800 rounded-sm w-full max-w-2xl shadow-2xl p-6 relative animate-in fade-in zoom-in-95 duration-300">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-slate-400 hover:text-slate-655 cursor-pointer"
@@ -55,7 +55,7 @@ export function NewTemplateDialog({
               <select
                 value={form.category}
                 onChange={(e) => setForm(prev => ({ ...prev, category: e.target.value }))}
-                className="w-full h-10 bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-md px-3 text-xs text-slate-900 dark:text-white outline-none cursor-pointer"
+                className="w-full h-10 bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-sm px-3 text-xs text-slate-900 dark:text-white outline-none cursor-pointer"
               >
                 <option value="PAYROLL">Payroll Related</option>
                 <option value="OFFER_LETTER">Offer Letter</option>
@@ -78,14 +78,14 @@ export function NewTemplateDialog({
           <div className="pt-2 flex items-center justify-end gap-3">
             <Button
               onClick={onClose}
-              className="border border-slate-200 bg-transparent text-slate-650 rounded-md text-xs font-bold py-2 px-4 cursor-pointer"
+              className="border border-slate-200 bg-transparent text-slate-650 rounded-sm text-xs font-bold py-2 px-4 cursor-pointer"
             >
               Cancel
             </Button>
             <Button
               onClick={() => onSubmit(form)}
               disabled={isPending || !form.name || !form.content}
-              className="bg-[#0a66c2] hover:bg-[#084e96] text-white shadow-md rounded-md text-xs font-bold py-2 px-4 cursor-pointer flex items-center gap-1.5"
+              className="bg-[#0a66c2] hover:bg-[#084e96] text-white shadow-md rounded-sm text-xs font-bold py-2 px-4 cursor-pointer flex items-center gap-1.5"
             >
               Create Template
             </Button>

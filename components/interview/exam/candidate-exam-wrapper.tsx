@@ -62,17 +62,25 @@ export function CandidateExamWrapper() {
     }
   };
 
-  const handleSubmitAnswer = useCallback(async (questionId: string) => {
-    if (!examData || !answers[questionId]?.trim()) {
+  const handleSubmitAnswer = useCallback(async (questionId: string, directAnswer?: string) => {
+    const finalAnswer = directAnswer || answers[questionId];
+    if (!examData || !finalAnswer?.trim()) {
       toast.error('Please write your answer before submitting.');
       return;
     }
 
     setSubmitting(questionId);
     try {
-      const response = await examApi.post(`/AIrounds/exam-submit/${questionId}/`, {
+      const isVideoRound = examData.rounds.some(rnd => 
+        rnd.questions.some(q => q.id === questionId) && rnd.question_format === 'VIDEO'
+      );
+      const submitPath = isVideoRound 
+        ? `/AIInterview/submit/${questionId}/`
+        : `/AIrounds/exam-submit/${questionId}/`;
+
+      const response = await examApi.post(submitPath, {
         exam_token: examData.exam_token,
-        answer: answers[questionId],
+        answer: finalAnswer,
       });
 
       if (response.data.status === 'success') {
@@ -86,7 +94,7 @@ export function CandidateExamWrapper() {
               if (rnd.questions.some(q => q.id === questionId)) {
                 let updatedQuestions = rnd.questions.map(q =>
                   q.id === questionId
-                    ? { ...q, candidate_answer: answers[questionId], answered_at: new Date().toISOString() }
+                    ? { ...q, candidate_answer: finalAnswer, answered_at: new Date().toISOString() }
                     : q
                 );
                 if (nextQ && !updatedQuestions.some(q => q.id === nextQ.id)) {

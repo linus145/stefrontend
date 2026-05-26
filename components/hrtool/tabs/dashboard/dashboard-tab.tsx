@@ -16,8 +16,10 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format, formatDistanceToNow } from 'date-fns';
+import { useRouter } from 'next/navigation';
 
 export function DashboardTab() {
+  const router = useRouter();
   const { data: employeesRes, isLoading: employeesLoading } = useQuery({
     queryKey: ['employees', 'dashboard'],
     queryFn: () => hrEmployeeService.getEmployees(),
@@ -50,7 +52,8 @@ export function DashboardTab() {
       change: `+${totalEmployees}`,
       trend: 'up',
       icon: Users,
-      color: 'blue'
+      color: 'blue',
+      link: 'employees'
     },
     {
       label: 'Total Departments',
@@ -58,7 +61,8 @@ export function DashboardTab() {
       change: 'Active',
       trend: 'up',
       icon: FileText,
-      color: 'orange'
+      color: 'orange',
+      link: 'organization'
     },
     {
       label: 'Total Designations',
@@ -66,7 +70,8 @@ export function DashboardTab() {
       change: 'Active',
       trend: 'up',
       icon: Calendar,
-      color: 'green'
+      color: 'green',
+      link: 'organization'
     },
     {
       label: 'Pending Leave Requests',
@@ -74,7 +79,8 @@ export function DashboardTab() {
       change: pendingLeaves > 0 ? 'Urgent' : 'Clear',
       trend: pendingLeaves > 0 ? 'down' : 'up',
       icon: Clock,
-      color: 'purple'
+      color: 'purple',
+      link: 'leave'
     }
   ];
 
@@ -102,7 +108,7 @@ export function DashboardTab() {
         const date = req.updated_at || req.created_at;
         const timeStr = date ? formatRelativeTime(date) : 'Recently';
         const timestamp = date ? new Date(date).getTime() : 0;
-        
+
         let action = '';
         let status = 'pending';
         let icon = Clock;
@@ -193,8 +199,7 @@ export function DashboardTab() {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Header section */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">HR Overview</h1>
-        <p className="text-muted-foreground">Monitor your organization's health and activity.</p>
+        <h1 className="text-xl font-bold tracking-tight">Hr dashboard</h1>
       </div>
 
       {/* Stats Grid */}
@@ -202,7 +207,8 @@ export function DashboardTab() {
         {stats.map((stat, i) => (
           <div
             key={i}
-            className="group p-6 bg-card border border-border rounded-sm hover:border-blue-500/50 transition-all hover:shadow-lg hover:shadow-blue-500/5"
+            onClick={() => router.push(`/Hrtools?tab=${stat.link}`)}
+            className="group p-6 bg-card border border-border rounded-sm hover:border-blue-500/50 transition-all hover:shadow-lg hover:shadow-blue-500/5 cursor-pointer"
           >
             <div className="flex items-start justify-between">
               <div className={cn(
@@ -226,7 +232,7 @@ export function DashboardTab() {
               {isLoading ? (
                 <div className="h-9 w-12 bg-muted/60 animate-pulse rounded-sm" />
               ) : (
-                <h3 className="text-3xl font-bold tracking-tight">{stat.value}</h3>
+                <h3 className="text-2xl font-bold tracking-tight">{stat.value}</h3>
               )}
               <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider mt-1">{stat.label}</p>
             </div>
@@ -283,42 +289,6 @@ export function DashboardTab() {
         {/* Quick Actions/Info */}
         <div className="space-y-4">
           <h2 className="text-lg font-semibold">Quick Insights</h2>
-          <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-sm p-6 text-white shadow-xl shadow-blue-500/20 relative overflow-hidden group">
-            <TrendingUp className="absolute -right-4 -bottom-4 w-32 h-32 text-white/10 group-hover:scale-110 transition-transform duration-500" />
-            <p className="text-sm font-medium text-white/80">Organization growth</p>
-            <h3 className="text-2xl font-bold mt-1">+15% this month</h3>
-            <div className="mt-6 flex gap-2">
-              <button data-agent="dashboard-generate-growth-report-btn" className="px-4 py-2 bg-white text-blue-600 text-xs font-bold rounded-sm hover:bg-blue-50 transition-colors">
-                Generate Report
-              </button>
-            </div>
-          </div>
-
-          <div className="bg-card border border-border rounded-sm p-6">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-4">Upcoming events</h3>
-            <div className="space-y-4">
-              <div className="flex gap-3">
-                <div className="w-10 h-10 rounded-sm bg-muted flex flex-col items-center justify-center shrink-0">
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase">May</span>
-                  <span className="text-sm font-bold">15</span>
-                </div>
-                <div>
-                  <p className="text-sm font-medium">Company Townhall</p>
-                  <p className="text-xs text-muted-foreground">10:00 AM - 11:30 AM</p>
-                </div>
-              </div>
-              <div className="flex gap-3">
-                <div className="w-10 h-10 rounded-sm bg-muted flex flex-col items-center justify-center shrink-0">
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase">May</span>
-                  <span className="text-sm font-bold">18</span>
-                </div>
-                <div>
-                  <p className="text-sm font-medium">Payroll Processing</p>
-                  <p className="text-xs text-muted-foreground">Full day event</p>
-                </div>
-              </div>
-            </div>
-          </div>
 
           <div className="bg-card border border-border rounded-sm p-6">
             <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-4">Upcoming Leaves</h3>

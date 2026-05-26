@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import {
   User, Shield, FileText, Calendar, Building, Globe, MapPin,
   Phone, Mail, CheckCircle2, AlertCircle, Briefcase, Loader2, Save, ArrowLeft,
-  Landmark, CreditCard, Eye, EyeOff
+  Landmark, CreditCard, Eye, EyeOff, Send, KeyRound
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -120,7 +120,7 @@ export function EmployeeDetailsView({ employeeId, onBack }: EmployeeDetailsViewP
         ifsc_code: employee.bank_detail?.ifsc_code || '',
         account_holder_name: employee.bank_detail?.account_holder_name || '',
         branch_name: employee.bank_detail?.branch_name || '',
-        password: '',
+        password: employee.portal_password || '',
         portal_username: employee.portal_username || '',
       });
     }
@@ -137,6 +137,17 @@ export function EmployeeDetailsView({ employeeId, onBack }: EmployeeDetailsViewP
       onBack();
     },
     onError: () => toast.error('Failed to update employee details.'),
+  });
+
+  const sendCredentialsMutation = useMutation({
+    mutationFn: (data: { password?: string; portal_username?: string }) =>
+      hrEmployeeService.sendCredentials(employeeId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['employee-detail', employeeId] });
+      toast.success('Password set and credentials email sent successfully!');
+      setFormData(prev => ({ ...prev, password: '' }));
+    },
+    onError: () => toast.error('Failed to send credentials email.'),
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -163,8 +174,9 @@ export function EmployeeDetailsView({ employeeId, onBack }: EmployeeDetailsViewP
       designation: formData.designation || null,
       department: formData.department || null,
       employee_id: formData.employee_id,
-      password: formData.password || undefined,
       portal_username: formData.portal_username || undefined,
+      // Only send password if it was changed from the stored value
+      ...(formData.password && formData.password !== (employee?.portal_password || '') ? { password: formData.password } : {}),
       aadhaar_detail: {
         aadhaar_number: formData.aadhaar_number,
         enrollment_no: formData.aadhaar_enrollment_no,
@@ -400,47 +412,52 @@ export function EmployeeDetailsView({ employeeId, onBack }: EmployeeDetailsViewP
                   <Card className="border-border/40 bg-card/10 rounded-sm shadow-sm sm:col-span-2 mt-4 animate-in fade-in duration-300">
                     <CardHeader className="py-3 px-4 border-b border-border/30 bg-muted/10">
                       <h4 className="text-xs font-bold uppercase tracking-wider text-foreground flex items-center gap-1.5">
-                        <User className="h-4 w-4 text-[#0a66c2]" /> Portal Access Credentials
+                        <KeyRound className="h-4 w-4 text-[#0a66c2]" /> Portal Access Credentials
                       </h4>
+                      <p className="text-[10px] text-muted-foreground mt-1">
+                        Set the employee&apos;s login password and send it via email. The password will be included in the credentials email.
+                      </p>
                     </CardHeader>
-                    <CardContent className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="space-y-1.5">
-                        <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Portal Username</label>
-                        <div className="relative">
-                          <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input 
-                            id="portal_username"
-                            value={formData.portal_username} 
-                            onChange={handleChange} 
-                            className="rounded-sm pl-10 bg-white font-semibold text-xs text-foreground" 
-                            placeholder="e.g. emp_john123"
-                            data-agent="employee-portal-username-input"
-                          />
+                    <CardContent className="p-4 space-y-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Portal Username</label>
+                          <div className="relative">
+                            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input 
+                              id="portal_username"
+                              value={formData.portal_username} 
+                              onChange={handleChange} 
+                              className="rounded-sm pl-10 bg-white font-semibold text-xs text-foreground" 
+                              placeholder="e.g. emp_john123"
+                              data-agent="employee-portal-username-input"
+                            />
+                          </div>
                         </div>
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Set / Reset Password</label>
-                        <div className="relative">
-                          <Input 
-                            id="password" 
-                            type={showPassword ? "text" : "password"} 
-                            value={formData.password} 
-                            onChange={handleChange} 
-                            className="rounded-sm pr-10 bg-white" 
-                            placeholder="Enter new password to update" 
-                            data-agent="employee-password-reset-input" 
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors outline-none cursor-pointer"
-                          >
-                            {showPassword ? (
-                              <EyeOff className="h-4 w-4" />
-                            ) : (
-                              <Eye className="h-4 w-4" />
-                            )}
-                          </button>
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Set / Reset Password</label>
+                          <div className="relative">
+                            <Input 
+                               id="password" 
+                               type={showPassword ? "text" : "password"} 
+                               value={formData.password} 
+                               onChange={handleChange} 
+                               className="rounded-sm pr-10 bg-white" 
+                               placeholder="Enter new password" 
+                               data-agent="employee-password-reset-input" 
+                             />
+                            <button
+                              type="button"
+                              onClick={() => setShowPassword(!showPassword)}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors outline-none cursor-pointer"
+                            >
+                              {showPassword ? (
+                                <EyeOff className="h-4 w-4" />
+                              ) : (
+                                <Eye className="h-4 w-4" />
+                              )}
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </CardContent>

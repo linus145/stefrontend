@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { HRHeader, HRSection } from './hr-header';
 import { HRSidebar } from './hr-sidebar';
 import { GlobalLoader } from '@/components/ui/global-loader';
@@ -28,6 +28,7 @@ const AgentSchedulingTab = React.lazy(() => import('@/components/hrtool/tabs/sch
 export function HRShell() {
   const { user, isAuthenticated, isLoading: authLoading, userSubscription } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<HRSection>('dashboard');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -47,14 +48,11 @@ export function HRShell() {
   };
 
   React.useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      const tab = params.get('tab');
-      if (tab) {
-        setActiveTab(tab as HRSection);
-      }
+    const tab = searchParams.get('tab');
+    if (tab) {
+      setActiveTab(tab as HRSection);
     }
-  }, []);
+  }, [searchParams]);
 
   const { data: companyCheck, isLoading: companyLoading } = useQuery({
     queryKey: ['company-check'],
@@ -121,7 +119,7 @@ export function HRShell() {
         {activeTab === 'agent-settings' && <AgentSettingsTab />}
         {activeTab === 'agent-scheduling' && <AgentSchedulingTab />}
         {activeTab === 'templates' && <TemplatesTab />}
-        {activeTab === 'performance' && <PerformanceTab />}
+        {activeTab.startsWith('performance') && <PerformanceTab subTab={activeTab} />}
         {activeTab === 'organization' && <OrgTab />}
       </React.Suspense>
     );

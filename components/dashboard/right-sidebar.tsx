@@ -34,7 +34,7 @@ export function RightSidebar({ isCollapsed, onToggle, onNavigateNews }: RightSid
 
   return (
     <aside className={cn(
-      "fixed right-20 top-24 h-max max-h-[calc(100vh-120px)] bg-card/80 backdrop-blur-md border border-border rounded-sm shadow-2xl flex flex-col pt-6 pb-6 z-20 hidden xl:flex w-80 px-6 overflow-y-auto scrollbar-hide"
+      "fixed right-16 2xl:right-28 top-24 h-max max-h-[calc(100vh-120px)] bg-card/80 backdrop-blur-md border border-border rounded-sm shadow-2xl flex flex-col pt-6 pb-6 z-20 hidden xl:flex w-[260px] 2xl:w-72 px-5 overflow-y-auto scrollbar-hide"
     )}>
       <div className="flex flex-col h-full w-full">
         {/* Trending Ecosystem News */}

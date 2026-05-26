@@ -174,12 +174,12 @@ export function EmployeeDashboard() {
 
 
   const { data: currentEmployeeRes } = useQuery({
-    queryKey: ['current-employee-profile', user?.email],
-    queryFn: () => hrEmployeeService.getEmployees({ email: user?.email }),
-    enabled: !isDemo && !!user?.email,
+    queryKey: ['current-employee-profile'],
+    queryFn: () => hrEmployeeService.getMyProfile(),
+    enabled: !isDemo && isAuthenticated,
   });
 
-  const currentEmployee = currentEmployeeRes?.data?.results?.[0];
+  const currentEmployee = currentEmployeeRes?.data;
 
   useEffect(() => {
     if (currentEmployee) {

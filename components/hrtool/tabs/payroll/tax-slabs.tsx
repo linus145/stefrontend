@@ -66,7 +66,7 @@ export function TaxSlabs() {
             setIsTaxModalOpen(true);
           }}
           data-agent="payroll-tax-add-btn"
-          className="bg-[#0a66c2] hover:bg-[#084e96] text-white shadow-sm rounded-md text-xs font-bold py-2 px-3 flex items-center gap-1 cursor-pointer transition-all duration-300"
+          className="bg-[#0a66c2] hover:bg-[#084e96] text-white shadow-sm rounded-sm text-xs font-bold py-2 px-3 flex items-center gap-1 cursor-pointer transition-all duration-300"
         >
           <Plus className="h-4 w-4" /> Add tax slab bracket
         </Button>
@@ -74,16 +74,16 @@ export function TaxSlabs() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {taxConfigs?.data?.results?.length === 0 ? (
-          <div className="col-span-full py-8 text-center text-xs text-slate-400 font-semibold tracking-wide bg-slate-50 dark:bg-slate-900/30 border border-dashed border-slate-200 dark:border-slate-850 rounded-md">
+          <div className="col-span-full py-8 text-center text-xs text-slate-400 font-semibold tracking-wide bg-slate-50 dark:bg-slate-900/30 border border-dashed border-slate-200 dark:border-slate-850 rounded-sm">
             No custom tax config slabs set. Falling back to default structures.
           </div>
         ) : (
           taxConfigs?.data?.results?.map((slab: any) => (
-            <Card key={slab.id} className="bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800/40 rounded-md shadow-sm">
+            <Card key={slab.id} className="bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800/40 rounded-sm shadow-sm">
               <CardHeader className="pb-2 p-4">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-sm font-extrabold text-slate-800 dark:text-slate-200 font-semibold">{slab.slab_name}</CardTitle>
-                  <Badge className="bg-[#0a66c2]/10 text-[#0a66c2] dark:bg-[#0a66c2]/20 dark:text-[#3b8fd9] border-none font-bold text-[10px] rounded-md shadow-none border">
+                  <Badge className="bg-[#0a66c2]/10 text-[#0a66c2] dark:bg-[#0a66c2]/20 dark:text-[#3b8fd9] border-none font-bold text-[10px] rounded-sm shadow-none border">
                     {slab.percentage}%
                   </Badge>
                 </div>
@@ -108,7 +108,7 @@ export function TaxSlabs() {
       {/* Tax Slab addition Modal */}
       {isTaxModalOpen && (
         <div className="fixed inset-0 bg-slate-900/15 dark:bg-black/40 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200 pointer-events-none">
-          <div className="bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800/80 rounded-md w-full max-w-md shadow-2xl p-6 relative overflow-hidden animate-in zoom-in-95 duration-300 pointer-events-auto">
+          <div className="bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800/80 rounded-sm w-full max-w-md shadow-2xl p-6 relative overflow-hidden animate-in zoom-in-95 duration-300 pointer-events-auto">
             <button 
               onClick={() => setIsTaxModalOpen(false)}
               className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer"
@@ -128,7 +128,7 @@ export function TaxSlabs() {
                   onChange={(e) => setTaxForm({...taxForm, slab_name: e.target.value})}
                   data-agent="payroll-tax-slab-name-input"
                   placeholder="e.g. Higher bracket tier"
-                  className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-md px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
+                  className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-sm px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
                 />
               </div>
 
@@ -140,7 +140,7 @@ export function TaxSlabs() {
                   onChange={(e) => setTaxForm({...taxForm, percentage: e.target.value})}
                   data-agent="payroll-tax-percentage-input"
                   placeholder="e.g. 25"
-                  className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-md px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
+                  className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-sm px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
                 />
               </div>
 
@@ -153,7 +153,7 @@ export function TaxSlabs() {
                     onChange={(e) => setTaxForm({...taxForm, min_amount: e.target.value})}
                     data-agent="payroll-tax-min-amount-input"
                     placeholder="e.g. 10000"
-                    className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-md px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
+                    className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-sm px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
                   />
                 </div>
 
@@ -165,7 +165,7 @@ export function TaxSlabs() {
                     onChange={(e) => setTaxForm({...taxForm, max_amount: e.target.value})}
                     data-agent="payroll-tax-max-amount-input"
                     placeholder="Leave empty for infinity"
-                    className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-md px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
+                    className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-sm px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
                   />
                 </div>
               </div>
@@ -173,7 +173,7 @@ export function TaxSlabs() {
               <div className="pt-2 flex items-center justify-end gap-3">
                 <Button 
                   onClick={() => setIsTaxModalOpen(false)}
-                  className="border border-slate-200 bg-transparent text-slate-600 rounded-md text-xs font-bold py-2 px-4 cursor-pointer"
+                  className="border border-slate-200 bg-transparent text-slate-600 rounded-sm text-xs font-bold py-2 px-4 cursor-pointer"
                 >
                   Cancel
                 </Button>
@@ -191,7 +191,7 @@ export function TaxSlabs() {
                   }}
                   disabled={taxPending}
                   data-agent="payroll-tax-modal-save-btn"
-                  className="bg-[#0a66c2] hover:bg-[#084e96] text-white shadow-md shadow-blue-500/15 rounded-md text-xs font-bold py-2 px-4 cursor-pointer"
+                  className="bg-[#0a66c2] hover:bg-[#084e96] text-white shadow-md shadow-blue-500/15 rounded-sm text-xs font-bold py-2 px-4 cursor-pointer"
                 >
                   Save bracket
                 </Button>

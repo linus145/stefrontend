@@ -3,14 +3,12 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Mic, MicOff, Video, VideoOff, Volume2, Sparkles, 
-  CornerDownLeft, Shield, AlertCircle, RefreshCw, Keyboard, UserCheck
+  Mic, MicOff, Sparkles, 
+  CornerDownLeft, Shield, Keyboard
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-
-// Initialize Web Speech APIs
-const SpeechRecognition = typeof window !== 'undefined' ? ((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition) : null;
+import axios from 'axios';
 
 interface Question {
   id: string;
@@ -40,11 +38,15 @@ interface ExamVoiceVideoPhaseProps {
   setActiveQuestionIndex: (idx: number) => void;
   answers: Record<string, string>;
   setAnswers: React.Dispatch<React.SetStateAction<Record<string, string>>>;
-  handleSubmitAnswer: (questionId: string) => void;
+  handleSubmitAnswer: (questionId: string, directAnswer?: string) => void;
   submitting: string | null;
   examData: any;
   logViolation: (type: string, metadata: any, severity: 'LOW' | 'MEDIUM' | 'HIGH') => void;
 }
+
+// ─── Deepgram Voice Agent Constants ───
+const DEEPGRAM_AGENT_URL = 'wss://agent.deepgram.com/v1/agent/converse';
+const SAMPLE_RATE = 16000;
 
 export function ExamVoiceVideoPhase({
   currentRound,
@@ -59,27 +61,35 @@ export function ExamVoiceVideoPhase({
 }: ExamVoiceVideoPhaseProps) {
   const currentQuestion = currentRound.questions[activeQuestionIndex];
 
-  // States
+  // ─── State ───
   const [isStarted, setIsStarted] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false); // AI speaking state
-  const [isListening, setIsListening] = useState(false); // STT microphone state
-  const isListeningRef = useRef(false);
-  useEffect(() => {
-    isListeningRef.current = isListening;
-  }, [isListening]);
-  const [isKeyboardMode, setIsKeyboardMode] = useState(false); // Fallback typing mode
-  const [transcript, setTranscript] = useState(''); // Realtime subtitles
-  const [voiceList, setVoiceList] = useState<SpeechSynthesisVoice[]>([]);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [isKeyboardMode, setIsKeyboardMode] = useState(false);
+  const [agentTranscript, setAgentTranscript] = useState('');  // What AI said
+  const [userTranscript, setUserTranscript] = useState('');     // What user said
+  const [connectionStatus, setConnectionStatus] = useState<'disconnected' | 'connecting' | 'connected' | 'error'>('disconnected');
   const [localCameraStream, setLocalCameraStream] = useState<MediaStream | null>(null);
+  const [micVolume, setMicVolume] = useState<number>(0);
+  const [conversationLog, setConversationLog] = useState<Array<{role: string, text: string}>>([]);
 
-  // References
-  const recognitionRef = useRef<any>(null);
+  // ─── Refs ───
+  const wsRef = useRef<WebSocket | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
+  const micStreamRef = useRef<MediaStream | null>(null);
+  const scriptProcessorRef = useRef<ScriptProcessorNode | null>(null);
+  const sourceNodeRef = useRef<MediaStreamAudioSourceNode | null>(null);
+  const audioQueueRef = useRef<ArrayBuffer[]>([]);
+  const isPlayingRef = useRef(false);
+  const playbackContextRef = useRef<AudioContext | null>(null);
+  const nextPlayTimeRef = useRef(0);
   const analyserRef = useRef<AnalyserNode | null>(null);
-  const [micVolume, setMicVolume] = useState<number>(0);
+  const volumeAnimFrameRef = useRef<number>(0);
 
-  // 1. Camera Initialization (Direct rendering for visual excellence)
+  // ─── AI Voice Agent prompt is now constructed dynamically on the backend ───
+
+  // ─── 1. Camera Initialization ───
   useEffect(() => {
     async function initCamera() {
       try {
@@ -87,7 +97,6 @@ export function ExamVoiceVideoPhase({
           (window as any).suspendProctoring = true;
         }
 
-        // Try reusing the global proctoring camera stream first to avoid hardware locking conflicts!
         if (typeof window !== 'undefined' && (window as any).proctoringStream) {
           const stream = (window as any).proctoringStream as MediaStream;
           setLocalCameraStream(stream);
@@ -96,7 +105,7 @@ export function ExamVoiceVideoPhase({
 
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { width: 640, height: 480, facingMode: 'user' },
-          audio: false // audio processed by SpeechRecognition
+          audio: false
         });
         setLocalCameraStream(stream);
       } catch (err) {
@@ -114,7 +123,7 @@ export function ExamVoiceVideoPhase({
     initCamera();
   }, []);
 
-  // 1b. Callback ref — binds stream IMMEDIATELY when the <video> element enters the DOM
+  // ─── 1b. Video callback ref ───
   const videoCallbackRef = useCallback((node: HTMLVideoElement | null) => {
     videoRef.current = node;
     if (node && localCameraStream) {
@@ -123,7 +132,7 @@ export function ExamVoiceVideoPhase({
     }
   }, [localCameraStream]);
 
-  // 1c. Secure cleanup of camera tracks on unmount
+  // ─── 1c. Camera cleanup ───
   useEffect(() => {
     return () => {
       if (localCameraStream && typeof window !== 'undefined' && localCameraStream !== (window as any).proctoringStream) {
@@ -132,249 +141,342 @@ export function ExamVoiceVideoPhase({
     };
   }, [localCameraStream]);
 
-  // 2. Microphone Audio Level Analyzer (to drive the glowing avatar orbit dynamically!)
-  useEffect(() => {
-    if (!isListening) {
-      setMicVolume(0);
-      return;
+  // ─── 2. Audio Playback Engine ─── 
+  // Plays raw Linear16 PCM audio chunks from Deepgram in sequence
+  const playAudioChunk = useCallback((audioData: ArrayBuffer) => {
+    if (!playbackContextRef.current || playbackContextRef.current.state === 'closed') {
+      playbackContextRef.current = new AudioContext({ sampleRate: SAMPLE_RATE });
     }
-    
-    let animationFrameId: number;
-    async function setupAudioMeter() {
-      try {
-        if (typeof window !== 'undefined') {
-          (window as any).suspendProctoring = true;
-        }
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-        const source = audioContext.createMediaStreamSource(stream);
-        const analyser = audioContext.createAnalyser();
-        analyser.fftSize = 64;
-        source.connect(analyser);
-        
-        audioContextRef.current = audioContext;
-        analyserRef.current = analyser;
+    const ctx = playbackContextRef.current;
 
-        const dataArray = new Uint8Array(analyser.frequencyBinCount);
-        const draw = () => {
-          if (!analyserRef.current || !isListening) return;
-          analyserRef.current.getByteFrequencyData(dataArray);
-          const average = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
-          setMicVolume(Math.min(100, Math.round((average / 255) * 150))); // Boost visually
-          animationFrameId = requestAnimationFrame(draw);
-        };
-        draw();
-      } catch (e) {
-        console.error("Mic analyzer setup failed:", e);
-      } finally {
-        setTimeout(() => {
-          if (typeof window !== 'undefined') {
-            (window as any).suspendProctoring = false;
-          }
-        }, 1500);
-      }
+    const int16Array = new Int16Array(audioData);
+    const float32Array = new Float32Array(int16Array.length);
+    for (let i = 0; i < int16Array.length; i++) {
+      float32Array[i] = int16Array[i] / 32768;
     }
-    setupAudioMeter();
 
-    return () => {
-      cancelAnimationFrame(animationFrameId);
-      if (audioContextRef.current) {
-        audioContextRef.current.close();
-      }
+    const audioBuffer = ctx.createBuffer(1, float32Array.length, SAMPLE_RATE);
+    audioBuffer.copyToChannel(float32Array, 0);
+
+    const source = ctx.createBufferSource();
+    source.buffer = audioBuffer;
+    source.connect(ctx.destination);
+
+    const currentTime = ctx.currentTime;
+    const startTime = Math.max(currentTime, nextPlayTimeRef.current);
+    source.start(startTime);
+    nextPlayTimeRef.current = startTime + audioBuffer.duration;
+
+    source.onended = () => {
+      // Will be superseded by AgentAudioDone event from server
     };
-  }, [isListening]);
+  }, []);
 
-  // 3. Speech Recognition Engine setup (Speech-to-Text)
-  useEffect(() => {
-    if (SpeechRecognition) {
-      const rec = new SpeechRecognition();
-      rec.continuous = true;
-      rec.interimResults = true;
-      rec.lang = 'en-US';
+  // ─── 3. Microphone → Linear16 PCM streaming ───
+  const startMicStream = useCallback(async () => {
+    try {
+      if (typeof window !== 'undefined') {
+        (window as any).suspendProctoring = true;
+      }
 
-      rec.onresult = (event: any) => {
-        let interimTranscript = '';
-        let finalTranscript = '';
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: { 
+          sampleRate: SAMPLE_RATE,
+          channelCount: 1,
+          echoCancellation: true,
+          noiseSuppression: true,
+        } 
+      });
+      micStreamRef.current = stream;
 
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          if (event.results[i].isFinal) {
-            finalTranscript += event.results[i][0].transcript;
-          } else {
-            interimTranscript += event.results[i][0].transcript;
+      const audioContext = new AudioContext({ sampleRate: SAMPLE_RATE });
+      audioContextRef.current = audioContext;
+
+      const source = audioContext.createMediaStreamSource(stream);
+      sourceNodeRef.current = source;
+
+      // Analyser for volume visualization
+      const analyser = audioContext.createAnalyser();
+      analyser.fftSize = 64;
+      source.connect(analyser);
+      analyserRef.current = analyser;
+
+      // ScriptProcessor to capture raw PCM and send to WebSocket
+      const scriptProcessor = audioContext.createScriptProcessor(4096, 1, 1);
+      scriptProcessorRef.current = scriptProcessor;
+
+      source.connect(scriptProcessor);
+      scriptProcessor.connect(audioContext.destination);
+
+      scriptProcessor.onaudioprocess = (event) => {
+        if (wsRef.current?.readyState === WebSocket.OPEN) {
+          const inputData = event.inputBuffer.getChannelData(0);
+          // Convert Float32 → Int16 (Linear16 PCM)
+          const int16Array = new Int16Array(inputData.length);
+          for (let i = 0; i < inputData.length; i++) {
+            const s = Math.max(-1, Math.min(1, inputData[i]));
+            int16Array[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
           }
-        }
-
-        const currentAnswerText = (finalTranscript || interimTranscript).trim();
-        setTranscript(currentAnswerText);
-        setAnswers(prev => ({ ...prev, [currentQuestion.id]: currentAnswerText }));
-      };
-
-      rec.onerror = (e: any) => {
-        if (e.error === 'no-speech' || e.error === 'aborted') {
-          // Ignore transient silence warnings
-          return;
-        }
-        console.warn("Speech recognition notice:", e.error);
-        if (e.error === 'not-allowed') {
-          toast.error("Microphone access is blocked. Please allow mic permissions in your browser.");
-          setIsListening(false);
+          wsRef.current.send(int16Array.buffer);
         }
       };
 
-      rec.onend = () => {
-        // Auto-restart STT listener if browser stops it on silence but user wants it active
-        if (isListeningRef.current) {
-          try {
-            rec.start();
-          } catch (err) {
-            // Silence restart contention
-          }
-        } else {
-          setIsListening(false);
+      // Volume metering animation loop
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+      const updateVolume = () => {
+        if (!analyserRef.current) return;
+        analyserRef.current.getByteFrequencyData(dataArray);
+        const average = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
+        setMicVolume(Math.min(100, Math.round((average / 255) * 150)));
+        volumeAnimFrameRef.current = requestAnimationFrame(updateVolume);
+      };
+      updateVolume();
+
+      setIsListening(true);
+    } catch (err) {
+      console.error("Mic stream setup failed:", err);
+      toast.error("Microphone access is required for the voice interview.");
+    } finally {
+      setTimeout(() => {
+        if (typeof window !== 'undefined') {
+          (window as any).suspendProctoring = false;
         }
-      };
-
-      recognitionRef.current = rec;
-    }
-  }, [currentQuestion.id]);
-
-  // 4. Voice Loading (Text-to-Speech voices)
-  useEffect(() => {
-    if (typeof window !== 'undefined' && window.speechSynthesis) {
-      const loadVoices = () => {
-        setVoiceList(window.speechSynthesis.getVoices());
-      };
-      loadVoices();
-      window.speechSynthesis.onvoiceschanged = loadVoices;
+      }, 1500);
     }
   }, []);
 
-  // 5. Speech vocalization (Text-to-Speech)
-  const speakAIResponse = (text: string) => {
-    if (typeof window !== 'undefined' && window.speechSynthesis) {
-      window.speechSynthesis.cancel(); // Cancel current audio
-      
-      const utterance = new SpeechSynthesisUtterance(text);
-      
-      // Select best premium English voice
-      const premiumVoice = voiceList.find(v => 
-        v.name.includes('Google US English') || 
-        v.name.includes('Google UK English Female') ||
-        v.name.includes('Samantha') || 
-        (v.lang.startsWith('en-') && v.name.includes('Natural'))
-      ) || voiceList[0];
+  const stopMicStream = useCallback(() => {
+    cancelAnimationFrame(volumeAnimFrameRef.current);
 
-      if (premiumVoice) utterance.voice = premiumVoice;
-      utterance.rate = 1.0; // Normal rate
-      utterance.pitch = 1.05; // Slightly pleasant high-fidelity pitch
+    if (scriptProcessorRef.current) {
+      scriptProcessorRef.current.disconnect();
+      scriptProcessorRef.current = null;
+    }
+    if (sourceNodeRef.current) {
+      sourceNodeRef.current.disconnect();
+      sourceNodeRef.current = null;
+    }
+    if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+      audioContextRef.current.close();
+      audioContextRef.current = null;
+    }
+    if (micStreamRef.current) {
+      micStreamRef.current.getTracks().forEach(t => t.stop());
+      micStreamRef.current = null;
+    }
+    analyserRef.current = null;
+    setIsListening(false);
+    setMicVolume(0);
+  }, []);
 
-      utterance.onstart = () => {
-        setIsSpeaking(true);
-        setIsListening(false);
+  // ─── 4. Deepgram Voice Agent WebSocket Connection ───
+  const connectToDeepgram = useCallback(async () => {
+    const deepgramKey = examData?.deepgram_api_key;
+    const examToken = examData?.exam_token;
+    const roundId = currentRound?.id;
+
+    if (!deepgramKey || !examToken || !roundId) {
+      toast.error("Voice Agent configuration missing. Please contact support.");
+      setConnectionStatus('error');
+      return;
+    }
+
+    setConnectionStatus('connecting');
+
+    try {
+      // Fetch dynamic settings from the backend
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api';
+      const response = await axios.get(`${baseUrl}/AIInterview/settings/`, {
+        params: {
+          exam_token: examToken,
+          round_id: roundId
+        }
+      });
+
+      if (response.data.status !== 'success' || !response.data.data?.settings) {
+        throw new Error(response.data.message || "Failed to load voice agent configuration");
+      }
+
+      const settings = response.data.data.settings;
+
+      // Browser WebSocket auth via subprotocol
+      const ws = new WebSocket(DEEPGRAM_AGENT_URL, ['token', deepgramKey]);
+      ws.binaryType = 'arraybuffer';
+      wsRef.current = ws;
+
+      ws.onopen = () => {
+        console.log('[Deepgram] WebSocket connected');
+        ws.send(JSON.stringify(settings));
+        console.log('[Deepgram] Settings sent');
       };
 
-      utterance.onend = () => {
-        setIsSpeaking(false);
-        // Automatically start listening after Sophia finishes her question
-        if (!isKeyboardMode) {
-          handleToggleListen(true);
+      ws.onmessage = (event) => {
+        // Binary = audio data from the agent
+        if (event.data instanceof ArrayBuffer) {
+          playAudioChunk(event.data);
+          return;
+        }
+
+        // JSON = control messages
+        try {
+          const msg = JSON.parse(event.data);
+          
+          switch (msg.type) {
+            case 'SettingsApplied':
+              console.log('[Deepgram] Settings applied successfully');
+              setConnectionStatus('connected');
+              // Start mic streaming after settings are confirmed
+              startMicStream();
+              break;
+
+            case 'AgentStartedSpeaking':
+              setIsSpeaking(true);
+              break;
+
+            case 'AgentAudioDone':
+              setIsSpeaking(false);
+              break;
+
+            case 'UserStartedSpeaking':
+              // User barged in — agent will stop speaking
+              setIsSpeaking(false);
+              break;
+
+            case 'ConversationText': {
+              const role = msg.role; // 'agent' or 'user'
+              const content = msg.content || '';
+              
+              if (role === 'agent' || role === 'assistant') {
+                setAgentTranscript(content);
+                setConversationLog(prev => [...prev, { role: 'agent', text: content }]);
+              } else if (role === 'user') {
+                setUserTranscript(content);
+                setConversationLog(prev => [...prev, { role: 'user', text: content }]);
+                // Save the user's transcript as the answer for the current question
+                setAnswers(prev => ({ ...prev, [currentQuestion.id]: content }));
+              }
+              break;
+            }
+
+            case 'AgentThinking':
+              // Agent is processing — could show a thinking indicator
+              break;
+
+            case 'Error':
+            case 'Warning':
+              console.warn('[Deepgram]', msg.type, msg.message || msg.description);
+              if (msg.type === 'Error') {
+                toast.error(`Voice Agent: ${msg.message || msg.description || 'Connection error'}`);
+              }
+              break;
+
+            default:
+              console.log('[Deepgram] Message:', msg.type, msg);
+          }
+        } catch (e) {
+          // Non-JSON message — ignore
         }
       };
 
-      window.speechSynthesis.speak(utterance);
-    } else {
-      // Browsers without speech synthesis fallback directly to start listening
-      if (!isKeyboardMode) handleToggleListen(true);
-    }
-  };
+      ws.onerror = (error) => {
+        console.error('[Deepgram] WebSocket error:', error);
+        setConnectionStatus('error');
+        toast.error('Voice Agent connection error. Please refresh and try again.');
+      };
 
-  // 6. Automatically speak when entering or moving questions
+      ws.onclose = (event) => {
+        console.log('[Deepgram] WebSocket closed:', event.code, event.reason);
+        setConnectionStatus('disconnected');
+        setIsSpeaking(false);
+        stopMicStream();
+      };
+    } catch (err: any) {
+      console.error("[Deepgram] Settings fetch failed:", err);
+      toast.error(err.message || 'Failed to initialize voice agent configurations.');
+      setConnectionStatus('error');
+    }
+  }, [examData, currentRound?.id, playAudioChunk, startMicStream, stopMicStream, currentQuestion?.id]);
+
+  // ─── 5. Cleanup on unmount ───
   useEffect(() => {
-    if (isStarted && currentQuestion) {
-      setTranscript(answers[currentQuestion.id] || '');
-      speakAIResponse(currentQuestion.question_text);
-    }
-  }, [activeQuestionIndex, isStarted]);
+    return () => {
+      if (wsRef.current) {
+        wsRef.current.close();
+        wsRef.current = null;
+      }
+      stopMicStream();
+      if (playbackContextRef.current && playbackContextRef.current.state !== 'closed') {
+        playbackContextRef.current.close();
+      }
+    };
+  }, [stopMicStream]);
 
-  // Handle Start round
+  // ─── 6. Handle Start Round ───
   const handleStartRound = () => {
     setIsStarted(true);
-    // Initialize Speech Engine and play Welcome + first question
-    const welcomeSpeech = `Hi, I am your AI HR Agent. I will conduct this conversational interview for the ${examData?.job_title || 'Position'}. Let's begin. Here is your first question: ${currentQuestion.question_text}`;
-    speakAIResponse(welcomeSpeech);
+    connectToDeepgram();
   };
 
-  // Toggle Microphone Capturing
-  const handleToggleListen = (forceState?: boolean) => {
-    const targetState = forceState !== undefined ? forceState : !isListening;
+  // ─── 7. Toggle mic mute/unmute ───
+  const handleToggleMic = () => {
+    if (micStreamRef.current) {
+      const audioTrack = micStreamRef.current.getAudioTracks()[0];
+      if (audioTrack) {
+        audioTrack.enabled = !audioTrack.enabled;
+        setIsListening(audioTrack.enabled);
+        if (!audioTrack.enabled) {
+          setMicVolume(0);
+        }
+      }
+    }
+  };
 
-    if (targetState) {
-      if (!recognitionRef.current) {
-        toast.error("Speech synthesis or recognition is not supported in this browser. Please use keyboard fallback mode.");
-        setIsKeyboardMode(true);
-        return;
-      }
-      try {
-        window.speechSynthesis.cancel(); // stop AI speech immediately
-        setIsSpeaking(false);
-        recognitionRef.current.start();
-        setIsListening(true);
-        toast.success("Microphone active. Speak clearly.");
-      } catch (err) {
-        console.error("Failed to start voice recognition:", err);
-      }
+  // ─── 8. Inject text message for keyboard mode ───
+  const handleKeyboardSubmit = () => {
+    const text = answers[currentQuestion.id];
+    if (!text?.trim()) {
+      toast.error("Please type your answer before submitting.");
+      return;
+    }
+
+    // Inject user message into the Deepgram conversation
+    if (wsRef.current?.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify({
+        type: "InjectAgentMessage",
+        message: "" // Clear any pending agent speech
+      }));
+      wsRef.current.send(JSON.stringify({
+        type: "InjectUserMessage",
+        message: text.trim()
+      }));
+      setUserTranscript(text.trim());
+      setConversationLog(prev => [...prev, { role: 'user', text: text.trim() }]);
+      toast.success("Answer submitted to AI interviewer.");
     } else {
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
-      }
-      setIsListening(false);
+      // Fallback: just save locally
+      handleSubmitAnswer(currentQuestion.id);
     }
   };
 
-  // Submit Spoken Response
-  const handleSubmitSpokenAnswer = async () => {
-    // Stop recording first
-    if (isListening) {
-      handleToggleListen(false);
-    }
-
-    const currentAnswer = answers[currentQuestion.id];
-    if (!currentAnswer?.trim()) {
-      toast.error("I couldn't hear your response. Please click record and speak, or type your response.");
+  // ─── 9. Submit full conversation transcript as the answer ───
+  const handleSubmitConversation = () => {
+    if (conversationLog.length === 0) {
+      toast.error("No conversation recorded yet. Please speak to the AI interviewer.");
       return;
     }
 
-    // Call existing submission service directly
-    handleSubmitAnswer(currentQuestion.id);
+    // Build a structured transcript from the conversation
+    const fullTranscript = conversationLog
+      .map(entry => `${entry.role === 'agent' ? 'Interviewer' : 'Candidate'}: ${entry.text}`)
+      .join('\n');
+
+    setAnswers(prev => ({ ...prev, [currentQuestion.id]: fullTranscript }));
+    
+    // Pass the transcript directly to avoid state batching race conditions!
+    handleSubmitAnswer(currentQuestion.id, fullTranscript);
   };
 
-  // Move to next question after submission completes
-  useEffect(() => {
-    if (submitting === null && answers[currentQuestion.id] === currentQuestion.candidate_answer && currentQuestion.candidate_answer) {
-      // Successfully saved!
-      // Speak brief supportive transitional text, then shift question index
-      const isLast = activeQuestionIndex === currentRound.questions.length - 1;
-      
-      if (!isLast) {
-        setActiveQuestionIndex(activeQuestionIndex + 1);
-      } else {
-        // Voice round complete
-        const finalWord = "Thank you. You have successfully answered all conversational questions for this round. Please click Finish Exam in the top bar to complete your evaluation.";
-        speakAIResponse(finalWord);
-      }
-    }
-  }, [submitting, currentQuestion.candidate_answer]);
-
-  // Accessibility Fallback Typing
-  const handleKeyboardInputSave = () => {
-    const currentAnswer = answers[currentQuestion.id];
-    if (!currentAnswer?.trim()) {
-      toast.error("Please type your answer before saving.");
-      return;
-    }
-    handleSubmitAnswer(currentQuestion.id);
-  };
-
+  // ─── RENDER ───
   return (
     <div className="w-full bg-card border border-border rounded-sm shadow-2xl overflow-hidden relative min-h-[580px] flex flex-col">
       {/* Visual background elements */}
@@ -386,43 +488,45 @@ export function ExamVoiceVideoPhase({
       {/* Screen Header Bar */}
       <div className="relative z-10 bg-secondary/60 backdrop-blur-md px-6 py-4 border-b border-border flex justify-between items-center">
         <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse" />
-          <span className="text-[10px] text-primary font-bold uppercase tracking-widest">Sophia Intermediary Workspace</span>
+          <div className={cn(
+            "w-2.5 h-2.5 rounded-full",
+            connectionStatus === 'connected' ? "bg-emerald-500 animate-pulse" :
+            connectionStatus === 'connecting' ? "bg-amber-500 animate-pulse" :
+            connectionStatus === 'error' ? "bg-red-500" :
+            "bg-primary animate-pulse"
+          )} />
+          <span className="text-[10px] text-primary font-bold uppercase tracking-widest">
+            {connectionStatus === 'connected' ? 'Sophia Live — Voice Agent Active' :
+             connectionStatus === 'connecting' ? 'Connecting to Voice Agent...' :
+             connectionStatus === 'error' ? 'Connection Error' :
+             'Sophia Intermediary Workspace'}
+          </span>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5 px-3 py-1 bg-secondary/40 rounded-full border border-border">
             <Shield className="w-3 h-3 text-emerald-500" />
             <span className="text-[9px] text-muted-foreground font-bold uppercase tracking-tight">AI SURVEILLANCE LOCKED</span>
           </div>
-          <button 
-            onClick={() => {
-              window.speechSynthesis.cancel();
-              speakAIResponse(currentQuestion.question_text);
-            }}
-            title="Repeat Question"
-            className="p-1.5 hover:bg-secondary text-muted-foreground hover:text-foreground rounded transition-all"
-          >
-            <RefreshCw size={13} className={cn(isSpeaking && "animate-spin")} />
-          </button>
-          <button 
-            onClick={() => {
-              handleToggleListen(false);
-              setIsKeyboardMode(!isKeyboardMode);
-            }}
-            className={cn(
-              "flex items-center gap-1.5 px-3 py-1.5 rounded text-[10px] font-bold border transition-all",
-              isKeyboardMode 
-                ? "bg-primary/10 border-primary/30 text-primary" 
-                : "bg-secondary border-border text-muted-foreground hover:border-border/80"
-            )}
-          >
-            <Keyboard size={12} />
-            {isKeyboardMode ? "Voice Mode" : "Type Answer"}
-          </button>
+          {isStarted && (
+            <button 
+              onClick={() => {
+                setIsKeyboardMode(!isKeyboardMode);
+              }}
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-1.5 rounded text-[10px] font-bold border transition-all",
+                isKeyboardMode 
+                  ? "bg-primary/10 border-primary/30 text-primary" 
+                  : "bg-secondary border-border text-muted-foreground hover:border-border/80"
+              )}
+            >
+              <Keyboard size={12} />
+              {isKeyboardMode ? "Voice Mode" : "Type Answer"}
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Main Connection Intro Screen */}
+      {/* Main Content */}
       <AnimatePresence mode="wait">
         {!isStarted ? (
           <motion.div 
@@ -433,9 +537,7 @@ export function ExamVoiceVideoPhase({
             className="flex-1 relative z-10 flex flex-col items-center justify-center p-12 text-center"
           >
             <div className="relative w-28 h-28 mb-8">
-              {/* Outer pulsing neon ring */}
               <div className="absolute inset-0 rounded-full bg-blue-600/20 border-2 border-blue-500/50 animate-ping opacity-60" />
-              {/* Inner glowing ball */}
               <div className="absolute inset-2 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 shadow-[0_0_40px_rgba(37,99,235,0.6)] flex items-center justify-center border border-white/20">
                 <Sparkles className="w-10 h-10 text-white animate-pulse" />
               </div>
@@ -443,7 +545,7 @@ export function ExamVoiceVideoPhase({
 
             <h3 className="text-2xl font-bold tracking-tight text-foreground mb-2">AI HR Agent is Ready</h3>
             <p className="text-muted-foreground text-xs font-medium max-w-sm leading-relaxed mb-8">
-              You are about to start a natural, verbal Voice Interview conducted by our AI Specialist Sophia. She will speak questions and evaluate your voice transcripts.
+              You are about to start a natural, verbal Voice Interview conducted by our AI Specialist Sophia. She will speak questions and evaluate your voice responses in real-time using advanced AI.
             </p>
 
             <div className="p-4 bg-secondary/60 border border-border rounded-sm max-w-sm mb-8 text-left space-y-3">
@@ -453,11 +555,15 @@ export function ExamVoiceVideoPhase({
               </div>
               <div className="flex items-start gap-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5" />
-                <p className="text-[10px] text-muted-foreground leading-normal">Web Speech API will translate your speech locally. Speak slowly and clearly.</p>
+                <p className="text-[10px] text-muted-foreground leading-normal">Sophia uses Deepgram Voice AI for natural speech recognition and synthesis. Speak clearly.</p>
               </div>
               <div className="flex items-start gap-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5" />
                 <p className="text-[10px] text-muted-foreground leading-normal">The surveillance proctoring tracks eye positions, face integrity, and device fraud checks.</p>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5" />
+                <p className="text-[10px] text-muted-foreground leading-normal">Powered by Google Gemini AI — the interviewer dynamically adapts questions based on your answers.</p>
               </div>
             </div>
 
@@ -547,7 +653,7 @@ export function ExamVoiceVideoPhase({
                     fill={isListening ? "url(#emeraldGrad)" : "url(#blueGrad)"} 
                     className="shadow-2xl border border-white/10"
                     animate={{
-                      r: isSpeaking ? [52, 57, 52] : 55
+                      scale: isSpeaking ? [0.95, 1.04, 0.95] : 1
                     }}
                     transition={{ repeat: Infinity, duration: 0.6, ease: "easeInOut" }}
                   />
@@ -563,14 +669,24 @@ export function ExamVoiceVideoPhase({
               </div>
 
               <div className="mt-8 text-center">
-                <p className="text-foreground font-bold text-sm tracking-wide">AI HR Agent</p>
-                <p className="text-muted-foreground text-[10px] uppercase font-bold mt-1 tracking-widest">Enterprise Interview Orchestrator</p>
+                <p className="text-foreground font-bold text-sm tracking-wide">AI HR Agent — Sophia</p>
+                <p className="text-muted-foreground text-[10px] uppercase font-bold mt-1 tracking-widest">
+                  {connectionStatus === 'connected' ? 'Deepgram Voice Agent • Gemini AI' : 'Enterprise Interview Orchestrator'}
+                </p>
               </div>
+
+              {/* Agent's last spoken text */}
+              {agentTranscript && (
+                <div className="absolute bottom-6 left-6 right-6 bg-card/90 backdrop-blur-sm border border-border rounded-sm p-3 max-h-[100px] overflow-y-auto">
+                  <span className="text-[8px] text-primary font-bold uppercase tracking-wider block mb-1">Sophia said:</span>
+                  <p className="text-[11px] text-foreground leading-relaxed">{agentTranscript}</p>
+                </div>
+              )}
             </div>
 
             {/* Right Box: Candidate & Camera / Audio Subtitles */}
             <div className="flex-1 flex flex-col bg-secondary/10 p-8 justify-between min-h-[500px]">
-              {/* Surveillance Webcam view with dynamic canvas overlays */}
+              {/* Surveillance Webcam view */}
               <div className="flex-1 flex flex-col">
                 <div className="relative w-full flex-1 min-h-[280px] bg-background rounded-sm border border-border overflow-hidden shadow-2xl group flex items-center justify-center">
                   <video 
@@ -584,16 +700,11 @@ export function ExamVoiceVideoPhase({
 
                   {/* Dynamic Proctoring Eye & Gaze tracker lines */}
                   <div className="absolute inset-0 pointer-events-none">
-                    {/* Bounding box lines */}
                     <div className="absolute top-4 left-4 w-4 h-4 border-t-2 border-l-2 border-blue-500 opacity-60" />
                     <div className="absolute top-4 right-4 w-4 h-4 border-t-2 border-r-2 border-blue-500 opacity-60" />
                     <div className="absolute bottom-4 left-4 w-4 h-4 border-b-2 border-l-2 border-blue-500 opacity-60" />
                     <div className="absolute bottom-4 right-4 w-4 h-4 border-b-2 border-r-2 border-blue-500 opacity-60" />
-
-                    {/* Central scan line */}
                     <div className="absolute top-1/2 left-4 right-4 h-[1px] bg-blue-500/20 border-t border-blue-500/10 shadow-[0_0_10px_rgba(59,130,246,0.3)] animate-pulse" />
-
-                    {/* Simulated Gaze Crosshair */}
                     <div className="absolute top-[45%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full border border-indigo-500/30 flex items-center justify-center">
                       <div className="w-1 h-1 rounded-full bg-indigo-500 animate-ping" />
                     </div>
@@ -617,18 +728,26 @@ export function ExamVoiceVideoPhase({
                 )}
               </div>
 
-              {/* Subtitles Transcript panel */}
+              {/* Transcript panel */}
               <div className="my-6 p-5 bg-card border border-border rounded-sm flex-1 min-h-[140px] flex flex-col justify-between">
                 <div>
-                  <span className="text-[9px] text-primary font-bold uppercase tracking-wider block mb-2">AI HR Agent's Question ({activeQuestionIndex + 1}/{currentRound.questions.length})</span>
-                  <p className="text-foreground text-xs leading-relaxed font-semibold">{currentQuestion?.question_text}</p>
+                  <span className="text-[9px] text-primary font-bold uppercase tracking-wider block mb-2">
+                    Live Interview — {currentRound.designation_display || currentRound.designation}
+                  </span>
+                  {agentTranscript ? (
+                    <p className="text-foreground text-xs leading-relaxed font-semibold">{agentTranscript}</p>
+                  ) : (
+                    <p className="text-muted-foreground text-xs italic">
+                      {connectionStatus === 'connected' ? 'Sophia is preparing...' : 'Waiting for connection...'}
+                    </p>
+                  )}
                 </div>
 
                 {!isKeyboardMode ? (
                   <div className="border-t border-border mt-4 pt-4">
-                    <span className="text-[9px] text-emerald-500 font-bold uppercase tracking-wider block mb-2">Live Answer Transcription</span>
+                    <span className="text-[9px] text-emerald-500 font-bold uppercase tracking-wider block mb-2">Your Response (Live Transcription)</span>
                     <p className="text-muted-foreground text-xs italic leading-relaxed min-h-[40px]">
-                      {transcript || (isListening ? "Listening, speak now..." : "Click record response below to talk...")}
+                      {userTranscript || (isListening ? "Listening, speak now..." : "Microphone is muted")}
                     </p>
                   </div>
                 ) : (
@@ -649,9 +768,10 @@ export function ExamVoiceVideoPhase({
                 {!isKeyboardMode ? (
                   <div className="flex items-center gap-3">
                     <button 
-                      onClick={() => handleToggleListen()}
+                      onClick={handleToggleMic}
+                      disabled={connectionStatus !== 'connected'}
                       className={cn(
-                        "w-12 h-12 rounded-full flex items-center justify-center transition-all cursor-pointer",
+                        "w-12 h-12 rounded-full flex items-center justify-center transition-all cursor-pointer disabled:opacity-40",
                         isListening 
                           ? "bg-red-600 text-white shadow-[0_0_20px_rgba(220,38,38,0.4)] hover:bg-red-700" 
                           : "bg-emerald-600 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)] hover:bg-emerald-700"
@@ -661,31 +781,34 @@ export function ExamVoiceVideoPhase({
                     </button>
                     <div>
                       <p className="text-[10px] text-muted-foreground font-bold">{isListening ? "RECORDING..." : "MIC MUTED"}</p>
-                      <p className="text-[8px] text-muted-foreground/60 font-medium">{isListening ? "AI is transcribing your voice" : "Click mic to speak answer"}</p>
+                      <p className="text-[8px] text-muted-foreground/60 font-medium">
+                        {connectionStatus === 'connected' 
+                          ? (isListening ? "Deepgram is transcribing your voice" : "Click mic to unmute")
+                          : "Waiting for connection..."
+                        }
+                      </p>
                     </div>
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
                     <button 
-                      onClick={handleKeyboardInputSave}
-                      disabled={submitting === currentQuestion.id}
+                      onClick={handleKeyboardSubmit}
+                      disabled={connectionStatus !== 'connected'}
                       className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-[10px] uppercase tracking-wider rounded-sm disabled:opacity-40 transition-all"
                     >
-                      {submitting === currentQuestion.id ? "Saving..." : "Save Answer"}
+                      Send to Sophia
                     </button>
                   </div>
                 )}
 
-                {!isKeyboardMode && (
-                  <button 
-                    onClick={handleSubmitSpokenAnswer}
-                    disabled={submitting === currentQuestion.id}
-                    className="group px-6 py-3 bg-primary text-primary-foreground font-bold text-[10px] uppercase tracking-widest rounded-sm hover:bg-primary/90 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-40"
-                  >
-                    {submitting === currentQuestion.id ? "Analyzing Speech..." : "Submit Response"}
-                    <CornerDownLeft size={10} className="group-hover:translate-x-0.5 transition-transform" />
-                  </button>
-                )}
+                <button 
+                  onClick={handleSubmitConversation}
+                  disabled={submitting === currentQuestion.id || conversationLog.length === 0}
+                  className="group px-6 py-3 bg-primary text-primary-foreground font-bold text-[10px] uppercase tracking-widest rounded-sm hover:bg-primary/90 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-40"
+                >
+                  {submitting === currentQuestion.id ? "Saving Transcript..." : "Save & Next Round"}
+                  <CornerDownLeft size={10} className="group-hover:translate-x-0.5 transition-transform" />
+                </button>
               </div>
             </div>
           </motion.div>

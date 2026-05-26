@@ -37,9 +37,6 @@ export function PreviewTemplateDialog({
     }
   }, [isOpen, template?.id, previewDesign]);
 
-  if (!isOpen || !template) return null;
-
-
   const previewVars = React.useMemo(() => ({
     organization_name: orgName || 'B2Linq Technologies Inc',
     candidate_name: 'John Doe',
@@ -64,12 +61,15 @@ export function PreviewTemplateDialog({
   }), [orgName]);
 
   const themedDocument = React.useMemo(() => {
+    if (!template) return null;
     return renderThemedDocument(previewDesign, template.content, previewVars);
-  }, [previewDesign, template.content, previewVars]);
+  }, [previewDesign, template, previewVars]);
+
+  if (!isOpen || !template) return null;
 
   return (
     <div className="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-[#121320] border border-slate-100 dark:border-slate-800 rounded-md w-full max-w-3xl shadow-2xl p-6 relative flex flex-col max-h-[85vh] animate-in fade-in zoom-in-95 duration-300">
+      <div className="bg-white dark:bg-[#121320] border border-slate-100 dark:border-slate-800 rounded-sm w-full max-w-3xl shadow-2xl p-6 relative flex flex-col max-h-[85vh] animate-in fade-in zoom-in-95 duration-300">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-slate-400 hover:text-slate-655 cursor-pointer"
@@ -82,7 +82,7 @@ export function PreviewTemplateDialog({
         </h3>
         
         <div className="mb-4 flex items-center justify-between gap-3 flex-wrap">
-          <Badge className={`text-[9px] font-bold mt-1 shadow-none border px-2 py-0.5 rounded-md ${getCategoryBadgeStyle(template.category)}`}>
+          <Badge className={`text-[9px] font-bold mt-1 shadow-none border px-2 py-0.5 rounded-sm ${getCategoryBadgeStyle(template.category)}`}>
             {getCategoryLabel(template.category)}
           </Badge>
 
@@ -107,14 +107,14 @@ export function PreviewTemplateDialog({
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto custom-scrollbar bg-slate-50 dark:bg-[#151624]/60 border border-slate-150 dark:border-slate-850 p-6 rounded-md leading-relaxed transform-gpu min-h-[300px]">
+        <div className="flex-1 overflow-y-auto custom-scrollbar bg-slate-50 dark:bg-[#151624]/60 border border-slate-150 dark:border-slate-850 p-6 rounded-sm leading-relaxed transform-gpu min-h-[300px]">
           {!isRendered ? (
             /* ── Document skeleton shimmer ───────────────────── */
             <div className="space-y-4 animate-pulse">
               {/* Header block */}
               <div className="flex justify-between items-start pb-4 border-b border-slate-200 dark:border-slate-800">
                 <div className="flex items-center gap-2">
-                  <div className="h-7 w-7 rounded-md bg-slate-200 dark:bg-slate-700" />
+                  <div className="h-7 w-7 rounded-sm bg-slate-200 dark:bg-slate-700" />
                   <div className="space-y-1">
                     <div className="h-3 w-40 rounded bg-slate-200 dark:bg-slate-700" />
                     <div className="h-2 w-24 rounded bg-slate-150 dark:bg-slate-800" />
@@ -166,13 +166,13 @@ export function PreviewTemplateDialog({
         <div className="pt-4 flex items-center justify-end gap-3 mt-auto">
           <Button
             onClick={() => onCopy(template.id, template.content)}
-            className="border border-slate-200 dark:border-slate-800 bg-transparent text-slate-600 dark:text-slate-350 rounded-md text-xs font-bold py-2 px-4 cursor-pointer flex items-center gap-1"
+            className="border border-slate-200 dark:border-slate-800 bg-transparent text-slate-600 dark:text-slate-350 rounded-sm text-xs font-bold py-2 px-4 cursor-pointer flex items-center gap-1"
           >
             {copiedId === template.id ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />} Copy layout content
           </Button>
           <Button
             onClick={onClose}
-            className="bg-[#0a66c2] hover:bg-[#084e96] text-white shadow-md rounded-md text-xs font-bold py-2 px-4 cursor-pointer"
+            className="bg-[#0a66c2] hover:bg-[#084e96] text-white shadow-md rounded-sm text-xs font-bold py-2 px-4 cursor-pointer"
           >
             Close Preview
           </Button>

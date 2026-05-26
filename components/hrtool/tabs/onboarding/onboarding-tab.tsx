@@ -252,14 +252,14 @@ export function OnboardingTab() {
                         <DropdownMenuItem 
                           onClick={() => setSelectedEmployeeId(employee.id)}
                           data-agent="onboarding-details-btn" 
-                          className="text-xs font-semibold py-2 cursor-pointer focus:bg-[#0a66c2]/10 focus:text-[#0a66c2] transition-colors rounded-none"
+                          className="text-xs font-semibold py-2 cursor-pointer focus:bg-[#0a66c2]/10 focus:text-[#0a66c2] transition-colors rounded-sm"
                         >
                           <User className="mr-2 h-3.5 w-3.5 opacity-60" /> Details
                         </DropdownMenuItem>
                         <DropdownMenuItem 
                           onClick={() => toast.info(`Interview details are available under Recruiter -> Interview Pipeline tab for ${employee.first_name}.`)}
                           data-agent="onboarding-interview-btn" 
-                          className="text-xs font-semibold py-2 cursor-pointer focus:bg-[#0a66c2]/10 focus:text-[#0a66c2] transition-colors rounded-none"
+                          className="text-xs font-semibold py-2 cursor-pointer focus:bg-[#0a66c2]/10 focus:text-[#0a66c2] transition-colors rounded-sm"
                         >
                           <BrainCircuit className="mr-2 h-3.5 w-3.5 opacity-60" /> Interview
                         </DropdownMenuItem>
@@ -267,7 +267,7 @@ export function OnboardingTab() {
                         <DropdownMenuItem
                           onClick={() => setDeleteTarget({ id: employee.id, name: `${employee.first_name} ${employee.last_name}` })}
                           data-agent="onboarding-delete-btn"
-                          className="text-xs font-semibold py-2 cursor-pointer text-red-600 focus:bg-red-50 focus:text-red-700 transition-colors rounded-none"
+                          className="text-xs font-semibold py-2 cursor-pointer text-red-600 focus:bg-red-50 focus:text-red-700 transition-colors rounded-sm"
                         >
                           <Trash2 className="mr-2 h-3.5 w-3.5 opacity-60" /> Delete
                         </DropdownMenuItem>

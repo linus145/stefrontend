@@ -9,8 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   ArrowLeft, User, Shield, FileText, Calendar, Building, Globe, MapPin, 
-  Phone, Mail, CheckCircle2, AlertCircle, Briefcase, Loader2, Save, Landmark, CreditCard,
-  Lock
+  Phone, Mail, CheckCircle2, AlertCircle, Briefcase, Loader2, Save, Landmark, CreditCard
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -47,8 +46,6 @@ export function AddEmployeeModal({ open, onOpenChange }: AddEmployeeModalProps) 
     address: '',
     designation: '',
     department: '',
-    password: '',
-    portal_username: '',
     
     // Aadhaar
     aadhaar_number: '',
@@ -112,8 +109,6 @@ export function AddEmployeeModal({ open, onOpenChange }: AddEmployeeModalProps) 
       address: newEmployee.address,
       designation: newEmployee.designation || null,
       department: newEmployee.department || null,
-      password: newEmployee.password || undefined,
-      portal_username: newEmployee.portal_username || undefined,
       aadhaar_detail: {
         aadhaar_number: newEmployee.aadhaar_number,
         enrollment_no: newEmployee.aadhaar_enrollment_no,
@@ -213,20 +208,6 @@ export function AddEmployeeModal({ open, onOpenChange }: AddEmployeeModalProps) 
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input id="email" type="email" value={newEmployee.email} onChange={handleInputChange} required className="rounded-sm pl-10 bg-white" placeholder="john.doe@company.com" data-agent="employee-email-input" />
-                    </div>
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground" htmlFor="password">Login Password</label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input id="password" type="password" value={newEmployee.password} onChange={handleInputChange} className="rounded-sm pl-10 bg-white" placeholder="Set login password" data-agent="employee-password-input" />
-                    </div>
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground" htmlFor="portal_username">Portal Username (Optional)</label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input id="portal_username" value={newEmployee.portal_username} onChange={handleInputChange} className="rounded-sm pl-10 bg-white" placeholder="Auto-generated if blank" data-agent="employee-portal-username-input" />
                     </div>
                   </div>
                   <div className="space-y-1.5">

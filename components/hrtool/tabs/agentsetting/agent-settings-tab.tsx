@@ -84,7 +84,7 @@ export function AgentSettingsTab() {
       <form onSubmit={handleSave} className="space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* LLM Engine Config */}
-          <Card className="lg:col-span-2 bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800 shadow-sm rounded-md overflow-hidden">
+          <Card className="lg:col-span-2 bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800 shadow-sm rounded-sm overflow-hidden">
             <CardHeader className="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-row items-center justify-between">
               <div className="flex items-center gap-2">
                 <Cpu className="h-4.5 w-4.5 text-[#0a66c2]" />
@@ -92,7 +92,7 @@ export function AgentSettingsTab() {
                   Cognitive LLM Parameters
                 </CardTitle>
               </div>
-              <Badge className="bg-[#0a66c2]/10 text-[#0a66c2] border-none font-bold text-[9px] px-2 py-0.5 rounded-md">
+              <Badge className="bg-[#0a66c2]/10 text-[#0a66c2] border-none font-bold text-[9px] px-2 py-0.5 rounded-sm">
                 Active Engine
               </Badge>
             </CardHeader>
@@ -105,7 +105,7 @@ export function AgentSettingsTab() {
                   <select
                     value={settings.llm_model}
                     onChange={(e) => setSettings({ ...settings, llm_model: e.target.value })}
-                    className="w-full h-9 px-3 text-xs bg-slate-50 dark:bg-[#1c1d30] border border-slate-200 dark:border-slate-850 rounded-md font-bold focus:outline-none focus:border-[#0a66c2]"
+                    className="w-full h-9 px-3 text-xs bg-slate-50 dark:bg-[#1c1d30] border border-slate-200 dark:border-slate-850 rounded-sm font-bold focus:outline-none focus:border-[#0a66c2]"
                   >
                     <option value="gemini-2.5-flash">Gemini 2.5 Flash (Recommended - Fastest)</option>
                     <option value="gemini-2.5-pro">Gemini 2.5 Pro (High Precision)</option>
@@ -121,7 +121,7 @@ export function AgentSettingsTab() {
                   <select
                     value={settings.autonomy_level}
                     onChange={(e) => setSettings({ ...settings, autonomy_level: e.target.value })}
-                    className="w-full h-9 px-3 text-xs bg-slate-50 dark:bg-[#1c1d30] border border-slate-200 dark:border-slate-850 rounded-md font-bold focus:outline-none focus:border-[#0a66c2]"
+                    className="w-full h-9 px-3 text-xs bg-slate-50 dark:bg-[#1c1d30] border border-slate-200 dark:border-slate-850 rounded-sm font-bold focus:outline-none focus:border-[#0a66c2]"
                   >
                     <option value="full_autonomy">Full Autonomy (Observe-Think-Act Loop)</option>
                     <option value="semi_autonomy">Semi-Autonomous (Confirm Actions)</option>
@@ -145,7 +145,7 @@ export function AgentSettingsTab() {
                     step="0.05"
                     value={settings.temperature}
                     onChange={(e) => setSettings({ ...settings, temperature: parseFloat(e.target.value) })}
-                    className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-[#0a66c2] border-none outline-none dark:bg-slate-800"
+                    className="w-full h-2 bg-slate-100 rounded-sm appearance-none cursor-pointer accent-[#0a66c2] border-none outline-none dark:bg-slate-800"
                   />
                 </div>
 
@@ -159,7 +159,7 @@ export function AgentSettingsTab() {
                     max="100"
                     value={settings.max_iterations}
                     onChange={(e) => setSettings({ ...settings, max_iterations: parseInt(e.target.value) || 30 })}
-                    className="w-full h-9 px-3 text-xs bg-slate-50 dark:bg-[#1c1d30] border border-slate-200 dark:border-slate-850 rounded-md font-bold focus:outline-none focus:border-[#0a66c2]"
+                    className="w-full h-9 px-3 text-xs bg-slate-50 dark:bg-[#1c1d30] border border-slate-200 dark:border-slate-850 rounded-sm font-bold focus:outline-none focus:border-[#0a66c2]"
                   />
                 </div>
               </div>
@@ -173,14 +173,14 @@ export function AgentSettingsTab() {
                   value={settings.system_prompt}
                   onChange={(e) => setSettings({ ...settings, system_prompt: e.target.value })}
                   placeholder="Inject additional domain context, company values, custom naming strategies, or custom checks here to align the agent..."
-                  className="w-full p-3 text-xs bg-slate-50 dark:bg-[#1c1d30] border border-slate-200 dark:border-slate-850 rounded-md font-medium focus:outline-none focus:border-[#0a66c2] resize-none"
+                  className="w-full p-3 text-xs bg-slate-50 dark:bg-[#1c1d30] border border-slate-200 dark:border-slate-850 rounded-sm font-medium focus:outline-none focus:border-[#0a66c2] resize-none"
                 />
               </div>
             </CardContent>
           </Card>
 
           {/* Sidebar Guidelines */}
-          <Card className="bg-slate-50 dark:bg-[#151628]/40 border border-slate-150 dark:border-slate-800 rounded-md shadow-sm">
+          <Card className="bg-slate-50 dark:bg-[#151628]/40 border border-slate-150 dark:border-slate-800 rounded-sm shadow-sm">
             <CardHeader className="p-4 flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-xs font-extrabold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
                 Control Overview
@@ -205,7 +205,7 @@ export function AgentSettingsTab() {
 
               <div className="pt-2 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs">
                 <span className="text-slate-500 font-bold uppercase">Security Mode:</span>
-                <Badge className="bg-emerald-500/10 text-emerald-600 border-none font-black text-[9px] px-2 py-0.5 rounded-md">
+                <Badge className="bg-emerald-500/10 text-emerald-600 border-none font-black text-[9px] px-2 py-0.5 rounded-sm">
                   ENCRYPTED
                 </Badge>
               </div>
@@ -217,7 +217,7 @@ export function AgentSettingsTab() {
           <Button
             type="submit"
             disabled={isSaving}
-            className="bg-[#0a66c2] hover:bg-[#084e96] text-white font-extrabold text-xs px-4 h-9 rounded-md shadow-sm flex items-center gap-2 cursor-pointer"
+            className="bg-[#0a66c2] hover:bg-[#084e96] text-white font-extrabold text-xs px-4 h-9 rounded-sm shadow-sm flex items-center gap-2 cursor-pointer"
           >
             {isSaving ? 'Updating Agent config...' : (
               <>

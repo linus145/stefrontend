@@ -387,7 +387,7 @@ export function TemplatesTab() {
         </div>
         <Button
           onClick={() => setIsNewOpen(true)}
-          className="bg-[#0a66c2] hover:bg-[#084e96] text-white shadow-md shadow-blue-500/15 rounded-md text-xs font-bold py-2.5 px-4 cursor-pointer inline-flex items-center gap-1.5 h-10 shrink-0"
+          className="bg-[#0a66c2] hover:bg-[#084e96] text-white shadow-md shadow-blue-500/15 rounded-sm text-xs font-bold py-2.5 px-4 cursor-pointer inline-flex items-center gap-1.5 h-10 shrink-0"
         >
           <Plus className="h-4 w-4" /> Create Custom Template
         </Button>
@@ -396,10 +396,10 @@ export function TemplatesTab() {
       {/* Tabs & Search Navigation Grid */}
       <div className="flex flex-col md:flex-row items-center justify-between gap-4">
         {/* Tab Buttons */}
-        <div className="flex bg-slate-100/80 dark:bg-[#151624]/60 p-1 rounded-md border border-slate-200/50 dark:border-slate-800/60 w-full md:w-auto">
+        <div className="flex bg-slate-100/80 dark:bg-[#151624]/60 p-1 rounded-sm border border-slate-200/50 dark:border-slate-800/60 w-full md:w-auto">
           <button
             onClick={() => setActiveCategory('ALL')}
-            className={`flex-1 md:flex-none px-4 py-1.5 text-xs font-bold rounded-md transition-all cursor-pointer ${activeCategory === 'ALL'
+            className={`flex-1 md:flex-none px-4 py-1.5 text-xs font-bold rounded-sm transition-all cursor-pointer ${activeCategory === 'ALL'
                 ? 'bg-white dark:bg-[#121320] text-[#0a66c2] shadow-sm'
                 : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
               }`}
@@ -408,7 +408,7 @@ export function TemplatesTab() {
           </button>
           <button
             onClick={() => setActiveCategory('PAYROLL')}
-            className={`flex-1 md:flex-none px-4 py-1.5 text-xs font-bold rounded-md transition-all cursor-pointer ${activeCategory === 'PAYROLL'
+            className={`flex-1 md:flex-none px-4 py-1.5 text-xs font-bold rounded-sm transition-all cursor-pointer ${activeCategory === 'PAYROLL'
                 ? 'bg-white dark:bg-[#121320] text-[#0a66c2] shadow-sm'
                 : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
               }`}
@@ -417,7 +417,7 @@ export function TemplatesTab() {
           </button>
           <button
             onClick={() => setActiveCategory('OFFER_JOINING')}
-            className={`flex-1 md:flex-none px-4 py-1.5 text-xs font-bold rounded-md transition-all cursor-pointer ${activeCategory === 'OFFER_JOINING'
+            className={`flex-1 md:flex-none px-4 py-1.5 text-xs font-bold rounded-sm transition-all cursor-pointer ${activeCategory === 'OFFER_JOINING'
                 ? 'bg-white dark:bg-[#121320] text-[#0a66c2] shadow-sm'
                 : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
               }`}
@@ -433,7 +433,7 @@ export function TemplatesTab() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search templates..."
-            className="pl-9 h-10 w-full rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#121320] outline-none text-xs"
+            className="pl-9 h-10 w-full rounded-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#121320] outline-none text-xs"
           />
         </div>
       </div>
@@ -444,12 +444,12 @@ export function TemplatesTab() {
           {[1, 2, 3, 4].map(i => (
             <div
               key={i}
-              className="bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800/50 rounded-md overflow-hidden flex flex-col p-5 gap-3"
+              className="bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800/50 rounded-sm overflow-hidden flex flex-col p-5 gap-3"
             >
               {/* Header row skeleton */}
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-md bg-slate-100 dark:bg-slate-800/60 animate-pulse" />
+                  <div className="w-8 h-8 rounded-sm bg-slate-100 dark:bg-slate-800/60 animate-pulse" />
                   <div className="space-y-1.5">
                     <div className="h-3 w-36 rounded bg-slate-100 dark:bg-slate-800/60 animate-pulse" />
                     <div className="h-2.5 w-20 rounded-full bg-slate-100 dark:bg-slate-800/50 animate-pulse" />
@@ -479,7 +479,7 @@ export function TemplatesTab() {
           ))}
         </div>
       ) : filteredList.length === 0 ? (
-        <Card className="border-dashed border-slate-200 dark:border-slate-800 rounded-md p-10 text-center text-slate-400 bg-white dark:bg-[#121320]">
+        <Card className="border-dashed border-slate-200 dark:border-slate-800 rounded-sm p-10 text-center text-slate-400 bg-white dark:bg-[#121320]">
           <Layers className="h-12 w-12 mx-auto opacity-30 mb-2" />
           <p className="text-xs font-bold">No matching templates found</p>
           <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1">
@@ -493,23 +493,23 @@ export function TemplatesTab() {
             return (
               <Card
                 key={item.id}
-                className="bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800/50 rounded-md overflow-hidden hover:shadow-md transition-all duration-300 flex flex-col group"
+                className="bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800/50 rounded-sm overflow-hidden hover:shadow-md transition-all duration-300 flex flex-col group"
               >
                 <CardContent className="p-5 flex-1 flex flex-col gap-3">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-md bg-slate-50 dark:bg-slate-800/40 flex items-center justify-center border border-slate-100 dark:border-slate-800">
+                      <div className="w-8 h-8 rounded-sm bg-slate-50 dark:bg-slate-800/40 flex items-center justify-center border border-slate-100 dark:border-slate-800">
                         {getCategoryIcon(item.category)}
                       </div>
                       <div>
                         <h4 className="text-xs font-extrabold text-slate-900 dark:text-white line-clamp-1">{item.name}</h4>
-                        <Badge className={`text-[9px] font-bold mt-1 shadow-none border px-2 py-0.5 rounded-md ${getCategoryBadgeStyle(item.category)}`}>
+                        <Badge className={`text-[9px] font-bold mt-1 shadow-none border px-2 py-0.5 rounded-sm ${getCategoryBadgeStyle(item.category)}`}>
                           {getCategoryLabel(item.category)}
                         </Badge>
                       </div>
                     </div>
                     {isSeed && (
-                      <Badge className="bg-amber-100/80 text-amber-800 dark:bg-amber-500/10 dark:text-amber-400 font-bold border border-amber-200/50 shadow-none text-[8px] rounded-md uppercase">
+                      <Badge className="bg-amber-100/80 text-amber-800 dark:bg-amber-500/10 dark:text-amber-400 font-bold border border-amber-200/50 shadow-none text-[8px] rounded-sm uppercase">
                         Default
                       </Badge>
                     )}

@@ -40,7 +40,7 @@ export const BlogList = ({ blogs = [] }: BlogListProps) => {
   ];
 
   return (
-    <section className="py-24 px-6 max-w-7xl mx-auto">
+    <section className="py-24 px-4 sm:px-6 max-w-7xl mx-auto">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {displayBlogs.map((blog, i) => (
           <div key={i} className="group bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-sm overflow-hidden hover:shadow-lg dark:hover:shadow-indigo-950/20 transition-all duration-300">
@@ -53,7 +53,7 @@ export const BlogList = ({ blogs = [] }: BlogListProps) => {
                  </span>
                </div>
             </div>
-            <div className="p-8">
+            <div className="p-6 sm:p-8">
                <div className="text-sm text-slate-500 dark:text-slate-400 mb-2 transition-colors duration-300">{blog.date} • By {blog.author}</div>
               <h3 className="text-xl font-bold text-slate-900 dark:text-slate-50 mb-4 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-300">
                 {blog.title}

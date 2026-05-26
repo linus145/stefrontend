@@ -148,7 +148,7 @@ export function BookDemoForm() {
 
       {/* Right Column: Interactive Form Panel */}
       <div className="lg:col-span-7 flex items-center justify-center">
-        <div className="w-full bg-white/80 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800/80 rounded-sm p-8 sm:p-10 shadow-xl backdrop-blur-xl relative overflow-hidden min-h-[580px] flex flex-col justify-center">
+        <div className="w-full bg-white/80 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800/80 rounded-sm p-5 sm:p-10 shadow-xl backdrop-blur-xl relative overflow-hidden min-h-[580px] flex flex-col justify-center">
           
           <div className="absolute top-0 left-0 w-full h-[4px] bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-500" />
 
@@ -287,7 +287,7 @@ export function BookDemoForm() {
                   <Button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full h-12 bg-[#0a66c2] hover:bg-[#084e96] text-white font-bold rounded-sm shadow-lg shadow-blue-100 hover:shadow-xl hover:shadow-blue-200 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 flex items-center justify-center gap-2 group mt-2 cursor-pointer"
+                    className="w-full h-12 bg-[#0a66c2] hover:bg-[#084e96] text-white font-bold rounded-sm shadow-lg shadow-blue-100 dark:shadow-none hover:shadow-xl hover:shadow-blue-200 dark:hover:shadow-none hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 flex items-center justify-center gap-2 group mt-2 cursor-pointer"
                   >
                     {isSubmitting ? (
                       <span className="flex items-center gap-2">

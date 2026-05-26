@@ -200,7 +200,7 @@ export function CareersList({ jobs = [] }: CareersListProps) {
             transition={{ duration: 0.2 }}
           >
             {/* Careers List Container */}
-            <section className="py-12 px-6 max-w-4xl mx-auto z-10 relative">
+            <section className="py-12 px-4 sm:px-6 max-w-4xl mx-auto z-10 relative">
               {jobs.length === 0 ? (
                 <div className="text-center py-16 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-8">
                   <HelpCircle className="w-12 h-12 text-slate-400 mx-auto mb-4" />
@@ -262,7 +262,7 @@ export function CareersList({ jobs = [] }: CareersListProps) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -15 }}
             transition={{ duration: 0.2 }}
-            className="py-12 px-6 max-w-3xl mx-auto z-10 relative space-y-8"
+            className="py-12 px-4 sm:px-6 max-w-3xl mx-auto z-10 relative space-y-8"
           >
             {/* Back button */}
             <button
@@ -309,7 +309,7 @@ export function CareersList({ jobs = [] }: CareersListProps) {
                   setApplyFormData({ name: '', email: '', resumeUrl: '', coverLetter: '' });
                   setFormErrors({});
                 }}
-                className="bg-[#0a66c2] hover:bg-[#084e96] text-white font-bold h-12 px-8 rounded-sm shadow-md hover:shadow-lg transition-all cursor-pointer flex items-center gap-2"
+                className="bg-[#0a66c2] hover:bg-[#084e96] text-white font-bold h-12 px-8 rounded-sm shadow-md dark:shadow-none hover:shadow-lg dark:hover:shadow-none transition-all cursor-pointer flex items-center gap-2"
               >
                 Apply Online <ArrowRight className="w-4.5 h-4.5" />
               </Button>
@@ -341,7 +341,7 @@ export function CareersList({ jobs = [] }: CareersListProps) {
                 className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-sm border border-slate-200/80 dark:border-slate-800/80 shadow-2xl overflow-hidden pointer-events-auto flex flex-col relative"
               >
                 {/* Modal Header */}
-                <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                <div className="p-4 sm:p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                   <div>
                     <h3 className="font-semibold text-black dark:text-slate-50 text-lg">Apply for {selectedJob.role}</h3>
                     <p className="text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-wider font-semibold mt-1">
@@ -357,7 +357,7 @@ export function CareersList({ jobs = [] }: CareersListProps) {
                 </div>
 
                 {/* Modal Body / Form */}
-                <div className="p-6 overflow-y-auto max-h-[75vh]">
+                <div className="p-4 sm:p-6 overflow-y-auto max-h-[75vh]">
                   <AnimatePresence mode="wait">
                     {!isSuccess ? (
                       <motion.form
@@ -437,7 +437,7 @@ export function CareersList({ jobs = [] }: CareersListProps) {
                           <Button
                             type="submit"
                             disabled={isSubmitting}
-                            className="bg-[#0a66c2] hover:bg-[#084e96] text-white font-bold h-11 px-8 rounded-sm shadow-md hover:shadow-lg transition-all flex items-center gap-1.5 cursor-pointer"
+                            className="bg-[#0a66c2] hover:bg-[#084e96] text-white font-bold h-11 px-8 rounded-sm shadow-md dark:shadow-none hover:shadow-lg dark:hover:shadow-none transition-all flex items-center gap-1.5 cursor-pointer"
                           >
                             {isSubmitting ? (
                               <span className="flex items-center gap-2">

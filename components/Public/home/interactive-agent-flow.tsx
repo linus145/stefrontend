@@ -226,12 +226,12 @@ export function InteractiveAgentFlow() {
         {/* HUD & Controls Container Group */}
         <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
           {/* Real-time Agentic Efficiency & Savings HUD */}
-          <div className={`flex items-center gap-3 border rounded-sm px-3.5 py-1.5 text-[10px] font-bold shadow-inner select-none shrink-0 ${isDark ? 'bg-zinc-950 border-zinc-800 text-zinc-400' : 'bg-zinc-50 border-zinc-300 text-zinc-500'
+          <div className={`flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3 border rounded-sm px-3 py-1.5 sm:px-3.5 sm:py-1.5 text-[10px] font-bold shadow-inner select-none w-full sm:w-auto ${isDark ? 'bg-zinc-950 border-zinc-800 text-zinc-400' : 'bg-zinc-50 border-zinc-300 text-zinc-500'
             }`}>
-            <div className={`flex items-center gap-1 border-r pr-2.5 ${isDark ? 'border-zinc-800' : 'border-zinc-300'}`}>
+            <div className={`flex items-center gap-1 border-r pr-2 sm:pr-2.5 ${isDark ? 'border-zinc-800' : 'border-zinc-300'}`}>
               <span className="text-indigo-500 font-black font-mono">5</span> Cooperative Agents
             </div>
-            <div className={`flex items-center gap-1 border-r pr-2.5 ${isDark ? 'border-zinc-800' : 'border-zinc-300'}`}>
+            <div className={`flex items-center gap-1 border-r pr-2 sm:pr-2.5 ${isDark ? 'border-zinc-800' : 'border-zinc-300'}`}>
               <span className="text-indigo-500 font-black font-mono">98%</span> Human Capacity Saved
             </div>
             <div className="flex items-center gap-1">
@@ -304,7 +304,7 @@ export function InteractiveAgentFlow() {
           <button
             key={idx}
             onClick={() => handleSelectCandidate(idx)}
-            className={`flex items-center gap-2 p-2.5 rounded-sm border text-left transition-all duration-300 ${selectedCand === idx
+            className={`flex items-center justify-center sm:justify-start gap-2 p-2.5 rounded-sm border text-left transition-all duration-300 ${selectedCand === idx
               ? isDark
                 ? 'border-indigo-500/40 bg-indigo-500/10 shadow-sm'
                 : 'border-indigo-500/30 bg-indigo-50/50 shadow-sm'
@@ -356,7 +356,7 @@ export function InteractiveAgentFlow() {
               }`}>
               <Search className={`w-4 h-4 ${activeStep === 0 ? 'text-indigo-400' : 'text-slate-500'}`} />
             </div>
-            <span className={`text-[9px] font-bold tracking-wider uppercase mt-2 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Discovery</span>
+            <span className={`text-[9px] font-bold tracking-wider uppercase mt-2 hidden sm:block ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Discovery</span>
           </div>
 
           {/* Connector 1 */}
@@ -379,7 +379,7 @@ export function InteractiveAgentFlow() {
               }`}>
               <Terminal className={`w-4 h-4 ${activeStep === 1 ? 'text-indigo-400' : 'text-slate-500'}`} />
             </div>
-            <span className={`text-[9px] font-bold tracking-wider uppercase mt-2 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Extraction</span>
+            <span className={`text-[9px] font-bold tracking-wider uppercase mt-2 hidden sm:block ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Extraction</span>
           </div>
 
           {/* Connector 2 */}
@@ -402,7 +402,7 @@ export function InteractiveAgentFlow() {
               }`}>
               <ClipboardCheck className={`w-4 h-4 ${activeStep === 2 ? 'text-indigo-400' : 'text-slate-500'}`} />
             </div>
-            <span className={`text-[9px] font-bold tracking-wider uppercase mt-2 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Screening</span>
+            <span className={`text-[9px] font-bold tracking-wider uppercase mt-2 hidden sm:block ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Screening</span>
           </div>
 
           {/* Connector 3 */}
@@ -425,7 +425,7 @@ export function InteractiveAgentFlow() {
               }`}>
               <Video className={`w-4 h-4 ${activeStep === 3 ? 'text-indigo-400' : 'text-slate-500'}`} />
             </div>
-            <span className={`text-[9px] font-bold tracking-wider uppercase mt-2 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Interviewer</span>
+            <span className={`text-[9px] font-bold tracking-wider uppercase mt-2 hidden sm:block ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Interviewer</span>
           </div>
 
           {/* Connector 4 */}
@@ -453,7 +453,7 @@ export function InteractiveAgentFlow() {
                 : 'text-slate-500'
                 }`} />
             </div>
-            <span className={`text-[9px] font-bold tracking-wider uppercase mt-2 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Decision</span>
+            <span className={`text-[9px] font-bold tracking-wider uppercase mt-2 hidden sm:block ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Decision</span>
           </div>
         </div>
       </div>
@@ -465,37 +465,37 @@ export function InteractiveAgentFlow() {
         }`}>
 
         {/* Futuristic Cooperative Agent Chaining Tracker */}
-        <div className={`flex flex-wrap items-center gap-1.5 sm:gap-2 mb-6 pb-4 border-b text-[10px] font-bold select-none ${isDark ? 'border-slate-850 text-slate-500' : 'border-slate-200/60 text-slate-400'
+        <div className={`flex items-center gap-1.5 sm:gap-2 mb-6 pb-4 border-b text-[10px] font-bold select-none overflow-x-auto scrollbar-none snap-x snap-mandatory w-full ${isDark ? 'border-slate-850 text-slate-500' : 'border-slate-200/60 text-slate-400'
           }`}>
-          <span className={`px-2.5 py-1 rounded-sm border transition-all duration-300 ${activeStep === 0
+          <span className={`px-2.5 py-1 rounded-sm border transition-all duration-300 shrink-0 snap-center ${activeStep === 0
               ? 'bg-indigo-600 border-indigo-500 text-white shadow-md shadow-indigo-100 scale-105'
               : isDark ? 'bg-slate-900 border-slate-800 text-slate-400' : 'bg-white border-slate-200 text-slate-500'
             }`}>
             Discovery Agent
           </span>
-          <span className={isDark ? 'text-slate-700 font-normal' : 'text-slate-300 font-normal'}>➔</span>
-          <span className={`px-2.5 py-1 rounded-sm border transition-all duration-300 ${activeStep === 1
+          <span className={`shrink-0 ${isDark ? 'text-slate-700 font-normal' : 'text-slate-300 font-normal'}`}>➔</span>
+          <span className={`px-2.5 py-1 rounded-sm border transition-all duration-300 shrink-0 snap-center ${activeStep === 1
               ? 'bg-indigo-600 border-indigo-500 text-white shadow-md shadow-indigo-100 scale-105'
               : isDark ? 'bg-slate-900 border-slate-800 text-slate-400' : 'bg-white border-slate-200 text-slate-500'
             }`}>
             Extraction Agent
           </span>
-          <span className={isDark ? 'text-slate-700 font-normal' : 'text-slate-300 font-normal'}>➔</span>
-          <span className={`px-2.5 py-1 rounded-sm border transition-all duration-300 ${activeStep === 2
+          <span className={`shrink-0 ${isDark ? 'text-slate-700 font-normal' : 'text-slate-300 font-normal'}`}>➔</span>
+          <span className={`px-2.5 py-1 rounded-sm border transition-all duration-300 shrink-0 snap-center ${activeStep === 2
               ? 'bg-indigo-600 border-indigo-500 text-white shadow-md shadow-indigo-100 scale-105'
               : isDark ? 'bg-slate-900 border-slate-800 text-slate-400' : 'bg-white border-slate-200 text-slate-500'
             }`}>
             Screening Agent
           </span>
-          <span className={isDark ? 'text-slate-700 font-normal' : 'text-slate-300 font-normal'}>➔</span>
-          <span className={`px-2.5 py-1 rounded-sm border transition-all duration-300 ${activeStep === 3
+          <span className={`shrink-0 ${isDark ? 'text-slate-700 font-normal' : 'text-slate-300 font-normal'}`}>➔</span>
+          <span className={`px-2.5 py-1 rounded-sm border transition-all duration-300 shrink-0 snap-center ${activeStep === 3
               ? 'bg-indigo-600 border-indigo-500 text-white shadow-md shadow-indigo-100 scale-105'
               : isDark ? 'bg-slate-900 border-slate-800 text-slate-400' : 'bg-white border-slate-200 text-slate-500'
             }`}>
             Interviewer Agent
           </span>
-          <span className={isDark ? 'text-slate-700 font-normal' : 'text-slate-300 font-normal'}>➔</span>
-          <span className={`px-2.5 py-1 rounded-sm border transition-all duration-300 ${activeStep === 4
+          <span className={`shrink-0 ${isDark ? 'text-slate-700 font-normal' : 'text-slate-300 font-normal'}`}>➔</span>
+          <span className={`px-2.5 py-1 rounded-sm border transition-all duration-300 shrink-0 snap-center ${activeStep === 4
               ? (currentCandidate.score >= 80 ? 'bg-indigo-600 border-indigo-500 shadow-indigo-100' : 'bg-rose-600 border-rose-500 shadow-rose-100') + ' text-white shadow-md scale-105'
               : isDark ? 'bg-slate-900 border-slate-800 text-slate-400' : 'bg-white border-slate-200 text-slate-500'
             }`}>
@@ -514,17 +514,17 @@ export function InteractiveAgentFlow() {
               </div>
               <span className="text-[10px] text-slate-400 font-mono">Job: Staff Architect</span>
             </div>
-            <div className="my-4 grid grid-cols-2 gap-4">
-              <div className={`border p-3 rounded-sm shadow-sm ${isDark ? 'border-slate-800 bg-slate-900' : 'border-slate-150 bg-white'
+            <div className="my-4 grid grid-cols-2 gap-3 sm:gap-4">
+              <div className={`border p-2.5 sm:p-3 rounded-sm shadow-sm ${isDark ? 'border-slate-800 bg-slate-900' : 'border-slate-150 bg-white'
                 }`}>
                 <span className="text-[10px] text-slate-400 block font-semibold">Incoming Profiles</span>
                 <span className={`text-xl font-bold mt-1 block ${isDark ? 'text-white' : 'text-slate-800'}`}>1,248</span>
               </div>
-              <div className={`border p-3 rounded-sm shadow-sm ${isDark ? 'border-slate-800 bg-slate-900' : 'border-slate-150 bg-white'
+              <div className={`border p-2.5 sm:p-3 rounded-sm shadow-sm ${isDark ? 'border-slate-800 bg-slate-900' : 'border-slate-150 bg-white'
                 }`}>
                 <span className="text-[10px] text-slate-400 block font-semibold">Ingestion Pipeline</span>
                 <span className="text-xs text-indigo-600 font-bold mt-1 block flex items-center gap-1">
-                  <Radio className="w-3 h-3 text-indigo-500 animate-pulse" /> Global API Channels
+                  <Radio className="w-3 h-3 text-indigo-500 animate-pulse" /> Ingestion Channels
                 </span>
               </div>
             </div>
@@ -569,8 +569,7 @@ export function InteractiveAgentFlow() {
                   }`}>Semantic Match Evaluator</span>
               </div>
               <span className="text-[10px] text-slate-400 font-mono">Precision: 99.8%</span>
-            </div>
-            <div className={`my-3 flex items-center justify-between gap-6 p-3 rounded-sm border shadow-sm ${isDark ? 'border-slate-850 bg-slate-900' : 'border-slate-100 bg-white'
+                     <div className={`my-3 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 p-3 rounded-sm border shadow-sm ${isDark ? 'border-slate-850 bg-slate-900' : 'border-slate-101 bg-white'
               }`}>
               <div className="flex items-center gap-4">
                 <div className="relative w-16 h-16 flex items-center justify-center shrink-0">
@@ -600,7 +599,7 @@ export function InteractiveAgentFlow() {
                   </div>
                 </div>
               </div>
-              <div className={`px-2.5 py-1 rounded-full border text-[10px] font-bold ${isDark
+              <div className={`px-2.5 py-1 rounded-full border text-[10px] font-bold text-center sm:text-left ${isDark
                   ? currentCandidate.score >= 80
                     ? 'text-emerald-450 bg-emerald-500/10 border-emerald-500/20'
                     : 'text-rose-450 bg-rose-500/10 border-rose-500/20'
@@ -608,7 +607,7 @@ export function InteractiveAgentFlow() {
                 }`}>
                 {currentCandidate.matchLevel}
               </div>
-            </div>
+            </div>    </div>
             <p className={`text-xs leading-relaxed font-medium ${isDark ? 'text-slate-300' : 'text-slate-500'}`}>
               Semantic skills correlation compared directly with dynamic technical criteria configurations.
             </p>
@@ -640,7 +639,7 @@ export function InteractiveAgentFlow() {
 
               <div>
                 <span className="text-[9px] font-extrabold uppercase text-indigo-500 block">AI Agent Prompt</span>
-                <span className={`text-xs block italic leading-snug mt-0.5 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>"{currentCandidate.interviewQ}"</span>
+                <span className={`text-xs block italic leading-snug mt-0.5 pr-10 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>"{currentCandidate.interviewQ}"</span>
               </div>
               <div className={`border-t pt-2 ${isDark ? 'border-slate-800' : 'border-slate-100'}`}>
                 <span className={`text-[9px] font-extrabold uppercase block flex items-center gap-1 ${isDark ? 'text-slate-400' : 'text-slate-600'
@@ -677,7 +676,7 @@ export function InteractiveAgentFlow() {
                 Verdict: {currentCandidate.score >= 80 ? "APPROVED" : "REJECTED"}
               </span>
             </div>
-            <div className={`my-2 border border-dashed p-3 rounded-sm flex items-center gap-3 relative shadow-inner ${isDark
+            <div className={`my-2 border border-dashed p-3 rounded-sm flex flex-col sm:flex-row items-center text-center sm:text-left gap-3 relative shadow-inner ${isDark
                 ? currentCandidate.score >= 80
                   ? 'border-indigo-500/30 bg-indigo-500/5'
                   : 'border-rose-500/30 bg-rose-500/5'

@@ -5,7 +5,7 @@ import { Layers, Briefcase, ArrowUpRight, Video, Users } from 'lucide-react';
 
 export function FlagshipWorkspaces() {
   return (
-    <section className="py-24 px-6 bg-slate-50 dark:bg-slate-950 border-b border-slate-200/80 dark:border-slate-800 relative overflow-hidden transition-colors duration-300">
+    <section className="py-24 px-4 sm:px-6 bg-slate-50 dark:bg-slate-950 border-b border-slate-200/80 dark:border-slate-800 relative overflow-hidden transition-colors duration-300">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(168,85,247,0.02)_0%,transparent_60%)] pointer-events-none" />
 
       <div className="max-w-6xl mx-auto relative z-10">
@@ -21,7 +21,7 @@ export function FlagshipWorkspaces() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
 
           {/* Product Card 1: Recruiter Dashboard */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/80 rounded-3xl p-8 hover:shadow-xl hover:border-emerald-200 dark:hover:border-emerald-900/30 hover:-translate-y-1 transition-all duration-300 shadow-sm relative overflow-hidden group flex flex-col justify-between">

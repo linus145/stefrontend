@@ -4,7 +4,7 @@ import { Video, Layers, Cpu, BarChart3 } from 'lucide-react';
 
 export function ExecutionEngine() {
   return (
-    <section className="py-24 px-6 bg-slate-900 text-white relative overflow-hidden">
+    <section className="py-24 px-4 sm:px-6 bg-slate-900 text-white relative overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom,rgba(99,102,241,0.08)_0%,transparent_50%)] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-16 items-center relative z-10">
@@ -16,7 +16,7 @@ export function ExecutionEngine() {
             <p className="text-slate-400 text-base">Autonomous pipelines orchestration managing the full hiring flow.</p>
           </div>
 
-          <div className="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-800 before:to-transparent">
+          <div className="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-800 before:to-transparent">
 
             <div className="relative flex items-start gap-6 group">
               <div className="z-10 flex items-center justify-center w-10 h-10 rounded-xl bg-slate-950 border border-slate-800 text-indigo-400 font-bold text-sm shrink-0 transition-colors duration-300 group-hover:border-indigo-500">1</div>

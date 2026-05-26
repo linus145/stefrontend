@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 
 export function CtaSection() {
   return (
-    <section className="py-32 px-6 text-center max-w-4xl mx-auto relative overflow-hidden">
+    <section className="py-16 sm:py-32 px-4 sm:px-6 text-center max-w-4xl mx-auto relative overflow-hidden">
       <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_bottom,rgba(99,102,241,0.06)_0%,transparent_50%)] pointer-events-none" />
 
       <div className="relative z-10 flex flex-col items-center">
@@ -17,7 +17,7 @@ export function CtaSection() {
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto">
           <Link href="/register" className="w-full sm:w-auto">
-            <Button className="w-full sm:w-auto h-14 px-10 rounded-xl bg-[#0a66c2] text-white shadow-lg shadow-blue-100 hover:shadow-xl hover:shadow-blue-200 hover:bg-[#084e96] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 font-bold text-base">
+            <Button className="w-full sm:w-auto h-14 px-10 rounded-xl bg-[#0a66c2] text-white shadow-lg shadow-blue-100 dark:shadow-none hover:shadow-xl hover:shadow-blue-200 dark:hover:shadow-none hover:bg-[#084e96] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 font-bold text-base">
               Get Started Free
             </Button>
           </Link>

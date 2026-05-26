@@ -113,7 +113,7 @@ export default async function BlogDetailPage({ params }: BlogPageProps) {
       <div className="fixed inset-0 z-0 bg-[radial-gradient(ellipse_at_top,rgba(79,70,229,0.03)_0%,transparent_50%)] pointer-events-none" />
 
       <main className="relative z-10 w-full pt-32 pb-24">
-        <div className="max-w-4xl mx-auto px-6">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6">
           
           {/* Back Button */}
           <Link href="/blogs" className="inline-flex items-center text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors mb-12 group">
@@ -175,7 +175,7 @@ export default async function BlogDetailPage({ params }: BlogPageProps) {
 
           {/* Article Footer */}
           <div className="mt-20 pt-12 border-t border-slate-100 dark:border-slate-800">
-            <div className="bg-slate-50 dark:bg-slate-900 rounded-3xl p-8 md:p-12 text-center">
+            <div className="bg-slate-50 dark:bg-slate-900 rounded-3xl p-6 sm:p-8 md:p-12 text-center">
               <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-50 mb-4 transition-colors duration-300">Want more insights?</h3>
               <p className="text-slate-600 dark:text-slate-400 mb-8 max-w-md mx-auto transition-colors duration-300">
                 Join our private newsletter to receive the latest updates on startup execution and capital efficiency.

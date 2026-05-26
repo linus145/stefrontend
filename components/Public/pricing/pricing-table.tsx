@@ -370,7 +370,7 @@ export function PricingTable() {
                     userSub && (userSub.plan_details?.slug === plan.slug || userSub.plan_details?.name?.toLowerCase() === plan.name.toLowerCase())
                       ? 'bg-slate-100 dark:bg-slate-800/80 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-800 cursor-not-allowed'
                       : plan.is_popular
-                      ? 'bg-[#0a66c2] hover:bg-[#084e96] dark:bg-blue-600 dark:hover:bg-blue-700 text-white shadow-md shadow-blue-100 dark:shadow-none hover:shadow-lg'
+                      ? 'bg-[#0a66c2] hover:bg-[#084e96] dark:bg-blue-600 dark:hover:bg-blue-700 text-white shadow-md shadow-blue-100 dark:shadow-none hover:shadow-lg dark:hover:shadow-none'
                       : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >

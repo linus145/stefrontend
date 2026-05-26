@@ -25,7 +25,7 @@ export function HeroSection() {
 
       <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto mb-16">
         <Link href="/book-demo" className="w-full sm:w-auto">
-          <Button className="w-full sm:w-auto h-13 px-8 rounded-xl bg-[#0a66c2] text-white shadow-lg shadow-blue-100 hover:shadow-xl hover:shadow-blue-200 hover:bg-[#084e96] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 font-semibold flex items-center justify-center gap-2 group">
+          <Button className="w-full sm:w-auto h-13 px-8 rounded-xl bg-[#0a66c2] text-white shadow-lg shadow-blue-100 dark:shadow-none hover:shadow-xl hover:shadow-blue-200 dark:hover:shadow-none hover:bg-[#084e96] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 font-semibold flex items-center justify-center gap-2 group">
             Book Custom Demo <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
           </Button>
         </Link>

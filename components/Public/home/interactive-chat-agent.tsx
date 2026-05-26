@@ -170,7 +170,7 @@ export function InteractiveChatAgent() {
     : 'bg-white border-zinc-300 text-zinc-800';
 
   return (
-    <div className={`w-full border rounded-sm p-6 sm:p-8 relative overflow-hidden transition-all duration-500 ${bgMain}`}>
+    <div className={`w-full border rounded-sm p-4 sm:p-8 relative overflow-hidden transition-all duration-500 ${bgMain}`}>
 
       {/* Accent gradients */}
       {isDark && <div className="absolute -right-20 -top-20 h-40 w-40 rounded-full blur-[80px] bg-indigo-500/10 -z-10" />}
@@ -209,12 +209,12 @@ export function InteractiveChatAgent() {
           </button>
 
           {/* HUD Stats */}
-          <div className={`flex items-center gap-3 border rounded-sm px-3.5 py-1.5 text-[10px] font-bold shadow-inner ${isDark ? 'bg-zinc-950 border-zinc-800 text-zinc-400' : 'bg-zinc-50 border-zinc-300 text-zinc-500'
+          <div className={`flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3 border rounded-sm px-3.5 py-1.5 text-[10px] font-bold shadow-inner ${isDark ? 'bg-zinc-950 border-zinc-800 text-zinc-400' : 'bg-zinc-50 border-zinc-300 text-zinc-500'
             }`}>
             <div className={`flex items-center gap-1 border-r pr-2.5 ${isDark ? 'border-zinc-800' : 'border-zinc-200'}`}>
               <span className="text-indigo-500 font-black">Agent OS</span> Online
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 font-bold">
               <span className="text-emerald-500 font-black">API Core</span> Active
             </div>
           </div>
@@ -245,7 +245,7 @@ export function InteractiveChatAgent() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
 
         {/* LEFT SIDE: REAL APPLICATION SIMULATOR (7 cols) */}
-        <div className={`lg:col-span-7 border rounded-sm p-5 sm:p-6 min-h-[380px] max-h-[380px] overflow-hidden shadow-inner flex flex-col justify-between relative transition-colors duration-500 ${bgConsole}`}>
+        <div className={`lg:col-span-7 border rounded-sm p-4 sm:p-6 min-h-[380px] max-h-[380px] overflow-hidden shadow-inner flex flex-col justify-between relative transition-colors duration-500 ${bgConsole}`}>
 
           {/* Header */}
           <div className={`flex items-center justify-between border-b pb-3 mb-4 shrink-0 ${borderSep}`}>
@@ -258,7 +258,7 @@ export function InteractiveChatAgent() {
                 {selectedPromptIdx === 3 && "B2Linq System Registry"}
               </span>
             </div>
-            <span className="text-[9px] text-slate-400 font-mono">localhost:3000/dashboard</span>
+            <span className="text-[9px] text-slate-400 font-mono hidden sm:inline">localhost:3000/dashboard</span>
           </div>
 
           {/* Simulator Content Area */}
@@ -379,8 +379,8 @@ export function InteractiveChatAgent() {
                       </span>
                     </div>
 
-                    <div className={`border rounded-sm overflow-hidden shadow-inner ${isDark ? 'border-slate-850 bg-slate-900' : 'border-slate-200 bg-white'}`}>
-                      <table className="w-full text-[10px] text-left border-collapse">
+                    <div className={`border rounded-sm overflow-x-auto w-full no-scrollbar shadow-inner ${isDark ? 'border-slate-850 bg-slate-900' : 'border-slate-200 bg-white'}`}>
+                      <table className="w-full text-[10px] text-left border-collapse min-w-[320px]">
                         <thead>
                           <tr className={`border-b text-slate-500 font-bold uppercase text-[9px] ${isDark ? 'bg-slate-950 border-slate-850' : 'bg-slate-50 border-slate-200'}`}>
                             <th className="p-2.5 pl-3">Employee</th>
@@ -650,7 +650,7 @@ export function InteractiveChatAgent() {
               <div className="w-7 h-7 rounded-sm bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-500 font-bold shrink-0 text-[10px]">
                 U
               </div>
-              <div className={`flex-1 border rounded-sm p-3 font-medium ${bgItem} ${textBody}`}>
+              <div className={`flex-1 border rounded-sm p-3 font-medium break-words ${bgItem} ${textBody}`}>
                 {inputValue}
               </div>
             </div>
@@ -666,7 +666,7 @@ export function InteractiveChatAgent() {
                     <span>{agentName}</span>
                     <span className="h-1.5 w-1.5 rounded-full bg-purple-500 animate-ping" />
                   </div>
-                  <div className={`border rounded-sm p-3 italic font-medium leading-relaxed ${bgItem} ${textBody}`}>
+                  <div className={`border rounded-sm p-3 italic font-medium leading-relaxed break-words ${bgItem} ${textBody}`}>
                     "{currentThought}"
                   </div>
                 </div>
@@ -679,12 +679,12 @@ export function InteractiveChatAgent() {
                 <div className="w-7 h-7 rounded-sm bg-slate-900/10 border border-slate-700/20 flex items-center justify-center text-slate-500 shrink-0">
                   <Terminal className="w-3.5 h-3.5" />
                 </div>
-                <div className={`flex-1 border rounded-sm p-3 font-mono text-[10px] space-y-1.5 ${bgItem} ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                <div className={`flex-1 border rounded-sm p-3 font-mono text-[10px] space-y-1.5 break-words whitespace-pre-wrap ${bgItem} ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                   {visibleLogs.map((logItem, idx) => (
-                    <div key={idx} className={
+                    <div key={idx} className={`break-words whitespace-pre-wrap ${
                       logItem?.type === 'success' ? 'text-emerald-500 font-semibold' :
                         logItem?.type === 'warning' ? 'text-amber-500 font-medium' : isDark ? 'text-slate-400' : 'text-slate-600'
-                    }>
+                    }`}>
                       {logItem?.log}
                     </div>
                   ))}

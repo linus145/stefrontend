@@ -38,17 +38,17 @@ export default async function BlogsPage() {
   }
 
   return (
-    <div className="bg-white text-slate-900 overflow-hidden min-h-screen font-sans selection:bg-indigo-100">
+    <div className="bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 overflow-hidden min-h-screen font-sans selection:bg-indigo-100 transition-colors duration-300 relative">
       <Header />
       
       <div className="fixed inset-0 z-0 bg-[radial-gradient(ellipse_at_top,rgba(79,70,229,0.05)_0%,transparent_50%)] pointer-events-none" />
 
       <main className="relative z-10 w-full pt-32">
         <section className="px-6 max-w-4xl mx-auto text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 mb-6">
-            The <span className="text-indigo-600">B2linq</span> Journal
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 dark:text-slate-50 mb-6 transition-colors duration-300">
+            The <span className="text-indigo-600 dark:text-indigo-400">B2linq</span> Journal
           </h1>
-          <p className="text-lg text-slate-600 leading-relaxed">
+          <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed transition-colors duration-300">
             Thoughts on building, scaling, and the future of capital efficiency.
           </p>
         </section>

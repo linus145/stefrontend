@@ -66,7 +66,7 @@ export default async function AboutPage() {
   };
 
   return (
-    <div className="bg-white text-slate-900 overflow-hidden min-h-screen font-sans selection:bg-indigo-100">
+    <div className="bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 overflow-hidden min-h-screen font-sans selection:bg-indigo-100 transition-colors duration-300 relative">
       <SEOStructuredData data={breadcrumbData} />
       <Header />
       
@@ -82,10 +82,10 @@ export default async function AboutPage() {
         
         {/* Call to action section */}
         <section className="py-32 px-6 text-center max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-slate-900 tracking-tight mb-6">
+          <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-50 tracking-tight mb-6 transition-colors duration-300">
             Join us in reshaping the ecosystem.
           </h2>
-          <p className="text-lg text-slate-600 mb-10 leading-relaxed">
+          <p className="text-lg text-slate-600 dark:text-slate-400 mb-10 leading-relaxed transition-colors duration-300">
             Whether you are a founder looking for capital or an investor seeking the next unicorn, 
             B2linq is the place where momentum begins.
           </p>

@@ -43,25 +43,25 @@ export const BlogList = ({ blogs = [] }: BlogListProps) => {
     <section className="py-24 px-6 max-w-7xl mx-auto">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {displayBlogs.map((blog, i) => (
-          <div key={i} className="group bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300">
-            <div className="h-48 bg-slate-100 relative overflow-hidden">
+          <div key={i} className="group bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-sm overflow-hidden hover:shadow-lg dark:hover:shadow-indigo-950/20 transition-all duration-300">
+            <div className="h-48 bg-slate-100 dark:bg-slate-950 relative overflow-hidden">
                {/* Placeholder for blog image */}
                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-transparent" />
                <div className="absolute top-4 left-4">
-                 <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-xs font-semibold text-indigo-600 rounded-full border border-indigo-100">
+                 <span className="px-3 py-1 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm text-xs font-semibold text-indigo-600 dark:text-indigo-400 rounded-full border border-indigo-100 dark:border-indigo-900/50 transition-colors duration-300">
                    {blog.category}
                  </span>
                </div>
             </div>
             <div className="p-8">
-              <div className="text-sm text-slate-500 mb-2">{blog.date} • By {blog.author}</div>
-              <h3 className="text-xl font-bold text-slate-900 mb-4 group-hover:text-indigo-600 transition-colors">
+               <div className="text-sm text-slate-500 dark:text-slate-400 mb-2 transition-colors duration-300">{blog.date} • By {blog.author}</div>
+              <h3 className="text-xl font-bold text-slate-900 dark:text-slate-50 mb-4 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-300">
                 {blog.title}
               </h3>
-              <p className="text-slate-600 text-sm leading-relaxed mb-6">
+              <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-6 transition-colors duration-300">
                 {blog.excerpt}
               </p>
-              <Link href={`/blogs/${blog.slug || '#'}`} className="inline-flex items-center text-sm font-bold text-indigo-600 hover:text-indigo-500 transition-colors">
+              <Link href={`/blogs/${blog.slug || '#'}`} className="inline-flex items-center text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 transition-colors">
                 Read Article <span className="ml-2">→</span>
               </Link>
             </div>

@@ -75,7 +75,7 @@ export default function PricingPage() {
   };
 
   return (
-    <div className="bg-slate-50 text-slate-900 overflow-hidden min-h-screen font-sans selection:bg-blue-100 relative">
+    <div className="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 overflow-hidden min-h-screen font-sans selection:bg-blue-100 relative transition-colors duration-300">
       <SEOStructuredData data={[breadcrumbData, productData]} />
       {/* Background Decorative Gradients */}
       <div className="fixed inset-0 z-0 bg-[radial-gradient(circle_at_top,rgba(10,102,194,0.05)_0%,transparent_55%)] pointer-events-none" />

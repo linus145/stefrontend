@@ -95,7 +95,7 @@ export function CareersList({ jobs = [] }: CareersListProps) {
       const parts = str.split('**');
       return parts.map((part, index) => {
         if (index % 2 === 1) {
-          return <strong key={index} className="font-bold text-slate-900">{part}</strong>;
+          return <strong key={index} className="font-bold text-slate-900 dark:text-slate-100">{part}</strong>;
         }
         return part;
       });
@@ -108,7 +108,7 @@ export function CareersList({ jobs = [] }: CareersListProps) {
       if (trimmed.startsWith('### ')) {
         if (inList) {
           elements.push(
-            <ul key={`list-${index}`} className="list-disc pl-5 my-4 space-y-2 text-slate-600">
+            <ul key={`list-${index}`} className="list-disc pl-5 my-4 space-y-2 text-slate-600 dark:text-slate-400">
               {listItems}
             </ul>
           );
@@ -116,14 +116,14 @@ export function CareersList({ jobs = [] }: CareersListProps) {
           inList = false;
         }
         elements.push(
-          <h4 key={index} className="text-base font-bold text-slate-900 mt-6 mb-2">
+          <h4 key={index} className="text-base font-bold text-slate-900 dark:text-slate-100 mt-6 mb-2">
             {parseInline(trimmed.slice(4))}
           </h4>
         );
       } else if (trimmed.startsWith('## ') || trimmed.startsWith('# ')) {
         if (inList) {
           elements.push(
-            <ul key={`list-${index}`} className="list-disc pl-5 my-4 space-y-2 text-slate-600">
+            <ul key={`list-${index}`} className="list-disc pl-5 my-4 space-y-2 text-slate-600 dark:text-slate-400">
               {listItems}
             </ul>
           );
@@ -132,7 +132,7 @@ export function CareersList({ jobs = [] }: CareersListProps) {
         }
         const title = trimmed.startsWith('## ') ? trimmed.slice(3) : trimmed.slice(2);
         elements.push(
-          <h3 key={index} className="text-lg font-bold text-slate-900 mt-6 mb-3">
+          <h3 key={index} className="text-lg font-bold text-slate-900 dark:text-slate-100 mt-6 mb-3">
             {parseInline(title)}
           </h3>
         );
@@ -150,7 +150,7 @@ export function CareersList({ jobs = [] }: CareersListProps) {
       else if (trimmed === '') {
         if (inList) {
           elements.push(
-            <ul key={`list-${index}`} className="list-disc pl-5 my-4 space-y-2 text-slate-600">
+            <ul key={`list-${index}`} className="list-disc pl-5 my-4 space-y-2 text-slate-600 dark:text-slate-400">
               {listItems}
             </ul>
           );
@@ -162,7 +162,7 @@ export function CareersList({ jobs = [] }: CareersListProps) {
       else {
         if (inList) {
           elements.push(
-            <ul key={`list-${index}`} className="list-disc pl-5 my-4 space-y-2 text-slate-600">
+            <ul key={`list-${index}`} className="list-disc pl-5 my-4 space-y-2 text-slate-600 dark:text-slate-400">
               {listItems}
             </ul>
           );
@@ -170,7 +170,7 @@ export function CareersList({ jobs = [] }: CareersListProps) {
           inList = false;
         }
         elements.push(
-          <p key={index} className="text-slate-600 text-sm leading-relaxed mb-4">
+          <p key={index} className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-4">
             {parseInline(trimmed)}
           </p>
         );
@@ -179,7 +179,7 @@ export function CareersList({ jobs = [] }: CareersListProps) {
 
     if (inList) {
       elements.push(
-        <ul key="list-final" className="list-disc pl-5 my-4 space-y-2 text-slate-600">
+        <ul key="list-final" className="list-disc pl-5 my-4 space-y-2 text-slate-600 dark:text-slate-400">
           {listItems}
         </ul>
       );
@@ -202,15 +202,15 @@ export function CareersList({ jobs = [] }: CareersListProps) {
             {/* Careers List Container */}
             <section className="py-12 px-6 max-w-4xl mx-auto z-10 relative">
               {jobs.length === 0 ? (
-                <div className="text-center py-16 bg-slate-50 rounded-2xl border border-slate-100 p-8">
+                <div className="text-center py-16 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-8">
                   <HelpCircle className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-bold text-slate-800">No Open Roles at the Moment</h3>
-                  <p className="text-slate-500 text-sm mt-2 max-w-sm mx-auto">
+                  <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">No Open Roles at the Moment</h3>
+                  <p className="text-slate-500 dark:text-slate-400 text-sm mt-2 max-w-sm mx-auto">
                     We aren't actively advertising any open roles. If you'd like to work with us anyway, please reach out via email.
                   </p>
                   <a 
                     href="mailto:careers@b2linq.com" 
-                    className="inline-flex items-center text-sm font-semibold text-indigo-600 hover:text-indigo-500 mt-4 underline underline-offset-4"
+                    className="inline-flex items-center text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 mt-4 underline underline-offset-4"
                   >
                     careers@b2linq.com
                   </a>
@@ -222,30 +222,30 @@ export function CareersList({ jobs = [] }: CareersListProps) {
                       key={job.id || job.role}
                       whileHover={{ y: -2, boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)' }}
                       onClick={() => handleSelectJob(job)}
-                      className="group bg-white border border-slate-200/80 rounded-sm p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between hover:border-indigo-500/30 transition-all cursor-pointer relative overflow-hidden"
+                      className="group bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-sm p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between hover:border-indigo-500/30 transition-all cursor-pointer relative overflow-hidden"
                     >
                       <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-transparent group-hover:bg-[#0a66c2] transition-all" />
                       
                       <div className="mb-4 md:mb-0">
-                        <h3 className="text-lg font-semibold text-black group-hover:text-[#0a66c2] transition-colors">
+                        <h3 className="text-lg font-semibold text-black dark:text-slate-100 group-hover:text-[#0a66c2] dark:group-hover:text-indigo-400 transition-colors">
                           {job.role}
                         </h3>
                         <div className="flex flex-wrap items-center gap-2 mt-2">
-                          <span className="text-xs font-semibold text-slate-500 flex items-center gap-1">
+                          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1">
                             <Briefcase className="w-3.5 h-3.5" /> {job.department}
                           </span>
-                          <span className="text-slate-300 text-xs">•</span>
-                          <span className="text-xs font-semibold text-slate-500 flex items-center gap-1">
+                          <span className="text-slate-300 dark:text-slate-700 text-xs">•</span>
+                          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1">
                             <MapPin className="w-3.5 h-3.5" /> {job.location}
                           </span>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-4 shrink-0">
-                        <span className="text-[10px] font-bold tracking-wider uppercase px-2.5 py-1 bg-slate-100 text-slate-600 rounded-sm flex items-center gap-1.5">
+                        <span className="text-[10px] font-bold tracking-wider uppercase px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-sm flex items-center gap-1.5">
                           <Clock className="w-3 h-3" /> {job.job_type}
                         </span>
-                        <div className="w-9 h-9 rounded-sm border border-slate-200 flex items-center justify-center group-hover:bg-[#0a66c2] group-hover:border-[#0a66c2] transition-all">
+                        <div className="w-9 h-9 rounded-sm border border-slate-200 dark:border-slate-800 flex items-center justify-center group-hover:bg-[#0a66c2] group-hover:border-[#0a66c2] transition-all">
                           <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-white transition-colors" />
                         </div>
                       </div>
@@ -267,24 +267,24 @@ export function CareersList({ jobs = [] }: CareersListProps) {
             {/* Back button */}
             <button
               onClick={() => setSelectedJob(null)}
-              className="inline-flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-slate-800 transition-colors cursor-pointer group"
+              className="inline-flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-455 hover:text-slate-800 dark:hover:text-slate-200 transition-colors cursor-pointer group"
             >
               <span className="group-hover:-translate-x-0.5 transition-transform">←</span> Back to Job Openings
             </button>
 
             {/* Header section with role details */}
-            <div className="bg-slate-50 border border-slate-200/60 rounded-sm p-6 md:p-8 space-y-4 relative overflow-hidden">
+            <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-sm p-6 md:p-8 space-y-4 relative overflow-hidden">
               <div className="absolute top-0 left-0 bottom-0 w-[4px] bg-[#0a66c2]" />
               <div className="space-y-2">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[#0a66c2] bg-blue-50 px-2.5 py-1 rounded-sm">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#0a66c2] bg-blue-50 dark:bg-blue-950/30 px-2.5 py-1 rounded-sm">
                   {selectedJob.department}
                 </span>
-                <h2 className="text-2xl md:text-3xl font-semibold text-black leading-tight pt-2">{selectedJob.role}</h2>
+                <h2 className="text-2xl md:text-3xl font-semibold text-black dark:text-slate-50 leading-tight pt-2">{selectedJob.role}</h2>
               </div>
               
-              <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-slate-500 pt-2">
+              <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-slate-500 dark:text-slate-400 pt-2">
                 <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4 text-slate-400" /> {selectedJob.location}</span>
-                <span className="text-slate-300">•</span>
+                <span className="text-slate-300 dark:text-slate-700">•</span>
                 <span className="flex items-center gap-1.5"><Clock className="w-4 h-4 text-slate-400" /> {selectedJob.job_type}</span>
               </div>
             </div>
@@ -295,10 +295,10 @@ export function CareersList({ jobs = [] }: CareersListProps) {
             </div>
 
             {/* Actions */}
-            <div className="border-t border-slate-100 pt-8 flex items-center justify-between">
+            <div className="border-t border-slate-100 dark:border-slate-800 pt-8 flex items-center justify-between">
               <a
                 href={`mailto:careers@b2linq.com?subject=Application for ${selectedJob.role}`}
-                className="text-xs font-bold text-slate-500 hover:text-slate-800 flex items-center gap-1.5 underline underline-offset-4"
+                className="text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 flex items-center gap-1.5 underline underline-offset-4"
               >
                 <Mail className="w-4 h-4" /> Apply via Email
               </a>
@@ -338,19 +338,19 @@ export function CareersList({ jobs = [] }: CareersListProps) {
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 15 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 250 }}
-                className="w-full max-w-lg bg-white rounded-sm border border-slate-200/80 shadow-2xl overflow-hidden pointer-events-auto flex flex-col relative"
+                className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-sm border border-slate-200/80 dark:border-slate-800/80 shadow-2xl overflow-hidden pointer-events-auto flex flex-col relative"
               >
                 {/* Modal Header */}
-                <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+                <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                   <div>
-                    <h3 className="font-semibold text-black text-lg">Apply for {selectedJob.role}</h3>
-                    <p className="text-slate-500 text-[10px] uppercase tracking-wider font-semibold mt-1">
+                    <h3 className="font-semibold text-black dark:text-slate-50 text-lg">Apply for {selectedJob.role}</h3>
+                    <p className="text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-wider font-semibold mt-1">
                       {selectedJob.department} • {selectedJob.location}
                     </p>
                   </div>
                   <button
                     onClick={() => setShowApplyModal(false)}
-                    className="p-2 rounded-sm hover:bg-slate-50 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                    className="p-2 rounded-sm hover:bg-slate-50 dark:hover:bg-slate-850 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -369,13 +369,13 @@ export function CareersList({ jobs = [] }: CareersListProps) {
                         className="space-y-4"
                       >
                         <div className="space-y-1">
-                          <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Full Name</label>
+                          <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Full Name</label>
                           <input
                             name="name"
                             value={applyFormData.name}
                             onChange={handleInputChange}
                             placeholder="John Doe"
-                            className={`w-full px-4 h-11 bg-white border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-50 transition-all rounded-sm text-sm outline-none ${
+                            className={`w-full px-4 h-11 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 focus:border-indigo-500 dark:focus:border-indigo-500 focus:ring-2 focus:ring-indigo-50 dark:focus:ring-indigo-500/20 transition-all rounded-sm text-sm outline-none ${
                               formErrors.name ? 'border-red-500 focus:ring-red-100' : ''
                             }`}
                           />
@@ -383,14 +383,14 @@ export function CareersList({ jobs = [] }: CareersListProps) {
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Email Address</label>
+                          <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Email Address</label>
                           <input
                             name="email"
                             type="email"
                             value={applyFormData.email}
                             onChange={handleInputChange}
                             placeholder="john@example.com"
-                            className={`w-full px-4 h-11 bg-white border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-50 transition-all rounded-sm text-sm outline-none ${
+                            className={`w-full px-4 h-11 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 focus:border-indigo-500 dark:focus:border-indigo-500 focus:ring-2 focus:ring-indigo-50 dark:focus:ring-indigo-500/20 transition-all rounded-sm text-sm outline-none ${
                               formErrors.email ? 'border-red-500 focus:ring-red-100' : ''
                             }`}
                           />
@@ -398,7 +398,7 @@ export function CareersList({ jobs = [] }: CareersListProps) {
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Resume / Portfolio URL</label>
+                          <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Resume / Portfolio URL</label>
                           <div className="relative">
                             <FileText className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                             <input
@@ -406,7 +406,7 @@ export function CareersList({ jobs = [] }: CareersListProps) {
                               value={applyFormData.resumeUrl}
                               onChange={handleInputChange}
                               placeholder="Paste link to Google Drive, Dropbox, or PDF..."
-                              className={`w-full pl-10 pr-4 h-11 bg-white border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-50 transition-all rounded-sm text-sm outline-none ${
+                              className={`w-full pl-10 pr-4 h-11 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 focus:border-indigo-500 dark:focus:border-indigo-500 focus:ring-2 focus:ring-indigo-50 dark:focus:ring-indigo-500/20 transition-all rounded-sm text-sm outline-none ${
                                 formErrors.resumeUrl ? 'border-red-500 focus:ring-red-100' : ''
                               }`}
                             />
@@ -415,13 +415,13 @@ export function CareersList({ jobs = [] }: CareersListProps) {
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Cover Letter (Optional)</label>
+                          <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Cover Letter (Optional)</label>
                           <textarea
                             name="coverLetter"
                             value={applyFormData.coverLetter}
                             onChange={handleInputChange}
                             placeholder="Tell us why you are a great fit for this role..."
-                            className="w-full px-4 py-3 min-h-[100px] bg-white border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-50 transition-all rounded-sm text-sm outline-none resize-none"
+                            className="w-full px-4 py-3 min-h-[100px] bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 focus:border-indigo-500 dark:focus:border-indigo-500 focus:ring-2 focus:ring-indigo-50 dark:focus:ring-indigo-500/20 transition-all rounded-sm text-sm outline-none resize-none"
                           />
                         </div>
 
@@ -466,12 +466,12 @@ export function CareersList({ jobs = [] }: CareersListProps) {
                           <CheckCircle2 className="w-9 h-9" />
                         </div>
                         <div className="space-y-2">
-                          <h3 className="text-xl font-black text-slate-900">Application Submitted!</h3>
-                          <p className="text-slate-500 text-xs max-w-xs mx-auto leading-relaxed">
-                            Thank you for applying, <span className="font-bold text-slate-800">{applyFormData.name}</span>! Your application has been recorded.
+                          <h3 className="text-xl font-black text-slate-900 dark:text-slate-50">Application Submitted!</h3>
+                          <p className="text-slate-500 dark:text-slate-400 text-xs max-w-xs mx-auto leading-relaxed">
+                            Thank you for applying, <span className="font-bold text-slate-850 dark:text-slate-200">{applyFormData.name}</span>! Your application has been recorded.
                           </p>
                         </div>
-                        <div className="bg-slate-50 rounded-sm border border-slate-100 p-4 text-xs text-left w-full max-w-sm">
+                        <div className="bg-slate-50 dark:bg-slate-850 rounded-sm border border-slate-100 dark:border-slate-800 p-4 text-xs text-left w-full max-w-sm">
                           <p className="text-slate-500 leading-relaxed">
                             Our recruitment team will review your credentials and contact you at <span className="font-bold text-slate-800">{applyFormData.email}</span> within 3 business days.
                           </p>

@@ -13,7 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function BookDemoPage() {
   return (
-    <div className="bg-slate-50 text-slate-900 overflow-hidden min-h-screen font-sans selection:bg-indigo-100 relative">
+    <div className="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 overflow-hidden min-h-screen font-sans selection:bg-indigo-100 relative transition-colors duration-300">
       
       {/* Decorative Glow Elements */}
       <div className="fixed inset-0 z-0 bg-[radial-gradient(circle_at_top,rgba(99,102,241,0.06)_0%,transparent_55%)] pointer-events-none" />

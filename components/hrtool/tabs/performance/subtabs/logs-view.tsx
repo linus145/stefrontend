@@ -76,6 +76,32 @@ export function LogsView() {
     },
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: (reviewId: string) => hrPerformanceService.deleteReview(reviewId),
+    onSuccess: () => {
+      toast.success('Appraisal deleted successfully.');
+      queryClient.invalidateQueries({ queryKey: ['performance-reviews'] });
+      queryClient.invalidateQueries({ queryKey: ['performance-analytics'] });
+    },
+    onError: () => {
+      toast.error('Failed to delete appraisal.');
+    }
+  });
+
+  const handleDeleteReview = (id: string) => {
+    toast('Are you sure you want to permanently delete this appraisal?', {
+      description: 'This action cannot be undone.',
+      action: {
+        label: 'Delete',
+        onClick: () => deleteMutation.mutate(id),
+      },
+      cancel: {
+        label: 'Cancel',
+        onClick: () => {},
+      },
+    });
+  };
+
   const handleLaunchAppraisal = (e: React.FormEvent) => {
     e.preventDefault();
     if (!employeeId || !reviewerId || !periodStart || !periodEnd) {
@@ -111,28 +137,29 @@ export function LogsView() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Performance Logs</h2>
-          <p className="text-muted-foreground text-sm">Historic ledger of all appraisal periods and final scores.</p>
         </div>
         <Button
           onClick={() => setIsLaunchOpen(true)}
           className="bg-[#0a66c2] hover:bg-[#004182] text-white shadow-lg shadow-blue-500/20 rounded-sm"
+          data-agent="performance-start-appraisal-btn"
         >
           <Plus className="mr-2 h-4 w-4" /> Start Appraisal
         </Button>
       </div>
 
       <div className="w-full">
-        <LogsMatrixTable 
-          reviews={reviews} 
-          isLoading={reviewsLoading} 
+        <LogsMatrixTable
+          reviews={reviews}
+          isLoading={reviewsLoading}
           onCalculate={(id) => calculateMutation.mutate(id)}
           isCalculating={calculateMutation.isPending}
+          onDelete={handleDeleteReview}
         />
       </div>
 
       {/* Launch Appraisal Dialog */}
       <Dialog open={isLaunchOpen} onOpenChange={setIsLaunchOpen}>
-        <DialogContent className="sm:max-w-md bg-white border border-border rounded-sm shadow-xl p-6">
+        <DialogContent className="w-full max-w-[480px] max-h-[85vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] bg-card border border-border/50 rounded-sm shadow-xl p-6">
           <DialogHeader>
             <DialogTitle className="text-lg font-bold text-foreground">Launch New Appraisal</DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
@@ -148,8 +175,9 @@ export function LogsView() {
                 id="targetEmployee"
                 value={employeeId}
                 onChange={(e) => setEmployeeId(e.target.value)}
-                className="flex h-10 w-full items-center justify-between rounded-sm border border-input bg-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                className="flex h-10 w-full items-center justify-between rounded-sm border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
                 required
+                data-agent="launch-appraisal-employee-select"
               >
                 <option value="">Select Employee...</option>
                 {employees.map((emp: any) => (
@@ -167,8 +195,9 @@ export function LogsView() {
                 id="appraisalReviewer"
                 value={reviewerId}
                 onChange={(e) => setReviewerId(e.target.value)}
-                className="flex h-10 w-full items-center justify-between rounded-sm border border-input bg-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                className="flex h-10 w-full items-center justify-between rounded-sm border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
                 required
+                data-agent="launch-appraisal-reviewer-select"
               >
                 <option value="">Select Reviewer...</option>
                 {employees.map((emp: any) => (
@@ -186,7 +215,8 @@ export function LogsView() {
                 id="appraisalCycle"
                 value={cycleId}
                 onChange={handleCycleChange}
-                className="flex h-10 w-full items-center justify-between rounded-sm border border-input bg-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                className="flex h-10 w-full items-center justify-between rounded-sm border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                data-agent="launch-appraisal-cycle-select"
               >
                 <option value="">No Cycle (Ad-hoc review)</option>
                 {cycles.map((c: any) => (
@@ -206,8 +236,9 @@ export function LogsView() {
                   type="date"
                   value={periodStart}
                   onChange={(e) => setPeriodStart(e.target.value)}
-                  className="rounded-sm bg-white border-input"
+                  className="rounded-sm bg-background border-input"
                   required
+                  data-agent="launch-appraisal-start-input"
                 />
               </div>
               <div className="space-y-1.5">
@@ -219,8 +250,9 @@ export function LogsView() {
                   type="date"
                   value={periodEnd}
                   onChange={(e) => setPeriodEnd(e.target.value)}
-                  className="rounded-sm bg-white border-input"
+                  className="rounded-sm bg-background border-input"
                   required
+                  data-agent="launch-appraisal-end-input"
                 />
               </div>
             </div>
@@ -230,6 +262,7 @@ export function LogsView() {
                 variant="outline"
                 onClick={() => setIsLaunchOpen(false)}
                 className="rounded-sm border-input hover:bg-slate-50 text-slate-700"
+                data-agent="launch-appraisal-cancel-btn"
               >
                 Cancel
               </Button>
@@ -237,6 +270,7 @@ export function LogsView() {
                 type="submit"
                 disabled={launchAppraisalMutation.isPending}
                 className="bg-[#0a66c2] hover:bg-[#004182] text-white rounded-sm shadow-md"
+                data-agent="launch-appraisal-submit-btn"
               >
                 {launchAppraisalMutation.isPending ? 'Launching...' : 'Launch Appraisal'}
               </Button>

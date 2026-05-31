@@ -11,7 +11,7 @@ export function ShowcaseSection() {
         <div className="inline-flex items-center gap-1.5 bg-indigo-50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/50 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wider mb-4">
           <Workflow className="w-3.5 h-3.5" /> Pipeline Showcase
         </div>
-        <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight mb-4 animate-pulse transition-colors duration-300">
+        <h2 className="text-3xl sm:text-4xl font-semibold text-slate-900 dark:text-slate-50 tracking-tight mb-4 animate-pulse transition-colors duration-300">
           The Agentic Workflow in Action
         </h2>
         <p className="text-slate-500 dark:text-slate-400 text-sm sm:text-base leading-relaxed transition-colors duration-300">
@@ -28,7 +28,7 @@ export function ShowcaseSection() {
             <div className="inline-flex items-center gap-1.5 bg-indigo-50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/50 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wider mb-3">
               <Bot className="w-3.5 h-3.5" /> Interactive Command Center
             </div>
-            <h3 className="text-2xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight mb-2 transition-colors duration-300">
+            <h3 className="text-2xl font-semibold text-slate-900 dark:text-slate-50 tracking-tight mb-2 transition-colors duration-300">
               Execute Real-Time Agentic Actions
             </h3>
             <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm transition-colors duration-300">

@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 export function EmployeeLoginForm() {
   const { employeeLogin, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
+  const [role, setRole] = useState<'EMPLOYEE' | 'MANAGER'>('EMPLOYEE');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -35,8 +36,8 @@ export function EmployeeLoginForm() {
 
     setIsSubmitting(true);
     try {
-      // Use dedicated employee login flow and redirect to employee dashboard
-      await employeeLogin(email.trim(), password, '/employee/dashboard');
+      // Use dedicated employee login flow with expected role boundaries
+      await employeeLogin(email.trim(), password, '/employee/dashboard', role);
     } catch (err: any) {
       setErrorMsg(err.response?.data?.error || err.response?.data?.detail || err.data?.detail || err.message || 'Invalid employee credentials.');
     } finally {
@@ -46,20 +47,33 @@ export function EmployeeLoginForm() {
 
   const handleDemoLogin = () => {
     setIsSubmitting(true);
-    toast.success('Logging in as Demo Employee...', { duration: 1500 });
+    const isManager = role === 'MANAGER';
+    toast.success(`Logging in as Demo ${isManager ? 'Manager' : 'Employee'}...`, { duration: 1500 });
     setTimeout(() => {
       // Store a mock session marker to bypass auth check in employee dashboard
-      localStorage.setItem('demo_employee_user', JSON.stringify({
-        id: 'demo-emp-001',
-        email: 'employee@b2linq.com',
-        first_name: 'David',
-        last_name: 'Miller',
-        role: 'EMPLOYEE',
-        employee_id: 'EMP-0842',
-        designation: 'Senior Frontend Engineer',
-        department: 'Engineering',
-        joining_date: '2024-03-15'
-      }));
+      localStorage.setItem('demo_employee_user', JSON.stringify(
+        isManager ? {
+          id: 'demo-mgr-001',
+          email: 'manager@b2linq.com',
+          first_name: 'Sarah',
+          last_name: 'Conner',
+          role: 'MANAGER',
+          employee_id: 'MGR-0214',
+          designation: 'Engineering Manager',
+          department: 'Engineering',
+          joining_date: '2022-06-10'
+        } : {
+          id: 'demo-emp-001',
+          email: 'employee@b2linq.com',
+          first_name: 'David',
+          last_name: 'Miller',
+          role: 'EMPLOYEE',
+          employee_id: 'EMP-0842',
+          designation: 'Senior Frontend Engineer',
+          department: 'Engineering',
+          joining_date: '2024-03-15'
+        }
+      ));
       router.replace('/employee/dashboard');
       setIsSubmitting(false);
     }, 1000);
@@ -70,8 +84,34 @@ export function EmployeeLoginForm() {
       {/* Subtle accent bar at the top */}
       <div className="hidden sm:block absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#0a66c2] to-transparent" />
       
+      {/* Premium Sliding Segmented Role Switcher */}
+      <div className="flex bg-slate-100 dark:bg-slate-950/80 p-1 rounded-sm border border-slate-200/60 dark:border-slate-800/60 mb-6 relative">
+        <button
+          type="button"
+          onClick={() => setRole('EMPLOYEE')}
+          className={`flex-1 text-center py-2 text-xs font-bold uppercase tracking-wider rounded-sm transition-all duration-300 relative z-10 cursor-pointer ${
+            role === 'EMPLOYEE'
+              ? 'bg-[#0a66c2] text-white shadow-sm'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+          }`}
+        >
+          Employee
+        </button>
+        <button
+          type="button"
+          onClick={() => setRole('MANAGER')}
+          className={`flex-1 text-center py-2 text-xs font-bold uppercase tracking-wider rounded-sm transition-all duration-300 relative z-10 cursor-pointer ${
+            role === 'MANAGER'
+              ? 'bg-[#0a66c2] text-white shadow-sm'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+          }`}
+        >
+          Manager
+        </button>
+      </div>
+
       <h2 className="text-md font-semibold text-slate-800 dark:text-slate-200 text-center uppercase tracking-wider mb-6">
-        Sign In to Employee Hub
+        Sign In to {role === 'MANAGER' ? 'Manager Hub' : 'Employee Hub'}
       </h2>
 
       {errorMsg && (
@@ -83,7 +123,7 @@ export function EmployeeLoginForm() {
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className="space-y-1.5">
           <label className="text-[9px] font-bold tracking-widest text-slate-500 dark:text-slate-400 uppercase" htmlFor="email">
-            Employee Username or Email
+            {role === 'MANAGER' ? 'Manager Username or Email' : 'Employee Username or Email'}
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
@@ -161,7 +201,7 @@ export function EmployeeLoginForm() {
           className="w-full flex items-center justify-center gap-2 rounded-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 hover:bg-slate-50 dark:hover:bg-slate-900 py-2 text-[10px] font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-all cursor-pointer"
         >
           <Sparkles className="h-3.5 w-3.5 text-blue-500 dark:text-blue-400" />
-          Launch Demo Employee Portal
+          Launch Demo {role === 'MANAGER' ? 'Manager' : 'Employee'} Portal
         </button>
       </div>
     </div>

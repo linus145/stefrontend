@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Calculator, FileText, User, MessageSquare, Award } from 'lucide-react';
+import { Calculator, FileText, User, MessageSquare, Award, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -24,9 +24,10 @@ interface LogsMatrixTableProps {
   isLoading: boolean;
   onCalculate: (id: string) => void;
   isCalculating: boolean;
+  onDelete?: (id: string) => void;
 }
 
-export function LogsMatrixTable({ reviews, isLoading, onCalculate, isCalculating }: LogsMatrixTableProps) {
+export function LogsMatrixTable({ reviews, isLoading, onCalculate, isCalculating, onDelete }: LogsMatrixTableProps) {
   const queryClient = useQueryClient();
 
   // State for Feedbacks
@@ -135,106 +136,120 @@ export function LogsMatrixTable({ reviews, isLoading, onCalculate, isCalculating
 
   return (
     <Card className="bg-card/50 border-border/50 rounded-sm overflow-hidden">
-      <div className="px-6 py-4 border-b border-border/50 flex items-center justify-between bg-muted/20">
-        <h3 className="text-sm font-bold uppercase tracking-widest text-foreground">Actionable Logs Matrix</h3>
-        <Badge variant="secondary" className="text-[10px] uppercase font-bold">Appraisal Periods</Badge>
+      <div className="px-4 py-2.5 border-b border-border/50 flex items-center justify-between bg-muted/20">
+        <h3 className="text-xs font-bold uppercase tracking-widest text-foreground">Actionable Logs Matrix</h3>
+        <Badge variant="secondary" className="text-[9px] uppercase font-bold">Appraisal Periods</Badge>
       </div>
-      
+
       <div className="overflow-x-auto">
-        <table className="w-full text-sm text-left">
-          <thead className="text-[10px] text-muted-foreground uppercase bg-muted/10">
+        <table className="w-full text-xs text-left">
+          <thead className="text-[9px] text-muted-foreground uppercase bg-muted/10">
             <tr>
-              <th className="px-6 py-3 font-bold">Employee</th>
-              <th className="px-6 py-3 font-bold">Period</th>
-              <th className="px-6 py-3 font-bold">Status</th>
-              <th className="px-6 py-3 font-bold text-center">Final Score</th>
-              <th className="px-6 py-3 font-bold text-right">Actions</th>
+              <th className="px-4 py-2 font-bold">Employee</th>
+              <th className="px-4 py-2 font-bold">Period</th>
+              <th className="px-4 py-2 font-bold">Status</th>
+              <th className="px-4 py-2 font-bold text-center">Final Score</th>
+              <th className="px-4 py-2 font-bold text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border/50">
             {isLoading ? (
               <tr>
-                <td colSpan={5} className="px-6 py-8 text-center text-sm text-muted-foreground">
+                <td colSpan={5} className="px-4 py-6 text-center text-xs text-muted-foreground">
                   Loading reviews...
                 </td>
               </tr>
             ) : reviews.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-6 py-8 text-center text-sm text-muted-foreground">
+                <td colSpan={5} className="px-4 py-6 text-center text-xs text-muted-foreground">
                   No performance reviews found.
                 </td>
               </tr>
             ) : (
               reviews.map((review: any) => (
                 <tr key={review.id} className="hover:bg-muted/30 transition-colors">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="h-8 w-8 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-600">
-                        <User className="h-4 w-4" />
+                  <td className="px-4 py-2">
+                    <div className="flex items-center gap-2">
+                      <div className="h-7 w-7 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-600">
+                        <User className="h-3.5 w-3.5" />
                       </div>
                       <div>
-                        <div className="font-semibold text-foreground">
+                        <div className="font-semibold text-xs text-foreground">
                           {review.employee_detail ? `${review.employee_detail.first_name} ${review.employee_detail.last_name}` : 'Unknown Employee'}
                         </div>
-                        <div className="text-[10px] text-muted-foreground">
+                        <div className="text-[9px] text-muted-foreground">
                           Rev: {review.reviewer_detail ? `${review.reviewer_detail.first_name} ${review.reviewer_detail.last_name}` : 'N/A'}
                         </div>
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="font-medium text-xs text-foreground">
+                  <td className="px-4 py-2">
+                    <div className="font-medium text-[11px] text-foreground">
                       {review.cycle_detail ? review.cycle_detail.name : 'Ad-hoc Cycle'}
                     </div>
-                    <div className="text-[10px] text-muted-foreground mt-0.5">
+                    <div className="text-[9px] text-muted-foreground mt-0.5">
                       Due: {review.cycle_detail ? review.cycle_detail.due_date : review.review_period_end}
                     </div>
                   </td>
-                  <td className="px-6 py-4">
-                    <Badge variant="outline" className={`text-[9px] uppercase font-bold ${
-                      review.status === 'SUBMITTED' ? 'border-emerald-500/20 text-emerald-600 bg-emerald-500/5' :
+                  <td className="px-4 py-2">
+                    <Badge variant="outline" className={`text-[8px] px-1.5 py-0 uppercase font-bold ${review.status === 'SUBMITTED' ? 'border-emerald-500/20 text-emerald-600 bg-emerald-500/5' :
                       review.status === 'DRAFT' ? 'border-amber-500/20 text-amber-600 bg-amber-500/5' :
-                      'border-blue-500/20 text-blue-600 bg-blue-500/5'
-                    }`}>
+                        'border-blue-500/20 text-blue-600 bg-blue-500/5'
+                      }`}>
                       {review.status.replace('_', ' ')}
                     </Badge>
                   </td>
-                  <td className="px-6 py-4 text-center">
+                  <td className="px-4 py-2 text-center">
                     {review.score_breakdown ? (
-                      <div className="font-bold text-[#0a66c2] text-sm">{parseFloat(review.score_breakdown.final_calculated_score).toFixed(1)}%</div>
+                      <div className="font-bold text-[#0a66c2] text-xs">{parseFloat(review.score_breakdown.final_calculated_score).toFixed(1)}%</div>
                     ) : (
-                      <span className="text-[10px] uppercase font-bold text-muted-foreground/60 italic">N/A</span>
+                      <span className="text-[9px] uppercase font-bold text-muted-foreground/60 italic">N/A</span>
                     )}
                   </td>
-                  <td className="px-6 py-4 text-right">
-                    <div className="flex items-center justify-end gap-1.5">
+                  <td className="px-4 py-2 text-right">
+                    <div className="flex items-center justify-end gap-1">
                       <Button
                         variant="outline"
                         size="sm"
-                        className="h-8 text-[10px] font-bold uppercase rounded-sm cursor-pointer"
+                        className="h-7 text-[9px] px-2 font-bold uppercase rounded-sm cursor-pointer"
                         onClick={() => openFeedback(review)}
                         title="Add 360 Feedback"
+                        data-agent={`performance-add-feedback-btn-${review.id}`}
                       >
-                        <MessageSquare className="h-3.5 w-3.5 mr-1 text-slate-500" /> Feedback
+                        <MessageSquare className="h-3 w-3 mr-1 text-slate-500" /> Feedback
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
-                        className="h-8 text-[10px] font-bold uppercase rounded-sm cursor-pointer"
+                        className="h-7 text-[9px] px-2 font-bold uppercase rounded-sm cursor-pointer"
                         onClick={() => openCompetency(review)}
                         title="Rate Competencies"
+                        data-agent={`performance-rate-competencies-btn-${review.id}`}
                       >
-                        <Award className="h-3.5 w-3.5 mr-1 text-slate-500" /> Rate
+                        <Award className="h-3 w-3 mr-1 text-slate-500" /> Rate
                       </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="h-8 text-[10px] font-bold uppercase rounded-sm bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700 cursor-pointer"
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-7 text-[9px] px-2 font-bold uppercase rounded-sm bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700 cursor-pointer"
                         onClick={() => onCalculate(review.id)}
                         disabled={isCalculating}
+                        data-agent={`performance-calculate-score-btn-${review.id}`}
                       >
-                        <Calculator className="mr-1 h-3.5 w-3.5" /> Calc
+                        <Calculator className="mr-1 h-3 w-3" /> Calc
                       </Button>
+                      {onDelete && (
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="h-7 w-7 rounded-sm border-rose-200 hover:border-rose-300 hover:bg-rose-50 text-rose-600 cursor-pointer"
+                          onClick={() => onDelete(review.id)}
+                          title="Delete Appraisal"
+                          data-agent={`performance-delete-review-btn-${review.id}`}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -246,7 +261,7 @@ export function LogsMatrixTable({ reviews, isLoading, onCalculate, isCalculating
 
       {/* Add 360 Feedback Dialog */}
       <Dialog open={isFeedbackOpen} onOpenChange={setIsFeedbackOpen}>
-        <DialogContent className="sm:max-w-md bg-white border border-border rounded-sm shadow-xl p-6">
+        <DialogContent className="w-full max-w-[480px] max-h-[85vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] bg-card border border-border/50 rounded-sm shadow-xl p-6">
           <DialogHeader>
             <DialogTitle className="text-lg font-bold text-foreground">Add 360 Feedback</DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
@@ -263,8 +278,9 @@ export function LogsMatrixTable({ reviews, isLoading, onCalculate, isCalculating
                   id="feedbackProvider"
                   value={providerId}
                   onChange={(e) => setProviderId(e.target.value)}
-                  className="flex h-10 w-full items-center justify-between rounded-sm border border-input bg-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                  className="flex h-10 w-full items-center justify-between rounded-sm border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
                   required
+                  data-agent="feedback-provider-select"
                 >
                   <option value="">Select Employee...</option>
                   {employees.map((emp: any) => (
@@ -282,7 +298,8 @@ export function LogsMatrixTable({ reviews, isLoading, onCalculate, isCalculating
                   id="feedbackType"
                   value={feedbackType}
                   onChange={(e) => setFeedbackType(e.target.value)}
-                  className="flex h-10 w-full items-center justify-between rounded-sm border border-input bg-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                  className="flex h-10 w-full items-center justify-between rounded-sm border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                  data-agent="feedback-type-select"
                 >
                   <option value="peer">Peer Review</option>
                   <option value="manager">Manager Review</option>
@@ -303,8 +320,9 @@ export function LogsMatrixTable({ reviews, isLoading, onCalculate, isCalculating
                   max="5"
                   value={feedbackRating}
                   onChange={(e) => setFeedbackRating(Math.min(5, Math.max(1, parseInt(e.target.value) || 1)))}
-                  className="rounded-sm bg-white border-input"
+                  className="rounded-sm bg-background border-input"
                   required
+                  data-agent="feedback-rating-input"
                 />
               </div>
               <div className="space-y-1.5">
@@ -315,7 +333,8 @@ export function LogsMatrixTable({ reviews, isLoading, onCalculate, isCalculating
                   id="isAnonymous"
                   value={isAnonymous}
                   onChange={(e) => setIsAnonymous(e.target.value)}
-                  className="flex h-10 w-full items-center justify-between rounded-sm border border-input bg-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                  className="flex h-10 w-full items-center justify-between rounded-sm border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                  data-agent="feedback-anonymous-select"
                 >
                   <option value="false">Show Provider Name</option>
                   <option value="true">Anonymous Feedback</option>
@@ -331,8 +350,9 @@ export function LogsMatrixTable({ reviews, isLoading, onCalculate, isCalculating
                 value={feedbackContent}
                 onChange={(e) => setFeedbackContent(e.target.value)}
                 placeholder="Share constructive feedback, strengths, and areas of improvement..."
-                className="rounded-sm bg-white border-input min-h-[80px]"
+                className="rounded-sm bg-background border-input min-h-[80px]"
                 required
+                data-agent="feedback-content-textarea"
               />
             </div>
             <DialogFooter className="pt-4">
@@ -341,6 +361,7 @@ export function LogsMatrixTable({ reviews, isLoading, onCalculate, isCalculating
                 variant="outline"
                 onClick={() => setIsFeedbackOpen(false)}
                 className="rounded-sm border-input hover:bg-slate-50 text-slate-700"
+                data-agent="feedback-cancel-btn"
               >
                 Cancel
               </Button>
@@ -348,6 +369,7 @@ export function LogsMatrixTable({ reviews, isLoading, onCalculate, isCalculating
                 type="submit"
                 disabled={feedbackMutation.isPending}
                 className="bg-[#0a66c2] hover:bg-[#004182] text-white rounded-sm shadow-md"
+                data-agent="feedback-submit-btn"
               >
                 {feedbackMutation.isPending ? 'Submitting...' : 'Save Feedback'}
               </Button>
@@ -358,7 +380,7 @@ export function LogsMatrixTable({ reviews, isLoading, onCalculate, isCalculating
 
       {/* Rate Competencies Dialog */}
       <Dialog open={isCompetencyOpen} onOpenChange={setIsCompetencyOpen}>
-        <DialogContent className="sm:max-w-md bg-white border border-border rounded-sm shadow-xl p-6">
+        <DialogContent className="w-full max-w-[480px] max-h-[85vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] bg-card border border-border/50 rounded-sm shadow-xl p-6">
           <DialogHeader>
             <DialogTitle className="text-lg font-bold text-foreground">Rate Core Competencies</DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
@@ -376,6 +398,7 @@ export function LogsMatrixTable({ reviews, isLoading, onCalculate, isCalculating
                 onChange={(e) => setCompetencyId(e.target.value)}
                 className="flex h-10 w-full items-center justify-between rounded-sm border border-input bg-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
                 required
+                data-agent="competency-select"
               >
                 <option value="">Choose competency...</option>
                 {competencies.map((comp: any) => (
@@ -397,8 +420,9 @@ export function LogsMatrixTable({ reviews, isLoading, onCalculate, isCalculating
                   max="5"
                   value={competencyScore}
                   onChange={(e) => setCompetencyScore(Math.min(5, Math.max(1, parseInt(e.target.value) || 1)))}
-                  className="rounded-sm bg-white border-input"
+                  className="rounded-sm bg-background border-input"
                   required
+                  data-agent="competency-score-input"
                 />
               </div>
               <div className="space-y-1.5">
@@ -412,8 +436,9 @@ export function LogsMatrixTable({ reviews, isLoading, onCalculate, isCalculating
                   max="100"
                   value={competencyWeight}
                   onChange={(e) => setCompetencyWeight(Math.min(100, Math.max(1, parseInt(e.target.value) || 100)))}
-                  className="rounded-sm bg-white border-input"
+                  className="rounded-sm bg-background border-input"
                   required
+                  data-agent="competency-weight-input"
                 />
               </div>
             </div>
@@ -423,6 +448,7 @@ export function LogsMatrixTable({ reviews, isLoading, onCalculate, isCalculating
                 variant="outline"
                 onClick={() => setIsCompetencyOpen(false)}
                 className="rounded-sm border-input hover:bg-slate-50 text-slate-700"
+                data-agent="competency-cancel-btn"
               >
                 Cancel
               </Button>
@@ -430,6 +456,7 @@ export function LogsMatrixTable({ reviews, isLoading, onCalculate, isCalculating
                 type="submit"
                 disabled={competencyScoreMutation.isPending}
                 className="bg-[#0a66c2] hover:bg-[#004182] text-white rounded-sm shadow-md"
+                data-agent="competency-submit-btn"
               >
                 {competencyScoreMutation.isPending ? 'Submitting...' : 'Save Rating'}
               </Button>

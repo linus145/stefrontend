@@ -154,7 +154,7 @@ export function DashboardTab() {
         activities.push({
           id: `emp-${emp.id}`,
           user,
-          action: `joined the organization as ${emp.designation_detail?.name || 'team member'}`,
+          action: `joined the organization as ${emp.role === 'MANAGER' ? 'manager' : (emp.designation_detail?.name || 'team member')}`,
           time: timeStr,
           status: 'completed',
           icon: CheckCircle2,

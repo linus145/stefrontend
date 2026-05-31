@@ -32,7 +32,15 @@ interface HRSidebarProps {
 const NAVIGATION_ITEMS: { id: HRSection; label: string; icon: any; subItems?: { id: HRSection; label: string }[] }[] = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'onboarding', label: 'Onboarding', icon: UserCheck },
-  { id: 'employees', label: 'Employees', icon: Users },
+  {
+    id: 'employees',
+    label: 'Employees',
+    icon: Users,
+    subItems: [
+      { id: 'employees-managers', label: 'Managers' },
+      { id: 'employees', label: 'Employees' },
+    ]
+  },
   {
     id: 'attendance',
     label: 'Attendance',
@@ -64,12 +72,12 @@ const NAVIGATION_ITEMS: { id: HRSection; label: string; icon: any; subItems?: { 
     subItems: [
       { id: 'payroll-dashboard', label: 'Dashboard' },
       { id: 'payroll-salary-structures', label: 'Salary Structures' },
-      { id: 'payroll-tax-configurations', label: 'Tax Configuration' },
-      { id: 'payroll-adjustments', label: 'Bonuses & Adjustments' },
-      { id: 'payroll-reimbursements', label: 'Reimbursements' },
       { id: 'payroll-runs', label: 'Payroll Runs' },
       { id: 'payroll-approvals', label: 'Payroll Approvals' },
       { id: 'payroll-payslips', label: 'Payslips' },
+      { id: 'payroll-tax-configurations', label: 'Tax Configuration' },
+      { id: 'payroll-adjustments', label: 'Bonuses & Adjustments' },
+      { id: 'payroll-reimbursements', label: 'Reimbursements' },
       { id: 'payroll-reports', label: 'Reports & Analytics' },
       { id: 'payroll-settings', label: 'Settings' }
     ]
@@ -80,13 +88,21 @@ const NAVIGATION_ITEMS: { id: HRSection; label: string; icon: any; subItems?: { 
     label: 'Performance',
     icon: BarChart3,
     subItems: [
-      { id: 'performance-dashboard', label: 'Dashboard' },
-      { id: 'performance-kpi', label: 'KPI Overview' },
-      { id: 'performance-goals', label: 'Employee Goals' },
-      { id: 'performance-appraisal', label: 'Appraisal Engine' },
-      { id: 'performance-analytics', label: 'Performance Analytics' },
-      { id: 'performance-ai-insights', label: 'AI Insights' },
-      { id: 'performance-logs', label: 'Performance Logs' }
+      // { id: 'performance-dashboard', label: 'Dashboard' },
+      // { id: 'performance-kpi', label: 'KPI Overview' },
+      // { id: 'performance-goals', label: 'Employee Goals' },
+      // { id: 'performance-appraisal', label: 'Appraisal Engine' },
+      // { id: 'performance-analytics', label: 'Performance Analytics' },
+      // { id: 'performance-ai-insights', label: 'AI Insights' },
+      // { id: 'performance-logs', label: 'Performance Logs' }
+      { id: 'performance-dashboard', label: 'Overview' },
+  { id: 'performance-kpi', label: 'Create goal' },
+  { id: 'performance-goals', label: 'assgin goal' },
+  { id: 'performance-appraisal', label: 'Reviews' },
+  { id: 'performance-logs', label: 'Daily Activity' },
+  { id: 'performance-analytics', label: 'Insights' },
+  { id: 'performance-ai-insights', label: 'Agent analysis' },
+
     ]
   },
   {
@@ -108,19 +124,20 @@ const NAVIGATION_ITEMS: { id: HRSection; label: string; icon: any; subItems?: { 
   { id: 'organization', label: 'Organization', icon: Building2 },
 ];
 
-export function HRSidebar({ 
-  activeTab, 
+export function HRSidebar({
+  activeTab,
   onTabChange,
   isCollapsed: controlledIsCollapsed,
   setIsCollapsed: controlledSetIsCollapsed
 }: HRSidebarProps) {
   const router = useRouter();
   const [localIsCollapsed, setLocalIsCollapsed] = useState(false);
-  
+
   const isCollapsed = controlledIsCollapsed !== undefined ? controlledIsCollapsed : localIsCollapsed;
   const setIsCollapsed = controlledSetIsCollapsed !== undefined ? controlledSetIsCollapsed : setLocalIsCollapsed;
-  
+
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({
+    employees: false,
     leave: false,
     attendance: false,
     payroll: false,
@@ -138,6 +155,9 @@ export function HRSidebar({
 
   // Auto-expand if active tab is a sub-item
   React.useEffect(() => {
+    if (activeTab === 'employees' || activeTab === 'employees-managers') {
+      setExpandedItems(prev => ({ ...prev, employees: true }));
+    }
     if (activeTab.startsWith('leave')) {
       setExpandedItems(prev => ({ ...prev, leave: true }));
     }
@@ -175,7 +195,7 @@ export function HRSidebar({
   return (
     <aside className={cn(
       "fixed left-0 top-16 bottom-0 z-30 bg-card border-r border-border transition-all duration-300 flex flex-col",
-      isCollapsed ? "w-16" : "w-64"
+      isCollapsed ? "w-16" : "w-56"
     )}>
       {/* Floating Toggle Button */}
       <button
@@ -190,7 +210,7 @@ export function HRSidebar({
           {NAVIGATION_ITEMS.map((item) => {
             const hasSubItems = !!item.subItems;
             const isExpanded = expandedItems[item.id] || false;
-            
+
             // Check active sub items
             const isAnySubActive = hasSubItems && item.subItems?.some((sub) => activeTab === sub.id);
             const isParentDirectlyActive = activeTab === item.id;
@@ -220,7 +240,7 @@ export function HRSidebar({
                       <ChevronDown className={cn(
                         "w-4 h-4 transition-transform duration-200",
                         isExpanded && "rotate-180",
-                        isParentDirectlyActive ? "text-white" : isAnySubActive ? "text-[#0a66c2]" : ""
+                        isNavParentActive ? "text-[#0a66c2]" : "text-muted-foreground/70"
                       )} />
                     )}
                   </button>

@@ -4,6 +4,7 @@ import React, { useState, useRef } from 'react';
 import Editor from '@monaco-editor/react';
 import { PlayIcon, RotateCcwIcon, TerminalIcon, Loader2Icon } from 'lucide-react';
 import { toast } from 'sonner';
+import { api } from '@/lib/api';
 
 interface CodeEditorProps {
   initialValue: string;
@@ -45,17 +46,11 @@ export function CodeEditor({ initialValue, language, onChange }: CodeEditorProps
     setOutput('⏳ Compiling and running...');
 
     try {
-      const response = await fetch('http://localhost:8000/api/proctoring/execute-code/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          source_code: currentCode,
-          language: language.toLowerCase(),
-          stdin: '',
-        }),
+      const data = await api.post<any>('/proctoring/execute-code/', {
+        source_code: currentCode,
+        language: language.toLowerCase(),
+        stdin: '',
       });
-
-      const data = await response.json();
 
       if (data.success) {
         setOutput(data.stdout || 'Code executed successfully (no output).');

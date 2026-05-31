@@ -389,9 +389,17 @@ function HRProfilesManager() {
                         </button>
                         <button
                           onClick={() => {
-                            if (confirm('Are you sure you want to delete this HR profile?')) {
-                              deleteMutation.mutate(profile.id);
-                            }
+                            toast('Delete this HR profile?', {
+                              description: 'This action will permanently remove it.',
+                              action: {
+                                label: 'Delete',
+                                onClick: () => deleteMutation.mutate(profile.id),
+                              },
+                              cancel: {
+                                label: 'Cancel',
+                                onClick: () => {},
+                              },
+                            });
                           }}
                           className="p-1.5 text-muted-foreground hover:text-red-500 hover:bg-muted/50 rounded-sm transition-colors"
                           title="Delete"

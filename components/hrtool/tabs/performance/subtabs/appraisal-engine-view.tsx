@@ -136,11 +136,11 @@ export function AppraisalEngineView() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Appraisal Engine</h2>
-          <p className="text-muted-foreground text-sm">Configure and manage performance cycles.</p>
         </div>
         <Button
           onClick={() => setIsCreateOpen(true)}
           className="bg-[#0a66c2] hover:bg-[#004182] text-white shadow-lg shadow-blue-500/20 rounded-sm"
+          data-agent="performance-new-cycle-btn"
         >
           <Plus className="mr-2 h-4 w-4" /> New Cycle
         </Button>
@@ -148,66 +148,75 @@ export function AppraisalEngineView() {
 
       <Card className="bg-card/50 border-border/50 overflow-hidden rounded-sm">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="text-[10px] text-muted-foreground uppercase bg-muted/10 border-b border-border/50">
+          <table className="w-full text-xs text-left">
+            <thead className="text-[9px] text-muted-foreground uppercase bg-muted/10 border-b border-border/50">
               <tr>
-                <th className="px-6 py-3 font-bold">Cycle Name</th>
-                <th className="px-6 py-3 font-bold">Start Date</th>
-                <th className="px-6 py-3 font-bold">Due Date</th>
-                <th className="px-6 py-3 font-bold">Status</th>
-                <th className="px-6 py-3 font-bold text-right">Actions</th>
+                <th className="px-4 py-2 font-bold">Cycle Name</th>
+                <th className="px-4 py-2 font-bold">Start Date</th>
+                <th className="px-4 py-2 font-bold">Due Date</th>
+                <th className="px-4 py-2 font-bold">Status</th>
+                <th className="px-4 py-2 font-bold text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/50">
               {isLoading ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-sm text-muted-foreground">
+                  <td colSpan={5} className="px-4 py-6 text-center text-xs text-muted-foreground">
                     Loading cycles...
                   </td>
                 </tr>
               ) : cycles.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-sm text-muted-foreground">
+                  <td colSpan={5} className="px-4 py-6 text-center text-xs text-muted-foreground">
                     No performance cycles defined.
                   </td>
                 </tr>
               ) : (
                 cycles.map((cycle: any) => (
                   <tr key={cycle.id} className="hover:bg-muted/30">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <Calendar className="h-4 w-4 text-[#0a66c2]" />
-                        <span className="font-semibold">{cycle.name}</span>
+                    <td className="px-4 py-2">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-3.5 w-3.5 text-[#0a66c2]" />
+                        <span className="font-semibold text-xs text-foreground">{cycle.name}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-xs font-medium">{cycle.start_date}</td>
-                    <td className="px-6 py-4 text-xs font-medium">{cycle.due_date}</td>
-                    <td className="px-6 py-4">
-                      <Badge variant="outline" className={`text-[9px] uppercase font-bold ${
-                        cycle.is_active ? 'border-emerald-500/20 text-emerald-600 bg-emerald-500/5' : 'border-muted text-muted-foreground'
-                      }`}>
+                    <td className="px-4 py-2 text-[11px] font-medium">{cycle.start_date}</td>
+                    <td className="px-4 py-2 text-[11px] font-medium">{cycle.due_date}</td>
+                    <td className="px-4 py-2">
+                      <Badge variant="outline" className={`text-[8px] px-1.5 py-0 uppercase font-bold ${cycle.is_active ? 'border-emerald-500/20 text-emerald-600 bg-emerald-500/5' : 'border-muted text-muted-foreground'
+                        }`}>
                         {cycle.is_active ? 'ACTIVE' : 'CLOSED'}
                       </Badge>
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-4 py-2 text-right">
                       <div className="flex items-center justify-end gap-1">
                         <Button
                           onClick={() => openLaunchDialog(cycle)}
-                          className="h-8 text-[10px] font-bold uppercase rounded-sm bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm shadow-emerald-500/10 cursor-pointer"
+                          className="h-7 text-[9px] px-2 font-bold uppercase rounded-sm bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm shadow-emerald-500/10 cursor-pointer"
+                          data-agent={`performance-launch-appraisal-btn-${cycle.id}`}
                         >
-                          <Rocket className="mr-1 h-3 w-3" /> Launch Appraisal
+                          <Rocket className="mr-1 h-2.5 w-2.5" /> Launch Appraisal
                         </Button>
                         <Button
                           variant="ghost"
                           size="icon"
                           onClick={() => {
-                            if (confirm('Are you sure you want to delete this cycle?')) {
-                              deleteCycleMutation.mutate(cycle.id);
-                            }
+                            toast('Delete this appraisal cycle?', {
+                              description: 'This action cannot be undone.',
+                              action: {
+                                label: 'Delete',
+                                onClick: () => deleteCycleMutation.mutate(cycle.id),
+                              },
+                              cancel: {
+                                label: 'Cancel',
+                                onClick: () => {},
+                              },
+                            });
                           }}
-                          className="text-rose-600 hover:text-rose-700 hover:bg-rose-500/10 h-8 w-8 rounded-sm"
+                          className="text-rose-600 hover:text-rose-700 hover:bg-rose-500/10 h-7 w-7 rounded-sm flex items-center justify-center"
+                          data-agent={`performance-delete-cycle-btn-${cycle.id}`}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                       </div>
                     </td>
@@ -221,7 +230,7 @@ export function AppraisalEngineView() {
 
       {/* New Cycle Dialog */}
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <DialogContent className="sm:max-w-md bg-white border border-border rounded-sm shadow-xl p-6">
+        <DialogContent className="w-full max-w-[480px] max-h-[85vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] bg-card border border-border/50 rounded-sm shadow-xl p-6">
           <DialogHeader>
             <DialogTitle className="text-lg font-bold text-foreground">Create Appraisal Cycle</DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
@@ -238,8 +247,9 @@ export function AppraisalEngineView() {
                 value={cycleName}
                 onChange={(e) => setCycleName(e.target.value)}
                 placeholder="e.g. Q2 2026 Mid-Year Appraisal"
-                className="rounded-sm bg-white border-input"
+                className="rounded-sm bg-background border-input"
                 required
+                data-agent="new-cycle-name-input"
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -252,8 +262,9 @@ export function AppraisalEngineView() {
                   type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="rounded-sm bg-white border-input"
+                  className="rounded-sm bg-background border-input"
                   required
+                  data-agent="new-cycle-start-input"
                 />
               </div>
               <div className="space-y-1.5">
@@ -265,8 +276,9 @@ export function AppraisalEngineView() {
                   type="date"
                   value={dueDate}
                   onChange={(e) => setDueDate(e.target.value)}
-                  className="rounded-sm bg-white border-input"
+                  className="rounded-sm bg-background border-input"
                   required
+                  data-agent="new-cycle-due-input"
                 />
               </div>
             </div>
@@ -278,7 +290,8 @@ export function AppraisalEngineView() {
                 id="cycleActive"
                 value={isActive}
                 onChange={(e) => setIsActive(e.target.value)}
-                className="flex h-10 w-full items-center justify-between rounded-sm border border-input bg-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                className="flex h-10 w-full items-center justify-between rounded-sm border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                data-agent="new-cycle-status-select"
               >
                 <option value="true">Active (Review period open)</option>
                 <option value="false">Closed / Inactive</option>
@@ -290,6 +303,7 @@ export function AppraisalEngineView() {
                 variant="outline"
                 onClick={() => setIsCreateOpen(false)}
                 className="rounded-sm border-input hover:bg-slate-50 text-slate-700"
+                data-agent="new-cycle-cancel-btn"
               >
                 Cancel
               </Button>
@@ -297,6 +311,7 @@ export function AppraisalEngineView() {
                 type="submit"
                 disabled={createCycleMutation.isPending}
                 className="bg-[#0a66c2] hover:bg-[#004182] text-white rounded-sm shadow-md"
+                data-agent="new-cycle-submit-btn"
               >
                 {createCycleMutation.isPending ? 'Creating...' : 'Create Cycle'}
               </Button>
@@ -307,7 +322,7 @@ export function AppraisalEngineView() {
 
       {/* Launch Appraisal Dialog */}
       <Dialog open={isLaunchOpen} onOpenChange={setIsLaunchOpen}>
-        <DialogContent className="sm:max-w-md bg-white border border-border rounded-sm shadow-xl p-6">
+        <DialogContent className="w-full max-w-[480px] max-h-[85vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] bg-card border border-border/50 rounded-sm shadow-xl p-6">
           <DialogHeader>
             <DialogTitle className="text-lg font-bold text-foreground">Launch Appraisal</DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
@@ -323,8 +338,9 @@ export function AppraisalEngineView() {
                 id="targetEmployee"
                 value={employeeId}
                 onChange={(e) => setEmployeeId(e.target.value)}
-                className="flex h-10 w-full items-center justify-between rounded-sm border border-input bg-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                className="flex h-10 w-full items-center justify-between rounded-sm border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
                 required
+                data-agent="launch-employee-select"
               >
                 <option value="">Select Employee...</option>
                 {employees.map((emp: any) => (
@@ -342,8 +358,9 @@ export function AppraisalEngineView() {
                 id="appraisalReviewer"
                 value={reviewerId}
                 onChange={(e) => setReviewerId(e.target.value)}
-                className="flex h-10 w-full items-center justify-between rounded-sm border border-input bg-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                className="flex h-10 w-full items-center justify-between rounded-sm border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
                 required
+                data-agent="launch-reviewer-select"
               >
                 <option value="">Select Reviewer...</option>
                 {employees.map((emp: any) => (
@@ -363,8 +380,9 @@ export function AppraisalEngineView() {
                   type="date"
                   value={periodStart}
                   onChange={(e) => setPeriodStart(e.target.value)}
-                  className="rounded-sm bg-white border-input"
+                  className="rounded-sm bg-background border-input"
                   required
+                  data-agent="launch-period-start-input"
                 />
               </div>
               <div className="space-y-1.5">
@@ -376,8 +394,9 @@ export function AppraisalEngineView() {
                   type="date"
                   value={periodEnd}
                   onChange={(e) => setPeriodEnd(e.target.value)}
-                  className="rounded-sm bg-white border-input"
+                  className="rounded-sm bg-background border-input"
                   required
+                  data-agent="launch-period-end-input"
                 />
               </div>
             </div>
@@ -387,6 +406,7 @@ export function AppraisalEngineView() {
                 variant="outline"
                 onClick={() => setIsLaunchOpen(false)}
                 className="rounded-sm border-input hover:bg-slate-50 text-slate-700"
+                data-agent="launch-cancel-btn"
               >
                 Cancel
               </Button>
@@ -394,6 +414,7 @@ export function AppraisalEngineView() {
                 type="submit"
                 disabled={launchAppraisalMutation.isPending}
                 className="bg-[#0a66c2] hover:bg-[#004182] text-white rounded-sm shadow-md"
+                data-agent="launch-submit-btn"
               >
                 {launchAppraisalMutation.isPending ? 'Launching...' : 'Launch Appraisal'}
               </Button>

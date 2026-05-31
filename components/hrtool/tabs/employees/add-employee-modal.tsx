@@ -16,9 +16,10 @@ import { cn } from '@/lib/utils';
 interface AddEmployeeModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  defaultRole?: 'EMPLOYEE' | 'MANAGER';
 }
 
-export function AddEmployeeModal({ open, onOpenChange }: AddEmployeeModalProps) {
+export function AddEmployeeModal({ open, onOpenChange, defaultRole = 'EMPLOYEE' }: AddEmployeeModalProps) {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<'personal' | 'statutory'>('personal');
 
@@ -34,6 +35,12 @@ export function AddEmployeeModal({ open, onOpenChange }: AddEmployeeModalProps) 
 
   const designations = designationsRes?.data?.results || [];
   const departments = departmentsRes?.data?.results || [];
+
+  const { data: managersRes } = useQuery({
+    queryKey: ['active-managers-list'],
+    queryFn: () => hrEmployeeService.getEmployees({ role: 'MANAGER', page_size: 100 }),
+  });
+  const managers = managersRes?.data?.results || [];
   
   const [newEmployee, setNewEmployee] = useState({
     first_name: '',
@@ -43,9 +50,11 @@ export function AddEmployeeModal({ open, onOpenChange }: AddEmployeeModalProps) 
     salary: '',
     employment_type: 'FULL_TIME',
     status: 'ACTIVE',
+    role: defaultRole,
     address: '',
     designation: '',
     department: '',
+    reporting_manager: '',
     
     // Aadhaar
     aadhaar_number: '',
@@ -106,9 +115,11 @@ export function AddEmployeeModal({ open, onOpenChange }: AddEmployeeModalProps) 
       salary: newEmployee.salary ? parseFloat(newEmployee.salary) : 0,
       employment_type: newEmployee.employment_type,
       status: newEmployee.status,
+      role: newEmployee.role,
       address: newEmployee.address,
-      designation: newEmployee.designation || null,
+      designation: newEmployee.role === 'MANAGER' ? null : (newEmployee.designation || null),
       department: newEmployee.department || null,
+      reporting_manager: newEmployee.reporting_manager || null,
       aadhaar_detail: {
         aadhaar_number: newEmployee.aadhaar_number,
         enrollment_no: newEmployee.aadhaar_enrollment_no,
@@ -154,9 +165,13 @@ export function AddEmployeeModal({ open, onOpenChange }: AddEmployeeModalProps) 
           {/* Symmetrical Header & Tab Selector */}
           <div className="bg-muted/30 p-6 border-b border-border/40 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div>
-              <CardTitle className="text-xl font-bold tracking-tight text-[#0a66c2]">Add New Employee</CardTitle>
+              <CardTitle className="text-xl font-bold tracking-tight text-[#0a66c2]">
+                {defaultRole === 'MANAGER' ? 'Add New Manager' : 'Add New Employee'}
+              </CardTitle>
               <CardDescription className="text-xs text-muted-foreground mt-1">
-                Onboard a new employee by providing their personal profile, statutory info, and salary bank details.
+                {defaultRole === 'MANAGER' 
+                  ? 'Onboard a new manager by providing their personal profile, statutory info, and salary bank details.' 
+                  : 'Onboard a new employee by providing their personal profile, statutory info, and salary bank details.'}
               </CardDescription>
             </div>
 
@@ -250,20 +265,43 @@ export function AddEmployeeModal({ open, onOpenChange }: AddEmployeeModalProps) 
                     </select>
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground" htmlFor="designation">Designation</label>
-                    <select
-                      id="designation"
-                      value={newEmployee.designation}
-                      onChange={handleInputChange}
-                      className="flex h-10 w-full items-center justify-between rounded-sm border border-input bg-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
-                      data-agent="employee-designation-select"
-                    >
-                      <option value="">Select Designation</option>
-                      {designations.map((d: any) => (
-                        <option key={d.id} value={d.id}>{d.title}</option>
-                      ))}
-                    </select>
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground" htmlFor="role">Portal Role</label>
+                    {newEmployee.role === 'MANAGER' ? (
+                      <Input
+                        value="Manager"
+                        disabled
+                        className="rounded-sm bg-muted text-muted-foreground font-semibold text-sm cursor-not-allowed h-10"
+                      />
+                    ) : (
+                      <select
+                        id="role"
+                        value={newEmployee.role}
+                        onChange={handleInputChange}
+                        className="flex h-10 w-full items-center justify-between rounded-sm border border-input bg-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                        data-agent="employee-role-select"
+                      >
+                        <option value="EMPLOYEE">Employee</option>
+                        <option value="MANAGER">Manager</option>
+                      </select>
+                    )}
                   </div>
+                  {newEmployee.role !== 'MANAGER' && (
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground" htmlFor="designation">Designation</label>
+                      <select
+                        id="designation"
+                        value={newEmployee.designation}
+                        onChange={handleInputChange}
+                        className="flex h-10 w-full items-center justify-between rounded-sm border border-input bg-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                        data-agent="employee-designation-select"
+                      >
+                        <option value="">Select Designation</option>
+                        {designations.map((d: any) => (
+                          <option key={d.id} value={d.id}>{d.title}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground" htmlFor="department">Department</label>
                     <select
@@ -276,6 +314,23 @@ export function AddEmployeeModal({ open, onOpenChange }: AddEmployeeModalProps) 
                       <option value="">Select Department</option>
                       {departments.map((d: any) => (
                         <option key={d.id} value={d.id}>{d.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground" htmlFor="reporting_manager">Reporting Manager</label>
+                    <select
+                      id="reporting_manager"
+                      value={newEmployee.reporting_manager}
+                      onChange={handleInputChange}
+                      className="flex h-10 w-full items-center justify-between rounded-sm border border-input bg-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                      data-agent="employee-reporting-manager-select"
+                    >
+                      <option value="">Select Manager</option>
+                      {managers.map((m: any) => (
+                        <option key={m.id} value={m.id}>
+                          {m.first_name} {m.last_name} ({m.employee_id || 'MGR'})
+                        </option>
                       ))}
                     </select>
                   </div>

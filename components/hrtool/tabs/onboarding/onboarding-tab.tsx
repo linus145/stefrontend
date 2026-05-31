@@ -229,7 +229,9 @@ export function OnboardingTab() {
                     </Avatar>
                     <div className="min-w-0">
                       <CardTitle data-agent="employee-name" className="text-[15px] font-bold tracking-tight truncate group-hover:text-[#0a66c2] transition-colors">{employee.first_name} {employee.last_name}</CardTitle>
-                      <p className="text-[11px] font-medium text-[#0a66c2]/70 mt-0.5">{employee.designation_detail?.title || 'Team Member'}</p>
+                      <p className="text-[11px] font-medium text-[#0a66c2]/70 mt-0.5">
+                        {employee.role === 'MANAGER' ? 'Manager' : (employee.designation_detail?.title || 'Team Member')}
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5">

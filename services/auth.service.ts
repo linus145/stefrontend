@@ -6,8 +6,8 @@ export const authService = {
     return api.post<BaseAPIResponse<AuthResponsePayload>>('/auth/login/', { email, password });
   },
 
-  employeeLogin: (email: string, password: string): Promise<BaseAPIResponse<AuthResponsePayload>> => {
-    return api.post<BaseAPIResponse<AuthResponsePayload>>('/employees/login/', { email, password });
+  employeeLogin: (email: string, password: string, role?: string): Promise<BaseAPIResponse<AuthResponsePayload>> => {
+    return api.post<BaseAPIResponse<AuthResponsePayload>>('/employees/login/', { email, password, role });
   },
 
   logout: (): Promise<BaseAPIResponse<any>> => {

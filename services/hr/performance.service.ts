@@ -57,6 +57,12 @@ export const hrPerformanceService = {
   createFeedback: (data: any): Promise<BaseAPIResponse<any>> => 
     api.post<any>('/performance/feedbacks/', data).then((res: any) => ({ status: 'success', message: '', data: res })),
 
-  generateAIInsights: (): Promise<any> => 
-    api.post<any>('/performance/reviews/generate-insights/').then((res: any) => res)
+  getAIInsights: (): Promise<{ status: 'NOT_STARTED' | 'PENDING' | 'SUCCESS' | 'FAILED'; insights: any; updated_at: string | null }> => 
+    api.get<any>('/performance/reviews/generate-insights/').then((res: any) => res),
+
+  triggerAIInsights: (): Promise<{ status: 'PENDING' | 'SUCCESS' | 'FAILED'; insights: any; updated_at: string | null }> => 
+    api.post<any>('/performance/reviews/generate-insights/').then((res: any) => res),
+
+  deleteReview: (id: string): Promise<void> => 
+    api.delete<any>(`/performance/reviews/${id}/`)
 };

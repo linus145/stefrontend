@@ -249,9 +249,17 @@ export function PayrollRuns() {
                         <Button 
                           onClick={(e) => {
                             e.stopPropagation();
-                            if (confirm(`Are you sure you want to rerun and recalculate the payroll run for ${getMonthName(run.month)} ${run.year}?`)) {
-                              onRerunRun(run.id);
-                            }
+                            toast(`Rerun payroll run for ${getMonthName(run.month)} ${run.year}?`, {
+                              description: 'This will recalculate all employee pay figures.',
+                              action: {
+                                label: 'Rerun',
+                                onClick: () => onRerunRun(run.id),
+                              },
+                              cancel: {
+                                label: 'Cancel',
+                                onClick: () => {},
+                              },
+                            });
                           }}
                           disabled={rerunPending}
                           data-agent={`payroll-rerun-btn-${getMonthName(run.month)}-${run.year}`}
@@ -263,9 +271,17 @@ export function PayrollRuns() {
                         <Button 
                           onClick={(e) => {
                             e.stopPropagation();
-                            if (confirm(`Are you sure you want to PERMANENTLY delete the payroll run for ${getMonthName(run.month)} ${run.year}? This will hard delete all computed slips and records.`)) {
-                              onDeleteRun(run.id);
-                            }
+                            toast(`PERMANENTLY delete payroll run for ${getMonthName(run.month)} ${run.year}?`, {
+                              description: 'This will hard delete all computed slips and records.',
+                              action: {
+                                label: 'Delete',
+                                onClick: () => onDeleteRun(run.id),
+                              },
+                              cancel: {
+                                label: 'Cancel',
+                                onClick: () => {},
+                              },
+                            });
                           }}
                           disabled={deletePending}
                           data-agent={`payroll-delete-btn-${getMonthName(run.month)}-${run.year}`}
@@ -424,9 +440,17 @@ export function PayrollRuns() {
         <div className="flex items-center gap-3">
             <Button
               onClick={() => {
-                if (confirm(`Are you sure you want to rerun and recalculate the payroll run for ${getMonthName(selectedRun.month)} ${selectedRun.year}?`)) {
-                  onRerunRun(selectedRun.id);
-                }
+                toast(`Rerun payroll run for ${getMonthName(selectedRun.month)} ${selectedRun.year}?`, {
+                  description: 'This will recalculate all employee pay figures.',
+                  action: {
+                    label: 'Rerun',
+                    onClick: () => onRerunRun(selectedRun.id),
+                  },
+                  cancel: {
+                    label: 'Cancel',
+                    onClick: () => {},
+                  },
+                });
               }}
               disabled={rerunPending}
               data-agent={`payroll-drilldown-rerun-btn-${getMonthName(selectedRun.month)}-${selectedRun.year}`}

@@ -1,10 +1,10 @@
-'use client';
+ 'use client';
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Edit2, X } from 'lucide-react';
+import { Plus, Edit2, X, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { hrPayrollService, hrEmployeeService } from '@/services/hr';
@@ -54,6 +54,17 @@ export function SalaryStructures() {
     },
     onError: (err: any) => {
       toast.error(err.response?.data?.error || 'Failed to configure salary structure.');
+    }
+  });
+
+  const deleteStructureMutation = useMutation({
+    mutationFn: (id: string) => hrPayrollService.deleteSalaryStructure(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['payroll-structures'] });
+      toast.success('Salary structure permanently deleted!');
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.error || 'Failed to delete salary structure.');
     }
   });
 
@@ -145,12 +156,29 @@ export function SalaryStructures() {
                   <tr key={str.id} className="border-b border-slate-100 dark:border-slate-800/60 hover:bg-slate-50/50 dark:hover:bg-slate-800/10 transition-colors">
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-[#0a66c2]/10 text-[#0a66c2] font-bold text-xs flex items-center justify-center shrink-0">
-                          {str.employee_name?.charAt(0) || 'E'}
+                        <div className={`w-8 h-8 rounded-full font-bold text-xs flex items-center justify-center shrink-0 ${
+                          str.is_employee_deleted 
+                            ? 'bg-rose-100 dark:bg-rose-500/10 text-rose-600 dark:text-rose-450 border border-rose-200/20' 
+                            : 'bg-[#0a66c2]/10 text-[#0a66c2]'
+                        }`}>
+                          {str.is_employee_deleted ? '?' : (str.employee_name?.charAt(0) || 'E')}
                         </div>
-                        <p className="text-xs font-bold text-slate-900 dark:text-white">
-                          {str.employee_name} {str.employee_last_name}
-                        </p>
+                        <div>
+                          <p className="text-xs font-bold text-slate-900 dark:text-white flex items-center flex-wrap gap-1">
+                            {str.is_employee_deleted && !str.employee_name ? (
+                              <span className="text-rose-600 dark:text-rose-450 italic">Deleted Profile</span>
+                            ) : (
+                              <>
+                                {str.employee_name} {str.employee_last_name}
+                              </>
+                            )}
+                            {str.is_employee_deleted && (
+                              <Badge className="font-extrabold text-[8px] tracking-wide px-1.5 py-0 bg-rose-50 dark:bg-rose-500/5 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-950/20 shadow-none rounded-[2px] ml-1">
+                                DELETED
+                              </Badge>
+                            )}
+                          </p>
+                        </div>
                       </div>
                     </td>
                     <td className="py-3 px-4 text-xs font-semibold text-slate-600 dark:text-slate-400">
@@ -171,26 +199,51 @@ export function SalaryStructures() {
                       </Badge>
                     </td>
                     <td className="py-3 px-4 text-right">
-                      <Button 
-                        onClick={() => {
-                          setSelectedStructure(str);
-                          setStructureForm({
-                            employee_id: str.employee_code || str.employee,
-                            basic_salary: str.basic_salary,
-                            hra: str.hra,
-                            overtime_rate: str.overtime_rate,
-                            tax_percentage: str.tax_percentage,
-                            pf_percentage: str.pf_percentage,
-                            esi_percentage: str.esi_percentage,
-                            status: str.status
-                          });
-                          setIsStructureModalOpen(true);
-                        }}
-                        data-agent={`payroll-salary-edit-btn-${str.id}`}
-                        className="border border-[#0a66c2]/10 bg-transparent hover:bg-[#0a66c2]/5 text-[#0a66c2] dark:text-[#3b8fd9] font-bold text-[10px] py-1.5 h-8 rounded-sm cursor-pointer transition-all duration-300 flex items-center gap-1 inline-flex"
-                      >
-                        <Edit2 className="h-3 w-3" /> Edit profile
-                      </Button>
+                      <div className="flex items-center justify-end gap-2">
+                        <Button 
+                          onClick={() => {
+                            setSelectedStructure(str);
+                            setStructureForm({
+                              employee_id: str.employee_code || str.employee,
+                              basic_salary: str.basic_salary,
+                              hra: str.hra,
+                              overtime_rate: str.overtime_rate,
+                              tax_percentage: str.tax_percentage,
+                              pf_percentage: str.pf_percentage,
+                              esi_percentage: str.esi_percentage,
+                              status: str.status
+                            });
+                            setIsStructureModalOpen(true);
+                          }}
+                          disabled={str.is_employee_deleted}
+                          title={str.is_employee_deleted ? "Cannot edit profile of a deleted employee" : "Edit profile"}
+                          data-agent={`payroll-salary-edit-btn-${str.id}`}
+                          className="border border-[#0a66c2]/15 dark:border-[#0a66c2]/30 bg-transparent hover:bg-[#0a66c2]/10 text-[#0a66c2] dark:text-[#3b8fd9] h-8 w-8 rounded-sm cursor-pointer transition-all duration-300 flex items-center justify-center shrink-0 disabled:opacity-40 disabled:pointer-events-none"
+                        >
+                          <Edit2 className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button 
+                          onClick={() => {
+                            toast('Permanently delete this salary structure?', {
+                              description: 'This action cannot be undone.',
+                              action: {
+                                label: 'Delete',
+                                onClick: () => deleteStructureMutation.mutate(str.id),
+                              },
+                              cancel: {
+                                label: 'Cancel',
+                                onClick: () => {},
+                              },
+                            });
+                          }}
+                          disabled={deleteStructureMutation.isPending}
+                          title="Delete salary structure"
+                          data-agent={`payroll-salary-delete-btn-${str.id}`}
+                          className="border border-rose-200/60 dark:border-rose-900/40 bg-transparent hover:bg-rose-500/10 text-rose-600 dark:text-rose-450 h-8 w-8 rounded-sm cursor-pointer transition-all duration-300 flex items-center justify-center shrink-0"
+                        >
+                          <Trash2 className="h-3.5 w-3.5 text-rose-500" />
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))

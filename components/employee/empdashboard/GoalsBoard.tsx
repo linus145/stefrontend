@@ -1,0 +1,108 @@
+'use client';
+
+import React from 'react';
+import { Target, Pencil } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+
+interface GoalsBoardProps {
+  goals: any[];
+  onEditGoal: (goal: any) => void;
+}
+
+function BoardColumn({ colStatus, label, badgeStyle, goals, onEditGoal }: {
+  colStatus: string;
+  label: string;
+  badgeStyle: string;
+  goals: any[];
+  onEditGoal: (goal: any) => void;
+}) {
+  const colGoals = goals.filter((g: any) => g.status === colStatus);
+  return (
+    <div className="flex flex-col space-y-4 bg-slate-50/50 dark:bg-slate-950/20 p-4 rounded-sm border border-slate-200/50 dark:border-slate-800/50 min-h-[260px]">
+      <div className="flex items-center justify-between border-b border-slate-200/80 dark:border-slate-800 pb-2">
+        <span className="text-xs font-bold text-slate-850 dark:text-slate-200 flex items-center gap-2">
+          <span className="h-2 w-2 rounded-full bg-current text-slate-500" /> {label}
+        </span>
+        <Badge className={`${badgeStyle} border-none font-bold text-[9px] px-2 py-0.5 rounded-full`}>
+          {colGoals.length}
+        </Badge>
+      </div>
+
+      <div className="flex-1 space-y-3 overflow-y-auto max-h-[350px] scrollbar-thin">
+        {colGoals.length === 0 ? (
+          <div className="h-full flex items-center justify-center text-center p-6 text-[10px] text-slate-400 italic font-medium">
+            No strategic tasks in this column
+          </div>
+        ) : (
+          colGoals.map((g: any) => {
+            return (
+              <div key={g.id} className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-sm shadow-sm hover:shadow-md transition-all group flex flex-col gap-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="space-y-1 min-w-0">
+                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200 line-clamp-2 leading-snug group-hover:text-[#0a66c2] transition-colors">{g.title}</span>
+                    {g.description && (
+                      <p className="text-[10px] text-muted-foreground font-medium line-clamp-2 leading-relaxed">{g.description}</p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-1.5 pt-2 border-t border-slate-100 dark:border-slate-800/50">
+                  <div className="flex items-center justify-between text-[9px] font-bold text-slate-400">
+                    <span>Progress</span>
+                    <span>{g.progress_percentage}%</span>
+                  </div>
+                  <div className="h-1 w-full bg-slate-100 dark:bg-slate-800 rounded-sm overflow-hidden flex">
+                    <div
+                      className="bg-[#0a66c2] transition-all duration-500"
+                      style={{ width: `${g.progress_percentage}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-1 text-[9px] font-semibold text-slate-400">
+                  <div className="text-[8px] font-bold text-slate-400 uppercase tracking-wider">
+                    Due: {g.due_date}
+                  </div>
+
+                  <button
+                    onClick={() => onEditGoal(g)}
+                    className="w-7 h-7 flex items-center justify-center rounded-sm bg-blue-500/5 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-500/10 transition-all cursor-pointer"
+                    title="Update Goal Progress"
+                  >
+                    <Pencil className="h-3 w-3" />
+                  </button>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+    </div>
+  );
+}
+
+export function GoalsBoard({ goals, onEditGoal }: GoalsBoardProps) {
+  return (
+    <Card className="border border-slate-200/80 dark:border-slate-800/80 bg-white/50 dark:bg-slate-900/30 backdrop-blur-md rounded-sm shadow-xl overflow-hidden">
+      <CardHeader className="bg-muted/10 border-b border-border/40 py-4 px-6">
+        <CardTitle className="text-sm font-bold tracking-wider text-[#0a66c2] uppercase flex items-center gap-2">
+          <Target className="h-4 w-4" /> My Assigned Strategic Goals (Jira Board)
+        </CardTitle>
+        <CardDescription className="text-[11px] font-medium text-slate-400">
+          View and track performance targets, milestones, and goals assigned to you by your supervisor.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="p-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* To Do Column */}
+          <BoardColumn colStatus="PENDING" label="To Do" badgeStyle="border-amber-500/20 bg-amber-500/5 text-amber-600" goals={goals} onEditGoal={onEditGoal} />
+          {/* In Progress Column */}
+          <BoardColumn colStatus="IN_PROGRESS" label="In Progress" badgeStyle="border-blue-500/20 bg-blue-500/5 text-blue-600" goals={goals} onEditGoal={onEditGoal} />
+          {/* Completed Column */}
+          <BoardColumn colStatus="COMPLETED" label="Done" badgeStyle="border-emerald-500/20 bg-emerald-500/5 text-emerald-600" goals={goals} onEditGoal={onEditGoal} />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}

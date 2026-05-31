@@ -1,4 +1,4 @@
-import { EmployeeDashboard } from '@/components/employee/empdashboard/employee-dashboard';
+import { EmployeeDashboardSwitcher } from '@/components/employee/dashboard-switcher';
 import { DashboardThemeProvider } from '@/context/DashboardThemeContext';
 import { Metadata } from 'next';
 
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function EmployeeDashboardPage() {
   return (
     <DashboardThemeProvider>
-      <EmployeeDashboard />
+      <EmployeeDashboardSwitcher />
     </DashboardThemeProvider>
   );
 }

@@ -43,8 +43,14 @@ export function EmployeeDetailsView({ employeeId, onBack }: EmployeeDetailsViewP
     queryFn: () => hrOrgService.getDepartments(),
   });
 
+  const { data: managersRes } = useQuery({
+    queryKey: ['active-managers-list'],
+    queryFn: () => hrEmployeeService.getEmployees({ role: 'MANAGER', page_size: 100 }),
+  });
+
   const designations = designationsRes?.data?.results || [];
   const departments = departmentsRes?.data?.results || [];
+  const managers = managersRes?.data?.results || [];
   const employee = detailRes?.data;
 
   const [formData, setFormData] = useState({
@@ -56,9 +62,11 @@ export function EmployeeDetailsView({ employeeId, onBack }: EmployeeDetailsViewP
     employment_type: 'FULL_TIME',
     address: '',
     status: 'ACTIVE',
+    role: 'EMPLOYEE',
     designation: '',
     employee_id: '',
     department: '',
+    reporting_manager: '',
 
     // Aadhaar
     aadhaar_number: '',
@@ -96,9 +104,11 @@ export function EmployeeDetailsView({ employeeId, onBack }: EmployeeDetailsViewP
         employment_type: employee.employment_type || 'FULL_TIME',
         address: employee.address || '',
         status: employee.status || 'ACTIVE',
+        role: employee.role || 'EMPLOYEE',
         designation: employee.designation || '',
         employee_id: employee.employee_id || '',
         department: employee.department || '',
+        reporting_manager: employee.reporting_manager || '',
 
         // Aadhaar
         aadhaar_number: employee.aadhaar_detail?.aadhaar_number || '',
@@ -171,8 +181,10 @@ export function EmployeeDetailsView({ employeeId, onBack }: EmployeeDetailsViewP
       employment_type: formData.employment_type,
       address: formData.address,
       status: formData.status,
-      designation: formData.designation || null,
+      role: formData.role,
+      designation: formData.role === 'MANAGER' ? null : (formData.designation || null),
       department: formData.department || null,
+      reporting_manager: formData.reporting_manager || null,
       employee_id: formData.employee_id,
       portal_username: formData.portal_username || undefined,
       // Only send password if it was changed from the stored value
@@ -244,7 +256,8 @@ export function EmployeeDetailsView({ employeeId, onBack }: EmployeeDetailsViewP
                     </Badge>
                   </div>
                   <p className="text-xs font-medium text-[#0a66c2]/80 mt-0.5">
-                    {employee?.designation_detail?.title || 'Team Member'} • {employee?.department_detail?.name || 'Operations'}
+                    {employee?.role === 'MANAGER' ? 'Manager' : (employee?.designation_detail?.title || 'Team Member')} • {employee?.department_detail?.name || 'Operations'}
+                    {employee?.reporting_manager_detail && ` • Reports To: ${employee.reporting_manager_detail.first_name} ${employee.reporting_manager_detail.last_name}`}
                   </p>
                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">
                     ID: {employee?.employee_id || 'TEMP'}
@@ -361,22 +374,47 @@ export function EmployeeDetailsView({ employeeId, onBack }: EmployeeDetailsViewP
                     </select>
                   </div>
 
-                  {/* Designation */}
+                  {/* Portal Role */}
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Designation</label>
-                    <select
-                      id="designation"
-                      value={formData.designation}
-                      onChange={handleChange}
-                      className="flex h-10 w-full items-center justify-between rounded-sm border border-input bg-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
-                      data-agent="employee-designation-select"
-                    >
-                      <option value="">Select Designation</option>
-                      {designations.map((d: any) => (
-                        <option key={d.id} value={d.id}>{d.title}</option>
-                      ))}
-                    </select>
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Portal Role</label>
+                    {formData.role === 'MANAGER' ? (
+                      <Input
+                        value="Manager"
+                        disabled
+                        className="rounded-sm bg-muted text-muted-foreground font-semibold text-sm cursor-not-allowed h-10"
+                      />
+                    ) : (
+                      <select
+                        id="role"
+                        value={formData.role}
+                        onChange={handleChange}
+                        className="flex h-10 w-full items-center justify-between rounded-sm border border-input bg-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                        data-agent="employee-role-select"
+                      >
+                        <option value="EMPLOYEE">Employee</option>
+                        <option value="MANAGER">Manager</option>
+                      </select>
+                    )}
                   </div>
+
+                  {/* Designation */}
+                  {formData.role !== 'MANAGER' && (
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Designation</label>
+                      <select
+                        id="designation"
+                        value={formData.designation}
+                        onChange={handleChange}
+                        className="flex h-10 w-full items-center justify-between rounded-sm border border-input bg-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                        data-agent="employee-designation-select"
+                      >
+                        <option value="">Select Designation</option>
+                        {designations.map((d: any) => (
+                          <option key={d.id} value={d.id}>{d.title}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
 
                   {/* Department */}
                   <div className="space-y-1.5">
@@ -391,6 +429,25 @@ export function EmployeeDetailsView({ employeeId, onBack }: EmployeeDetailsViewP
                       <option value="">Select Department</option>
                       {departments.map((d: any) => (
                         <option key={d.id} value={d.id}>{d.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Reporting Manager */}
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Reporting Manager</label>
+                    <select
+                      id="reporting_manager"
+                      value={formData.reporting_manager}
+                      onChange={handleChange}
+                      className="flex h-10 w-full items-center justify-between rounded-sm border border-input bg-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                      data-agent="employee-reporting-manager-select"
+                    >
+                      <option value="">Select Manager</option>
+                      {managers.map((m: any) => (
+                        <option key={m.id} value={m.id}>
+                          {m.first_name} {m.last_name} ({m.employee_id || 'MGR'})
+                        </option>
                       ))}
                     </select>
                   </div>

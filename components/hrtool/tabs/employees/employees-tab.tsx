@@ -33,7 +33,11 @@ import {
 import { AddEmployeeModal } from './add-employee-modal';
 import { EmployeeDetailsView } from './employee-details-view';
 
-export function EmployeesTab() {
+interface EmployeesTabProps {
+  defaultRole?: 'EMPLOYEE' | 'MANAGER';
+}
+
+export function EmployeesTab({ defaultRole = 'EMPLOYEE' }: EmployeesTabProps) {
   const queryClient = useQueryClient();
   const [searchInput, setSearchInput] = useState('');
   const [filterInput, setFilterInput] = useState('ALL');
@@ -120,7 +124,8 @@ export function EmployeesTab() {
       activeFilters.startDate,
       activeFilters.endDate,
       activeFilters.designation,
-      activeFilters.department
+      activeFilters.department,
+      defaultRole
     ],
     queryFn: () => hrEmployeeService.getEmployees({
       search: activeFilters.search || undefined,
@@ -128,6 +133,7 @@ export function EmployeesTab() {
       employment_type: activeFilters.filter === 'ALL' ? undefined : activeFilters.filter,
       designation: activeFilters.designation === 'ALL' ? undefined : activeFilters.designation,
       department: activeFilters.department === 'ALL' ? undefined : activeFilters.department,
+      role: defaultRole,
       ordering: activeFilters.ordering,
       joining_date__gte: activeFilters.startDate || undefined,
       joining_date__lte: activeFilters.endDate || undefined,
@@ -227,6 +233,7 @@ export function EmployeesTab() {
       <AddEmployeeModal
         open={isAddModalOpen}
         onOpenChange={setIsAddModalOpen}
+        defaultRole={defaultRole}
       />
     );
   }
@@ -244,7 +251,9 @@ export function EmployeesTab() {
     <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
       <div className="flex items-center justify-between border-b border-border/40 pb-2">
         <div>
-          <h2 className="text-xl font-bold tracking-tight">Employee Directory</h2>
+          <h2 className="text-xl font-bold tracking-tight">
+            {defaultRole === 'MANAGER' ? 'Manager Directory' : 'Employee Directory'}
+          </h2>
         </div>
         <div className="flex items-center gap-2">
           <Button
@@ -252,7 +261,7 @@ export function EmployeesTab() {
             data-agent="add-employee-button"
             className="bg-[#0a66c2] text-white hover:bg-[#004182] shadow-sm rounded-sm text-[11px] font-semibold px-4 h-10 transition-all whitespace-nowrap"
           >
-            <UserPlus className="mr-2 h-3.5 w-3.5" /> Add Employee
+            <UserPlus className="mr-2 h-3.5 w-3.5" /> {defaultRole === 'MANAGER' ? 'Add Manager' : 'Add Employee'}
           </Button>
           <Button
             type="button"
@@ -414,6 +423,7 @@ export function EmployeesTab() {
               <tr>
                 <th className="px-4 py-3">Employee</th>
                 <th className="px-4 py-3">Role</th>
+                <th className="px-4 py-3">Manager</th>
                 <th className="px-4 py-3">Contact</th>
                 <th className="px-4 py-3 w-[140px]">Type</th>
                 <th className="px-4 py-3 text-right">Actions</th>
@@ -438,9 +448,38 @@ export function EmployeesTab() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex flex-col">
-                      <span className="text-[12px] font-semibold text-foreground">{employee.designation_detail?.title || 'Team Member'}</span>
-                      <span className="text-[11px] font-medium text-muted-foreground">{employee.department_detail?.name || 'No Department'}</span>
+                      {employee.role === 'MANAGER' ? (
+                        <>
+                          <span className="text-[12px] font-semibold text-foreground">Manager</span>
+                          <span className="text-[11px] font-medium text-muted-foreground">{employee.department_detail?.name || 'No Department'}</span>
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="text-[12px] font-semibold text-foreground">{employee.designation_detail?.title || 'Team Member'}</span>
+                          </div>
+                          <span className="text-[11px] font-medium text-muted-foreground">{employee.department_detail?.name || 'No Department'}</span>
+                        </>
+                      )}
                     </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    {employee.reporting_manager_detail ? (
+                      <div className="flex items-center gap-2">
+                        <Avatar className="h-6 w-6 border border-border/50 shadow-sm rounded-sm">
+                          <AvatarFallback className="bg-[#0a66c2]/10 text-[#0a66c2] font-bold rounded-sm text-[8px]">
+                            {employee.reporting_manager_detail.first_name[0]}{employee.reporting_manager_detail.last_name[0]}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col">
+                          <span className="font-bold text-[12px] text-foreground">
+                            {employee.reporting_manager_detail.first_name} {employee.reporting_manager_detail.last_name}
+                          </span>
+                        </div>
+                      </div>
+                    ) : (
+                      <span className="text-[11px] text-muted-foreground font-semibold italic">Not Assigned</span>
+                    )}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex flex-col gap-1 text-[11px] font-semibold text-muted-foreground">
@@ -468,7 +507,7 @@ export function EmployeesTab() {
                       <button
                         onClick={() => setSelectedEmployeeId(employee.id)}
                         data-agent="employee-details-btn"
-                        className="w-7 h-7 flex items-center justify-center rounded-sm bg-blue-500/5 text-blue-600 hover:bg-blue-600 hover:text-white transition-all active:scale-95 border border-blue-500/10"
+                        className="w-7 h-7 flex items-center justify-center rounded-sm bg-[#0a66c2]/5 text-[#0a66c2] hover:bg-[#0a66c2] hover:text-white transition-all active:scale-95 border border-[#0a66c2]/10"
                         title="View Details"
                       >
                         <User className="h-3 w-3" />
@@ -478,7 +517,7 @@ export function EmployeesTab() {
                         onClick={() => sendCredentialsMutation.mutate(employee.id)}
                         disabled={sendCredentialsMutation.isPending}
                         data-agent="employee-send-link-btn"
-                        className="w-7 h-7 flex items-center justify-center rounded-sm bg-emerald-500/5 text-emerald-600 hover:bg-emerald-600 hover:text-white transition-all active:scale-95 border border-emerald-500/10 disabled:opacity-50"
+                        className="w-7 h-7 flex items-center justify-center rounded-sm bg-[#0a66c2]/5 text-[#0a66c2] hover:bg-[#0a66c2] hover:text-white transition-all active:scale-95 border border-[#0a66c2]/10 disabled:opacity-50"
                         title="Send Email Link"
                       >
                         <Mail className="h-3 w-3" />

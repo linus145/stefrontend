@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { hrLeaveService } from '@/services/hr';
 import { Card, CardContent } from '@/components/ui/card';
@@ -46,9 +46,20 @@ interface LeaveTabProps {
 
 export function LeaveTab({ filterStatus, subTab }: LeaveTabProps) {
   const queryClient = useQueryClient();
+  const [page, setPage] = useState(1);
+
+  // Reset page when filterStatus or subTab changes
+  useEffect(() => {
+    setPage(1);
+  }, [filterStatus, subTab]);
+
   const { data: requests, isLoading } = useQuery({
-    queryKey: ['leave-requests'],
-    queryFn: () => hrLeaveService.getLeaveRequests(),
+    queryKey: ['leave-requests', filterStatus, page],
+    queryFn: () => hrLeaveService.getLeaveRequests({
+      status: filterStatus || undefined,
+      page: page,
+      page_size: 20
+    }),
   });
 
   // States for Leave Types (Company Leaves) Management
@@ -218,7 +229,6 @@ export function LeaveTab({ filterStatus, subTab }: LeaveTabProps) {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold tracking-tight">Company Leaves</h2>
-            <p className="text-sm text-muted-foreground">Manage and define leave categories and policies for your organization.</p>
           </div>
           <Button 
             onClick={handleCreate}
@@ -270,58 +280,58 @@ export function LeaveTab({ filterStatus, subTab }: LeaveTabProps) {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {leaveTypes.map((type: any) => (
-              <Card key={type.id} className="group overflow-hidden hover:shadow-2xl hover:shadow-blue-500/5 transition-all duration-500 border-border/40 bg-card/40 backdrop-blur-md rounded-sm flex flex-col justify-between">
-                <CardContent className="p-6 space-y-4">
+              <Card key={type.id} className="group overflow-hidden hover:shadow-xl hover:shadow-blue-500/5 transition-all duration-500 border-border/40 bg-card/40 backdrop-blur-md rounded-sm flex flex-col justify-between">
+                <CardContent className="p-4 space-y-2.5">
                   <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-sm bg-blue-500/10 flex items-center justify-center text-blue-600 font-bold uppercase shrink-0">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-sm bg-blue-500/10 flex items-center justify-center text-blue-600 font-bold uppercase text-[13px] shrink-0">
                         {type.name.slice(0, 2)}
                       </div>
                       <div>
-                        <h3 className="text-[15px] font-bold tracking-tight group-hover:text-[#0a66c2] transition-colors">{type.name}</h3>
-                        <p className="text-[10px] font-bold text-muted-foreground mt-0.5">
+                        <h3 className="text-xs font-bold tracking-tight group-hover:text-[#0a66c2] transition-colors">{type.name}</h3>
+                        <p className="text-[9px] font-bold text-muted-foreground mt-0.5">
                           {type.max_days_per_year !== null && type.max_days_per_year !== undefined
                             ? `${type.max_days_per_year} Days / Year`
                             : 'Unlimited Days'}
                         </p>
                         {type.date && (
-                          <p className="text-[10px] font-bold text-blue-600 dark:text-blue-400 mt-0.5">
+                          <p className="text-[9px] font-bold text-blue-600 dark:text-blue-400 mt-0.5">
                             Date: {format(new Date(type.date + 'T00:00:00'), 'dd MMM yyyy')}
                           </p>
                         )}
                       </div>
                     </div>
-                    <div className="flex items-center gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => handleEdit(type)}
                         data-agent={`leave-type-edit-btn-${type.id}`}
-                        className="h-7 w-7 p-0 border-border/60 hover:text-blue-600 hover:bg-blue-500/5 rounded-sm"
+                        className="h-6 w-6 p-0 border-border/60 hover:text-blue-600 hover:bg-blue-500/5 rounded-sm"
                         title="Edit Policy"
                       >
-                        <Edit className="h-3.5 w-3.5" />
+                        <Edit className="h-3 w-3" />
                       </Button>
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => setDeleteTypeTarget({ id: type.id, name: type.name })}
                         data-agent={`leave-type-delete-btn-${type.id}`}
-                        className="h-7 w-7 p-0 border-border/60 text-rose-500 hover:bg-rose-500/5 hover:border-rose-500/30 rounded-sm"
+                        className="h-6 w-6 p-0 border-border/60 text-rose-500 hover:bg-rose-500/5 hover:border-rose-500/30 rounded-sm"
                         title="Delete category"
                       >
-                        <Trash2 className="h-3.5 w-3.5" />
+                        <Trash2 className="h-3 w-3" />
                       </Button>
                     </div>
                   </div>
 
-                  <p className="text-xs text-muted-foreground/80 line-clamp-3 leading-relaxed min-h-[48px]">
+                  <p className="text-[11px] text-muted-foreground/80 line-clamp-3 leading-relaxed min-h-[40px]">
                     {type.description || 'No description provided.'}
                   </p>
 
-                  <div className="flex flex-wrap gap-2 pt-2 border-t border-border/40">
+                  <div className="flex flex-wrap gap-1.5 pt-2 border-t border-border/40">
                     <Badge variant="outline" className={cn(
-                      "text-[9px] px-2 py-0.5 font-bold rounded-sm uppercase tracking-wider shadow-none",
+                      "text-[8px] px-1.5 py-0 font-bold rounded-sm uppercase tracking-wider shadow-none",
                       type.category === 'ANNUAL' && "border-indigo-500/20 text-indigo-600 bg-indigo-500/5",
                       type.category === 'SICK' && "border-rose-500/20 text-rose-600 bg-rose-500/5",
                       type.category === 'CASUAL' && "border-emerald-500/20 text-emerald-600 bg-emerald-500/5",
@@ -332,7 +342,7 @@ export function LeaveTab({ filterStatus, subTab }: LeaveTabProps) {
                       {type.category ? type.category.replace('_', ' ') : 'Other'}
                     </Badge>
                     <Badge variant="outline" className={cn(
-                      "text-[9px] px-2 py-0.5 font-bold rounded-sm uppercase tracking-wider shadow-none",
+                      "text-[8px] px-1.5 py-0 font-bold rounded-sm uppercase tracking-wider shadow-none",
                       type.is_paid !== false 
                         ? "border-green-500/20 text-green-600 bg-green-500/5"
                         : "border-slate-500/20 text-slate-500 bg-slate-500/5"
@@ -340,7 +350,7 @@ export function LeaveTab({ filterStatus, subTab }: LeaveTabProps) {
                       {type.is_paid !== false ? 'Paid' : 'Unpaid'}
                     </Badge>
                     <Badge variant="outline" className={cn(
-                      "text-[9px] px-2 py-0.5 font-bold rounded-sm uppercase tracking-wider shadow-none",
+                      "text-[8px] px-1.5 py-0 font-bold rounded-sm uppercase tracking-wider shadow-none",
                       type.carry_forward === true 
                         ? "border-blue-500/20 text-blue-600 bg-blue-500/5"
                         : "border-amber-500/20 text-amber-600 bg-amber-500/5"
@@ -385,7 +395,7 @@ export function LeaveTab({ filterStatus, subTab }: LeaveTabProps) {
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="w-full h-10 px-3 bg-white border border-border focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:border-blue-500 rounded-sm text-sm font-medium outline-none focus:border-blue-500"
+                  className="w-full h-10 px-3 bg-background border border-border focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:border-blue-500 rounded-sm text-sm font-medium outline-none focus:border-blue-500"
                 >
                   <option value="ANNUAL">Annual Leave</option>
                   <option value="SICK">Sick Leave</option>
@@ -402,7 +412,7 @@ export function LeaveTab({ filterStatus, subTab }: LeaveTabProps) {
                   type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="h-10 bg-white border border-border focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:border-blue-500 rounded-sm text-sm font-medium"
+                  className="h-10 bg-background border border-border focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:border-blue-500 rounded-sm text-sm font-medium"
                 />
               </div>
 
@@ -412,7 +422,7 @@ export function LeaveTab({ filterStatus, subTab }: LeaveTabProps) {
                   placeholder="Explain who qualifies for this leave and any applicable terms..."
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="bg-white border border-border focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:border-blue-500 rounded-sm text-sm font-medium min-h-[80px]"
+                  className="bg-background border border-border focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:border-blue-500 rounded-sm text-sm font-medium min-h-[80px]"
                 />
               </div>
 
@@ -425,7 +435,7 @@ export function LeaveTab({ filterStatus, subTab }: LeaveTabProps) {
                     value={maxDays}
                     onChange={(e) => setMaxDays(e.target.value === '' ? '' : parseInt(e.target.value) || 0)}
                     placeholder="Unlimited"
-                    className="h-10 bg-white border border-border focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:border-blue-500 rounded-sm text-sm font-medium"
+                    className="h-10 bg-background border border-border focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:border-blue-500 rounded-sm text-sm font-medium"
                   />
                 </div>
 
@@ -507,51 +517,54 @@ export function LeaveTab({ filterStatus, subTab }: LeaveTabProps) {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">{header.title}</h2>
-          <p className="text-sm text-muted-foreground">{header.subtitle}</p>
         </div>
       </div>
 
       <Card className="bg-card/50 backdrop-blur-sm border-border/50 rounded-sm">
-        <CardContent className="pt-6">
+        <CardContent className="p-3">
           <div className="overflow-x-auto">
             <Table className="w-full">
               <TableHeader>
-                <TableRow className="border-b border-border/60 text-muted-foreground text-xs uppercase tracking-wider font-semibold">
-                  <TableHead className="py-3 px-4 font-medium">Emp ID</TableHead>
-                  <TableHead className="py-3 px-4 font-medium">Emp Name</TableHead>
-                  <TableHead className="py-3 px-4 font-medium">Email</TableHead>
-                  <TableHead className="py-3 px-4 font-medium">Leave Dates</TableHead>
-                  <TableHead className="py-3 px-4 font-medium">Reason</TableHead>
-                  <TableHead className="py-3 px-4 font-medium text-right">Actions</TableHead>
+                <TableRow className="border-b border-border/60 text-muted-foreground text-[9px] uppercase tracking-wider font-semibold">
+                  <TableHead className="py-2 px-3 font-medium">Emp ID</TableHead>
+                  <TableHead className="py-2 px-3 font-medium">Emp Name</TableHead>
+                  <TableHead className="py-2 px-3 font-medium">Email</TableHead>
+                  <TableHead className="py-2 px-3 font-medium">Leave Dates</TableHead>
+                  <TableHead className="py-2 px-3 font-medium">Leave Type</TableHead>
+                  <TableHead className="py-2 px-3 font-medium">Reason</TableHead>
+                  <TableHead className="py-2 px-3 font-medium text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody className="divide-y divide-border/40">
+              <TableBody className="divide-y divide-border/40 text-xs">
                 {filteredRequests.map((request: any) => (
                   <TableRow key={request.id} className="hover:bg-muted/30 transition-colors">
-                    <TableCell className="py-3.5 px-4 font-mono text-xs text-muted-foreground">
+                    <TableCell className="py-2 px-3 font-mono text-[11px] text-muted-foreground">
                       {request.employee_detail?.employee_id || '—'}
                     </TableCell>
-                    <TableCell className="py-3.5 px-4 font-medium">
+                    <TableCell className="py-2 px-3 font-semibold text-xs text-foreground">
                       {request.employee_name || `${request.employee_detail?.first_name || ''} ${request.employee_detail?.last_name || ''}`.trim() || 'Employee'}
                     </TableCell>
-                    <TableCell className="py-3.5 px-4 text-muted-foreground">
+                    <TableCell className="py-2 px-3 text-[11px] text-muted-foreground">
                       {request.employee_detail?.email || '—'}
                     </TableCell>
-                    <TableCell className="py-3.5 px-4">
+                    <TableCell className="py-2 px-3 font-semibold text-xs text-foreground">
+                      {format(new Date(request.start_date), 'dd/MM/yyyy')} - {format(new Date(request.end_date), 'dd/MM/yyyy')}
+                    </TableCell>
+                    <TableCell className="py-2 px-3">
                       <div className="flex flex-col">
-                        <span className="font-semibold text-foreground">
-                          {format(new Date(request.start_date), 'dd/MM/yyyy')} - {format(new Date(request.end_date), 'dd/MM/yyyy')}
+                        <span className="font-semibold text-xs text-foreground">
+                          {request.leave_type_name || 'Leave'}
                         </span>
-                        <span className="text-[10px] text-blue-600 font-bold uppercase tracking-wide mt-0.5">
-                          {request.total_days} {request.total_days === 1 ? 'day' : 'days'} • {request.leave_type_name || 'Leave'}
+                        <span className="text-[10px] text-muted-foreground mt-0.5">
+                          {request.total_days} {request.total_days === 1 ? 'day' : 'days'}
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell className="py-3.5 px-4 text-muted-foreground max-w-[200px] truncate" title={request.reason}>
+                    <TableCell className="py-2 px-3 text-[11px] text-muted-foreground max-w-[200px] truncate" title={request.reason}>
                       {request.reason || '—'}
                     </TableCell>
-                    <TableCell className="py-3.5 px-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
+                    <TableCell className="py-2 px-3 text-right">
+                      <div className="flex items-center justify-end gap-1">
                         {request.status?.toLowerCase() === 'pending' ? (
                           <>
                             <Button
@@ -559,10 +572,10 @@ export function LeaveTab({ filterStatus, subTab }: LeaveTabProps) {
                               onClick={() => approveMutation.mutate(request.id)}
                               disabled={approveMutation.isPending}
                               data-agent={`leave-approve-btn-${request.id}`}
-                              className="h-8 w-8 p-0 bg-blue-500 hover:bg-blue-600 text-white rounded-sm shadow-sm"
+                              className="h-7 w-7 p-0 bg-blue-500 hover:bg-blue-600 text-white rounded-sm shadow-sm"
                               title="Approve"
                             >
-                              <Check className="h-4 w-4" />
+                              <Check className="h-3 w-3" />
                             </Button>
                             <Button
                               size="sm"
@@ -570,17 +583,17 @@ export function LeaveTab({ filterStatus, subTab }: LeaveTabProps) {
                               onClick={() => rejectMutation.mutate(request.id)}
                               disabled={rejectMutation.isPending}
                               data-agent={`leave-reject-btn-${request.id}`}
-                              className="h-8 w-8 p-0 border-rose-500/20 text-rose-500 hover:bg-rose-500/5 rounded-sm"
+                              className="h-7 w-7 p-0 border-rose-500/20 text-rose-500 hover:bg-rose-500/5 rounded-sm"
                               title="Reject"
                             >
-                              <X className="h-4 w-4" />
+                              <X className="h-3 w-3" />
                             </Button>
                           </>
                         ) : (
                           <Badge
                             variant="outline"
                             className={cn(
-                              "text-[10px] px-2.5 py-0.5 font-bold rounded-sm uppercase tracking-wider",
+                              "text-[8px] px-1.5 py-0 font-bold rounded-sm uppercase tracking-wider",
                               request.status?.toLowerCase() === 'approved'
                                 ? "border-green-500/30 text-green-600 bg-green-500/5"
                                 : "border-rose-500/30 text-rose-600 bg-rose-500/5"
@@ -595,10 +608,10 @@ export function LeaveTab({ filterStatus, subTab }: LeaveTabProps) {
                           onClick={() => deleteMutation.mutate(request.id)}
                           disabled={deleteMutation.isPending}
                           data-agent={`leave-delete-btn-${request.id}`}
-                          className="h-8 w-8 p-0 border-slate-300 dark:border-slate-700 text-slate-500 hover:bg-rose-500/10 hover:text-rose-600 hover:border-rose-500/30 rounded-sm transition-colors"
+                          className="h-7 w-7 p-0 border-slate-300 dark:border-slate-700 text-slate-500 hover:bg-rose-500/10 hover:text-rose-600 hover:border-rose-500/30 rounded-sm transition-colors"
                           title="Delete"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-3 w-3" />
                         </Button>
                       </div>
                     </TableCell>
@@ -608,10 +621,39 @@ export function LeaveTab({ filterStatus, subTab }: LeaveTabProps) {
             </Table>
             {filteredRequests.length === 0 && (
               <div className="text-center py-8">
-                <p className="text-sm text-muted-foreground italic">No requests at the moment.</p>
+                <p className="text-xs text-muted-foreground italic">No requests at the moment.</p>
               </div>
             )}
           </div>
+
+          {/* Pagination Controls */}
+          {(requests?.data?.count ?? 0) > 0 && (
+            <div className="flex justify-center items-center gap-4 pt-4 pb-1 border-t border-border/40 mt-3">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1 || isLoading}
+                data-agent="leave-pagination-prev"
+                className="text-xs h-7 px-3 rounded-sm border-border text-muted-foreground shadow-sm hover:bg-muted font-bold text-[10px]"
+              >
+                Previous
+              </Button>
+              <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">
+                Page {page} of {Math.max(1, Math.ceil((requests?.data?.count || 0) / 20))}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage(p => p + 1)}
+                disabled={!requests?.data?.next || isLoading}
+                data-agent="leave-pagination-next"
+                className="text-xs h-7 px-3 rounded-sm border-border text-muted-foreground shadow-sm hover:bg-muted font-bold text-[10px]"
+              >
+                Next
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

@@ -10,23 +10,24 @@ import { AgentUIController } from '@/agent/ui/AgentUIController';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
-export type HRSection = 
-  | 'dashboard' 
-  | 'employees' 
-  | 'onboarding' 
-  | 'attendance' 
+export type HRSection =
+  | 'dashboard'
+  | 'employees'
+  | 'employees-managers'
+  | 'onboarding'
+  | 'attendance'
   | 'attendance-requests'
   | 'attendance-hour-account'
   | 'attendance-work-records'
   | 'attendance-activity'
   | 'attendance-late-early'
   | 'attendance-settings'
-  | 'leave' 
-  | 'leave-requests' 
-  | 'leave-pending' 
-  | 'leave-approved' 
-  | 'leave-company' 
-  | 'payroll' 
+  | 'leave'
+  | 'leave-requests'
+  | 'leave-pending'
+  | 'leave-approved'
+  | 'leave-company'
+  | 'payroll'
   | 'payroll-dashboard'
   | 'payroll-runs'
   | 'payroll-salary-structures'
@@ -41,7 +42,7 @@ export type HRSection =
   | 'agent-scheduling'
   | 'scheduling'
   | 'settings'
-  | 'performance' 
+  | 'performance'
   | 'performance-dashboard'
   | 'performance-kpi'
   | 'performance-goals'
@@ -97,7 +98,7 @@ export function HRHeader({
       <div className="flex items-center gap-3 sm:gap-5">
         <ThemeToggle />
         <NotificationPopover currentDashboard="HR" dotColorClass="bg-[#0a66c2]" />
-        
+
         {/* AI Agent Header Button */}
         <button
           onClick={handleAgentClick}

@@ -18,7 +18,6 @@ export function AnalyticsView() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Performance Analytics</h2>
-          <p className="text-muted-foreground text-sm">Enterprise-wide performance distribution and trends.</p>
         </div>
       </div>
 
@@ -35,45 +34,45 @@ export function AnalyticsView() {
               <div className="h-64 flex items-center justify-center text-muted-foreground text-sm">Loading analytics...</div>
             ) : dist ? (
               <div className="max-w-2xl mx-auto">
-                <div className="grid grid-cols-3 gap-2 h-96">
+                <div data-agent="analytics-9box-grid" className="grid grid-cols-3 gap-2 h-96">
                   {/* Top Row: High Potential */}
-                  <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-sm flex flex-col items-center justify-center relative group hover:bg-emerald-500/20 transition-all">
+                  <div data-agent="analytics-9box-stars" className="bg-emerald-500/10 border border-emerald-500/30 rounded-sm flex flex-col items-center justify-center relative group hover:bg-emerald-500/20 transition-all">
                     <span className="text-4xl font-extrabold text-emerald-600">{dist.highPerformanceHighPotential}</span>
                     <span className="absolute bottom-2 text-[9px] uppercase tracking-widest font-bold text-emerald-700/60">Stars</span>
                   </div>
-                  <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-sm flex flex-col items-center justify-center relative group hover:bg-emerald-500/10 transition-all">
+                  <div data-agent="analytics-9box-high-potentials" className="bg-emerald-500/5 border border-emerald-500/20 rounded-sm flex flex-col items-center justify-center relative group hover:bg-emerald-500/10 transition-all">
                     <span className="text-4xl font-extrabold text-emerald-600">{dist.medPerformanceHighPotential}</span>
                     <span className="absolute bottom-2 text-[9px] uppercase tracking-widest font-bold text-emerald-700/60">High Potentials</span>
                   </div>
-                  <div className="bg-amber-500/10 border border-amber-500/30 rounded-sm flex flex-col items-center justify-center relative group hover:bg-amber-500/20 transition-all">
+                  <div data-agent="analytics-9box-enigmas" className="bg-amber-500/10 border border-amber-500/30 rounded-sm flex flex-col items-center justify-center relative group hover:bg-amber-500/20 transition-all">
                     <span className="text-4xl font-extrabold text-amber-600">{dist.lowPerformanceHighPotential}</span>
                     <span className="absolute bottom-2 text-[9px] uppercase tracking-widest font-bold text-amber-700/60">Enigmas</span>
                   </div>
 
                   {/* Middle Row: Med Potential */}
-                  <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-sm flex flex-col items-center justify-center relative group hover:bg-emerald-500/10 transition-all">
+                  <div data-agent="analytics-9box-high-performers" className="bg-emerald-500/5 border border-emerald-500/20 rounded-sm flex flex-col items-center justify-center relative group hover:bg-emerald-500/10 transition-all">
                     <span className="text-4xl font-extrabold text-emerald-600">{dist.highPerformanceMedPotential}</span>
                     <span className="absolute bottom-2 text-[9px] uppercase tracking-widest font-bold text-emerald-700/60">High Performers</span>
                   </div>
-                  <div className="bg-blue-500/10 border border-blue-500/30 rounded-sm flex flex-col items-center justify-center relative group hover:bg-blue-500/20 transition-all">
+                  <div data-agent="analytics-9box-core-players" className="bg-blue-500/10 border border-blue-500/30 rounded-sm flex flex-col items-center justify-center relative group hover:bg-blue-500/20 transition-all">
                     <span className="text-4xl font-extrabold text-blue-600">{dist.medPerformanceMedPotential}</span>
                     <span className="absolute bottom-2 text-[9px] uppercase tracking-widest font-bold text-blue-700/60">Core Players</span>
                   </div>
-                  <div className="bg-amber-500/5 border border-amber-500/20 rounded-sm flex flex-col items-center justify-center relative group hover:bg-amber-500/10 transition-all">
+                  <div data-agent="analytics-9box-dilemmas" className="bg-amber-500/5 border border-amber-500/20 rounded-sm flex flex-col items-center justify-center relative group hover:bg-amber-500/10 transition-all">
                     <span className="text-4xl font-extrabold text-amber-600">{dist.lowPerformanceMedPotential}</span>
                     <span className="absolute bottom-2 text-[9px] uppercase tracking-widest font-bold text-amber-700/60">Dilemmas</span>
                   </div>
 
                   {/* Bottom Row: Low Potential */}
-                  <div className="bg-amber-500/10 border border-amber-500/30 rounded-sm flex flex-col items-center justify-center relative group hover:bg-amber-500/20 transition-all">
+                  <div data-agent="analytics-9box-workhorses" className="bg-amber-500/10 border border-amber-500/30 rounded-sm flex flex-col items-center justify-center relative group hover:bg-amber-500/20 transition-all">
                     <span className="text-4xl font-extrabold text-amber-600">{dist.highPerformanceLowPotential}</span>
                     <span className="absolute bottom-2 text-[9px] uppercase tracking-widest font-bold text-amber-700/60">Workhorses</span>
                   </div>
-                  <div className="bg-amber-500/5 border border-amber-500/20 rounded-sm flex flex-col items-center justify-center relative group hover:bg-amber-500/10 transition-all">
+                  <div data-agent="analytics-9box-inconsistent" className="bg-amber-500/5 border border-amber-500/20 rounded-sm flex flex-col items-center justify-center relative group hover:bg-amber-500/10 transition-all">
                     <span className="text-4xl font-extrabold text-amber-600">{dist.medPerformanceLowPotential}</span>
                     <span className="absolute bottom-2 text-[9px] uppercase tracking-widest font-bold text-amber-700/60">Inconsistent</span>
                   </div>
-                  <div className="bg-rose-500/10 border border-rose-500/30 rounded-sm flex flex-col items-center justify-center relative group hover:bg-rose-500/20 transition-all">
+                  <div data-agent="analytics-9box-underperformers" className="bg-rose-500/10 border border-rose-500/30 rounded-sm flex flex-col items-center justify-center relative group hover:bg-rose-500/20 transition-all">
                     <span className="text-4xl font-extrabold text-rose-600">{dist.lowPerformanceLowPotential}</span>
                     <span className="absolute bottom-2 text-[9px] uppercase tracking-widest font-bold text-rose-700/60">Underperformers</span>
                   </div>
@@ -94,7 +93,7 @@ export function AnalyticsView() {
         </Card>
 
         <div className="space-y-6">
-          <Card className="bg-card/50 border-border/50 rounded-sm">
+          <Card data-agent="analytics-company-average-card" className="bg-card/50 border-border/50 rounded-sm">
             <CardHeader className="pb-2">
               <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
                 <Activity className="h-3 w-3 text-[#0a66c2]" />
@@ -108,7 +107,7 @@ export function AnalyticsView() {
             </CardContent>
           </Card>
           
-          <Card className="bg-card/50 border-border/50 rounded-sm">
+          <Card data-agent="analytics-total-appraisals-card" className="bg-card/50 border-border/50 rounded-sm">
             <CardHeader className="pb-2">
               <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
                 <Users className="h-3 w-3 text-emerald-500" />

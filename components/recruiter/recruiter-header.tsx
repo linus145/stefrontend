@@ -22,7 +22,7 @@ interface RecruiterHeaderProps {
 
 const NAVIGATION_ITEMS: { id: RecruiterSection; label: string }[] = [
   { id: 'overview', label: 'Overview' },
-  { id: 'candidates', label: 'Talents' },
+  // { id: 'candidates', label: 'Talents' },
   { id: 'my-jobs', label: 'Jobs' },
   { id: 'applications', label: 'Applications' },
   { id: 'company', label: 'Company Profile' },

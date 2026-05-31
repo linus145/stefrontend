@@ -126,28 +126,36 @@ export function TwoStepVerificationSection({ expanded, onToggle }: TwoStepVerifi
     }
   };
 
-  const handleDisable2FA = async () => {
-    if (!confirm('Are you sure you want to disable Two-step verification? This will reduce your account security.')) {
-      return;
-    }
-
-    setIsDisabling2FA(true);
-    try {
-      await authService.disable2FA();
-      toast.success('Two-step verification has been disabled.');
-      if (fetchProfile) await fetchProfile();
-      // Reset inputs
-      setSecondaryEmail('');
-      setThirdEmail('');
-      setSecondaryOtp('');
-      setThirdOtp('');
-      setSetupMode2FA('status');
-      setSetupStep2FA('secondary_email');
-    } catch (error: any) {
-      toast.error('Failed to disable 2FA. Please try again.');
-    } finally {
-      setIsDisabling2FA(false);
-    }
+  const handleDisable2FA = () => {
+    toast('Disable Two-step verification?', {
+      description: 'This will reduce your account security.',
+      action: {
+        label: 'Disable',
+        onClick: async () => {
+          setIsDisabling2FA(true);
+          try {
+            await authService.disable2FA();
+            toast.success('Two-step verification has been disabled.');
+            if (fetchProfile) await fetchProfile();
+            // Reset inputs
+            setSecondaryEmail('');
+            setThirdEmail('');
+            setSecondaryOtp('');
+            setThirdOtp('');
+            setSetupMode2FA('status');
+            setSetupStep2FA('secondary_email');
+          } catch (error: any) {
+            toast.error('Failed to disable 2FA. Please try again.');
+          } finally {
+            setIsDisabling2FA(false);
+          }
+        }
+      },
+      cancel: {
+        label: 'Cancel',
+        onClick: () => {}
+      }
+    });
   };
 
   return (

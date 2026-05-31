@@ -103,7 +103,7 @@ export function TemplatesTab() {
 
   // Send Template Mutation
   const sendTemplateMutation = useMutation({
-    mutationFn: ({ employee_id, email_body, subject, template_name, design_id }: any) => 
+    mutationFn: ({ employee_id, email_body, subject, template_name, design_id }: any) =>
       hrPayrollService.sendTemplate(employee_id, email_body, subject, template_name, design_id),
     onSuccess: (res: any) => {
       toast.success(res?.data?.message || "Document email sent successfully to the employee!");
@@ -129,7 +129,7 @@ export function TemplatesTab() {
       if (response.data && response.data.found) {
         const pData = response.data;
         const updated = { ...(currentVars || templateVariables) };
-        
+
         if (parsedVariables.includes('month') || updated['month'] !== undefined) {
           updated['month'] = MONTHS[parseInt(month) - 1] || '';
         }
@@ -212,7 +212,7 @@ export function TemplatesTab() {
     const emp = employees.find((e: any) => e.id === empId);
     if (emp) {
       const updatedVars = { ...templateVariables };
-      
+
       if (parsedVariables.includes('employee_name')) {
         updatedVars['employee_name'] = `${emp.first_name} ${emp.last_name}`;
       }
@@ -238,7 +238,7 @@ export function TemplatesTab() {
         updatedVars['workplace_mode'] = emp.employment_type === 'FULL_TIME' ? 'Office (Full-Time)' : 'Remote';
       }
       if (parsedVariables.includes('reporting_manager')) {
-        updatedVars['reporting_manager'] = emp.reporting_manager_detail 
+        updatedVars['reporting_manager'] = emp.reporting_manager_detail
           ? `${emp.reporting_manager_detail.first_name} ${emp.reporting_manager_detail.last_name}`
           : 'HR Manager';
       }
@@ -250,7 +250,7 @@ export function TemplatesTab() {
         const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         updatedVars['pay_period'] = `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
       }
-      
+
       setTemplateVariables(updatedVars);
 
       if (selectedMonth && selectedYear) {
@@ -400,8 +400,8 @@ export function TemplatesTab() {
           <button
             onClick={() => setActiveCategory('ALL')}
             className={`flex-1 md:flex-none px-4 py-1.5 text-xs font-bold rounded-sm transition-all cursor-pointer ${activeCategory === 'ALL'
-                ? 'bg-white dark:bg-[#121320] text-[#0a66c2] shadow-sm'
-                : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
+              ? 'bg-white dark:bg-[#121320] text-[#0a66c2] shadow-sm'
+              : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
               }`}
           >
             All Templates
@@ -409,8 +409,8 @@ export function TemplatesTab() {
           <button
             onClick={() => setActiveCategory('PAYROLL')}
             className={`flex-1 md:flex-none px-4 py-1.5 text-xs font-bold rounded-sm transition-all cursor-pointer ${activeCategory === 'PAYROLL'
-                ? 'bg-white dark:bg-[#121320] text-[#0a66c2] shadow-sm'
-                : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
+              ? 'bg-white dark:bg-[#121320] text-[#0a66c2] shadow-sm'
+              : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
               }`}
           >
             Payroll Related
@@ -418,8 +418,8 @@ export function TemplatesTab() {
           <button
             onClick={() => setActiveCategory('OFFER_JOINING')}
             className={`flex-1 md:flex-none px-4 py-1.5 text-xs font-bold rounded-sm transition-all cursor-pointer ${activeCategory === 'OFFER_JOINING'
-                ? 'bg-white dark:bg-[#121320] text-[#0a66c2] shadow-sm'
-                : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
+              ? 'bg-white dark:bg-[#121320] text-[#0a66c2] shadow-sm'
+              : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
               }`}
           >
             Offer & Joining Letters
@@ -546,7 +546,7 @@ export function TemplatesTab() {
                           setParsedVariables(vars);
                           setSelectedEmployeeId('');
                           setCustomSubject(`Document: ${item.name}`);
-                          
+
                           const initialVars: Record<string, string> = {};
                           vars.forEach(v => {
                             if (v === 'organization_name') {
@@ -580,9 +580,17 @@ export function TemplatesTab() {
                           </Button>
                           <Button
                             onClick={() => {
-                              if (confirm('Are you sure you want to hard delete this customized template?')) {
-                                deleteMutation.mutate(item.id);
-                              }
+                              toast('Delete this custom template?', {
+                                description: 'This action cannot be undone.',
+                                action: {
+                                  label: 'Delete',
+                                  onClick: () => deleteMutation.mutate(item.id),
+                                },
+                                cancel: {
+                                  label: 'Cancel',
+                                  onClick: () => { },
+                                },
+                              });
                             }}
                             title="Delete"
                             className="h-7 w-7 p-0 border border-red-200/50 bg-transparent text-red-500 hover:bg-red-500/5 rounded cursor-pointer"

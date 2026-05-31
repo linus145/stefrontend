@@ -12,6 +12,9 @@ export const hrAttendanceService = {
   checkOut: (data: { location_out?: string }): Promise<BaseAPIResponse<AttendanceRecord>> => 
     api.post<AttendanceRecord>('/attendance/records/check_out/', data).then(res => ({ status: 'success', message: '', data: res })),
 
+  getMonthlySummary: (): Promise<BaseAPIResponse<{ total_monthly_hours: number }>> =>
+    api.get<{ total_monthly_hours: number }>('/attendance/records/monthly_summary/').then(res => ({ status: 'success', message: '', data: res })),
+
   deleteAttendance: (id: string): Promise<BaseAPIResponse<null>> =>
     api.delete(`/attendance/records/${id}/`).then(res => ({ status: 'success', message: 'Deleted', data: res as any })),
 

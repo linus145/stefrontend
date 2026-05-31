@@ -21,7 +21,7 @@ import {
 
 export function GoalsView() {
   const queryClient = useQueryClient();
-  
+
   // State for Create Goal Dialog
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [employeeId, setEmployeeId] = useState('');
@@ -149,11 +149,11 @@ export function GoalsView() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Employee Goals</h2>
-          <p className="text-muted-foreground text-sm">Track individual employee OKRs and goals.</p>
         </div>
         <Button
           onClick={() => setIsCreateOpen(true)}
           className="bg-[#0a66c2] hover:bg-[#004182] text-white shadow-lg shadow-blue-500/20 rounded-sm"
+          data-agent="performance-assign-goal-btn"
         >
           <Plus className="mr-2 h-4 w-4" /> Assign Goal
         </Button>
@@ -161,100 +161,109 @@ export function GoalsView() {
 
       <Card className="bg-card/50 border-border/50 overflow-hidden rounded-sm">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="text-[10px] text-muted-foreground uppercase bg-muted/10 border-b border-border/50">
+          <table className="w-full text-xs text-left">
+            <thead className="text-[9px] text-muted-foreground uppercase bg-muted/10 border-b border-border/50">
               <tr>
-                <th className="px-6 py-3 font-bold">Employee</th>
-                <th className="px-6 py-3 font-bold">Goal Title</th>
-                <th className="px-6 py-3 font-bold">Status</th>
-                <th className="px-6 py-3 font-bold w-1/4">Progress</th>
-                <th className="px-6 py-3 font-bold">Due Date</th>
-                <th className="px-6 py-3 font-bold text-right">Actions</th>
+                <th className="px-4 py-2 font-bold">Employee</th>
+                <th className="px-4 py-2 font-bold">Goal Title</th>
+                <th className="px-4 py-2 font-bold">Status</th>
+                <th className="px-4 py-2 font-bold w-1/4">Progress</th>
+                <th className="px-4 py-2 font-bold">Due Date</th>
+                <th className="px-4 py-2 font-bold text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/50">
               {isLoading ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-sm text-muted-foreground">
+                  <td colSpan={6} className="px-4 py-6 text-center text-xs text-muted-foreground">
                     Loading goals...
                   </td>
                 </tr>
               ) : goals.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-sm text-muted-foreground">
+                  <td colSpan={6} className="px-4 py-6 text-center text-xs text-muted-foreground">
                     No active goals found.
                   </td>
                 </tr>
               ) : (
                 goals.map((goal: any) => (
                   <tr key={goal.id} className="hover:bg-muted/30">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-600">
-                          <User className="h-4 w-4" />
+                    <td className="px-4 py-2">
+                      <div className="flex items-center gap-2">
+                        <div className="h-7 w-7 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-600">
+                          <User className="h-3.5 w-3.5" />
                         </div>
-                        <div className="font-semibold">
+                        <div className="font-semibold text-xs text-foreground">
                           {goal.employee_detail ? `${goal.employee_detail.first_name} ${goal.employee_detail.last_name}` : 'Unknown Employee'}
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="font-semibold text-foreground flex items-center gap-2">
-                        <Target className="h-3 w-3 text-muted-foreground" />
+                    <td className="px-4 py-2">
+                      <div className="font-semibold text-xs text-foreground flex items-center gap-1.5">
+                        <Target className="h-2.5 w-2.5 text-muted-foreground" />
                         {goal.title}
                       </div>
                       {goal.kpi_detail && (
-                        <div className="text-[10px] text-muted-foreground mt-0.5">
+                        <div className="text-[9px] text-muted-foreground mt-0.5">
                           KPI: {goal.kpi_detail.name}
                         </div>
                       )}
                     </td>
-                    <td className="px-6 py-4">
-                      <Badge variant="outline" className={`text-[9px] uppercase font-bold ${
-                        goal.status === 'COMPLETED' ? 'border-emerald-500/20 text-emerald-600 bg-emerald-500/5' :
+                    <td className="px-4 py-2">
+                      <Badge variant="outline" className={`text-[8px] px-1.5 py-0 uppercase font-bold ${goal.status === 'COMPLETED' ? 'border-emerald-500/20 text-emerald-600 bg-emerald-500/5' :
                         goal.status === 'IN_PROGRESS' ? 'border-blue-500/20 text-blue-600 bg-blue-500/5' :
-                        'border-amber-500/20 text-amber-600 bg-amber-500/5'
-                      }`}>
+                          'border-amber-500/20 text-amber-600 bg-amber-500/5'
+                        }`}>
                         {goal.status.replace('_', ' ')}
                       </Badge>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-2">
                       <div className="space-y-1">
-                        <div className="flex justify-between text-[10px] font-bold text-muted-foreground">
+                        <div className="flex justify-between text-[9px] font-bold text-muted-foreground">
                           <span>{goal.progress_percentage}%</span>
                         </div>
-                        <div className="h-1.5 w-full bg-muted rounded-sm overflow-hidden flex">
-                          <div 
-                            className="bg-blue-500 transition-all duration-1000" 
-                            style={{ width: `${goal.progress_percentage}%` }} 
+                        <div className="h-1 w-full bg-muted rounded-sm overflow-hidden flex">
+                          <div
+                            className="bg-blue-500 transition-all duration-1000"
+                            style={{ width: `${goal.progress_percentage}%` }}
                           />
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 font-medium text-xs">
+                    <td className="px-4 py-2 text-[11px] font-medium">
                       {goal.due_date}
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-4 py-2 text-right">
                       <div className="flex items-center justify-end gap-1">
                         <Button
                           variant="ghost"
                           size="icon"
                           onClick={() => openUpdateDialog(goal)}
-                          className="text-slate-600 hover:text-slate-900 hover:bg-slate-100 h-8 w-8 rounded-sm"
+                          className="text-slate-600 hover:text-slate-900 hover:bg-slate-100 h-7 w-7 rounded-sm flex items-center justify-center"
+                          data-agent={`performance-edit-goal-btn-${goal.id}`}
                         >
-                          <Pencil className="h-3.5 w-3.5" />
+                          <Pencil className="h-3 w-3" />
                         </Button>
                         <Button
                           variant="ghost"
                           size="icon"
                           onClick={() => {
-                            if (confirm('Are you sure you want to delete this goal?')) {
-                              deleteMutation.mutate(goal.id);
-                            }
+                            toast('Delete this strategic goal?', {
+                              description: 'This action cannot be undone.',
+                              action: {
+                                label: 'Delete',
+                                onClick: () => deleteMutation.mutate(goal.id),
+                              },
+                              cancel: {
+                                label: 'Cancel',
+                                onClick: () => {},
+                              },
+                            });
                           }}
-                          className="text-rose-600 hover:text-rose-700 hover:bg-rose-500/10 h-8 w-8 rounded-sm"
+                          className="text-rose-600 hover:text-rose-700 hover:bg-rose-500/10 h-7 w-7 rounded-sm flex items-center justify-center"
+                          data-agent={`performance-delete-goal-btn-${goal.id}`}
                         >
-                          <Trash2 className="h-3.5 w-3.5" />
+                          <Trash2 className="h-3 w-3" />
                         </Button>
                       </div>
                     </td>
@@ -268,7 +277,7 @@ export function GoalsView() {
 
       {/* Assign Goal Dialog */}
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <DialogContent className="sm:max-w-md bg-white border border-border rounded-sm shadow-xl p-6">
+        <DialogContent className="w-full max-w-[480px] max-h-[85vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] bg-card border border-border/50 rounded-sm shadow-xl p-6">
           <DialogHeader>
             <DialogTitle className="text-lg font-bold text-foreground">Assign New Goal</DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
@@ -284,8 +293,9 @@ export function GoalsView() {
                 id="employee"
                 value={employeeId}
                 onChange={(e) => setEmployeeId(e.target.value)}
-                className="flex h-10 w-full items-center justify-between rounded-sm border border-input bg-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                className="flex h-10 w-full items-center justify-between rounded-sm border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
                 required
+                data-agent="assign-employee-select"
               >
                 <option value="">Select Employee...</option>
                 {employees.map((emp: any) => (
@@ -304,8 +314,9 @@ export function GoalsView() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g. Implement performance subtabs"
-                className="rounded-sm bg-white border-input"
+                className="rounded-sm bg-background border-input"
                 required
+                data-agent="assign-goal-title-input"
               />
             </div>
             <div className="space-y-1.5">
@@ -317,7 +328,8 @@ export function GoalsView() {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Key outcomes, expectations, and metrics..."
-                className="rounded-sm bg-white border-input min-h-[60px]"
+                className="rounded-sm bg-background border-input min-h-[60px]"
+                data-agent="assign-goal-desc-textarea"
               />
             </div>
             <div className="space-y-1.5">
@@ -328,7 +340,8 @@ export function GoalsView() {
                 id="goalKpi"
                 value={kpiId}
                 onChange={(e) => setKpiId(e.target.value)}
-                className="flex h-10 w-full items-center justify-between rounded-sm border border-input bg-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                className="flex h-10 w-full items-center justify-between rounded-sm border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                data-agent="assign-goal-kpi-select"
               >
                 <option value="">No Associated KPI</option>
                 {kpis.map((kpi: any) => (
@@ -348,8 +361,9 @@ export function GoalsView() {
                   type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="rounded-sm bg-white border-input"
+                  className="rounded-sm bg-background border-input"
                   required
+                  data-agent="assign-goal-start-input"
                 />
               </div>
               <div className="space-y-1.5">
@@ -361,8 +375,9 @@ export function GoalsView() {
                   type="date"
                   value={dueDate}
                   onChange={(e) => setDueDate(e.target.value)}
-                  className="rounded-sm bg-white border-input"
+                  className="rounded-sm bg-background border-input"
                   required
+                  data-agent="assign-goal-due-input"
                 />
               </div>
             </div>
@@ -375,7 +390,8 @@ export function GoalsView() {
                   id="goalStatus"
                   value={status}
                   onChange={(e) => setStatus(e.target.value)}
-                  className="flex h-10 w-full items-center justify-between rounded-sm border border-input bg-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                  className="flex h-10 w-full items-center justify-between rounded-sm border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                  data-agent="assign-goal-status-select"
                 >
                   <option value="PENDING">Pending</option>
                   <option value="IN_PROGRESS">In Progress</option>
@@ -394,7 +410,8 @@ export function GoalsView() {
                   max="100"
                   value={progress}
                   onChange={(e) => setProgress(Math.min(100, Math.max(0, parseInt(e.target.value) || 0)))}
-                  className="rounded-sm bg-white border-input"
+                  className="rounded-sm bg-background border-input"
+                  data-agent="assign-goal-progress-input"
                 />
               </div>
             </div>
@@ -404,6 +421,7 @@ export function GoalsView() {
                 variant="outline"
                 onClick={() => setIsCreateOpen(false)}
                 className="rounded-sm border-input hover:bg-slate-50 text-slate-700"
+                data-agent="assign-goal-cancel-btn"
               >
                 Cancel
               </Button>
@@ -411,6 +429,7 @@ export function GoalsView() {
                 type="submit"
                 disabled={createMutation.isPending}
                 className="bg-[#0a66c2] hover:bg-[#004182] text-white rounded-sm shadow-md"
+                data-agent="assign-goal-submit-btn"
               >
                 {createMutation.isPending ? 'Assigning...' : 'Assign Goal'}
               </Button>
@@ -421,7 +440,7 @@ export function GoalsView() {
 
       {/* Update Progress Dialog */}
       <Dialog open={isUpdateOpen} onOpenChange={setIsUpdateOpen}>
-        <DialogContent className="sm:max-w-sm bg-white border border-border rounded-sm shadow-xl p-6">
+        <DialogContent className="w-full max-w-[400px] max-h-[85vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] bg-card border border-border/50 rounded-sm shadow-xl p-6">
           <DialogHeader>
             <DialogTitle className="text-lg font-bold text-foreground">Update Progress</DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
@@ -437,7 +456,8 @@ export function GoalsView() {
                 id="updateStatus"
                 value={updateStatus}
                 onChange={(e) => setUpdateStatus(e.target.value)}
-                className="flex h-10 w-full items-center justify-between rounded-sm border border-input bg-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                className="flex h-10 w-full items-center justify-between rounded-sm border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                data-agent="update-goal-status-select"
               >
                 <option value="PENDING">Pending</option>
                 <option value="IN_PROGRESS">In Progress</option>
@@ -456,7 +476,8 @@ export function GoalsView() {
                 max="100"
                 value={updateProgress}
                 onChange={(e) => setUpdateProgress(Math.min(100, Math.max(0, parseInt(e.target.value) || 0)))}
-                className="rounded-sm bg-white border-input"
+                className="rounded-sm bg-background border-input"
+                data-agent="update-goal-progress-input"
               />
             </div>
             <DialogFooter className="pt-4">
@@ -465,6 +486,7 @@ export function GoalsView() {
                 variant="outline"
                 onClick={() => setIsUpdateOpen(false)}
                 className="rounded-sm border-input hover:bg-slate-50 text-slate-700"
+                data-agent="update-goal-cancel-btn"
               >
                 Cancel
               </Button>
@@ -472,6 +494,7 @@ export function GoalsView() {
                 type="submit"
                 disabled={updateMutation.isPending}
                 className="bg-[#0a66c2] hover:bg-[#004182] text-white rounded-sm shadow-md"
+                data-agent="update-goal-submit-btn"
               >
                 {updateMutation.isPending ? 'Saving...' : 'Save Updates'}
               </Button>

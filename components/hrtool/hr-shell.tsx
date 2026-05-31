@@ -99,7 +99,8 @@ export function HRShell() {
       <React.Suspense fallback={<LocalLoader />}>
         {activeTab === 'dashboard' && <DashboardTab />}
         {activeTab === 'onboarding' && <OnboardingTab />}
-        {activeTab === 'employees' && <EmployeesTab />}
+        {activeTab === 'employees' && <EmployeesTab defaultRole="EMPLOYEE" />}
+        {activeTab === 'employees-managers' && <EmployeesTab defaultRole="MANAGER" />}
         {activeTab.startsWith('attendance') && (
           <AttendanceTab 
             subTab={activeTab} 
@@ -140,7 +141,7 @@ export function HRShell() {
         setIsCollapsed={handleSidebarCollapse}
       />
 
-      <main className={`flex-1 pt-16 min-w-0 flex flex-col transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-16' : 'lg:pl-64'}`}>
+      <main className={`flex-1 pt-16 min-w-0 flex flex-col transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-16' : 'lg:pl-56'}`}>
         <div className="container mx-auto p-4 lg:p-8 flex-1 flex flex-col">
           {renderContent()}
         </div>

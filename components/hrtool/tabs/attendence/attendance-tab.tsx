@@ -6,6 +6,7 @@ import { hrAttendanceService } from '@/services/hr';
 import { Button } from '@/components/ui/button';
 import { LogIn, LogOut } from 'lucide-react';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 // Modular Subcomponents
 import { AttendanceActivity } from './AttendanceActivity';
@@ -21,7 +22,10 @@ interface AttendanceTabProps {
 
 export function AttendanceTab({ subTab }: AttendanceTabProps) {
   const queryClient = useQueryClient();
-  
+
+  const [page, setPage] = React.useState(1);
+  const [filterDate, setFilterDate] = React.useState('');
+
   // Attendance settings state
   const [settings, setSettings] = React.useState<any>({
     id: null,
@@ -40,16 +44,16 @@ export function AttendanceTab({ subTab }: AttendanceTabProps) {
 
   React.useEffect(() => {
     if (shiftSettings?.data?.results && shiftSettings.data.results.length > 0) {
-       const shift = shiftSettings.data.results[0];
-       setSettings({
-         id: shift.id,
-         checkInTime: shift.start_time?.substring(0, 5) || '09:00',
-         checkOutTime: shift.end_time?.substring(0, 5) || '18:00',
-         gracePeriod: shift.grace_period || 15,
-         minHoursFullDay: parseFloat(shift.min_hours_full_day) || 8,
-         minHoursHalfDay: parseFloat(shift.min_hours_half_day) || 4,
-         autoOvertime: true
-       });
+      const shift = shiftSettings.data.results[0];
+      setSettings({
+        id: shift.id,
+        checkInTime: shift.start_time?.substring(0, 5) || '09:00',
+        checkOutTime: shift.end_time?.substring(0, 5) || '18:00',
+        gracePeriod: shift.grace_period || 15,
+        minHoursFullDay: parseFloat(shift.min_hours_full_day) || 8,
+        minHoursHalfDay: parseFloat(shift.min_hours_half_day) || 4,
+        autoOvertime: true
+      });
     }
   }, [shiftSettings]);
 
@@ -82,9 +86,14 @@ export function AttendanceTab({ subTab }: AttendanceTabProps) {
   };
 
   const { data: attendance, isLoading } = useQuery({
-    queryKey: ['attendance'],
-    queryFn: () => hrAttendanceService.getAttendance(),
+    queryKey: ['attendance', page, filterDate],
+    queryFn: () => hrAttendanceService.getAttendance({ page, date: filterDate || undefined }),
     refetchInterval: 3000,
+  });
+
+  const { data: monthlySummary } = useQuery({
+    queryKey: ['attendance-monthly-summary'],
+    queryFn: () => hrAttendanceService.getMonthlySummary(),
   });
 
   const checkInMutation = useMutation({
@@ -154,60 +163,100 @@ export function AttendanceTab({ subTab }: AttendanceTabProps) {
   const header = getHeaderInfo();
 
   // Mock data for requests
-  const mockRequests = [
-    { id: 1, name: 'Jane Cooper', date: '2026-05-15', requestType: 'Manual Check-in', time: '09:00 AM', reason: 'Forgot access card' },
-    { id: 2, name: 'Alex Carter', date: '2026-05-14', requestType: 'Manual Check-out', time: '06:05 PM', reason: 'Client meeting out-of-office' }
-  ];
+  const mockRequests: any[] = [];
 
   // Mock hour account
-  const mockHourAccounts = [
-    { name: 'Jane Cooper', standardHours: 160, workedHours: 172.5, balance: 12.5, status: 'overtime' },
-    { name: 'Alex Carter', standardHours: 160, workedHours: 158.0, balance: -2.0, status: 'deficit' },
-    { name: 'Sarah Jenkins', standardHours: 160, workedHours: 160.0, balance: 0.0, status: 'normal' }
-  ];
+  const mockHourAccounts: any[] = [];
 
   // Mock late arrivals
-  const mockLateArrivals = [
-    { name: 'Alex Carter', date: 'May 18, 2026', checkin: '09:45 AM', lateBy: '45 mins', severity: 'high' },
-    { name: 'Sarah Jenkins', date: 'May 18, 2026', checkin: '09:12 AM', lateBy: '12 mins', severity: 'low' },
-    { name: 'John Doe', date: 'May 17, 2026', checkin: '09:30 AM', lateBy: '30 mins', severity: 'medium' }
-  ];
+  const mockLateArrivals: any[] = [];
 
   const attendanceData = attendance?.data?.results || [];
+  const totalCount = attendance?.data?.count || 0;
+  const totalPages = Math.ceil(totalCount / 20) || 1;
+
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxVisible = 5;
+    let start = Math.max(1, page - 2);
+    let end = Math.min(totalPages, page + 2);
+
+    if (page <= 3) {
+      end = Math.min(totalPages, maxVisible);
+    }
+    if (page > totalPages - 3) {
+      start = Math.max(1, totalPages - maxVisible + 1);
+    }
+
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    return pages;
+  };
+
+  const showFilterAndPagination = subTab === undefined || subTab === 'attendance-work-records' || subTab === 'attendance-activity';
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+    <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-500">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">{header.title}</h2>
-          <p className="text-sm text-muted-foreground">{header.desc}</p>
+          <h2 className="text-xl font-bold tracking-tight">{header.title}</h2>
         </div>
-        
+
         {/* Quick Check-in/out Action Buttons */}
-        <div className="flex gap-3">
-          <Button 
-            onClick={handleCheckIn} 
+        <div className="flex gap-2">
+          <Button
+            onClick={handleCheckIn}
             disabled={checkInMutation.isPending}
             data-agent="attendance-quick-check-in-btn"
-            className="bg-[#0a66c2] hover:bg-[#004182] text-white rounded-sm font-bold"
+            className="bg-[#0a66c2] hover:bg-[#004182] text-white rounded-sm font-semibold h-8 text-xs px-4"
           >
-            <LogIn className="mr-2 h-4 w-4" /> Check In
+            <LogIn className="mr-1.5 h-3.5 w-3.5" /> Check In
           </Button>
-          <Button 
-            onClick={handleCheckOut} 
+          <Button
+            onClick={handleCheckOut}
             disabled={checkOutMutation.isPending}
-            variant="outline" 
+            variant="outline"
             data-agent="attendance-quick-check-out-btn"
-            className="border-rose-500/20 text-rose-600 hover:bg-rose-500/5 rounded-sm font-bold"
+            className="border-rose-500/20 text-rose-600 hover:bg-rose-500/5 rounded-sm font-semibold h-8 text-xs px-4"
           >
-            <LogOut className="mr-2 h-4 w-4" /> Check Out
+            <LogOut className="mr-1.5 h-3.5 w-3.5" /> Check Out
           </Button>
         </div>
       </div>
 
+      {showFilterAndPagination && (
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 py-1">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-slate-550 dark:text-slate-400 uppercase tracking-wider">Filter by Date:</span>
+            <input
+              type="date"
+              value={filterDate}
+              onChange={(e) => {
+                setFilterDate(e.target.value);
+                setPage(1);
+              }}
+              className="px-3 py-1.5 text-xs rounded-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-[#0a66c2]"
+            />
+            {filterDate && (
+              <Button
+                onClick={() => {
+                  setFilterDate('');
+                  setPage(1);
+                }}
+                variant="ghost"
+                className="h-8 text-xs text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 px-2 rounded-sm"
+              >
+                Clear Filter
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Render subTab layouts dynamically */}
       {subTab === 'attendance-settings' && (
-        <AttendanceSettings 
+        <AttendanceSettings
           settings={settings}
           setSettings={setSettings}
           isSaving={isSaving}
@@ -233,7 +282,52 @@ export function AttendanceTab({ subTab }: AttendanceTabProps) {
 
       {/* Default/Standard Work Records View */}
       {(subTab === undefined || subTab === 'attendance-work-records') && (
-        <WorkRecords attendanceData={attendanceData} />
+        <WorkRecords attendanceData={attendanceData} monthlyHours={monthlySummary?.data?.total_monthly_hours || 0.00} />
+      )}
+
+      {showFilterAndPagination && totalCount > 0 && (
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 py-4 mt-4 relative">
+          <div className="text-xs text-slate-555 dark:text-slate-400 font-medium sm:absolute sm:left-0 mb-3 sm:mb-0">
+            Showing Page <strong className="text-slate-900 dark:text-slate-100">{page}</strong> of <strong className="text-slate-900 dark:text-slate-100">{totalPages}</strong> ({totalCount} total records)
+          </div>
+          <div className="flex items-center gap-1.5 justify-center">
+            <Button
+              onClick={() => setPage(prev => Math.max(prev - 1, 1))}
+              disabled={page <= 1}
+              variant="outline"
+              className="h-8 text-xs font-semibold px-3 rounded-sm border border-slate-200 dark:border-slate-800"
+            >
+              Previous
+            </Button>
+
+            <div className="flex items-center gap-1 mx-1">
+              {getPageNumbers().map(p => (
+                <Button
+                  key={p}
+                  onClick={() => setPage(p)}
+                  variant={page === p ? "default" : "ghost"}
+                  className={cn(
+                    "h-8 w-8 text-xs font-bold rounded-sm p-0",
+                    page === p
+                      ? "bg-[#0a66c2] hover:bg-[#004182] text-white"
+                      : "text-slate-505 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800"
+                  )}
+                >
+                  {p}
+                </Button>
+              ))}
+            </div>
+
+            <Button
+              onClick={() => setPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={page >= totalPages}
+              variant="outline"
+              className="h-8 text-xs font-semibold px-3 rounded-sm border border-slate-200 dark:border-slate-800"
+            >
+              Next
+            </Button>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -25,7 +25,7 @@ export function PerformanceTab({ subTab }: PerformanceTabProps) {
     <React.Suspense fallback={<LocalLoader />}>
       {currentTab === 'performance-dashboard' && <DashboardView />}
       {currentTab === 'performance' && <DashboardView />}
-      
+
       {currentTab === 'performance-kpi' && <KpiOverviewView />}
       {currentTab === 'performance-goals' && <GoalsView />}
       {currentTab === 'performance-appraisal' && <AppraisalEngineView />}

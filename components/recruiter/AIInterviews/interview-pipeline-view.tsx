@@ -256,9 +256,17 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
             {/* Permanent Delete Button */}
             <button
               onClick={() => {
-                if (window.confirm('Are you sure you want to delete this interview session permanently? This action cannot be undone.')) {
-                  deleteSessionMutation.mutate(session.id);
-                }
+                toast('Delete this interview session permanently?', {
+                  description: 'This action cannot be undone.',
+                  action: {
+                    label: 'Delete',
+                    onClick: () => deleteSessionMutation.mutate(session.id),
+                  },
+                  cancel: {
+                    label: 'Cancel',
+                    onClick: () => {},
+                  },
+                });
               }}
               disabled={deleteSessionMutation.isPending}
               className="w-8 h-8 flex items-center justify-center rounded-sm bg-red-600/5 text-red-600 hover:bg-red-600 hover:text-white transition-all active:scale-95 border border-red-600/10 disabled:opacity-50"

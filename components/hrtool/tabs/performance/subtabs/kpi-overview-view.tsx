@@ -79,11 +79,11 @@ export function KpiOverviewView() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">KPI Overview</h2>
-          <p className="text-muted-foreground text-sm">Manage standard organizational KPIs.</p>
         </div>
         <Button
           onClick={() => setIsCreateOpen(true)}
           className="bg-[#0a66c2] hover:bg-[#004182] text-white shadow-lg shadow-blue-500/20 rounded-sm"
+          data-agent="performance-new-kpi-btn"
         >
           <Plus className="mr-2 h-4 w-4" /> New KPI
         </Button>
@@ -91,54 +91,65 @@ export function KpiOverviewView() {
 
       <Card className="bg-card/50 border-border/50 overflow-hidden rounded-sm">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="text-[10px] text-muted-foreground uppercase bg-muted/10 border-b border-border/50">
+          <table className="w-full text-xs text-left">
+            <thead className="text-[9px] text-muted-foreground uppercase bg-muted/10 border-b border-border/50">
               <tr>
-                <th className="px-6 py-3 font-bold">KPI Name</th>
-                <th className="px-6 py-3 font-bold">Description</th>
-                <th className="px-6 py-3 font-bold">Target</th>
-                <th className="px-6 py-3 font-bold text-right">Actions</th>
+                <th className="px-4 py-2 font-bold">KPI Name</th>
+                <th className="px-4 py-2 font-bold">Description</th>
+                <th className="px-4 py-2 font-bold">Target</th>
+                <th className="px-4 py-2 font-bold text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/50">
               {isLoading ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-sm text-muted-foreground">
+                  <td colSpan={4} className="px-4 py-6 text-center text-xs text-muted-foreground">
                     Loading KPIs...
                   </td>
                 </tr>
               ) : kpis.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-sm text-muted-foreground">
+                  <td colSpan={4} className="px-4 py-6 text-center text-xs text-muted-foreground">
                     No KPIs defined yet.
                   </td>
                 </tr>
               ) : (
                 kpis.map((kpi: any) => (
                   <tr key={kpi.id} className="hover:bg-muted/30">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <Target className="h-4 w-4 text-blue-500" />
-                        <span className="font-semibold">{kpi.name}</span>
+                    <td className="px-4 py-2">
+                      <div className="flex items-center gap-2">
+                        <Target className="h-3.5 w-3.5 text-blue-500" />
+                        <span className="font-semibold text-xs text-foreground">{kpi.name}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-muted-foreground">{kpi.description}</td>
-                    <td className="px-6 py-4 font-bold">
+                    <td className="px-4 py-2 text-muted-foreground text-[11px]">{kpi.description}</td>
+                    <td className="px-4 py-2 font-bold text-[11px]">
                       {kpi.target_value ? `${kpi.target_value} ${kpi.unit}` : '--'}
                     </td>
-                    <td className="px-6 py-4 text-right">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => {
-                          if (confirm('Are you sure you want to delete this KPI?')) {
-                            deleteMutation.mutate(kpi.id);
-                          }
-                        }}
-                        className="text-rose-600 hover:text-rose-700 hover:bg-rose-500/10 h-8 w-8 rounded-sm"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                    <td className="px-4 py-2 text-right">
+                      <div className="flex items-center justify-end">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            toast('Delete this KPI configuration?', {
+                              description: 'This action cannot be undone.',
+                              action: {
+                                label: 'Delete',
+                                onClick: () => deleteMutation.mutate(kpi.id),
+                              },
+                              cancel: {
+                                label: 'Cancel',
+                                onClick: () => {},
+                              },
+                            });
+                          }}
+                          className="text-rose-600 hover:text-rose-700 hover:bg-rose-500/10 h-7 w-7 rounded-sm flex items-center justify-center"
+                          data-agent={`performance-delete-kpi-btn-${kpi.id}`}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -149,7 +160,7 @@ export function KpiOverviewView() {
       </Card>
 
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <DialogContent className="sm:max-w-md bg-white border border-border rounded-sm shadow-xl p-6">
+        <DialogContent className="w-full max-w-[480px] max-h-[85vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] bg-card border border-border/50 rounded-sm shadow-xl p-6">
           <DialogHeader>
             <DialogTitle className="text-lg font-bold text-foreground">Create New KPI</DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
@@ -166,8 +177,9 @@ export function KpiOverviewView() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. Sales Conversion Rate"
-                className="rounded-sm bg-white border-input"
+                className="rounded-sm bg-background border-input"
                 required
+                data-agent="new-kpi-name-input"
               />
             </div>
             <div className="space-y-1.5">
@@ -179,7 +191,8 @@ export function KpiOverviewView() {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Describe what this KPI measures and how it is evaluated..."
-                className="rounded-sm bg-white border-input min-h-[80px]"
+                className="rounded-sm bg-background border-input min-h-[80px]"
+                data-agent="new-kpi-desc-textarea"
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -194,7 +207,8 @@ export function KpiOverviewView() {
                   value={targetValue}
                   onChange={(e) => setTargetValue(e.target.value)}
                   placeholder="e.g. 85.00"
-                  className="rounded-sm bg-white border-input"
+                  className="rounded-sm bg-background border-input"
+                  data-agent="new-kpi-target-input"
                 />
               </div>
               <div className="space-y-1.5">
@@ -206,7 +220,8 @@ export function KpiOverviewView() {
                   value={unit}
                   onChange={(e) => setUnit(e.target.value)}
                   placeholder="e.g. % or USD"
-                  className="rounded-sm bg-white border-input"
+                  className="rounded-sm bg-background border-input"
+                  data-agent="new-kpi-unit-input"
                 />
               </div>
             </div>
@@ -216,6 +231,7 @@ export function KpiOverviewView() {
                 variant="outline"
                 onClick={() => setIsCreateOpen(false)}
                 className="rounded-sm border-input hover:bg-slate-50 text-slate-700"
+                data-agent="new-kpi-cancel-btn"
               >
                 Cancel
               </Button>
@@ -223,6 +239,7 @@ export function KpiOverviewView() {
                 type="submit"
                 disabled={createMutation.isPending}
                 className="bg-[#0a66c2] hover:bg-[#004182] text-white rounded-sm shadow-md"
+                data-agent="new-kpi-submit-btn"
               >
                 {createMutation.isPending ? 'Creating...' : 'Create KPI'}
               </Button>

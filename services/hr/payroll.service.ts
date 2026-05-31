@@ -42,6 +42,9 @@ export const hrPayrollService = {
   updateSalaryStructure: (id: string, data: any): Promise<BaseAPIResponse<any>> => 
     api.put<any>(`/payroll/structures/${id}/`, data).then(res => ({ status: 'success', message: '', data: res })),
 
+  deleteSalaryStructure: (id: string): Promise<BaseAPIResponse<any>> => 
+    api.delete<any>(`/payroll/structures/${id}/`).then(res => ({ status: 'success', message: '', data: res })),
+
   assignAllowance: (data: { structure_id: string; allowance_id: string; amount: number }): Promise<BaseAPIResponse<any>> => 
     api.post<any>('/payroll/structures/assign_allowance/', data).then(res => ({ status: 'success', message: '', data: res })),
 

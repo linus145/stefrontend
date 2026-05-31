@@ -15,7 +15,7 @@ interface AuthContextType {
   userSubscription: any | null;
   fetchSubscription: () => Promise<void>;
   login: (email: string, password: string, redirectTo?: string) => Promise<void>;
-  employeeLogin: (email: string, password: string, redirectTo?: string) => Promise<void>;
+  employeeLogin: (email: string, password: string, redirectTo?: string, role?: string) => Promise<void>;
   googleLogin: (token: string, redirectTo?: string) => Promise<void>;
   requestOtp: (email: string) => Promise<void>;
   verifyOtp: (email: string, otp: string, redirectTo?: string) => Promise<void>;
@@ -77,10 +77,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const employeeLogin = async (email: string, password: string, redirectTo: string = '/employee/dashboard') => {
+  const employeeLogin = async (email: string, password: string, redirectTo: string = '/employee/dashboard', role?: string) => {
     setIsLoading(true);
     try {
-      const resp = await authService.employeeLogin(email, password);
+      const resp = await authService.employeeLogin(email, password, role);
       setUser(resp.data.user);
       await fetchSubscription();
 
@@ -88,7 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       router.replace(redirectTo);
     } catch (error: any) {
       toast.error('Employee Login Failed', {
-        description: error.response?.data?.error || error.data?.detail || error.data?.error || error.data?.message || error.message || 'Invalid credentials.'
+        description: error.response?.data?.error || error.response?.data?.detail || error.data?.detail || error.data?.error || error.data?.message || error.message || 'Invalid credentials.'
       });
       throw error;
     } finally {

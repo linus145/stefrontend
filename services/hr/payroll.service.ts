@@ -111,4 +111,10 @@ export const hrPayrollService = {
 
   fetchPayrollData: (employee_id: string, month: string, year: string): Promise<BaseAPIResponse<any>> =>
     api.get<any>('/payroll/templates/fetch_payroll_data/', { params: { employee_id, month, year } }).then(res => ({ status: 'success', message: '', data: res })),
+
+  sendPayslipEmail: (id: string): Promise<BaseAPIResponse<any>> => 
+    api.post<any>(`/payroll/payslips/${id}/send_email/`).then(res => ({ status: 'success', message: '', data: res })),
+
+  bulkSendPayslipEmails: (params: { month: number; year: number }): Promise<BaseAPIResponse<any>> => 
+    api.post<any>(`/payroll/payslips/bulk_send_emails/`, {}, { params }).then(res => ({ status: 'success', message: '', data: res })),
 };

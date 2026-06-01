@@ -2,10 +2,10 @@
 
 import React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { hrPayrollService } from '@/services/hr';
+import { hrPayrollService, hrEmployeeService } from '@/services/hr';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { LocalLoader } from '@/components/ui/local-loader';
-import { Landmark, Cpu, Save, RefreshCw } from 'lucide-react';
+import { Landmark, Cpu, Save, RefreshCw, Workflow } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
@@ -15,6 +15,11 @@ export function PayrollSettingsClient() {
   const { data: settingsRes, isLoading } = useQuery({
     queryKey: ['payroll-settings'],
     queryFn: () => hrPayrollService.getSettingsConfigs(),
+  });
+
+  const { data: employeesRes } = useQuery({
+    queryKey: ['payroll-employees-list'],
+    queryFn: () => hrEmployeeService.getEmployees({ limit: 100 }),
   });
 
   const updateMutation = useMutation({
@@ -32,7 +37,11 @@ export function PayrollSettingsClient() {
     currency: 'INR',
     statutory_pf_percentage: 12.00,
     statutory_esi_percentage: 1.75,
-    automation_enabled: true
+    automation_enabled: true,
+    finance_approval_required: false,
+    finance_manager: '',
+    director_approval_required: false,
+    director: ''
   });
 
   // Hydrate local form state when data finishes loading
@@ -42,7 +51,11 @@ export function PayrollSettingsClient() {
         currency: settingsRes.data.currency || 'INR',
         statutory_pf_percentage: settingsRes.data.statutory_pf_percentage || 12.00,
         statutory_esi_percentage: settingsRes.data.statutory_esi_percentage || 1.75,
-        automation_enabled: settingsRes.data.automation_enabled ?? true
+        automation_enabled: settingsRes.data.automation_enabled ?? true,
+        finance_approval_required: settingsRes.data.finance_approval_required ?? false,
+        finance_manager: settingsRes.data.finance_manager || '',
+        director_approval_required: settingsRes.data.director_approval_required ?? false,
+        director: settingsRes.data.director || ''
       });
     }
   }, [settingsRes]);
@@ -50,6 +63,10 @@ export function PayrollSettingsClient() {
   if (isLoading) {
     return <LocalLoader />;
   }
+
+  const employeesList = employeesRes?.data?.results || [];
+  // Filter active employees with linked user profile
+  const activeLinkedEmployees = employeesList.filter((emp: any) => emp.user);
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -163,13 +180,110 @@ export function PayrollSettingsClient() {
             </CardContent>
           </Card>
 
+          {/* Card 3: Approval Stages & Hierarchy Settings */}
+          <Card className="bg-white dark:bg-[#121320] border border-slate-150 rounded-sm shadow-sm md:col-span-2">
+            <CardHeader className="p-4 flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-xs font-extrabold text-slate-800 dark:text-slate-200 uppercase">Approval Hierarchy Settings</CardTitle>
+              <Workflow className="h-4.5 w-4.5 text-[#0a66c2]" />
+            </CardHeader>
+            <CardContent className="p-4 pt-0 space-y-6">
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Level 1: Finance Manager Stage */}
+                <div className="space-y-4 p-4 rounded-sm bg-slate-50/50 dark:bg-[#151624]/30 border border-slate-100 dark:border-slate-800/40">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">Level 1: Finance Manager Approval</span>
+                    <button
+                      type="button"
+                      onClick={() => setFormState({ 
+                        ...formState, 
+                        finance_approval_required: !formState.finance_approval_required,
+                        finance_manager: formState.finance_approval_required ? '' : formState.finance_manager 
+                      })}
+                      className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-205 ease-in-out focus:outline-none ${
+                        formState.finance_approval_required ? 'bg-[#0a66c2]' : 'bg-slate-200 dark:bg-slate-800/80'
+                      }`}
+                    >
+                      <span
+                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-205 ease-in-out ${
+                          formState.finance_approval_required ? 'translate-x-5' : 'translate-x-0'
+                        }`}
+                      />
+                    </button>
+                  </div>
+                  
+                  {formState.finance_approval_required && (
+                    <div className="space-y-1.5 animate-in fade-in duration-205">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase">Designated Finance Manager</label>
+                      <select
+                        value={formState.finance_manager}
+                        onChange={(e) => setFormState({ ...formState, finance_manager: e.target.value })}
+                        className="w-full h-9 px-3 text-xs bg-white dark:bg-[#1c1d30] border border-slate-200 dark:border-slate-800 rounded-sm font-semibold focus:outline-none focus:border-[#0a66c2] cursor-pointer"
+                      >
+                        <option value="">Select Finance Manager...</option>
+                        {activeLinkedEmployees.map((emp: any) => (
+                          <option key={emp.id} value={emp.user}>
+                            {emp.first_name} {emp.last_name} ({emp.employee_id || 'No ID'})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </div>
+
+                {/* Level 2: Director Stage */}
+                <div className="space-y-4 p-4 rounded-sm bg-slate-50/50 dark:bg-[#151624]/30 border border-slate-100 dark:border-slate-800/40">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">Level 2: Director Approval</span>
+                    <button
+                      type="button"
+                      onClick={() => setFormState({ 
+                        ...formState, 
+                        director_approval_required: !formState.director_approval_required,
+                        director: formState.director_approval_required ? '' : formState.director 
+                      })}
+                      className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-205 ease-in-out focus:outline-none ${
+                        formState.director_approval_required ? 'bg-[#0a66c2]' : 'bg-slate-200 dark:bg-slate-800/80'
+                      }`}
+                    >
+                      <span
+                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-205 ease-in-out ${
+                          formState.director_approval_required ? 'translate-x-5' : 'translate-x-0'
+                        }`}
+                      />
+                    </button>
+                  </div>
+                  
+                  {formState.director_approval_required && (
+                    <div className="space-y-1.5 animate-in fade-in duration-205">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase">Designated Director</label>
+                      <select
+                        value={formState.director}
+                        onChange={(e) => setFormState({ ...formState, director: e.target.value })}
+                        className="w-full h-9 px-3 text-xs bg-white dark:bg-[#1c1d30] border border-slate-200 dark:border-slate-800 rounded-sm font-semibold focus:outline-none focus:border-[#0a66c2] cursor-pointer"
+                      >
+                        <option value="">Select Director...</option>
+                        {activeLinkedEmployees.map((emp: any) => (
+                          <option key={emp.id} value={emp.user}>
+                            {emp.first_name} {emp.last_name} ({emp.employee_id || 'No ID'})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+            </CardContent>
+          </Card>
+
         </div>
 
         <div className="flex justify-end">
           <Button
             type="submit"
             disabled={updateMutation.isPending}
-            className="bg-[#0a66c2] hover:bg-[#084e96] text-white font-extrabold text-xs px-4 h-9 rounded-sm shadow-sm flex items-center gap-2"
+            className="bg-[#0a66c2] hover:bg-[#084e96] text-white font-extrabold text-xs px-4 h-9 rounded-sm shadow-sm flex items-center gap-2 cursor-pointer"
           >
             {updateMutation.isPending ? (
               <>

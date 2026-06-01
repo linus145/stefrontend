@@ -11,20 +11,26 @@ interface AttendanceHistoryCardProps {
   attendanceLogs: any[];
 }
 
+const toSentenceCase = (str: string) => {
+  if (!str) return '';
+  const cleaned = str.replace(/_/g, ' ');
+  return cleaned.charAt(0).toUpperCase() + cleaned.slice(1).toLowerCase();
+};
+
 export function AttendanceHistoryCard({ attendanceLogs }: AttendanceHistoryCardProps) {
   return (
     <Card className="border border-slate-200/80 dark:border-slate-800/80 bg-white/50 dark:bg-slate-900/30 backdrop-blur-md rounded-sm shadow-xl overflow-hidden">
-      <CardHeader className="bg-muted/10 border-b border-border/40 py-4 px-6">
+      <CardHeader className="bg-muted/10 border-b border-border/40 py-6 px-8">
         <div>
-          <CardTitle className="text-sm font-bold tracking-wider text-[#0a66c2] uppercase flex items-center gap-2">
-            <Calendar className="h-4 w-4" /> Complete Attendance History Logs
+          <CardTitle className="text-base font-bold tracking-wider text-[#0a66c2] uppercase flex items-center gap-2">
+            <Calendar className="h-4 w-4" /> Complete attendance history logs
           </CardTitle>
-          <CardDescription className="text-[11px] font-medium text-slate-400">
+          <CardDescription className="text-xs font-medium text-slate-400">
             A comprehensive history of all check-in sessions, locations, and working durations.
           </CardDescription>
         </div>
       </CardHeader>
-      <CardContent className="p-4 overflow-x-auto">
+      <CardContent className="p-6 overflow-x-auto">
         {attendanceLogs.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-8 text-center text-slate-400 space-y-2">
             <Calendar className="h-10 w-10 text-slate-400/60" />
@@ -36,12 +42,12 @@ export function AttendanceHistoryCard({ attendanceLogs }: AttendanceHistoryCardP
         ) : (
           <table className="w-full text-left border-collapse text-xs select-none">
             <thead>
-              <tr className="border-b border-slate-200 dark:border-slate-800 uppercase text-[9px] font-extrabold text-slate-400 tracking-wider">
-                <th className="py-2.5 px-3">Date</th>
-                <th className="py-2.5 px-3">Status</th>
-                <th className="py-2.5 px-3">First Check In</th>
-                <th className="py-2.5 px-3">Last Check Out</th>
-                <th className="py-2.5 px-3 text-right">Overtime</th>
+              <tr className="border-b border-slate-200 dark:border-slate-800 uppercase text-[10px] font-extrabold text-slate-400 tracking-wider">
+                <th className="py-3.5 px-4">Date</th>
+                <th className="py-3.5 px-4">Status</th>
+                <th className="py-3.5 px-4">First check in</th>
+                <th className="py-3.5 px-4">Last check out</th>
+                <th className="py-3.5 px-4 text-right">Overtime</th>
               </tr>
             </thead>
             <tbody className="font-semibold text-slate-700 dark:text-slate-300">
@@ -77,7 +83,7 @@ export function AttendanceHistoryCard({ attendanceLogs }: AttendanceHistoryCardP
                         console.error(e);
                       }
                     } else {
-                      displayTimeOut = 'Active / Checked In';
+                      displayTimeOut = 'Active / checked in';
                     }
 
                     if (lastSession.location_out) {
@@ -93,46 +99,46 @@ export function AttendanceHistoryCard({ attendanceLogs }: AttendanceHistoryCardP
 
                 return (
                   <tr key={log.id} className="border-b border-slate-100 dark:border-slate-800/40 hover:bg-muted/10 transition-colors">
-                    <td className="py-3 px-3 text-[11px] font-bold text-slate-800 dark:text-slate-200">
+                    <td className="py-4 px-4 text-xs font-bold text-slate-880 dark:text-slate-200">
                       {format(new Date(log.date), 'EEEE, MMM dd, yyyy')}
                     </td>
-                    <td className="py-3 px-3">
+                    <td className="py-4 px-4">
                       <Badge className={cn(
-                        "border-none font-extrabold text-[8px] px-2 py-0.5 rounded-sm uppercase tracking-wider",
+                        "border-none font-extrabold text-[9px] px-2.5 py-0.5 rounded-sm uppercase tracking-wider",
                         status.toUpperCase() === 'PRESENT' ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" :
                           status.toUpperCase() === 'LATE' ? "bg-amber-500/10 text-amber-600 dark:text-amber-400" :
                             status.toUpperCase() === 'HALF_DAY' ? "bg-blue-500/10 text-blue-600 dark:text-blue-455" :
                               "bg-rose-500/10 text-rose-600 dark:text-rose-450"
                       )}>
-                        {status}
+                        {toSentenceCase(status)}
                       </Badge>
                     </td>
-                    <td className="py-3 px-3">
+                    <td className="py-4 px-4">
                       <div className="flex flex-col gap-0.5">
-                        <span className="text-[11px] font-bold text-slate-880 dark:text-slate-200 flex items-center gap-1">
-                          <Clock className="h-3 w-3 text-emerald-500" /> {displayTimeIn}
+                        <span className="text-xs font-bold text-slate-880 dark:text-slate-200 flex items-center gap-1">
+                          <Clock className="h-3.5 w-3.5 text-emerald-500" /> {displayTimeIn}
                         </span>
-                        <span className="text-[9px] text-slate-400 flex items-center gap-0.5">
-                          <MapPin className="h-2 w-2" /> {displayLocationIn}
+                        <span className="text-[10px] text-slate-400 flex items-center gap-0.5 mt-0.5">
+                          <MapPin className="h-2.5 w-2.5" /> {toSentenceCase(displayLocationIn)}
                         </span>
                       </div>
                     </td>
-                    <td className="py-3 px-3">
+                    <td className="py-4 px-4">
                       <div className="flex flex-col gap-0.5">
                         <span className={cn(
-                          "text-[11px] font-bold flex items-center gap-1",
+                          "text-xs font-bold flex items-center gap-1",
                           displayTimeOut.includes('Active') ? "text-amber-500 animate-pulse" : "text-slate-800 dark:text-slate-200"
                         )}>
-                          <Clock className="h-3 w-3 text-rose-500" /> {displayTimeOut}
+                          <Clock className="h-3.5 w-3.5 text-rose-500" /> {displayTimeOut}
                         </span>
                         {!displayTimeOut.includes('Active') && displayTimeOut !== '--:--' && (
-                          <span className="text-[9px] text-slate-400 flex items-center gap-0.5">
-                            <MapPin className="h-2 w-2" /> {displayLocationOut}
+                          <span className="text-[10px] text-slate-400 flex items-center gap-0.5 mt-0.5">
+                            <MapPin className="h-2.5 w-2.5" /> {toSentenceCase(displayLocationOut)}
                           </span>
                         )}
                       </div>
                     </td>
-                    <td className="py-3 px-3 text-right">
+                    <td className="py-4 px-4 text-right">
                       <span className="font-mono text-xs text-slate-500">
                         {log.overtime_hours && parseFloat(log.overtime_hours) > 0 ? `${log.overtime_hours} hrs` : '—'}
                       </span>

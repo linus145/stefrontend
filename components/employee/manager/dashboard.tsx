@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Loader2, Sparkles } from 'lucide-react';
 
 import { useManagerDashboard } from './useManagerDashboard';
@@ -13,10 +13,12 @@ import { TimecardLogs } from '../TimecardLogs';
 import { LeaveRequestModal } from '../empdashboard/LeaveRequestModal';
 import { CredentialsModal } from '../empdashboard/CredentialsModal';
 import { TeamApprovalsQueue } from './TeamApprovalsQueue';
+import { PendingRequestsSummary } from '../PendingRequestsSummary';
 import { DirectReportsTable } from './DirectReportsTable';
 import { TeamGoalsBoard } from './TeamGoalsBoard';
 import { AssignGoalModal } from './AssignGoalModal';
 import { AttendanceHistoryCard } from '../AttendanceHistoryCard';
+import { PortalSidebar, PortalSection } from '../PortalSidebar';
 
 export function ManagerDashboard() {
     const {
@@ -96,9 +98,45 @@ export function ManagerDashboard() {
 
         attendanceLogs,
         leaveRequestsList,
+        pendingList,
+
+        // Payroll approvals
+        payrollApprovalsList,
+        payrollSettings,
+        getPayrollApprovalAccess,
+        handleApprovePayroll,
+        handleRejectPayroll,
+        approvePayrollMutation,
+        rejectPayrollMutation,
+        payrollApprovalConfirm,
+        setPayrollApprovalConfirm,
 
         handleSignOut,
     } = useManagerDashboard();
+
+    // Sidebar state
+    const [activeSection, setActiveSection] = useState<PortalSection>('dashboard');
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+        if (typeof window !== 'undefined') {
+            return localStorage.getItem('mgr-sidebar-collapsed') === 'true';
+        }
+        return false;
+    });
+
+    const handleSidebarCollapse = (collapsed: boolean) => {
+        setIsSidebarCollapsed(collapsed);
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('mgr-sidebar-collapsed', String(collapsed));
+        }
+    };
+
+    const handleSectionChange = (section: PortalSection) => {
+        if (section === 'credentials') {
+            setIsCredentialsModalOpen(true);
+            return;
+        }
+        setActiveSection(section);
+    };
 
     if (authLoading && !isDemo) {
         return (
@@ -107,6 +145,220 @@ export function ManagerDashboard() {
             </div>
         );
     }
+
+    const renderContent = () => {
+        switch (activeSection) {
+            case 'dashboard':
+                return (
+                    <div className="space-y-6 animate-in fade-in duration-300">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div className="flex-1 w-full">
+                                <WelcomeBanner
+                                    displayName={displayName}
+                                    displayDesignation={displayDesignation}
+                                    displayDepartment={displayDepartment}
+                                    currentDateTime={currentDateTime}
+                                />
+                            </div>
+                            {isDemo && (
+                                <div className="flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 p-3 rounded-sm self-start animate-pulse">
+                                    <Sparkles className="h-4 w-4" />
+                                    <div className="text-xs font-bold uppercase tracking-wider">Manager Sandbox Activated</div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Top Widgets Grid */}
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                            <div className="lg:col-span-5 flex flex-col">
+                                <ShiftTracker
+                                    isCheckedIn={isCheckedIn}
+                                    elapsedSeconds={elapsedSeconds}
+                                    checkInTime={checkInTime}
+                                    displayDepartment={displayDepartment}
+                                    isSyncing={!isDemo && (checkInMutation.isPending || checkOutMutation.isPending)}
+                                    onCheckIn={handleCheckIn}
+                                    onCheckOut={handleCheckOut}
+                                />
+                            </div>
+                            <div className="lg:col-span-7 flex flex-col">
+                                <TeamApprovalsQueue
+                                    teamLeaveApprovals={teamLeaveApprovals}
+                                    onApprove={handleApproveTeamLeave}
+                                    onReject={handleRejectTeamLeave}
+                                    payrollApprovalsList={payrollApprovalsList}
+                                    payrollSettings={payrollSettings}
+                                    getPayrollApprovalAccess={getPayrollApprovalAccess}
+                                    onApprovePayroll={handleApprovePayroll}
+                                    onRejectPayroll={handleRejectPayroll}
+                                    isApprovingPayroll={approvePayrollMutation.isPending}
+                                    isRejectingPayroll={rejectPayrollMutation.isPending}
+                                    payrollConfirmId={payrollApprovalConfirm}
+                                    setPayrollConfirmId={setPayrollApprovalConfirm}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Leave Balances */}
+                        <LeaveBalanceCards
+                            balancesList={balancesList}
+                            onRequestLeave={() => setIsLeaveModalOpen(true)}
+                        />
+
+                        {/* Personal Pending / Rejected Leave Requests */}
+                        <PendingRequestsSummary pendingList={pendingList} />
+
+                        {/* Direct Reports */}
+                        <DirectReportsTable teamSubordinates={teamSubordinates} />
+                    </div>
+                );
+
+            case 'attendance':
+                return (
+                    <div className="space-y-6 animate-in fade-in duration-300">
+                        <div>
+                            <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Attendance &amp; shift logs</h2>
+                            <p className="text-sm text-slate-400 dark:text-slate-550 font-medium mt-1">Track your check-ins, work hours, and attendance history.</p>
+                        </div>
+                        <ShiftTracker
+                            isCheckedIn={isCheckedIn}
+                            elapsedSeconds={elapsedSeconds}
+                            checkInTime={checkInTime}
+                            displayDepartment={displayDepartment}
+                            isSyncing={!isDemo && (checkInMutation.isPending || checkOutMutation.isPending)}
+                            onCheckIn={handleCheckIn}
+                            onCheckOut={handleCheckOut}
+                        />
+                        <TimecardLogs attendanceLogs={attendanceLogs} />
+                        <AttendanceHistoryCard attendanceLogs={attendanceLogs} />
+                    </div>
+                );
+
+            case 'leaves':
+            case 'leave-balances':
+                return (
+                    <div className="space-y-6 animate-in fade-in duration-300">
+                        <div>
+                            <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Leave balances</h2>
+                            <p className="text-sm text-slate-400 dark:text-slate-550 font-medium mt-1">View remaining balances and submit new leave requests.</p>
+                        </div>
+                        <LeaveBalanceCards
+                            balancesList={balancesList}
+                            onRequestLeave={() => setIsLeaveModalOpen(true)}
+                        />
+                    </div>
+                );
+
+            case 'leave-requests':
+                return (
+                    <div className="space-y-6 animate-in fade-in duration-300">
+                        <div>
+                            <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Leave request history</h2>
+                            <p className="text-sm text-slate-400 dark:text-slate-550 font-medium mt-1">Review your submitted leave requests and their approval status.</p>
+                        </div>
+                        <LeaveRequestLogs leaveRequestsList={leaveRequestsList} />
+                    </div>
+                );
+
+            case 'goals':
+                return (
+                    <div className="space-y-6 animate-in fade-in duration-300">
+                        <div>
+                            <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Personal goals</h2>
+                            <p className="text-sm text-slate-400 dark:text-slate-550 font-medium mt-1">Track progress on your assigned performance goals.</p>
+                        </div>
+                        {/* Managers can see their own goals if any are assigned to them */}
+                        <TeamGoalsBoard
+                            goals={goals}
+                            onOpenAssignModal={openAssignModal}
+                            onUpdateGoal={handleUpdateGoal}
+                            onDeleteGoal={handleDeleteGoal}
+                        />
+                    </div>
+                );
+
+            // ── Manager-only sections ──
+
+            case 'team':
+            case 'team-reports':
+                return (
+                    <div className="space-y-6 animate-in fade-in duration-300">
+                        <div>
+                            <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Direct reports</h2>
+                            <p className="text-sm text-slate-400 dark:text-slate-555 font-medium mt-1">Your team members and their current status.</p>
+                        </div>
+                        <DirectReportsTable teamSubordinates={teamSubordinates} />
+                    </div>
+                );
+
+            case 'team-approvals':
+                return (
+                    <div className="space-y-6 animate-in fade-in duration-300">
+                        <div>
+                            <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Team approvals queue</h2>
+                            <p className="text-sm text-slate-400 dark:text-slate-555 font-medium mt-1">Review and authorize pending leave requests from your subordinates.</p>
+                        </div>
+                        <TeamApprovalsQueue
+                            teamLeaveApprovals={teamLeaveApprovals}
+                            onApprove={handleApproveTeamLeave}
+                            onReject={handleRejectTeamLeave}
+                            payrollApprovalsList={payrollApprovalsList}
+                            payrollSettings={payrollSettings}
+                            getPayrollApprovalAccess={getPayrollApprovalAccess}
+                            onApprovePayroll={handleApprovePayroll}
+                            onRejectPayroll={handleRejectPayroll}
+                            isApprovingPayroll={approvePayrollMutation.isPending}
+                            isRejectingPayroll={rejectPayrollMutation.isPending}
+                            payrollConfirmId={payrollApprovalConfirm}
+                            setPayrollConfirmId={setPayrollApprovalConfirm}
+                        />
+                    </div>
+                );
+
+            case 'team-goals':
+                return (
+                    <div className="space-y-6 animate-in fade-in duration-300">
+                        <div>
+                            <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Team goals board</h2>
+                            <p className="text-sm text-slate-400 dark:text-slate-555 font-medium mt-1">Assign, track, and review performance goals for your team.</p>
+                        </div>
+                        <TeamGoalsBoard
+                            goals={goals}
+                            onOpenAssignModal={openAssignModal}
+                            onUpdateGoal={handleUpdateGoal}
+                            onDeleteGoal={handleDeleteGoal}
+                        />
+                    </div>
+                );
+
+            case 'payroll-approvals':
+                return (
+                    <div className="space-y-6 animate-in fade-in duration-300">
+                        <div>
+                            <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Payroll cycle approvals</h2>
+                            <p className="text-sm text-slate-400 dark:text-slate-555 font-medium mt-1">Review and authorize payroll cycles that require your approval.</p>
+                        </div>
+                        <TeamApprovalsQueue
+                            teamLeaveApprovals={[]}
+                            onApprove={() => {}}
+                            onReject={() => {}}
+                            payrollApprovalsList={payrollApprovalsList}
+                            payrollSettings={payrollSettings}
+                            getPayrollApprovalAccess={getPayrollApprovalAccess}
+                            onApprovePayroll={handleApprovePayroll}
+                            onRejectPayroll={handleRejectPayroll}
+                            isApprovingPayroll={approvePayrollMutation.isPending}
+                            isRejectingPayroll={rejectPayrollMutation.isPending}
+                            payrollConfirmId={payrollApprovalConfirm}
+                            setPayrollConfirmId={setPayrollApprovalConfirm}
+                        />
+                    </div>
+                );
+
+            default:
+                return null;
+        }
+    };
 
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans select-none antialiased transition-colors duration-500">
@@ -120,84 +372,28 @@ export function ManagerDashboard() {
                 onSignOut={handleSignOut}
             />
 
-            {/* Main Grid Content */}
-            <main className="flex-1 p-6 md:p-8 max-w-7xl mx-auto w-full space-y-6">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="flex-1 w-full">
-                        <WelcomeBanner
-                            displayName={displayName}
-                            displayDesignation={displayDesignation}
-                            displayDepartment={displayDepartment}
-                            currentDateTime={currentDateTime}
-                        />
-                    </div>
-                    {isDemo && (
-                        <div className="flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 p-3 rounded-sm self-start animate-pulse">
-                            <Sparkles className="h-4 w-4" />
-                            <div className="text-xs font-bold uppercase tracking-wider">Manager Sandbox Activated</div>
-                        </div>
-                    )}
-                </div>
-
-                {/* Manager Top Widgets Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    {/* Shift Tracker Card (5 columns) */}
-                    <div className="lg:col-span-5 flex flex-col">
-                        <ShiftTracker
-                            isCheckedIn={isCheckedIn}
-                            elapsedSeconds={elapsedSeconds}
-                            checkInTime={checkInTime}
-                            displayDepartment={displayDepartment}
-                            isSyncing={!isDemo && (checkInMutation.isPending || checkOutMutation.isPending)}
-                            onCheckIn={handleCheckIn}
-                            onCheckOut={handleCheckOut}
-                        />
-                    </div>
-
-                    {/* Symmetrical Manager Action Center (7 columns) - Team Approvals Queue */}
-                    <div className="lg:col-span-7 flex flex-col">
-                        <TeamApprovalsQueue
-                            teamLeaveApprovals={teamLeaveApprovals}
-                            onApprove={handleApproveTeamLeave}
-                            onReject={handleRejectTeamLeave}
-                        />
-                    </div>
-                </div>
-
-                {/* Leave Balances Grid Widget */}
-                <LeaveBalanceCards
-                    balancesList={balancesList}
-                    onRequestLeave={() => setIsLeaveModalOpen(true)}
+            {/* Sidebar + Content Shell */}
+            <div className="flex flex-1">
+                <PortalSidebar
+                    activeSection={activeSection}
+                    onSectionChange={handleSectionChange}
+                    isCollapsed={isSidebarCollapsed}
+                    setIsCollapsed={handleSidebarCollapse}
+                    isManager={true}
                 />
 
-                {/* Manager-Specific Subordinates ledger card */}
-                <DirectReportsTable teamSubordinates={teamSubordinates} />
-
-                {/* Team Goals Board (Jira Style) */}
-                <TeamGoalsBoard
-                    goals={goals}
-                    onOpenAssignModal={openAssignModal}
-                    onUpdateGoal={handleUpdateGoal}
-                    onDeleteGoal={handleDeleteGoal}
-                />
-
-                {/* Symmetrical Detailed Logs: Attendance & Leaves Section */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    {/* Leaves Request History (7 Columns) */}
-                    <div className="lg:col-span-7">
-                        <LeaveRequestLogs leaveRequestsList={leaveRequestsList} />
+                <main
+                    className={`flex-1 min-w-0 transition-all duration-300 ${
+                        isSidebarCollapsed ? 'pl-[60px]' : 'pl-[220px]'
+                    }`}
+                >
+                    <div className="p-8 md:p-10 max-w-7xl mx-auto w-full">
+                        {renderContent()}
                     </div>
+                </main>
+            </div>
 
-                    {/* Recent Attendance Log Sheets (5 Columns) */}
-                    <div className="lg:col-span-5">
-                        <TimecardLogs attendanceLogs={attendanceLogs} />
-                    </div>
-                </div>
-
-                {/* Complete Attendance History Logs Card */}
-                <AttendanceHistoryCard attendanceLogs={attendanceLogs} />
-            </main>
-
+            {/* Modals */}
             <LeaveRequestModal
                 isOpen={isLeaveModalOpen}
                 onClose={() => setIsLeaveModalOpen(false)}
@@ -227,7 +423,6 @@ export function ManagerDashboard() {
                 onSubmit={handleCredentialsSubmit}
             />
 
-            {/* Assign Goal Dialog */}
             <AssignGoalModal
                 isOpen={isAssignModalOpen}
                 onOpenChange={setIsAssignModalOpen}

@@ -73,7 +73,7 @@ export function PayrollLayoutClient({ children }: { children: React.ReactNode })
         setIsCollapsed={handleSidebarCollapse}
       />
 
-      <main className={`flex-1 pt-16 min-w-0 flex flex-col transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-16' : 'lg:pl-64'}`}>
+      <main className={`flex-1 pt-16 min-w-0 flex flex-col transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-16' : 'lg:pl-56'}`}>
         <div className="container mx-auto p-4 lg:p-8 flex-1 flex flex-col">
           {companyLoading ? <LocalLoader /> : children}
         </div>

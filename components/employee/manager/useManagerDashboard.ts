@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { hrAttendanceService, hrLeaveService, hrEmployeeService, hrPerformanceService } from '@/services/hr';
+import { hrAttendanceService, hrLeaveService, hrEmployeeService, hrPerformanceService, hrPayrollService } from '@/services/hr';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { useDashboardTheme } from '@/context/DashboardThemeContext';
@@ -87,6 +87,9 @@ export function useManagerDashboard() {
     const [goalStatus, setGoalStatus] = useState('PENDING');
     const [goalProgress, setGoalProgress] = useState(0);
 
+    // Payroll approvals state
+    const [payrollApprovalConfirm, setPayrollApprovalConfirm] = useState<string | null>(null);
+
     // Check login and demo mode status on mount
     useEffect(() => {
         setCurrentDateTime(new Date());
@@ -148,6 +151,12 @@ export function useManagerDashboard() {
         enabled: !isDemo && isAuthenticated,
     });
 
+    const { data: realLeaveTypes } = useQuery({
+        queryKey: ['employee-leave-types'],
+        queryFn: () => hrLeaveService.getLeaveTypes(),
+        enabled: !isDemo && isAuthenticated,
+    });
+
     const { data: realRequests } = useQuery({
         queryKey: ['employee-leave-requests'],
         queryFn: () => hrLeaveService.getLeaveRequests(),
@@ -205,6 +214,78 @@ export function useManagerDashboard() {
         queryFn: () => hrPerformanceService.getGoals(),
         enabled: !isDemo && isAuthenticated,
     });
+
+    // Payroll approvals queue & settings (real mode only)
+    const { data: payrollApprovalsRes } = useQuery({
+        queryKey: ['manager-payroll-approvals'],
+        queryFn: () => hrPayrollService.getApprovalsQueue(),
+        enabled: !isDemo && isAuthenticated,
+        refetchInterval: 30000,
+    });
+
+    const { data: payrollSettingsRes } = useQuery({
+        queryKey: ['manager-payroll-settings'],
+        queryFn: () => hrPayrollService.getSettingsConfigs(),
+        enabled: !isDemo && isAuthenticated,
+    });
+
+    const approvePayrollMutation = useMutation({
+        mutationFn: (id: string) => hrPayrollService.approvePayroll(id),
+        onSuccess: (res: any) => {
+            queryClient.invalidateQueries({ queryKey: ['manager-payroll-approvals'] });
+            queryClient.invalidateQueries({ queryKey: ['payroll-approvals'] });
+            queryClient.invalidateQueries({ queryKey: ['payrolls'] });
+            setPayrollApprovalConfirm(null);
+            const isPartial = res.message?.includes('L1') || res.message?.includes('recorded');
+            toast.success(isPartial ? (res.message || 'L1 Approval recorded.') : 'Payroll cycle fully approved!');
+        },
+        onError: (err: any) => {
+            toast.error(err.response?.data?.error || 'Failed to approve payroll cycle.');
+        },
+    });
+
+    const rejectPayrollMutation = useMutation({
+        mutationFn: (id: string) => hrPayrollService.rejectPayroll(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['manager-payroll-approvals'] });
+            queryClient.invalidateQueries({ queryKey: ['payroll-approvals'] });
+            queryClient.invalidateQueries({ queryKey: ['payrolls'] });
+            setPayrollApprovalConfirm(null);
+            toast.success('Payroll cycle sent back for correction.');
+        },
+        onError: () => {
+            toast.error('Failed to reject payroll cycle.');
+        },
+    });
+
+    const handleApprovePayroll = (id: string) => {
+        approvePayrollMutation.mutate(id);
+    };
+
+    const handleRejectPayroll = (id: string) => {
+        rejectPayrollMutation.mutate(id);
+    };
+
+    // Compute which payroll cycles the current user can act on
+    const payrollApprovalsList = !isDemo ? (payrollApprovalsRes?.data || []) : [];
+    const payrollSettings = !isDemo ? payrollSettingsRes?.data : null;
+
+    const getPayrollApprovalAccess = (run: any) => {
+        if (!payrollSettings || !user) return { allowed: false, stage: '' };
+        if (payrollSettings.finance_approval_required && !run.finance_approved) {
+            return {
+                allowed: user.id === payrollSettings.finance_manager,
+                stage: 'Finance Manager (L1)',
+            };
+        }
+        if (payrollSettings.director_approval_required && !run.director_approved) {
+            return {
+                allowed: user.id === payrollSettings.director,
+                stage: 'Director (Final)',
+            };
+        }
+        return { allowed: true, stage: 'Final' };
+    };
 
     const goals = isDemo ? demoGoals : (realGoalsRes?.data?.results || []);
 
@@ -312,7 +393,19 @@ export function useManagerDashboard() {
     }, [currentEmployee]);
 
     // Setup leave type
-    const balancesList = isDemo ? demoBalances : (realBalances?.data?.results || []);
+    const balancesList = isDemo 
+        ? demoBalances 
+        : (realBalances?.data?.results && realBalances.data.results.length > 0
+            ? realBalances.data.results
+            : (realLeaveTypes?.data?.results || []).map((lt: any) => ({
+                id: lt.id,
+                leave_type: lt.id,
+                leave_type_name: lt.name,
+                total_days: String(lt.max_days_per_year || 0),
+                used_days: '0',
+                remaining_days: lt.max_days_per_year || 0,
+              }))
+          );
     useEffect(() => {
         if (balancesList.length > 0 && !leaveType) {
             setLeaveType(balancesList[0].leave_type || balancesList[0].id);
@@ -540,9 +633,15 @@ export function useManagerDashboard() {
             }, 800);
         } else {
             try {
+                if (newPassword.trim()) {
+                    // Dedicated change password API that synchronizes credentials with Django and the HR tool
+                    await hrEmployeeService.changePassword({
+                        password: newPassword.trim()
+                    });
+                }
+
                 await hrEmployeeService.changeCredentials({
-                    portal_username: newPortalUsername.trim(),
-                    password: newPassword.trim() || undefined
+                    portal_username: newPortalUsername.trim()
                 });
                 queryClient.invalidateQueries({ queryKey: ['current-employee-profile'] });
                 setIsSubmittingCredentials(false);
@@ -610,6 +709,31 @@ export function useManagerDashboard() {
                 reason: r.reason,
                 status: r.status
             }));
+
+    // Build the pending requests list (manager's own pending and rejected leaves)
+    const pendingList = isDemo
+        ? demoLeaves.filter((r: any) => {
+            const statusUpper = r.status?.toUpperCase();
+            return statusUpper === 'PENDING' || statusUpper === 'REJECTED';
+          }).map((r: any) => ({
+            id: r.id,
+            name: r.leave_type_name || 'Leave',
+            type: `${r.leave_type_name || 'Leave'} Request`,
+            duration: `${r.total_days} days`,
+            reason: r.reason,
+            status: r.status,
+          }))
+        : leaveRequestsList.filter((r: any) => {
+            const statusUpper = r.status?.toUpperCase();
+            return statusUpper === 'PENDING' || statusUpper === 'REJECTED';
+          }).map((r: any) => ({
+            id: r.id,
+            name: r.leave_type_name || 'Leave',
+            type: `${r.leave_type_name || 'Leave'} Request`,
+            duration: `${r.total_days} days`,
+            reason: r.reason,
+            status: r.status,
+          }));
 
     const openAssignModal = () => {
         setSelectedAssignee('');
@@ -708,6 +832,18 @@ export function useManagerDashboard() {
         // Lists
         attendanceLogs,
         leaveRequestsList,
+        pendingList,
+
+        // Payroll approvals (manager)
+        payrollApprovalsList,
+        payrollSettings,
+        getPayrollApprovalAccess,
+        handleApprovePayroll,
+        handleRejectPayroll,
+        approvePayrollMutation,
+        rejectPayrollMutation,
+        payrollApprovalConfirm,
+        setPayrollApprovalConfirm,
 
         // Actions
         handleSignOut,

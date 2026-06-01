@@ -26,6 +26,9 @@ export const hrEmployeeService = {
   changeCredentials: (data: { portal_username?: string; password?: string }): Promise<BaseAPIResponse<any>> =>
     api.post<any>('/employees/employees/change-credentials/', data).then(res => ({ status: 'success', message: 'Credentials updated successfully.', data: res })),
 
+  changePassword: (data: { password: string }): Promise<BaseAPIResponse<any>> =>
+    api.post<any>('/employees/employees/change-password/', data).then(res => ({ status: 'success', message: 'Password updated successfully.', data: res })),
+
   getMyProfile: (): Promise<BaseAPIResponse<any>> =>
     api.get<any>('/employees/employees/me/').then(res => ({ status: 'success', message: '', data: res })),
 };

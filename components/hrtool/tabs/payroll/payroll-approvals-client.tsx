@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '@/hooks/useAuth';
 import { hrPayrollService } from '@/services/hr';
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
@@ -14,6 +15,7 @@ import {
 
 export function PayrollApprovalsClient() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const [selectedRun, setSelectedRun] = React.useState<any | null>(null);
 
   const { data: approvalsRes, isLoading } = useQuery({
@@ -47,14 +49,21 @@ export function PayrollApprovalsClient() {
 
   const approveMutation = useMutation({
     mutationFn: (id: string) => hrPayrollService.approvePayroll(id),
-    onSuccess: () => {
+    onSuccess: (res: any) => {
       queryClient.invalidateQueries({ queryKey: ['payroll-approvals'] });
       queryClient.invalidateQueries({ queryKey: ['payrolls'] });
-      setSelectedRun(null);
-      toast.success('Payroll cycle approved and published successfully!');
+      
+      const isL1DoneOnly = res.message?.includes('L1') || res.message?.includes('recorded');
+      if (isL1DoneOnly && res.payroll) {
+        toast.success(res.message || 'L1 (Finance Manager) approval recorded successfully!');
+        setSelectedRun(res.payroll);
+      } else {
+        setSelectedRun(null);
+        toast.success('Payroll cycle approved and published successfully!');
+      }
     },
-    onError: () => {
-      toast.error('Failed to approve payroll cycle.');
+    onError: (err: any) => {
+      toast.error(err.response?.data?.error || 'Failed to approve payroll cycle.');
     }
   });
 
@@ -81,10 +90,10 @@ export function PayrollApprovalsClient() {
 
   const getStatusBadgeColor = (status: string) => {
     switch (status?.toUpperCase()) {
-      case 'APPROVED': return 'bg-emerald-50 text-emerald-700 border-emerald-250 dark:bg-emerald-500/10 dark:text-emerald-400';
-      case 'PROCESSED': return 'bg-amber-50 text-amber-700 border-amber-250 dark:bg-amber-500/10 dark:text-amber-400';
-      case 'PAID': return 'bg-blue-50 text-blue-700 border-blue-250 dark:bg-blue-500/10 dark:text-blue-400';
-      case 'REJECTED': return 'bg-rose-50 text-rose-700 border-rose-250 dark:bg-rose-500/10 dark:text-rose-400';
+      case 'APPROVED': return 'bg-emerald-50 text-emerald-700 border-emerald-255 dark:bg-emerald-500/10 dark:text-emerald-400';
+      case 'PROCESSED': return 'bg-amber-50 text-amber-700 border-amber-255 dark:bg-amber-500/10 dark:text-amber-400';
+      case 'PAID': return 'bg-blue-50 text-blue-700 border-blue-255 dark:bg-blue-500/10 dark:text-blue-400';
+      case 'REJECTED': return 'bg-rose-50 text-rose-700 border-rose-255 dark:bg-rose-500/10 dark:text-rose-400';
       default: return 'bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-500/10 dark:text-slate-400';
     }
   };
@@ -95,6 +104,38 @@ export function PayrollApprovalsClient() {
   };
 
   const list = approvalsRes?.data || [];
+
+  const getApprovalStatusAndCheck = () => {
+    if (!settingsRes?.data || !selectedRun) return { allowed: true, message: '', currentStage: '' };
+    
+    const config = settingsRes.data;
+    
+    if (config.finance_approval_required && !selectedRun.finance_approved) {
+      const allowed = user?.id === config.finance_manager;
+      return {
+        allowed,
+        message: allowed 
+          ? 'You are authorized to approve this cycle as Finance Manager (Level 1 Approval).'
+          : `Level 1 Approval pending from designated Finance Manager: ${config.finance_manager_name || 'Unassigned'}.`,
+        currentStage: 'Finance Manager Approval'
+      };
+    }
+    
+    if (config.director_approval_required && !selectedRun.director_approved) {
+      const allowed = user?.id === config.director;
+      return {
+        allowed,
+        message: allowed
+          ? 'You are authorized to approve this cycle as Director (Level 2 / Final Approval).'
+          : `Level 2 / Final Approval pending from designated Director: ${config.director_name || 'Unassigned'}.`,
+        currentStage: 'Director Approval'
+      };
+    }
+    
+    return { allowed: true, message: '', currentStage: '' };
+  };
+
+  const approvalCheck = getApprovalStatusAndCheck();
 
   // Drilldown audit mode
   if (selectedRun) {
@@ -131,14 +172,26 @@ export function PayrollApprovalsClient() {
             </Button>
             <Button 
               onClick={() => approveMutation.mutate(selectedRun.id)}
-              disabled={approveMutation.isPending}
+              disabled={approveMutation.isPending || !approvalCheck.allowed}
               data-agent={`payroll-run-approve-btn-${selectedRun.id}`}
-              className="bg-[#0a66c2] hover:bg-[#084e96] text-white shadow-md shadow-blue-500/15 rounded-sm text-xs font-bold py-2 px-4 cursor-pointer transition-all duration-300 flex items-center gap-1.5"
+              className="bg-[#0a66c2] hover:bg-[#084e96] text-white shadow-md shadow-blue-500/15 rounded-sm text-xs font-bold py-2 px-4 cursor-pointer transition-all duration-300 flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Check className="h-4 w-4" /> Approve & issue payslips
+              <Check className="h-4 w-4" /> 
+              {approvalCheck.currentStage ? `Approve (${approvalCheck.currentStage})` : 'Approve & issue payslips'}
             </Button>
           </div>
         </div>
+
+        {approvalCheck.message && (
+          <div className={`p-4 rounded-sm border text-xs font-bold flex items-center gap-2.5 animate-in slide-in-from-top duration-300 ${
+            approvalCheck.allowed 
+              ? 'bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' 
+              : 'bg-amber-50 text-amber-800 border-amber-250 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20'
+          }`}>
+            <ShieldAlert className="h-4.5 w-4.5 text-amber-500 dark:text-amber-400 animate-pulse" />
+            <span>{approvalCheck.message}</span>
+          </div>
+        )}
 
         {/* Drilldown Records Table */}
         <Card className="bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800/40 rounded-sm overflow-hidden shadow-sm">
@@ -260,9 +313,21 @@ export function PayrollApprovalsClient() {
                       {run.processed_at ? new Date(run.processed_at).toLocaleDateString() : 'Draft mode'}
                     </td>
                     <td className="py-3 px-4">
-                      <Badge className={`${getStatusBadgeColor(run.status)} font-bold text-[9px] px-2 py-0.5 rounded-sm border shadow-none`}>
-                        {toSentenceCase(run.status)}
-                      </Badge>
+                      <div className="space-y-1.5 flex flex-col items-start justify-start">
+                        <Badge className={`${getStatusBadgeColor(run.status)} font-bold text-[9px] px-2 py-0.5 rounded-sm border shadow-none`}>
+                          {toSentenceCase(run.status)}
+                        </Badge>
+                        {settingsRes?.data?.finance_approval_required && !run.finance_approved && (
+                          <div className="text-[10px] font-bold text-amber-600 dark:text-amber-400/90 whitespace-nowrap">
+                            Awaiting Finance Manager: {settingsRes.data.finance_manager_name || 'Unassigned'}
+                          </div>
+                        )}
+                        {((settingsRes?.data?.finance_approval_required && run.finance_approved) || !settingsRes?.data?.finance_approval_required) && settingsRes?.data?.director_approval_required && !run.director_approved && (
+                          <div className="text-[10px] font-bold text-amber-600 dark:text-amber-400/90 whitespace-nowrap">
+                            Awaiting Director: {settingsRes.data.director_name || 'Unassigned'}
+                          </div>
+                        )}
+                      </div>
                     </td>
                     <td className="py-3 px-4 text-right">
                       <Button 

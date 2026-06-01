@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
-  CreditCard, Play, Download, CheckCircle2, AlertCircle, 
+  CreditCard, Play, CheckCircle2, AlertCircle, 
   ArrowRight, ShieldAlert, X, Check, Calendar, RotateCcw, Trash2, Mail
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
@@ -189,6 +189,15 @@ export function PayrollRuns() {
           <div>
             <h3 className="text-sm font-extrabold text-slate-900 dark:text-white tracking-tight">Cycle runs compile logs</h3>
           </div>
+          {sortedRuns.length > 0 && (
+            <Button 
+              onClick={() => setIsNewRunOpen(true)}
+              data-agent="payroll-start-run-btn"
+              className="bg-[#0a66c2] hover:bg-[#084e96] text-white shadow-md shadow-blue-500/15 rounded-sm text-xs font-bold py-2 px-4 cursor-pointer inline-flex items-center gap-1.5 h-9"
+            >
+              <Play className="h-3.5 w-3.5 fill-current" /> Start Payroll Run
+            </Button>
+          )}
         </div>
         
         {isLoadingPayrolls ? (
@@ -527,14 +536,6 @@ export function PayrollRuns() {
                     <td className="py-3 px-4 text-right whitespace-nowrap">
                       {selectedRun.status === 'APPROVED' || selectedRun.status === 'PAID' ? (
                         <div className="inline-flex items-center gap-2">
-                          <a 
-                            href={`${process.env.NEXT_PUBLIC_API_URL || ''}/api/payroll/payslips/${rec.id}/download/`}
-                            download
-                            title="Download"
-                            className="inline-flex items-center justify-center border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/40 text-slate-600 dark:text-slate-400 font-bold text-[10px] h-8 w-8 p-0 rounded-sm cursor-pointer transition-all duration-300"
-                          >
-                            <Download className="h-3.5 w-3.5" />
-                          </a>
                           <Button 
                             title="Email"
                             onClick={() => alert("Mail payslip functionality is coming soon!")}

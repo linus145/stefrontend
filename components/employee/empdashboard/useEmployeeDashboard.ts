@@ -166,6 +166,12 @@ export function useEmployeeDashboard() {
     enabled: !isDemo && isAuthenticated,
   });
 
+  const { data: realLeaveTypes } = useQuery({
+    queryKey: ['employee-leave-types'],
+    queryFn: () => hrLeaveService.getLeaveTypes(),
+    enabled: !isDemo && isAuthenticated,
+  });
+
   const { data: realRequests } = useQuery({
     queryKey: ['employee-leave-requests'],
     queryFn: () => hrLeaveService.getLeaveRequests(),
@@ -239,7 +245,19 @@ export function useEmployeeDashboard() {
   }, [currentEmployee]);
 
   // Set default selected leave category when leave types are fetched
-  const balancesList = isDemo ? demoBalances : (realBalances?.data?.results || []);
+  const balancesList = isDemo
+    ? demoBalances
+    : (realBalances?.data?.results && realBalances.data.results.length > 0
+        ? realBalances.data.results
+        : (realLeaveTypes?.data?.results || []).map((lt: any) => ({
+            id: lt.id,
+            leave_type: lt.id,
+            leave_type_name: lt.name,
+            total_days: String(lt.max_days_per_year || 0),
+            used_days: '0',
+            remaining_days: lt.max_days_per_year || 0,
+          }))
+      );
   useEffect(() => {
     if (balancesList.length > 0 && !leaveType) {
       setLeaveType(balancesList[0].leave_type || balancesList[0].id);
@@ -428,9 +446,15 @@ export function useEmployeeDashboard() {
       }, 800);
     } else {
       try {
+        if (newPassword.trim()) {
+          // Dedicated change password API that synchronizes credentials with Django and the HR tool
+          await hrEmployeeService.changePassword({
+            password: newPassword.trim()
+          });
+        }
+
         await hrEmployeeService.changeCredentials({
-          portal_username: newPortalUsername.trim(),
-          password: newPassword.trim() || undefined
+          portal_username: newPortalUsername.trim()
         });
 
         // Refresh the query
@@ -509,14 +533,18 @@ export function useEmployeeDashboard() {
 
   // Build the pending requests list (employee's own pending leaves)
   const pendingList = isDemo
-    ? demoApprovals
-    : leaveRequestsList.filter((r: any) => r.status?.toUpperCase() === 'PENDING').map((r: any) => ({
-      id: r.id,
-      name: r.leave_type_name || 'Leave',
-      type: `${r.leave_type_name || 'Leave'} Request`,
-      duration: `${r.total_days} days`,
-      reason: r.reason,
-    }));
+    ? demoApprovals.map((r: any) => ({ ...r, status: 'PENDING' }))
+    : leaveRequestsList.filter((r: any) => {
+        const statusUpper = r.status?.toUpperCase();
+        return statusUpper === 'PENDING' || statusUpper === 'REJECTED';
+      }).map((r: any) => ({
+        id: r.id,
+        name: r.leave_type_name || 'Leave',
+        type: `${r.leave_type_name || 'Leave'} Request`,
+        duration: `${r.total_days} days`,
+        reason: r.reason,
+        status: r.status,
+      }));
 
   return {
     // Auth / loading

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
   CreditCard, Play, CheckCircle2, AlertCircle, 
-  ArrowRight, ShieldAlert, X, Check, Calendar, RotateCcw, Trash2, Mail
+  ArrowRight, ShieldAlert, X, Check, Calendar, RotateCcw, Trash2, Mail, Download, Loader2
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -23,6 +23,9 @@ export function PayrollRuns() {
   const [isNewRunOpen, setIsNewRunOpen] = useState(false);
   const [newRunMonth, setNewRunMonth] = useState('5');
   const [newRunYear, setNewRunYear] = useState('2026');
+  const [exportMonth, setExportMonth] = useState('5');
+  const [exportYear, setExportYear] = useState('2026');
+  const [isExporting, setIsExporting] = useState(false);
   const [page, setPage] = useState(1);
 
   // Queries
@@ -131,6 +134,110 @@ export function PayrollRuns() {
   const onCompileSubmit = () => generateMutation.mutate({ month: parseInt(newRunMonth), year: parseInt(newRunYear) });
   const compilePending = generateMutation.isPending;
   const onClaimTabRedirect = () => { window.location.href = '/Hrtools/payroll/reimbursements'; };
+
+  const handleExportExcel = (runToExport = selectedRun, recordsToExport = runRecords) => {
+    if (!recordsToExport || recordsToExport.length === 0) {
+      toast.error("No payroll records available to export.");
+      return;
+    }
+
+    // Header row
+    const headers = [
+      "Employee Name",
+      "Employee ID",
+      "Designation",
+      "Department",
+      "Bank Name",
+      "Bank Account Number",
+      "IFSC Code",
+      "Basic Salary",
+      "Overtime Amount",
+      "Reimbursements",
+      "Deductions",
+      "Net Payout"
+    ];
+
+    // Build CSV rows
+    const rows = recordsToExport.map(rec => {
+      const emp = rec.employee_detail || {};
+      const bank = emp.bank_detail || {};
+      
+      const employeeName = `"${emp.first_name || ''} ${emp.last_name || ''}"`;
+      const employeeId = `"${emp.employee_id || ''}"`;
+      const designation = `"${emp.designation_detail?.title || emp.designation_detail?.name || 'Team Member'}"`;
+      const department = `"${emp.department_detail?.name || 'Operations'}"`;
+      const bankName = `"${bank.bank_name || 'N/A'}"`;
+      
+      // Excel safe bank account number format to prevent scientific notation conversion
+      const accountNumber = bank.account_number ? `"\t${bank.account_number}"` : '"N/A"';
+      const ifscCode = bank.ifsc_code ? `"${bank.ifsc_code}"` : '"N/A"';
+      
+      const basicSalary = rec.gross_salary || 0;
+      const overtime = rec.overtime_amount || 0;
+      const reimbursement = rec.reimbursement_amount || 0;
+      const deductions = rec.deductions || 0;
+      const netPayout = rec.net_salary || 0;
+
+      return [
+        employeeName,
+        employeeId,
+        designation,
+        department,
+        bankName,
+        accountNumber,
+        ifscCode,
+        basicSalary,
+        overtime,
+        reimbursement,
+        deductions,
+        netPayout
+      ].join(",");
+    });
+
+    const csvContent = [headers.join(","), ...rows].join("\n");
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    
+    const fileName = `payroll_export_${getMonthName(runToExport.month).toLowerCase()}_${runToExport.year}.csv`;
+    link.setAttribute("download", fileName);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast.success("Excel data sheet exported successfully!");
+  };
+
+  const handleMainExport = () => {
+    // 1. Find matching payroll run in rawList
+    const matchingRun = rawList.find(
+      (r: any) => String(r.month) === exportMonth && String(r.year) === exportYear
+    );
+
+    if (!matchingRun) {
+      toast.error(`No processed payroll run found for ${getMonthName(parseInt(exportMonth))} ${exportYear}.`);
+      return;
+    }
+
+    // 2. Fetch records dynamically
+    setIsExporting(true);
+    hrPayrollService.getPayrollRecords(matchingRun.id)
+      .then(res => {
+        if (res.data && res.data.length > 0) {
+          handleExportExcel(matchingRun, res.data);
+        } else {
+          toast.error("This payroll run has no computed records.");
+        }
+      })
+      .catch(() => {
+        toast.error("Failed to load payroll details for export.");
+      })
+      .finally(() => {
+        setIsExporting(false);
+      });
+  };
   
   const { data: settingsRes } = useQuery({
     queryKey: ['payroll-settings'],
@@ -190,13 +297,64 @@ export function PayrollRuns() {
             <h3 className="text-sm font-extrabold text-slate-900 dark:text-white tracking-tight">Cycle runs compile logs</h3>
           </div>
           {sortedRuns.length > 0 && (
-            <Button 
-              onClick={() => setIsNewRunOpen(true)}
-              data-agent="payroll-start-run-btn"
-              className="bg-[#0a66c2] hover:bg-[#084e96] text-white shadow-md shadow-blue-500/15 rounded-sm text-xs font-bold py-2 px-4 cursor-pointer inline-flex items-center gap-1.5 h-9"
-            >
-              <Play className="h-3.5 w-3.5 fill-current" /> Start Payroll Run
-            </Button>
+            <div className="flex flex-wrap items-center gap-2">
+              {/* Month Dropdown */}
+              <select
+                value={exportMonth}
+                onChange={(e) => setExportMonth(e.target.value)}
+                className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-sm text-xs px-2.5 py-1.5 h-9 outline-none cursor-pointer text-slate-900 dark:text-white font-bold"
+              >
+                <option value="1">January</option>
+                <option value="2">February</option>
+                <option value="3">March</option>
+                <option value="4">April</option>
+                <option value="5">May</option>
+                <option value="6">June</option>
+                <option value="7">July</option>
+                <option value="8">August</option>
+                <option value="9">September</option>
+                <option value="10">October</option>
+                <option value="11">November</option>
+                <option value="12">December</option>
+              </select>
+
+              {/* Year Dropdown */}
+              <select
+                value={exportYear}
+                onChange={(e) => setExportYear(e.target.value)}
+                className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-sm text-xs px-2.5 py-1.5 h-9 outline-none cursor-pointer text-slate-900 dark:text-white font-bold mr-1"
+              >
+                <option value="2025">2025</option>
+                <option value="2026">2026</option>
+                <option value="2027">2027</option>
+              </select>
+
+              {/* Export Button */}
+              <Button
+                onClick={handleMainExport}
+                disabled={isExporting}
+                className="bg-[#0a66c2] hover:bg-[#004182] text-white shadow-md shadow-blue-500/15 rounded-sm text-xs font-bold py-2 px-4 cursor-pointer flex items-center gap-1.5 h-9 transition-all duration-300"
+              >
+                {isExporting ? (
+                  <>
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" /> Exporting...
+                  </>
+                ) : (
+                  <>
+                    <Download className="h-3.5 w-3.5" /> Export Bank Sheet
+                  </>
+                )}
+              </Button>
+
+              {/* Start Payroll Button */}
+              <Button 
+                onClick={() => setIsNewRunOpen(true)}
+                data-agent="payroll-start-run-btn"
+                className="bg-[#0a66c2] hover:bg-[#084e96] text-white shadow-md shadow-blue-500/15 rounded-sm text-xs font-bold py-2 px-4 cursor-pointer inline-flex items-center gap-1.5 h-9"
+              >
+                <Play className="h-3.5 w-3.5 fill-current" /> Start Payroll Run
+              </Button>
+            </div>
           )}
         </div>
         

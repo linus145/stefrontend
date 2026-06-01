@@ -302,6 +302,7 @@ export function PayrollRuns() {
               <select
                 value={exportMonth}
                 onChange={(e) => setExportMonth(e.target.value)}
+                data-agent="payroll-export-month-select"
                 className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-sm text-xs px-2.5 py-1.5 h-9 outline-none cursor-pointer text-slate-900 dark:text-white font-bold"
               >
                 <option value="1">January</option>
@@ -322,6 +323,7 @@ export function PayrollRuns() {
               <select
                 value={exportYear}
                 onChange={(e) => setExportYear(e.target.value)}
+                data-agent="payroll-export-year-select"
                 className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-sm text-xs px-2.5 py-1.5 h-9 outline-none cursor-pointer text-slate-900 dark:text-white font-bold mr-1"
               >
                 <option value="2025">2025</option>
@@ -333,6 +335,7 @@ export function PayrollRuns() {
               <Button
                 onClick={handleMainExport}
                 disabled={isExporting}
+                data-agent="payroll-export-bank-sheet-btn"
                 className="bg-[#0a66c2] hover:bg-[#004182] text-white shadow-md shadow-blue-500/15 rounded-sm text-xs font-bold py-2 px-4 cursor-pointer flex items-center gap-1.5 h-9 transition-all duration-300"
               >
                 {isExporting ? (

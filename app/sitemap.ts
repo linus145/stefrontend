@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 import { publicService } from '@/services/public.service';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const siteUrl = 'https://b2linq.com';
+  const siteUrl = 'https://www.b2linq.in';
   
   // Public static routes
   const staticRoutes = [
@@ -11,6 +11,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/pricing',
     '/book-demo',
     '/careers',
+    '/blogs',
     '/login',
     '/register',
   ].map((route) => ({

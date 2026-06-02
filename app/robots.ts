@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 
 export default function robots(): MetadataRoute.Robots {
-  const siteUrl = 'https://b2linq.com';
+  const siteUrl = 'https://www.b2linq.in';
   
   return {
     rules: [

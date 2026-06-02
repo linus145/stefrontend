@@ -68,7 +68,7 @@ const PROMPTS: PromptConfig[] = [
       { log: "[INFO] Profile data: David Miller, Role='Senior FE Engineer'", type: 'info' },
       { log: "[INFO] Formulating personalized welcome packet & handbook access index...", type: 'info' },
       { log: "[INFO] Auto-compiling legal NDA & workspace safety documents...", type: 'info' },
-      { log: "[INFO] Provisioning corporate workspace email: dmiller@b2linq.com...", type: 'info' },
+      { log: "[INFO] Provisioning corporate workspace email: dmiller@b2linq.in...", type: 'info' },
       { log: "[INFO] Syncing credentials and data into HRMS portal employee roster...", type: 'info' },
       { log: "[SUCCESS] NDA package dispatched. Workspace access fully provisioned.", type: 'success' }
     ]
@@ -558,7 +558,7 @@ export function InteractiveChatAgent() {
                       <div className="space-y-1 min-w-0 flex-1">
                         <span className={`text-xs font-bold block truncate ${textHeading}`}>David Miller</span>
                         <span className="text-[9.5px] text-slate-400 font-semibold block truncate animate-pulse">Senior FE Engineer</span>
-                        <span className="text-[9.5px] text-[#8c74f5] font-mono block truncate">dmiller@b2linq.com</span>
+                        <span className="text-[9.5px] text-[#8c74f5] font-mono block truncate">dmiller@b2linq.in</span>
                         <span className="text-[8.5px] text-slate-500 block pt-1 uppercase font-bold tracking-wider">ID: EMP-2940</span>
                       </div>
                     </div>

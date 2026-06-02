@@ -57,10 +57,10 @@ export default function RootLayout({
               '@graph': [
                 {
                   '@type': 'Organization',
-                  '@id': 'https://b2linq.com/#organization',
+                  '@id': 'https://www.b2linq.in/#organization',
                   'name': 'B2linq',
-                  'url': 'https://b2linq.com',
-                  'logo': 'https://b2linq.com/logo.png',
+                  'url': 'https://www.b2linq.in',
+                  'logo': 'https://www.b2linq.in/logo.png',
                   'sameAs': [
                     'https://www.linkedin.com/company/b2linq'
                   ],
@@ -68,11 +68,11 @@ export default function RootLayout({
                 },
                 {
                   '@type': 'SoftwareApplication',
-                  '@id': 'https://b2linq.com/#software',
+                  '@id': 'https://www.b2linq.in/#software',
                   'name': 'B2linq Autonomous Hiring OS',
                   'applicationCategory': 'BusinessApplication',
                   'operatingSystem': 'All',
-                  'url': 'https://b2linq.com',
+                  'url': 'https://www.b2linq.in',
                   'offers': {
                     '@type': 'Offer',
                     'price': '0',
@@ -90,11 +90,11 @@ export default function RootLayout({
                 },
                 {
                   '@type': 'WebSite',
-                  '@id': 'https://b2linq.com/#website',
-                  'url': 'https://b2linq.com',
+                  '@id': 'https://www.b2linq.in/#website',
+                  'url': 'https://www.b2linq.in',
                   'name': 'B2linq Platform',
                   'publisher': {
-                    '@id': 'https://b2linq.com/#organization'
+                    '@id': 'https://www.b2linq.in/#organization'
                   }
                 }
               ]

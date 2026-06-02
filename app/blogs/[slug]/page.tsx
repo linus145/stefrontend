@@ -62,19 +62,19 @@ export default async function BlogDetailPage({ params }: BlogPageProps) {
         '@type': 'ListItem',
         'position': 1,
         'name': 'Home',
-        'item': 'https://b2linq.com'
+        'item': 'https://www.b2linq.in'
       },
       {
         '@type': 'ListItem',
         'position': 2,
         'name': 'Blogs',
-        'item': 'https://b2linq.com/blogs'
+        'item': 'https://www.b2linq.in/blogs'
       },
       {
         '@type': 'ListItem',
         'position': 3,
         'name': blog.title,
-        'item': `https://b2linq.com/blogs/${slug}`
+        'item': `https://www.b2linq.in/blogs/${slug}`
       }
     ]
   };
@@ -84,7 +84,7 @@ export default async function BlogDetailPage({ params }: BlogPageProps) {
     '@type': 'BlogPosting',
     'headline': blog.title,
     'description': blog.excerpt,
-    'image': blog.image || 'https://b2linq.com/logo.png',
+    'image': blog.image || 'https://www.b2linq.in/logo.png',
     'datePublished': blog.date || new Date().toISOString(),
     'author': {
       '@type': 'Person',
@@ -95,12 +95,12 @@ export default async function BlogDetailPage({ params }: BlogPageProps) {
       'name': 'B2linq',
       'logo': {
         '@type': 'ImageObject',
-        'url': 'https://b2linq.com/logo.png'
+        'url': 'https://www.b2linq.in/logo.png'
       }
     },
     'mainEntityOfPage': {
       '@type': 'WebPage',
-      '@id': `https://b2linq.com/blogs/${slug}`
+      '@id': `https://www.b2linq.in/blogs/${slug}`
     }
   };
 

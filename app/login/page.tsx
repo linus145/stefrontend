@@ -4,10 +4,14 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-export const metadata: Metadata = {
-  title: 'Sign In | B2linq Platform',
-  description: 'Log into the highly-optimized Startup Ecosystem securely.',
-};
+import { getPageMetadata } from '@/lib/seo';
+
+export async function generateMetadata(): Promise<Metadata> {
+  return getPageMetadata('/login', {
+    title: 'Sign In | B2linq Platform',
+    description: 'Log into the highly-optimized Startup Ecosystem securely.',
+  });
+}
 
 export default function LoginPage() {
   return (

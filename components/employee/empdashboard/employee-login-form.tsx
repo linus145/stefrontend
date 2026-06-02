@@ -54,7 +54,7 @@ export function EmployeeLoginForm() {
       localStorage.setItem('demo_employee_user', JSON.stringify(
         isManager ? {
           id: 'demo-mgr-001',
-          email: 'manager@b2linq.com',
+          email: 'manager@b2linq.in',
           first_name: 'Sarah',
           last_name: 'Conner',
           role: 'MANAGER',
@@ -64,7 +64,7 @@ export function EmployeeLoginForm() {
           joining_date: '2022-06-10'
         } : {
           id: 'demo-emp-001',
-          email: 'employee@b2linq.com',
+          email: 'employee@b2linq.in',
           first_name: 'David',
           last_name: 'Miller',
           role: 'EMPLOYEE',

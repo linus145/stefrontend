@@ -209,10 +209,10 @@ export function CareersList({ jobs = [] }: CareersListProps) {
                     We aren't actively advertising any open roles. If you'd like to work with us anyway, please reach out via email.
                   </p>
                   <a 
-                    href="mailto:careers@b2linq.com" 
+                    href="mailto:careers@b2linq.in" 
                     className="inline-flex items-center text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 mt-4 underline underline-offset-4"
                   >
-                    careers@b2linq.com
+                    careers@b2linq.in
                   </a>
                 </div>
               ) : (
@@ -297,7 +297,7 @@ export function CareersList({ jobs = [] }: CareersListProps) {
             {/* Actions */}
             <div className="border-t border-slate-100 dark:border-slate-800 pt-8 flex items-center justify-between">
               <a
-                href={`mailto:careers@b2linq.com?subject=Application for ${selectedJob.role}`}
+                href={`mailto:careers@b2linq.in?subject=Application for ${selectedJob.role}`}
                 className="text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 flex items-center gap-1.5 underline underline-offset-4"
               >
                 <Mail className="w-4 h-4" /> Apply via Email

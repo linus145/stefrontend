@@ -3,10 +3,14 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 
-export const metadata: Metadata = {
-  title: 'Register | B2linq Platform',
-  description: 'Sign up for the highly-optimized Startup Ecosystem.',
-};
+import { getPageMetadata } from '@/lib/seo';
+
+export async function generateMetadata(): Promise<Metadata> {
+  return getPageMetadata('/register', {
+    title: 'Register | B2linq Platform',
+    description: 'Sign up for the highly-optimized Startup Ecosystem.',
+  });
+}
 
 export default function RegisterPage() {
   return (

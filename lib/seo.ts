@@ -25,7 +25,7 @@ export function normalizePath(rawPath: string): string {
 
 export async function getPageMetadata(path: string, defaultMeta: Metadata): Promise<Metadata> {
   const normalizedPath = normalizePath(path);
-  const siteUrl = 'https://b2linq.com'; // Production URL baseline
+  const siteUrl = 'https://www.b2linq.in'; // Production URL baseline
 
   const defaultMetaBase = {
     metadataBase: new URL(siteUrl),

@@ -30,13 +30,13 @@ export default async function CareersPage() {
         '@type': 'ListItem',
         'position': 1,
         'name': 'Home',
-        'item': 'https://b2linq.com'
+        'item': 'https://www.b2linq.in'
       },
       {
         '@type': 'ListItem',
         'position': 2,
         'name': 'Careers',
-        'item': 'https://b2linq.com/careers'
+        'item': 'https://www.b2linq.in/careers'
       }
     ]
   };
@@ -51,7 +51,7 @@ export default async function CareersPage() {
     'hiringOrganization': {
       '@type': 'Organization',
       'name': 'B2linq',
-      'sameAs': 'https://b2linq.com'
+      'sameAs': 'https://www.b2linq.in'
     },
     'jobLocation': {
       '@type': 'Place',
@@ -91,8 +91,8 @@ export default async function CareersPage() {
           <div className="max-w-4xl mx-auto px-6 text-center">
             <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-50 mb-4 transition-colors duration-300">Don't see a fit?</h2>
             <p className="text-slate-600 dark:text-slate-400 mb-8 transition-colors duration-300">We are always looking for exceptional talent. Drop us a line.</p>
-            <a href="mailto:careers@b2linq.com" className="text-indigo-600 dark:text-indigo-400 font-bold hover:text-indigo-500 dark:hover:text-indigo-300 underline underline-offset-4">
-              careers@b2linq.com
+            <a href="mailto:careers@b2linq.in" className="text-indigo-600 dark:text-indigo-400 font-bold hover:text-indigo-500 dark:hover:text-indigo-300 underline underline-offset-4">
+              careers@b2linq.in
             </a>
           </div>
         </section>

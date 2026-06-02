@@ -96,12 +96,12 @@ const NAVIGATION_ITEMS: { id: HRSection; label: string; icon: any; subItems?: { 
       // { id: 'performance-ai-insights', label: 'AI Insights' },
       // { id: 'performance-logs', label: 'Performance Logs' }
       { id: 'performance-dashboard', label: 'Overview' },
-  { id: 'performance-kpi', label: 'Create goal' },
-  { id: 'performance-goals', label: 'assgin goal' },
-  { id: 'performance-appraisal', label: 'Reviews' },
-  { id: 'performance-logs', label: 'Daily Activity' },
-  { id: 'performance-analytics', label: 'Insights' },
-  { id: 'performance-ai-insights', label: 'Agent analysis' },
+      { id: 'performance-kpi', label: 'Create goal' },
+      { id: 'performance-goals', label: 'assgin goal' },
+      { id: 'performance-appraisal', label: 'Reviews' },
+      { id: 'performance-logs', label: 'Daily Activity' },
+      { id: 'performance-analytics', label: 'Insights' },
+      { id: 'performance-ai-insights', label: 'Agent analysis' },
 
     ]
   },

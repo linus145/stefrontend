@@ -540,8 +540,8 @@ export function DashboardHeader({
                               "w-[20px] h-[20px] mb-1 transition-all group-hover/tab:scale-110",
                               activeSection === 'hire' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
                            )} />
-                           <div className="absolute -top-1 -right-4 px-1 py-0.5 bg-primary/20 border border-primary/30 rounded-[4px] text-[6px] font-black text-primary uppercase tracking-tighter scale-75 animate-pulse">
-                              Soon
+                           <div className="absolute -top-1.5 -right-4 px-1.5 py-0.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-[4px] text-[7px] font-black uppercase tracking-wider scale-75 shadow-[0_0_10px_rgba(16,185,129,0.5)] border border-emerald-400/20">
+                              New
                            </div>
                         </div>
                         <span className={cn(

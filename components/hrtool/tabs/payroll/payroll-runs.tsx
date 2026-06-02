@@ -392,7 +392,7 @@ export function PayrollRuns() {
                   </tr>
                 </thead>
                 <tbody>
-                  {sortedRuns.map((run: any) => (
+                  {sortedRuns.map((run: any, index: number) => (
                     <tr key={run.id} className="border-b border-slate-100 dark:border-slate-800/60 hover:bg-slate-50/50 dark:hover:bg-slate-800/10 transition-colors">
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
@@ -432,7 +432,7 @@ export function PayrollRuns() {
                             });
                           }}
                           disabled={rerunPending}
-                          data-agent={`payroll-rerun-btn-${getMonthName(run.month)}-${run.year}`}
+                          data-agent={`payroll-rerun-btn${index === 0 ? "" : `-${index}`}`}
                           title="Rerun"
                           className="border border-amber-500/20 hover:bg-amber-500/5 text-amber-600 bg-transparent rounded-sm font-bold text-xs h-7.5 w-7.5 p-0 cursor-pointer transition-all duration-300 inline-flex items-center justify-center"
                         >
@@ -454,7 +454,7 @@ export function PayrollRuns() {
                             });
                           }}
                           disabled={deletePending}
-                          data-agent={`payroll-delete-btn-${getMonthName(run.month)}-${run.year}`}
+                          data-agent={`payroll-delete-btn${index === 0 ? "" : `-${index}`}`}
                           title="Delete"
                           className="border border-red-500/20 hover:bg-red-500/5 text-red-600 bg-transparent rounded-sm font-bold text-xs h-7.5 w-7.5 p-0 cursor-pointer transition-all duration-300 inline-flex items-center justify-center"
                         >
@@ -462,7 +462,7 @@ export function PayrollRuns() {
                         </Button>
                         <Button 
                           onClick={() => setSelectedRun(run)}
-                          data-agent={`payroll-review-sheet-btn-${getMonthName(run.month)}-${run.year}`}
+                          data-agent={`payroll-review-sheet-btn${index === 0 ? "" : `-${index}`}`}
                           className="border border-[#0a66c2]/20 hover:bg-[#0a66c2]/5 text-[#0a66c2] dark:text-[#3b8fd9] dark:hover:bg-[#0a66c2]/10 bg-transparent rounded-sm font-bold text-xs h-7.5 px-3 cursor-pointer transition-all duration-300 inline-flex items-center gap-1"
                         >
                           Review sheet <ArrowRight className="h-3 w-3" />
@@ -623,7 +623,7 @@ export function PayrollRuns() {
                 });
               }}
               disabled={rerunPending}
-              data-agent={`payroll-drilldown-rerun-btn-${getMonthName(selectedRun.month)}-${selectedRun.year}`}
+              data-agent="payroll-drilldown-rerun-btn"
               className="bg-amber-600 hover:bg-amber-700 text-white shadow-md shadow-amber-500/15 rounded-sm text-xs font-bold py-2 px-4 cursor-pointer flex items-center gap-1.5 transition-all duration-300 h-9"
             >
               <RotateCcw className="h-3.5 w-3.5" /> Rerun Compilation

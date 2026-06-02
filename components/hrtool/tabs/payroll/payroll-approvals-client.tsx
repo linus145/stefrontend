@@ -165,7 +165,7 @@ export function PayrollApprovalsClient() {
             <Button 
               onClick={() => rejectMutation.mutate(selectedRun.id)}
               disabled={rejectMutation.isPending}
-              data-agent={`payroll-run-reject-btn-${selectedRun.id}`}
+              data-agent="payroll-run-reject-btn"
               className="border border-red-500/20 bg-transparent hover:bg-red-500/5 text-red-600 rounded-sm text-xs font-bold py-2 px-4 cursor-pointer transition-all duration-300"
             >
               Reject run
@@ -173,7 +173,7 @@ export function PayrollApprovalsClient() {
             <Button 
               onClick={() => approveMutation.mutate(selectedRun.id)}
               disabled={approveMutation.isPending || !approvalCheck.allowed}
-              data-agent={`payroll-run-approve-btn-${selectedRun.id}`}
+              data-agent="payroll-run-approve-btn"
               className="bg-[#0a66c2] hover:bg-[#084e96] text-white shadow-md shadow-blue-500/15 rounded-sm text-xs font-bold py-2 px-4 cursor-pointer transition-all duration-300 flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Check className="h-4 w-4" /> 
@@ -294,7 +294,7 @@ export function PayrollApprovalsClient() {
                 </tr>
               </thead>
               <tbody>
-                {list.map((run: any) => (
+                {list.map((run: any, index: number) => (
                   <tr key={run.id} className="border-b border-slate-100 dark:border-slate-800/60 hover:bg-slate-50/50 dark:hover:bg-slate-800/10 transition-colors">
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-3">
@@ -332,7 +332,7 @@ export function PayrollApprovalsClient() {
                     <td className="py-3 px-4 text-right">
                       <Button 
                         onClick={() => setSelectedRun(run)}
-                        data-agent={`payroll-approvals-review-sheet-btn-${run.id}`}
+                        data-agent={`payroll-approvals-review-sheet-btn${index === 0 ? "" : `-${index}`}`}
                         className="border border-[#0a66c2]/20 hover:bg-[#0a66c2]/5 text-[#0a66c2] dark:text-[#3b8fd9] dark:hover:bg-[#0a66c2]/10 bg-transparent rounded-sm font-bold text-xs h-7.5 px-3 cursor-pointer transition-all duration-300 inline-flex items-center gap-1"
                       >
                         Review sheet <ArrowRight className="h-3 w-3" />

@@ -12,7 +12,6 @@ import { Cpu, Save, ShieldCheck, Sparkles } from 'lucide-react';
 interface AgentSettingsData {
   id?: string;
   llm_model: string;
-  temperature: number;
   max_iterations: number;
   system_prompt: string;
   autonomy_level: string;
@@ -23,7 +22,6 @@ export function AgentSettingsTab() {
   const [isSaving, setIsSaving] = useState(false);
   const [settings, setSettings] = useState<AgentSettingsData>({
     llm_model: 'gemini-2.5-flash',
-    temperature: 0.1,
     max_iterations: 30,
     system_prompt: '',
     autonomy_level: 'full_autonomy',
@@ -107,10 +105,8 @@ export function AgentSettingsTab() {
                     onChange={(e) => setSettings({ ...settings, llm_model: e.target.value })}
                     className="w-full h-9 px-3 text-xs bg-slate-50 dark:bg-[#1c1d30] border border-slate-200 dark:border-slate-850 rounded-sm font-bold focus:outline-none focus:border-[#0a66c2]"
                   >
-                    <option value="gemini-2.5-flash">Gemini 2.5 Flash (Recommended - Fastest)</option>
-                    <option value="gemini-2.5-pro">Gemini 2.5 Pro (High Precision)</option>
-                    <option value="claude-3-5-sonnet">Claude 3.5 Sonnet (Autonomous Flows)</option>
-                    <option value="gpt-4o">GPT-4o (Standard Cognitive)</option>
+                    <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                    <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash Lite</option>
                   </select>
                 </div>
 
@@ -131,24 +127,6 @@ export function AgentSettingsTab() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                <div className="space-y-1.5">
-                  <div className="flex justify-between items-center">
-                    <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                      Creativity Temp ({settings.temperature})
-                    </label>
-                    <span className="text-[10px] font-bold text-[#0a66c2]">Deterministic</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="0"
-                    max="1.0"
-                    step="0.05"
-                    value={settings.temperature}
-                    onChange={(e) => setSettings({ ...settings, temperature: parseFloat(e.target.value) })}
-                    className="w-full h-2 bg-slate-100 rounded-sm appearance-none cursor-pointer accent-[#0a66c2] border-none outline-none dark:bg-slate-800"
-                  />
-                </div>
-
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                     Max Iteration Boundary limit
@@ -191,7 +169,7 @@ export function AgentSettingsTab() {
               <div className="space-y-3.5 text-xs text-slate-600 dark:text-slate-400 font-semibold leading-relaxed">
                 <div className="flex gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-[#0a66c2] mt-1.5 shrink-0" />
-                  <p>Lower temperatures force deterministic logic which is crucial for repetitive tasks like document formatting.</p>
+                  <p>Choose the model engine matching your task complexity and speed requirements.</p>
                 </div>
                 <div className="flex gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-[#0a66c2] mt-1.5 shrink-0" />

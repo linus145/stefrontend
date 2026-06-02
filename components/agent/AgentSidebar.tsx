@@ -36,13 +36,6 @@ export const AgentSidebar: React.FC = () => {
   // Load sidebar mode on mount to avoid SSR hydration mismatch
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const hasActiveContext = localStorage.getItem('agent_llm_context') || 
-                               localStorage.getItem('agent_active_plan') ||
-                               localStorage.getItem('agent_cross_tab_continuation');
-      if (hasActiveContext) {
-        setSidebarMode('ACT');
-        return;
-      }
       const savedMode = localStorage.getItem('agent_sidebar_mode');
       if (savedMode === 'ACT' || savedMode === 'PLAN') {
         setSidebarMode(savedMode);
@@ -213,7 +206,7 @@ export const AgentSidebar: React.FC = () => {
     try {
       // 1. Stop any active agent execution
       AgentController.getInstance().stopAgent();
-      
+
       // 2. Clear localStorage contexts
       localStorage.removeItem('agent_llm_context');
       localStorage.removeItem('agent_paused_action');
@@ -233,7 +226,7 @@ export const AgentSidebar: React.FC = () => {
 
       // 4. Clear conversation history in backend & state
       await handleClearChatHistory();
-      
+
       // 5. Add custom status log
       addLog("✨ Started a new conversation. All states reset successfully.", "success");
     } catch (error) {
@@ -301,10 +294,10 @@ export const AgentSidebar: React.FC = () => {
       setIsRunning(controller.getIsRunning());
     };
 
-    const onGoalComplete = (goal: string) => {
+    const onGoalComplete = async (goal: string) => {
       setStatus('Goal Completed');
       setIsRunning(false);
-      
+
       let cleanGoal = goal;
       if (goal.includes('You are now in the Interview Pipeline') || goal.length > 80) {
         const firstLine = goal.split('\n')[0].trim();
@@ -315,15 +308,51 @@ export const AgentSidebar: React.FC = () => {
         }
       }
       addLog(`Successfully completed goal: ${cleanGoal}`, 'success');
+
+      // RC-6 backup: finalize scheduling log if use-scheduling.ts hasn't already
+      if (typeof window !== 'undefined') {
+        const activeLogId = sessionStorage.getItem('active_scheduling_log_id');
+        if (activeLogId) {
+          sessionStorage.removeItem('active_scheduling_log_id');
+          try {
+            await api.patch(`/agentsettings/scheduling/logs/${activeLogId}/`, {
+              status: 'success',
+              completed_at: new Date().toISOString()
+            });
+            window.dispatchEvent(new CustomEvent('agent-scheduling-log-updated'));
+          } catch (err) {
+            console.error("Failed to complete scheduling log from sidebar:", err);
+          }
+        }
+      }
     };
 
-    const onTaskFailed = ({ task, error }: any) => {
+    const onTaskFailed = async ({ task, error }: any) => {
       setStatus(error === 'Execution terminated' ? 'Stopped' : 'Error');
       setIsRunning(false);
       if (error === 'Execution terminated') {
         addLog(error, 'error');
       } else {
         addLog(`Task failed: ${task.description} - ${error}`, 'error');
+      }
+
+      // RC-6 backup: finalize scheduling log if use-scheduling.ts hasn't already
+      if (typeof window !== 'undefined') {
+        const activeLogId = sessionStorage.getItem('active_scheduling_log_id');
+        if (activeLogId) {
+          sessionStorage.removeItem('active_scheduling_log_id');
+          const errorMsg = error || 'Execution terminated';
+          try {
+            await api.patch(`/agentsettings/scheduling/logs/${activeLogId}/`, {
+              status: 'failed',
+              completed_at: new Date().toISOString(),
+              error_message: errorMsg
+            });
+            window.dispatchEvent(new CustomEvent('agent-scheduling-log-updated'));
+          } catch (err) {
+            console.error("Failed to fail scheduling log from sidebar:", err);
+          }
+        }
       }
     };
 
@@ -562,6 +591,33 @@ export const AgentSidebar: React.FC = () => {
     setIsRunning(false);
   };
 
+  const handleStartRef = useRef(handleStart);
+  useEffect(() => {
+    handleStartRef.current = handleStart;
+  });
+
+  useEffect(() => {
+    const handleRunGoal = (e: any) => {
+      const targetGoal = e.detail.goal;
+      if (targetGoal) {
+        setIsVisible(true);
+        setSidebarMode('ACT');
+        setGoal(targetGoal); // Paste the command into the chat input
+
+        // After 600ms, simulate hitting enter / start
+        setTimeout(() => {
+          if (handleStartRef.current) {
+            handleStartRef.current(targetGoal);
+          }
+        }, 600);
+      }
+    };
+    window.addEventListener('agent-run-goal', handleRunGoal);
+    return () => {
+      window.removeEventListener('agent-run-goal', handleRunGoal);
+    };
+  }, []);
+
   const handleResume = () => {
     AgentController.getInstance().resumeAgent();
     setIsRunning(true);
@@ -668,9 +724,9 @@ export const AgentSidebar: React.FC = () => {
                   )}
                   title="Toggle Agent History"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
                 </button>
-                
+
                 {/* Tooltip */}
                 {!showHistoryView && (
                   <div className="absolute right-full top-1/2 -translate-y-1/2 mr-2.5 px-2 py-0.5 bg-foreground text-background text-[9px] font-bold rounded-[3px] opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-200 whitespace-nowrap shadow-md z-40 border border-border/10">
@@ -678,7 +734,7 @@ export const AgentSidebar: React.FC = () => {
                   </div>
                 )}
               </div>
-              
+
               {/* Close arrow — slides sidebar back to the right */}
               <button
                 onClick={() => AgentUIController.getInstance().toggleSidebar()}

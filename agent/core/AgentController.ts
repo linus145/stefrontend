@@ -1,5 +1,4 @@
-
-import { AgentPlanner, AgentPlan } from '@/agent/planner/AgentPlanner';
+import { AgentPlanner, AgentPlan, AgentTask } from '@/agent/planner/AgentPlanner';
 import { AgentExecutor } from '@/agent/executor/AgentExecutor';
 import { AgentMemory } from '@/agent/memory/AgentMemory';
 import { AgentMonitor } from '@/agent/monitoring/AgentMonitor';
@@ -19,17 +18,6 @@ interface LLMAction {
   error?: string;
 }
 
-/**
- * AgentController — orchestrates both:
- *  1. Legacy DOM-based agent (for simple tasks like job posting)
- *  2. LLM-powered observe→think→act loop (for complex autonomous tasks)
- * 
- * The LLM mode runs ENTIRELY in-browser:
- *  - StateObserver captures the page state
- *  - Backend LLM planner (Gemini) decides the next action
- *  - AgentExecutor executes the action in the DOM
- *  - Loop until done
- */
 export class AgentController {
   private static instance: AgentController;
   private planner: AgentPlanner;
@@ -61,30 +49,8 @@ export class AgentController {
     this.monitor = AgentMonitor.getInstance();
     this.stream = AgentRealtimeStream.getInstance();
     this.observer = StateObserver.getInstance();
-    
-    // Clear stale plans if a fresh cross-tab handover is pending
-    if (typeof window !== 'undefined') {
-      const continuation = localStorage.getItem('agent_cross_tab_continuation');
-      if (continuation) {
-        console.log('[AgentController] Pending cross-tab continuation detected. Clearing legacy/stale plans for fresh handover.');
-        localStorage.removeItem('agent_active_plan');
-        // Do NOT clear agent_llm_context so we preserve execution context and history
-      }
-    }
 
-    this.loadLLMContext();
-    this.checkCrossTabContinuation();
-    this.loadPersistedPlan();
-
-    // Sync across tabs
-    if (typeof window !== 'undefined') {
-      window.addEventListener('storage', (e) => {
-        if (e.key === 'agent_active_plan' && e.newValue) {
-          const parsed = JSON.parse(e.newValue);
-          this.currentPlan = parsed.plan;
-        }
-      });
-    }
+    this.initAsync();
   }
 
   private getTabId(): string {
@@ -104,22 +70,13 @@ export class AgentController {
     return AgentController.instance;
   }
 
-  /**
-   * Detect if this goal should use the LLM-powered agent.
-   * Complex tasks that involve navigation, interview pipeline,
-   * or multi-step flows benefit from the AI-driven agent.
-   * NOTE: UUID goals should NOT use LLM — they go through the legacy 
-   * screening plan first. LLM mode is only for cross-tab continuation
-   * (interview config in Tab 2) or explicit interview commands.
-   */
   private shouldUseLLM(goal: string): boolean {
     if (!goal) return false;
 
-    // UUID goals (programmatic candidate screening) → ALWAYS use legacy plan (screening → open tab → handover)
+    // UUID goals (programmatic candidate screening) → ALWAYS use legacy plan
     const uuidPattern = /[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/i;
     if (uuidPattern.test(goal)) return false;
 
-    // All other natural language prompts from the user use the smart, flexible LLM Planner!
     return true;
   }
 
@@ -131,6 +88,116 @@ export class AgentController {
     return this.isRunning;
   }
 
+  /**
+   * Async initialization to rehydrate execution state from Django DB
+   */
+  public async initAsync() {
+    if (typeof window === 'undefined') return;
+
+    // Parse URL query parameter for cross-tab execution handover
+    const urlParams = new URLSearchParams(window.location.search);
+    const executionId = urlParams.get('execution_id');
+
+    let activeExecution: any = null;
+
+    try {
+      if (executionId) {
+        console.log(`[AgentController] Recovering execution from URL param: ${executionId}`);
+        activeExecution = await aiAgentService.getExecutionState(executionId);
+      } else {
+        // Query the database for the active running execution for this session/user
+        activeExecution = await aiAgentService.getActiveExecution();
+      }
+    } catch (e) {
+      console.error('[AgentController] Error loading state from backend DB:', e);
+    }
+
+    // Guard against race conditions: if a goal has already been triggered, abort rehydration
+    if (this.isRunning) {
+      console.log('[AgentController] Aborting initAsync rehydration because agent is already running.');
+      return;
+    }
+
+    // Check if we retrieved a valid running execution (Terminal check)
+    if (activeExecution && activeExecution.active !== false && (activeExecution.status === 'running' || activeExecution.status === 'pending')) {
+      console.log(`[AgentController] Rehydrating active execution from backend: ${activeExecution.id}`);
+      this.currentExecutionId = activeExecution.id;
+      
+      const goalDetails = activeExecution.goal_details;
+      this.llmGoal = goalDetails?.goal || activeExecution.metadata?.goal || '';
+      this.originalGoal = goalDetails?.goal || activeExecution.metadata?.goal || '';
+      this._isLLMMode = this.shouldUseLLM(this.llmGoal);
+
+      // Restore action history from backend
+      if (activeExecution.agent_actions && activeExecution.agent_actions.length > 0) {
+        this.llmActionHistory = activeExecution.agent_actions.map((act: any) => ({
+          action_type: act.action_type,
+          selector: act.action_payload?.selector,
+          value: act.action_payload?.value,
+          description: act.action_payload?.description,
+          thinking: act.action_payload?.thinking,
+        }));
+      } else if (activeExecution.actions_performed && activeExecution.actions_performed.length > 0) {
+        this.llmActionHistory = activeExecution.actions_performed.map((act: any) => ({
+          action_type: act.type || act.action_type || '',
+          selector: act.selector,
+          value: act.value,
+          description: act.description,
+        }));
+      } else {
+        this.llmActionHistory = [];
+      }
+
+      this.llmIteration = this.llmActionHistory.length;
+
+      // Sync AgentMemory history with backend memories
+      const memoryInstance = AgentMemory.getInstance();
+      memoryInstance.setExecutionId(activeExecution.id);
+      if (activeExecution.memories && activeExecution.memories.length > 0) {
+        const parsedHistory = activeExecution.memories.map((m: any) => ({
+          timestamp: new Date(m.created_at).getTime(),
+          type: m.memory_type as any,
+          content: m.memory_value,
+        }));
+        memoryInstance.loadHistory(parsedHistory);
+      }
+
+      // If there's a legacy plan saved in metadata, load it
+      if (!this._isLLMMode && activeExecution.metadata?.plan) {
+        this.currentPlan = activeExecution.metadata.plan;
+      }
+
+      // Double execution prevention check for cross-tab active owner
+      if (typeof window !== 'undefined') {
+        const activeTabId = localStorage.getItem('agent_active_tab_id');
+        if (activeTabId && activeTabId !== this.getTabId()) {
+          console.log(`[AgentController] Suppressing auto-resume in tab ${this.getTabId()} because active tab is ${activeTabId}`);
+          return;
+        }
+        localStorage.setItem('agent_active_tab_id', this.getTabId());
+      }
+
+      // Resume execution
+      this.isRunning = true;
+      this.stream.emit('status', `🔄 Resuming active goal: ${this.originalGoal}`);
+      
+      setTimeout(() => {
+        if (this._isLLMMode) {
+          this.runLLMLoop(this.llmGoal, undefined, true);
+        } else if (this.currentPlan) {
+          this.executePlan();
+        }
+      }, 1000);
+
+    } else {
+      console.log('[AgentController] Safe initialization completed. No active goals.');
+      // Clean local runtime
+      this.isRunning = false;
+      this.currentExecutionId = null;
+      AgentMemory.getInstance().setExecutionId(null);
+    }
+  }
+
   public async startGoal(goal: string) {
     if (this.isRunning) return;
     this.isRunning = true;
@@ -139,8 +206,6 @@ export class AgentController {
       localStorage.setItem('agent_active_tab_id', this.getTabId());
     }
 
-    // Track original goal for clean completion message
-    // If it's a continuation, we keep the existing originalGoal
     if (!goal.toLowerCase().includes('regarding my previous request')) {
       this.originalGoal = goal;
     }
@@ -156,21 +221,20 @@ export class AgentController {
     } else {
       this._isLLMMode = false;
       this.stream.emit('status', `Planning goal: ${goal}`);
-      await this.createBackendExecution(goal);
       const plan = await this.planner.generatePlan(goal);
-      
-      if (!this.isRunning) return; // Stop if user cancelled during planning
-      
+
+      if (!this.isRunning) return;
+
       this.currentPlan = plan;
       this.memory.remember('decision', { goal, plan: this.currentPlan });
-      this.persistPlan();
+      await this.createBackendExecution(goal, plan);
       this.executePlan();
     }
   }
 
   public stopAgent() {
     this.isRunning = false;
-    this.persistLLMContext(); // Persist Stopped state so we can resume later
+    this.updateBackendExecution('failed').catch(e => console.error(e));
     if (typeof window !== 'undefined') {
       const activeTabId = localStorage.getItem('agent_active_tab_id');
       if (activeTabId === this.getTabId()) {
@@ -182,8 +246,7 @@ export class AgentController {
 
   public async resumeAgent() {
     if (this.isRunning) return;
-    
-    // Safety check: if no state exists, we can't resume
+
     if (!this.llmGoal && !this.currentPlan) {
       this.stream.emit('status', `⚠️ No active task found to resume.`);
       return;
@@ -192,6 +255,10 @@ export class AgentController {
     this.isRunning = true;
     if (typeof window !== 'undefined') {
       localStorage.setItem('agent_active_tab_id', this.getTabId());
+    }
+
+    if (this.currentExecutionId) {
+      await this.updateBackendExecution('running');
     }
 
     if (this.llmGoal) {
@@ -207,8 +274,6 @@ export class AgentController {
     }
   }
 
-  // ── LLM-Powered Observe → Think → Act Loop ──────────────────
-
   private async runLLMLoop(goal: string, userResponse?: string, isResume: boolean = false) {
     this.llmGoal = goal;
     if (!isResume) {
@@ -219,18 +284,14 @@ export class AgentController {
     try {
       while (this.isRunning && this.llmIteration < AgentController.MAX_LLM_ITERATIONS) {
         this.llmIteration++;
-        this.persistLLMContext(); // Persist at the start of each iteration
         this.stream.emit('status', `Iteration ${this.llmIteration}/${AgentController.MAX_LLM_ITERATIONS} — Observing page...`);
 
-        // Small delay to let page settle after last action
         await this.wait(800);
- 
-        // 1. OBSERVE — capture current page state
+
         const pageState = this.observer.capture();
         this.stream.emit('status', `📸 Captured ${pageState.visible_elements.length} elements | ${pageState.active_step || pageState.url}`);
 
-        // 2. THINK — ask backend LLM for next action
-        if (!this.isRunning) break; // STOP CHECK: Before thinking
+        if (!this.isRunning) break;
         this.stream.emit('status', `🧠 Analyzing with AI...`);
 
         let action: LLMAction;
@@ -243,7 +304,6 @@ export class AgentController {
             iteration: this.llmIteration,
             user_response: userResponse || null,
           });
-          // Clear user response after using it once
           userResponse = undefined;
         } catch (error: any) {
           this.stream.emit('status', `⚠️ LLM request failed: ${error.message}. Retrying...`);
@@ -251,36 +311,36 @@ export class AgentController {
           continue;
         }
 
-        // Show the LLM's thinking
         if (action.thinking) {
           this.stream.emit('status', `🧠 ${action.thinking}`);
+          // Save Decision to backend
+          if (this.currentExecutionId) {
+            aiAgentService.saveDecision(this.currentExecutionId, {
+              decision_type: action.action_type,
+              decision_data: action,
+              reasoning_data: { thinking: action.thinking }
+            }).catch(e => console.error(e));
+          }
         }
 
-        // 3. CHECK — is the goal complete?
         if (action.action_type === 'done') {
           this.stream.emit('goal_complete', this.llmGoal);
-          localStorage.removeItem('agent_llm_context'); // Clear memory on completion
           await this.updateBackendExecution('success', this.llmActionHistory);
           break;
         }
 
-        // 4. CHECK — does the LLM need user input?
         if (action.action_type === 'ask_user') {
           this.stream.emit('status', `❓ Agent is asking you a question...`);
           this._isWaitingForUser = true;
           this._userResponse = null;
 
-          // Do not save agent's question to conversational chat history in ACT mode
-
-          // Dispatch event so the sidebar shows the question
           window.dispatchEvent(new CustomEvent('agent-ask-user', {
-            detail: { 
+            detail: {
               message: action.value || 'I need more information.',
               options: action.options || []
             }
           }));
 
-          // Wait for user response (poll every 500ms, max 5 min)
           const waitStart = Date.now();
           while (this._isWaitingForUser && (Date.now() - waitStart) < 300000) {
             await this.wait(500);
@@ -292,16 +352,22 @@ export class AgentController {
             userResponse = reply;
             this._userResponse = null;
 
-            // Do not save user response to conversational chat history in ACT mode
-
-            // Record in history
             this.llmActionHistory.push({
               action_type: 'ask_user',
               value: action.value,
               description: `Asked user: ${action.value} → User said: ${userResponse}`,
             });
+
+            // Save Action to backend
+            if (this.currentExecutionId) {
+              aiAgentService.saveAction(this.currentExecutionId, {
+                action_type: 'ask_user',
+                action_payload: { value: action.value, user_reply: userResponse }
+              }).catch(e => console.error(e));
+            }
+
             await this.updateBackendExecution('running', this.llmActionHistory);
-            continue; // Go back to THINK with user's response
+            continue;
           } else {
             this.stream.emit('status', `⏱️ No response received. Stopping.`);
             this.isRunning = false;
@@ -311,13 +377,25 @@ export class AgentController {
           }
         }
 
-        // 5. ACT — execute the action via DOM executor
         const description = action.description || action.action_type;
         this.stream.emit('action_start', { type: action.action_type, selector: action.selector || '', description });
-        
-        if (!this.isRunning) break; // STOP CHECK: Before execution
+
+        if (!this.isRunning) break;
 
         this.stream.emit('status', `⚡ Executing: ${description}`);
+
+        // Save Checkpoint before execution
+        if (this.currentExecutionId) {
+          aiAgentService.saveCheckpoint(this.currentExecutionId, {
+            checkpoint_data: {
+              iteration: this.llmIteration,
+              url: window.location.href,
+              action_type: action.action_type,
+              selector: action.selector,
+              value: action.value
+            }
+          }).catch(e => console.error(e));
+        }
 
         let success = true;
         try {
@@ -328,30 +406,35 @@ export class AgentController {
           this.stream.emit('status', `❌ Action failed: ${error.message}`);
         }
 
-        // Record in history
-        this.llmActionHistory.push({
+        const historyItem = {
           ...action,
           ...(success ? {} : { error: 'Action failed' }),
-        });
+        };
+        this.llmActionHistory.push(historyItem);
+
+        // Save Action to backend
+        if (this.currentExecutionId) {
+          aiAgentService.saveAction(this.currentExecutionId, {
+            action_type: action.action_type,
+            action_payload: historyItem
+          }).catch(e => console.error(e));
+        }
+
         await this.updateBackendExecution('running', this.llmActionHistory);
 
-        // AUTO-STOP: If we just returned to the pipeline page after a full flow, STOP.
-        // This prevents the agent from looping after a successful dispatch + return.
         const currentUrl = window.location.href;
         const isOnPipeline = currentUrl.includes('/AIInterviews') || currentUrl.includes('/recruiter/AIInterviews');
         const hasReturnedToPipeline = this.llmActionHistory.some(
           a => a.selector === 'return-to-pipeline-button' && a.action_type === 'click'
         );
-        
+
         if (isOnPipeline && hasReturnedToPipeline && this.llmIteration > 3) {
           this.stream.emit('status', `✅ Full flow completed. Returned to pipeline. Stopping.`);
           this.stream.emit('goal_complete', this.llmGoal);
-          localStorage.removeItem('agent_llm_context');
           await this.updateBackendExecution('success', this.llmActionHistory);
           break;
         }
 
-        // Wait after action
         const waitTime = action.wait_after_ms || 1000;
         if (waitTime > 0) {
           await this.wait(waitTime);
@@ -370,8 +453,6 @@ export class AgentController {
       this.isRunning = false;
       this._isLLMMode = false;
       this._isWaitingForUser = false;
-      const finalStatus = this.llmActionHistory.some(a => a.error) ? 'failed' : 'success';
-      await this.updateBackendExecution(finalStatus, this.llmActionHistory);
       if (typeof window !== 'undefined') {
         const activeTabId = localStorage.getItem('agent_active_tab_id');
         if (activeTabId === this.getTabId()) {
@@ -381,9 +462,6 @@ export class AgentController {
     }
   }
 
-  /**
-   * Execute a single LLM-decided action using the existing DOM executor.
-   */
   private async executeLLMAction(action: LLMAction): Promise<void> {
     switch (action.action_type) {
       case 'click':
@@ -406,34 +484,39 @@ export class AgentController {
         break;
 
       case 'wait':
-        // Wait is handled by the wait_after_ms field
         break;
 
       case 'open_new_tab':
         if (!action.value) throw new Error('No URL for open_new_tab');
-        
-        // Save continuation for the NEW tab to pick up
+
+        // Pass execution ID in URL query parameters for stateless recovery
+        const targetUrl = new URL(action.value, window.location.origin);
+        if (this.currentExecutionId) {
+          targetUrl.searchParams.set('execution_id', this.currentExecutionId);
+        }
+
         if (typeof window !== 'undefined') {
-          localStorage.setItem('agent_cross_tab_continuation', JSON.stringify({
-            goal: this.llmGoal, // Keep the current goal
-            timestamp: Date.now(),
-            sourceUrl: window.location.href,
-          }));
           const activeTabId = localStorage.getItem('agent_active_tab_id');
           if (activeTabId === this.getTabId()) {
             localStorage.removeItem('agent_active_tab_id');
           }
         }
 
-        window.open(action.value, '_blank');
+        window.open(targetUrl.toString(), '_blank');
         this.stream.emit('status', 'Handing over execution to new tab...');
-        this.isRunning = false; // Stop in current tab
+        this.isRunning = false;
         break;
 
       case 'navigate':
         if (!action.value) throw new Error('No path for navigate');
-        this.persistLLMContext();
-        window.location.href = action.value;
+        
+        // Pass execution ID to next page
+        const navUrl = new URL(action.value, window.location.origin);
+        if (this.currentExecutionId) {
+          navUrl.searchParams.set('execution_id', this.currentExecutionId);
+        }
+        
+        window.location.href = navUrl.toString();
         break;
 
       case 'click-skill':
@@ -446,76 +529,12 @@ export class AgentController {
     }
   }
 
-  private persistLLMContext() {
-    if (typeof window === 'undefined') return;
-    localStorage.setItem('agent_llm_context', JSON.stringify({
-      goal: this.llmGoal,
-      originalGoal: this.originalGoal,
-      history: this.llmActionHistory,
-      iteration: this.llmIteration,
-      isRunning: this.isRunning,
-      timestamp: Date.now()
-    }));
-  }
-
-  private loadLLMContext() {
-    if (typeof window === 'undefined') return;
-    const data = localStorage.getItem('agent_llm_context');
-    if (!data) return;
-
-    // If there is a pending cross-tab handover, let checkCrossTabContinuation handle it
-    if (localStorage.getItem('agent_cross_tab_continuation')) {
-      console.log('[AgentController] Pending cross-tab continuation found. Skipping loadLLMContext resume.');
-      return;
-    }
-
-    try {
-      const context = JSON.parse(data);
-      const age = Date.now() - (context.timestamp || 0);
-
-      // Only pick up if it's very fresh (less than 5 minutes)
-      if (age < 5 * 60 * 1000) {
-        this.originalGoal = context.originalGoal || context.goal;
-        this.llmGoal = context.goal;
-        this.llmActionHistory = context.history || [];
-        this.llmIteration = context.iteration || 0;
-        
-        if (context.isRunning) {
-          // Guard: only resume if this tab is the active agent tab
-          const activeTabId = localStorage.getItem('agent_active_tab_id');
-          if (activeTabId && activeTabId !== this.getTabId()) {
-            console.log(`[AgentController] Suppressing resume in tab ${this.getTabId()} because active tab is ${activeTabId}`);
-            return;
-          }
-
-          this.stream.emit('status', `🔄 Resuming autonomous goal: ${this.originalGoal}`);
-          this.isRunning = true;
-          this._isLLMMode = true;
-          setTimeout(() => {
-            this.runLLMLoop(this.llmGoal, undefined, true);
-          }, 1000);
-        } else {
-          this.stream.emit('status', `Stopped: ${this.originalGoal}`);
-        }
-      } else {
-        localStorage.removeItem('agent_llm_context');
-      }
-    } catch (e) {
-      localStorage.removeItem('agent_llm_context');
-    }
-  }
-
-  /**
-   * Called when the user provides a response to an agent question (LLM mode).
-   */
   public sendPlaywrightResponse(response: string) {
     this._userResponse = response;
     this._isWaitingForUser = false;
 
-    // If we are NOT in LLM mode (Legacy), we need to re-trigger the plan generation
-    // based on the user's answer.
     if (!this._isLLMMode) {
-      this.isRunning = false; // Reset to allow startGoal to run
+      this.isRunning = false;
       this.startGoal(`Regarding my previous request: ${this.lastQuestion}\nUser Reply: ${response}`);
     }
   }
@@ -524,16 +543,32 @@ export class AgentController {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  private async createBackendExecution(goal: string) {
+  private async createBackendExecution(goal: string, plan?: any) {
     try {
+      // 1. Create backend Goal record
+      const goalRes = await aiAgentService.createGoal({
+        goal,
+        goal_type: this.shouldUseLLM(goal) ? 'autonomous' : 'legacy',
+        status: 'running',
+        priority: 'medium'
+      });
+
+      // 2. Create Execution record
       const res = await aiAgentService.createExecution({
         agent_type: 'browser_agent',
         status: 'running',
         actions_performed: [],
-        metadata: { goal }
+        metadata: { goal, plan: plan || null, goal_id: goalRes.id }
       });
+      
       if (res && res.id) {
         this.currentExecutionId = res.id;
+        AgentMemory.getInstance().setExecutionId(res.id);
+        
+        // Link execution to goal
+        await aiAgentService.updateExecution(res.id, {
+          goal: goalRes.id
+        });
       }
     } catch (e) {
       console.error('Failed to create backend execution record:', e);
@@ -554,6 +589,8 @@ export class AgentController {
       }
       if (status === 'success' || status === 'failed') {
         data.completed_at = new Date().toISOString();
+        // Disconnect memory context
+        AgentMemory.getInstance().setExecutionId(null);
       }
       await aiAgentService.updateExecution(this.currentExecutionId, data);
     } catch (e) {
@@ -561,97 +598,10 @@ export class AgentController {
     }
   }
 
-  /**
-   * Check if another tab left a continuation goal for us.
-   * This is how the agent "follows" across tabs:
-   *   Tab 1 (recruiter dashboard) → completes screening → opens AI Interviews in Tab 2
-   *   Tab 1 saves continuation goal to localStorage
-   *   Tab 2 loads → AgentController initializes → calls this method
-   *   This method finds the goal → auto-starts the LLM agent loop
-   */
-  private checkCrossTabContinuation() {
-    if (typeof window === 'undefined') return;
-
-    const data = localStorage.getItem('agent_cross_tab_continuation');
-    if (!data) return;
-
-    try {
-      const continuation = JSON.parse(data);
-      const age = Date.now() - (continuation.timestamp || 0);
-
-      // Only pick up continuations that are less than 5 minutes old
-      if (age > 5 * 60 * 1000) {
-        localStorage.removeItem('agent_cross_tab_continuation');
-        return;
-      }
-
-      // Allow same-page continuation if it's very recent (less than 30s) to handle reloads
-      if (continuation.sourceUrl && window.location.href === continuation.sourceUrl && age > 30000) {
-        return;
-      }
-
-      // Clear it immediately so we don't pick it up again
-      localStorage.removeItem('agent_cross_tab_continuation');
-
-      this.stream.emit('status', '🔄 Agent handover detected from previous tab — continuing autonomously...');
-
-      // Load context from localStorage if present to preserve execution memory and chain
-      const contextData = localStorage.getItem('agent_llm_context');
-      if (contextData) {
-        try {
-          const context = JSON.parse(contextData);
-          this.originalGoal = context.originalGoal || context.goal;
-          this.llmGoal = context.goal;
-          this.llmActionHistory = context.history || [];
-          this.llmIteration = context.iteration || 0;
-        } catch (e) {
-          console.error('[AgentController] Error loading context during handover:', e);
-        }
-      }
-
-      // Claim active tab status!
-      localStorage.setItem('agent_active_tab_id', this.getTabId());
-
-      this.isRunning = true;
-      this._isLLMMode = true;
-      // Give the page a moment to fully render before starting
-      setTimeout(() => {
-        this.runLLMLoop(this.llmGoal || continuation.goal, undefined, true);
-      }, 1000);
-
-    } catch (e) {
-      localStorage.removeItem('agent_cross_tab_continuation');
-    }
-  }
-
-  // ── Legacy DOM Agent (unchanged) ─────────────────────────────
-
-  private persistPlan() {
-    if (typeof window !== 'undefined' && this.currentPlan) {
-      localStorage.setItem('agent_active_plan', JSON.stringify({
-        plan: this.currentPlan,
-        isRunning: this.isRunning
-      }));
-    }
-  }
-
   private loadPersistedPlan() {
-    if (typeof window !== 'undefined') {
-      const data = localStorage.getItem('agent_active_plan');
-      if (data) {
-        const parsed = JSON.parse(data);
-        this.currentPlan = parsed.plan;
-        if (parsed.isRunning && this.currentPlan) {
-          this.isRunning = true;
-          this.executePlan();
-        }
-      }
-    }
-  }
-
-  private clearPersistedPlan() {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('agent_active_plan');
+    // Legacy compatibility for run execution state rehydration
+    if (this.currentPlan && this.isRunning) {
+      this.executePlan();
     }
   }
 
@@ -663,132 +613,125 @@ export class AgentController {
 
       this.stream.emit('task_start', task);
       task.status = 'running';
-      this.persistPlan();
 
       try {
         const startIndex = task.currentActionIndex || 0;
-        
+
         for (let i = startIndex; i < task.actions.length; i++) {
-          if (!this.isRunning) return; // Immediate stop check
+          if (!this.isRunning) return;
 
           const action = task.actions[i];
           task.currentActionIndex = i;
-          
+
           this.stream.emit('action_start', action);
-          
-          if (!this.isRunning) break; // Check before executing
-          
+
+          if (!this.isRunning) break;
+
           await this.executor.execute(action);
           this.memory.remember('action', action);
           this.stream.emit('action_complete', action);
 
-          this.legacyActionHistory.push({
+          const historyItem = {
             action_type: action.type,
             selector: action.selector || '',
             value: action.value || '',
             description: action.description || action.message || action.type
-          });
+          };
+          this.legacyActionHistory.push(historyItem);
+
+          if (this.currentExecutionId) {
+            aiAgentService.saveAction(this.currentExecutionId, {
+              action_type: action.type,
+              action_payload: historyItem
+            }).catch(e => console.error(e));
+          }
+
           await this.updateBackendExecution('running', this.legacyActionHistory);
 
           if (action.type === 'ask_user') {
             this.lastQuestion = action.message || '';
-            // Do not save agent plan question to conversational chat history in ACT mode
             task.status = 'paused';
-            this.persistPlan();
             this.stream.emit('task_paused', task);
-            this.isRunning = false;
-            await this.updateBackendExecution('running', this.legacyActionHistory);
-            return; 
-          }
-
-          if (action.type === 'open_new_tab') {
-            // Check if we are resuming from a pause at this index
-            let isPausedAtThisIndex = false;
-            if (typeof window !== 'undefined') {
-              isPausedAtThisIndex = localStorage.getItem('agent_paused_tab_transition') === i.toString();
-            }
-
-            if (!isPausedAtThisIndex) {
-              // Pause execution and ask the user to click play/resume to proceed to the next tab
-              if (typeof window !== 'undefined') {
-                localStorage.setItem('agent_paused_tab_transition', i.toString());
-              }
-              task.status = 'paused';
-              this.persistPlan();
-              this.stream.emit('status', `🔔 Phase Completed. Ready to proceed to the next tab.`);
-              this.stream.emit('task_paused', task);
-              
-              // Dispatch event to prompt the user in the conversational log
-              if (typeof window !== 'undefined') {
-                window.dispatchEvent(new CustomEvent('agent-ask-user', {
-                  detail: { 
-                    message: `AI Screening completed successfully! 📊 Would you like to proceed to the Interview Pipeline (${action.value}) now? Click the Play (Continue) button in the sidebar to proceed.`,
-                    options: ['Click the Play/Continue button to proceed']
-                  }
-                }));
-              }
-              
-              this.isRunning = false;
-              await this.updateBackendExecution('running', this.legacyActionHistory);
-              return;
-            }
-
-            // Resuming! Clear the pause flag
-            if (typeof window !== 'undefined') {
-              localStorage.removeItem('agent_paused_tab_transition');
-            }
-
-            // Save a continuation goal for the new tab to pick up
-            const continuationGoal = `You are now in the Interview Pipeline. 
-1. Click 'Sync Pipeline' (data-agent="sync-pipeline-button") first.
-2. Observe the candidates (data-agent="candidate-name") and their roles.
-3. ASK THE USER: "Which candidate would you like to configure the interview for?"
-4. Wait for the user's response. Once identified, click the 'Configure' or 'Reconfigure' button (data-agent="configure-interview-button") for that specific candidate.
-5. In the Architecture step, read the job title (data-agent="target-job-title").
-6. Based on the job title and seniority (e.g., 'Senior', 'Frontend', 'Backend'), autonomously select the most appropriate interview rounds. Add them using the 'Add' button (data-agent="add-round-button") and configure them (Strategy, Depth, Format).
-7. If the user mentioned a specific number of rounds or types, respect those instructions first.
-8. If unsure about the perfect round types for this specific role, ASK THE USER for advice.
-9. Be fast, precise, and professional.`;
-            if (typeof window !== 'undefined') {
-              localStorage.setItem('agent_cross_tab_continuation', JSON.stringify({
-                goal: continuationGoal,
-                timestamp: Date.now(),
-                sourceUrl: window.location.href,
-              }));
-            }
-
-            task.currentActionIndex = i + 1;
-            task.status = 'paused';
-            this.persistPlan();
-            this.stream.emit('status', 'Continuing execution on new page...');
             this.isRunning = false;
             await this.updateBackendExecution('running', this.legacyActionHistory);
             return;
           }
 
+          if (action.type === 'open_new_tab') {
+            let isPausedAtThisIndex = false;
+            if (typeof window !== 'undefined') {
+              isPausedAtThisIndex = sessionStorage.getItem('agent_paused_tab_transition') === i.toString();
+            }
+
+            if (!isPausedAtThisIndex) {
+              if (typeof window !== 'undefined') {
+                sessionStorage.setItem('agent_paused_tab_transition', i.toString());
+              }
+              task.status = 'paused';
+              this.stream.emit('status', `🔔 Phase Completed. Ready to proceed to the next tab.`);
+              this.stream.emit('task_paused', task);
+
+              if (typeof window !== 'undefined') {
+                window.dispatchEvent(new CustomEvent('agent-ask-user', {
+                  detail: {
+                    message: `AI Screening completed successfully! 📊 Would you like to proceed to the Interview Pipeline (${action.value}) now? Click the Play (Continue) button in the sidebar to proceed.`,
+                    options: ['Click the Play/Continue button to proceed']
+                  }
+                }));
+              }
+
+              this.isRunning = false;
+              await this.updateBackendExecution('running', this.legacyActionHistory);
+              return;
+            }
+
+            if (typeof window !== 'undefined') {
+              sessionStorage.removeItem('agent_paused_tab_transition');
+            }
+
+            const targetUrl = new URL(action.value, window.location.origin);
+            if (this.currentExecutionId) {
+              targetUrl.searchParams.set('execution_id', this.currentExecutionId);
+            }
+
+            task.currentActionIndex = i + 1;
+            task.status = 'paused';
+            this.stream.emit('status', 'Continuing execution on new page...');
+            this.isRunning = false;
+            
+            window.open(targetUrl.toString(), '_blank');
+            return;
+          }
+
           task.currentActionIndex = i + 1;
-          this.persistPlan();
         }
-        
+
         task.status = 'completed';
-        this.persistPlan();
         this.stream.emit('task_complete', task);
       } catch (error) {
         task.status = 'failed';
-        this.persistPlan();
         this.stream.emit('task_failed', { task, error: (error as Error).message });
         this.isRunning = false;
-        this.legacyActionHistory.push({
+        
+        const errItem = {
           action_type: 'error',
           description: `Task failed: ${(error as Error).message}`
-        });
+        };
+        this.legacyActionHistory.push(errItem);
+
+        if (this.currentExecutionId) {
+          aiAgentService.saveAction(this.currentExecutionId, {
+            action_type: 'error',
+            action_payload: errItem
+          }).catch(e => console.error(e));
+        }
+
         await this.updateBackendExecution('failed', this.legacyActionHistory);
         return;
       }
     }
 
     this.isRunning = false;
-    this.clearPersistedPlan();
     this.stream.emit('goal_complete', this.originalGoal || this.currentPlan.goal);
     await this.updateBackendExecution('success', this.legacyActionHistory);
   }

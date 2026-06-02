@@ -1,3 +1,4 @@
+import { aiAgentService } from '@/services/ai-agents.service';
 
 export interface MemoryEntry {
   timestamp: number;
@@ -9,6 +10,7 @@ export class AgentMemory {
   private static instance: AgentMemory;
   private history: MemoryEntry[] = [];
   private preferences: Record<string, any> = {};
+  private executionId: string | null = null;
 
   private constructor() {
     this.loadFromStorage();
@@ -21,6 +23,14 @@ export class AgentMemory {
     return AgentMemory.instance;
   }
 
+  public setExecutionId(executionId: string | null) {
+    this.executionId = executionId;
+  }
+
+  public loadHistory(history: MemoryEntry[]) {
+    this.history = history;
+  }
+
   public remember(type: MemoryEntry['type'], content: any) {
     const entry: MemoryEntry = {
       timestamp: Date.now(),
@@ -28,6 +38,18 @@ export class AgentMemory {
       content
     };
     this.history.push(entry);
+    
+    // Asynchronously save to backend if we have a valid execution context
+    if (this.executionId) {
+      aiAgentService.saveMemory(this.executionId, {
+        memory_type: type,
+        memory_key: `history_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+        memory_value: content
+      }).catch(err => {
+        console.error('[AgentMemory] Failed to save memory to backend:', err);
+      });
+    }
+
     this.saveToStorage();
   }
 
@@ -46,20 +68,35 @@ export class AgentMemory {
 
   private saveToStorage() {
     if (typeof window !== 'undefined') {
-      localStorage.setItem('agent_memory', JSON.stringify({
-        history: this.history.slice(-100), // Keep last 100 entries
-        preferences: this.preferences
-      }));
+      // Local storage is restricted to preferences only (Category A)
+      localStorage.setItem('agent_preferences', JSON.stringify(this.preferences));
     }
   }
 
   private loadFromStorage() {
     if (typeof window !== 'undefined') {
-      const data = localStorage.getItem('agent_memory');
+      const data = localStorage.getItem('agent_preferences');
       if (data) {
-        const parsed = JSON.parse(data);
-        this.history = parsed.history || [];
-        this.preferences = parsed.preferences || {};
+        try {
+          this.preferences = JSON.parse(data) || {};
+        } catch (e) {
+          console.error('[AgentMemory] Failed to parse preferences:', e);
+          this.preferences = {};
+        }
+      } else {
+        // Migration/backward compatibility: try checking old agent_memory key
+        const legacyData = localStorage.getItem('agent_memory');
+        if (legacyData) {
+          try {
+            const parsed = JSON.parse(legacyData);
+            this.preferences = parsed.preferences || {};
+            // Immediately write to clean key and clean up old key
+            localStorage.setItem('agent_preferences', JSON.stringify(this.preferences));
+            localStorage.removeItem('agent_memory');
+          } catch (e) {
+            this.preferences = {};
+          }
+        }
       }
     }
   }

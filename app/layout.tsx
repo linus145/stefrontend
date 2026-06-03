@@ -60,7 +60,7 @@ export default function RootLayout({
                   '@id': 'https://www.b2linq.in/#organization',
                   'name': 'B2linq',
                   'url': 'https://www.b2linq.in',
-                  'logo': 'https://www.b2linq.in/logo.png',
+                  'logo': 'https://www.b2linq.in/logo.webp',
                   'sameAs': [
                     'https://www.linkedin.com/company/b2linq'
                   ],

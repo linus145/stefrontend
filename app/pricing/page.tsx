@@ -36,7 +36,7 @@ export default function PricingPage() {
     '@context': 'https://schema.org',
     '@type': 'Product',
     'name': 'B2linq Autonomous Recruiting Subscription',
-    'image': 'https://www.b2linq.in/logo.png',
+    'image': 'https://www.b2linq.in/logo.webp',
     'description': 'Subscription plans to deploy autonomous AI agents that handle talent sourcing, resume processing, and dynamic voice screening interviews.',
     'brand': {
       '@type': 'Brand',

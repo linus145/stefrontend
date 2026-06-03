@@ -84,7 +84,7 @@ export default async function BlogDetailPage({ params }: BlogPageProps) {
     '@type': 'BlogPosting',
     'headline': blog.title,
     'description': blog.excerpt,
-    'image': blog.image || 'https://www.b2linq.in/logo.png',
+    'image': blog.image || 'https://www.b2linq.in/logo.webp',
     'datePublished': blog.date || new Date().toISOString(),
     'author': {
       '@type': 'Person',
@@ -95,7 +95,7 @@ export default async function BlogDetailPage({ params }: BlogPageProps) {
       'name': 'B2linq',
       'logo': {
         '@type': 'ImageObject',
-        'url': 'https://www.b2linq.in/logo.png'
+        'url': 'https://www.b2linq.in/logo.webp'
       }
     },
     'mainEntityOfPage': {

@@ -46,12 +46,21 @@ export async function getPageMetadata(path: string, defaultMeta: Metadata): Prom
       siteName: 'B2linq Platform',
       locale: 'en_US',
       type: 'website',
+      images: defaultMeta.openGraph?.images || [
+        {
+          url: `${siteUrl}/logo.webp`,
+          width: 1200,
+          height: 630,
+          alt: 'B2linq - Autonomous Hiring Orchestration Platform',
+        }
+      ],
       ...defaultMeta.openGraph,
     },
     twitter: {
       card: 'summary_large_image',
       title: defaultMeta.title as string,
       description: defaultMeta.description as string,
+      images: defaultMeta.twitter?.images || [`${siteUrl}/logo.webp`],
       ...defaultMeta.twitter,
     }
   };
@@ -79,7 +88,9 @@ export async function getPageMetadata(path: string, defaultMeta: Metadata): Prom
       openGraph: {
         title: seo.og_title || seo.meta_title || (defaultMeta.openGraph?.title as string),
         description: seo.og_description || seo.meta_description || (defaultMeta.openGraph?.description as string),
-        images: seo.og_image ? [{ url: seo.og_image }] : defaultMeta.openGraph?.images,
+        images: seo.og_image 
+          ? [{ url: seo.og_image }] 
+          : (defaultMeta.openGraph?.images || [{ url: `${siteUrl}/logo.webp`, width: 1200, height: 630, alt: 'B2linq Platform' }]),
         url: `${siteUrl}${normalizedPath === '/' ? '' : normalizedPath}`,
         type: (seo.og_type || (defaultMeta.openGraph as any)?.type || 'website') as any,
       },
@@ -87,7 +98,9 @@ export async function getPageMetadata(path: string, defaultMeta: Metadata): Prom
         card: 'summary_large_image',
         title: seo.og_title || seo.meta_title || (defaultMeta.openGraph?.title as string),
         description: seo.og_description || seo.meta_description || (defaultMeta.openGraph?.description as string),
-        images: seo.og_image ? [seo.og_image] : undefined,
+        images: seo.og_image 
+          ? [seo.og_image] 
+          : (defaultMeta.twitter?.images || [`${siteUrl}/logo.webp`]),
       }
     };
   } catch (error) {

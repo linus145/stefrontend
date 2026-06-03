@@ -156,7 +156,7 @@ export function MyJobsTab({ isApproved, onViewApplications }: MyJobsTabProps) {
               key={f.value}
               onClick={() => setStatusFilter(f.value)}
               className={cn(
-                "px-4 py-1.5 rounded-md text-xs font-semibold transition-all whitespace-nowrap border",
+                "px-4 py-1.5 rounded-sm text-xs font-semibold transition-all whitespace-nowrap border",
                 statusFilter === f.value
                   ? "bg-blue-500/10 text-blue-600 border-blue-500/30"
                   : "bg-muted/30 text-muted-foreground border-border hover:bg-muted/50"

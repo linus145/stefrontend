@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { aiService } from '@/services/ai.service';
 import {
@@ -48,6 +48,57 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
   const isMetricsLocked = planPrice < 12000;
   // Deploy Agent unlocks only at Enterprise (18000)
   const isAgentDeployLocked = planPrice < 18000;
+
+  // Resizing state
+  const [panelWidth, setPanelWidth] = useState<number>(480);
+  const [isResizing, setIsResizing] = useState<boolean>(false);
+
+  // Load custom width from localStorage on mount and set CSS property
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('ai_screening_panel_width');
+      const width = saved ? parseInt(saved, 10) : 480;
+      if (!isNaN(width) && width >= 360 && width <= 1000) {
+        setPanelWidth(width);
+        document.documentElement.style.setProperty('--ai-panel-width', `${width}px`);
+      }
+    }
+  }, []);
+
+  const startResize = (mouseDownEvent: React.MouseEvent) => {
+    mouseDownEvent.preventDefault();
+    setIsResizing(true);
+    window.dispatchEvent(new CustomEvent('ai-panel-resize-start'));
+  };
+
+  const resize = useCallback((mouseMoveEvent: MouseEvent) => {
+    if (isResizing) {
+      const newWidth = window.innerWidth - mouseMoveEvent.clientX;
+      const minWidth = 360;
+      const maxWidth = Math.min(1200, window.innerWidth * 0.85);
+      if (newWidth >= minWidth && newWidth <= maxWidth) {
+        setPanelWidth(newWidth);
+        localStorage.setItem('ai_screening_panel_width', newWidth.toString());
+        document.documentElement.style.setProperty('--ai-panel-width', `${newWidth}px`);
+      }
+    }
+  }, [isResizing]);
+
+  const stopResize = useCallback(() => {
+    setIsResizing(false);
+    window.dispatchEvent(new CustomEvent('ai-panel-resize-stop'));
+  }, []);
+
+  useEffect(() => {
+    if (isResizing) {
+      window.addEventListener('mousemove', resize);
+      window.addEventListener('mouseup', stopResize);
+    }
+    return () => {
+      window.removeEventListener('mousemove', resize);
+      window.removeEventListener('mouseup', stopResize);
+    };
+  }, [isResizing, resize, stopResize]);
 
   // Sync visibility with AgentUIController
   useEffect(() => {
@@ -152,10 +203,36 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
   const isProcessing = results?.status === 'processing' || isLoading;
 
   return (
-    <div className={cn(
-      "absolute inset-y-0 right-0 w-full sm:w-[480px] bg-white dark:bg-[#0B0F19] border-l border-border shadow-2xl z-30 transform transition-transform duration-500 ease-in-out flex flex-col font-sans",
-      isOpen ? "translate-x-0" : "translate-x-full"
-    )}>
+    <div
+      className={cn(
+        "absolute top-0 bottom-0 right-0 bg-white dark:bg-[#0B0F19] z-30 flex flex-col font-sans",
+        !isResizing && "transition-all duration-500 ease-in-out",
+        isOpen 
+          ? "translate-x-0 border-l border-border shadow-2xl" 
+          : "translate-x-full border-none shadow-none pointer-events-none"
+      )}
+      style={{
+        width: isOpen ? `${panelWidth}px` : '0px',
+      }}
+    >
+      {/* Resize Drag Handle */}
+      {isOpen && (
+        <div
+          onMouseDown={startResize}
+          className={cn(
+            "absolute left-0 top-0 bottom-0 w-1 cursor-ew-resize hover:bg-[#7C3AED]/20 active:bg-[#7C3AED]/40 z-50 transition-colors",
+            isResizing && "bg-[#7C3AED]/30 w-1.5"
+          )}
+        />
+      )}
+
+      {/* Inner wrapper with fixed width to prevent content squishing during resizing */}
+      <div
+        className="h-full flex flex-col"
+        style={{
+          width: isOpen ? `${panelWidth}px` : '480px',
+        }}
+      >
       {/* Header */}
       <div className="relative pt-6 pb-4 px-6 flex items-center justify-between bg-white dark:bg-[#0B0F19] border-b border-border">
         <div className="flex items-center gap-3">
@@ -640,6 +717,7 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
             <Send className="w-4 h-4" />
           </button>
         </div>
+      </div>
       </div>
 
       <AgentTaskModal

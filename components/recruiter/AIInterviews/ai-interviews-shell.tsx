@@ -80,10 +80,12 @@ export function AIInterviewsShell() {
     switch (activeSection) {
       case 'pipeline':
         return (
-          <InterviewPipelineView 
-            onConfigure={handleConfigureCandidate} 
-            onSectionChange={setActiveSection}
-          />
+          <div className="w-full max-w-7xl mx-auto flex flex-col">
+            <InterviewPipelineView 
+              onConfigure={handleConfigureCandidate} 
+              onSectionChange={setActiveSection}
+            />
+          </div>
         );
       case 'configuration':
         return (

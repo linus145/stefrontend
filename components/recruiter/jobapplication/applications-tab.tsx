@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { jobsService } from '@/services/jobs.service';
 import { aiService } from '@/services/ai.service';
@@ -34,6 +34,18 @@ export function ApplicationsTab({ selectedJobId, onBack }: ApplicationsTabProps)
   const [isAiPanelOpen, setIsAiPanelOpen] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [activeJobId, setActiveJobId] = useState<string | null>(selectedJobId);
+  const [isAiPanelResizing, setIsAiPanelResizing] = useState(false);
+
+  useEffect(() => {
+    const handleStart = () => setIsAiPanelResizing(true);
+    const handleStop = () => setIsAiPanelResizing(false);
+    window.addEventListener('ai-panel-resize-start', handleStart);
+    window.addEventListener('ai-panel-resize-stop', handleStop);
+    return () => {
+      window.removeEventListener('ai-panel-resize-start', handleStart);
+      window.removeEventListener('ai-panel-resize-stop', handleStop);
+    };
+  }, []);
 
   // Queries
   const { data: jobsResponse } = useQuery({
@@ -150,11 +162,18 @@ export function ApplicationsTab({ selectedJobId, onBack }: ApplicationsTabProps)
   ];
 
   return (
-    <div className="flex relative w-full h-full overflow-hidden">
-      <div className={cn(
-        "flex-1 p-4 sm:p-6 lg:p-8 animate-in fade-in slide-in-from-bottom-4 duration-700 transition-all duration-500 lg:ml-0",
-        isAiPanelOpen ? "lg:mr-[480px]" : ""
-      )}>
+    <div 
+      className={cn(
+        "flex relative w-full h-full overflow-hidden",
+        isAiPanelResizing ? "transition-none" : "transition-all duration-500"
+      )}
+      style={{
+        paddingRight: isAiPanelOpen ? 'var(--ai-panel-width, 480px)' : '0px'
+      }}
+    >
+      <div 
+        className="flex-1 w-full max-w-7xl mx-auto flex flex-col p-4 sm:p-6 lg:p-8 animate-in fade-in slide-in-from-bottom-4 duration-700"
+      >
         {/* Header */}
         <div className="mb-2">
           <button
@@ -218,7 +237,7 @@ export function ApplicationsTab({ selectedJobId, onBack }: ApplicationsTabProps)
                   key={opt.value}
                   onClick={() => setStatusFilter(opt.value)}
                   className={cn(
-                    "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all whitespace-nowrap border",
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-xs font-semibold transition-all whitespace-nowrap border",
                     statusFilter === opt.value
                       ? "bg-blue-500/10 text-blue-600 border-blue-500/30"
                       : "bg-muted/30 text-muted-foreground border-border hover:bg-muted/50"

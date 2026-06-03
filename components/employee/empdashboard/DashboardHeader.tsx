@@ -3,6 +3,7 @@
 import React from 'react';
 import { Sun, Moon, Key, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { NotificationPopover } from '@/components/dashboard/notifications/notification-popover';
 
 interface DashboardHeaderProps {
   displayName: string;
@@ -44,10 +45,11 @@ export function DashboardHeader({
           <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">
             {displayName}
           </span>
-          <span className="text-[9px] text-slate-550 dark:text-slate-450 tracking-wider font-semibold">
+          <span className="text-[9px] text-slate-550 dark:text-slate-455 tracking-wider font-semibold">
             {displayDesignation} • {displayId}
           </span>
         </div>
+        <NotificationPopover currentDashboard="HR" dotColorClass="bg-rose-500" />
         <Button
           onClick={toggleTheme}
           variant="ghost"

@@ -101,19 +101,35 @@ export function RecruiterShell() {
   const renderContent = () => {
     switch (activeTab) {
       case 'overview':
-        return <OverviewTab onNavigate={handleTabChange} />;
+        return (
+          <div className="flex-1 w-full max-w-7xl mx-auto flex flex-col">
+            <OverviewTab onNavigate={handleTabChange} />
+          </div>
+        );
       case 'my-jobs':
-        return <MyJobsTab isApproved={company.is_approved ?? false} onViewApplications={handleViewApplications} />;
+        return (
+          <div className="flex-1 w-full max-w-7xl mx-auto flex flex-col">
+            <MyJobsTab isApproved={company.is_approved ?? false} onViewApplications={handleViewApplications} />
+          </div>
+        );
       case 'applications':
         return <ApplicationsTab selectedJobId={selectedJobId} onBack={() => setActiveTab('my-jobs')} />;
       case 'candidates':
         return <CandidatesTab />;
       case 'company':
-        return <CompanyProfileTab company={company} />;
+        return (
+          <div className="flex-1 w-full max-w-7xl mx-auto flex flex-col">
+            <CompanyProfileTab company={company} />
+          </div>
+        );
       case 'messages':
         return <MessagesView roomType="direct" />;
       default:
-        return <OverviewTab onNavigate={handleTabChange} />;
+        return (
+          <div className="flex-1 w-full max-w-7xl mx-auto flex flex-col">
+            <OverviewTab onNavigate={handleTabChange} />
+          </div>
+        );
     }
   };
 

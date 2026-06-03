@@ -73,16 +73,16 @@ export function RecruiterHeader({
             <h2 className="text-sm font-semibold text-foreground tracking-tight truncate max-w-[120px]">{companyName}</h2>
             <div className="flex items-center gap-1.5">
               {isGenuine && (
-                <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-500/10 text-blue-500 border border-blue-500/20 uppercase tracking-wider flex items-center gap-1" title="Genuine Company">
+                <span className="px-1.5 py-0.5 rounded-sm text-[9px] font-bold bg-blue-500/10 text-blue-500 border border-blue-500/20 uppercase tracking-wider flex items-center gap-1" title="Genuine Company">
                   <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" /></svg>
                 </span>
               )}
               {isApproved ? (
-                <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 uppercase tracking-wider">
+                <span className="px-1.5 py-0.5 rounded-sm text-[9px] font-bold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 uppercase tracking-wider">
                   Approved
                 </span>
               ) : (
-                <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20 uppercase tracking-wider">
+                <span className="px-1.5 py-0.5 rounded-sm text-[9px] font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20 uppercase tracking-wider">
                   Pending
                 </span>
               )}

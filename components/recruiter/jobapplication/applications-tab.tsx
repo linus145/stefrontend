@@ -29,12 +29,14 @@ export function ApplicationsTab({ selectedJobId, onBack }: ApplicationsTabProps)
   const [selectedApplicant, setSelectedApplicant] = useState<JobApplication['applicant'] | null>(null);
   const [message, setMessage] = useState('');
   const [sendEmail, setSendEmail] = useState(true);
+  const [contactMode, setContactMode] = useState<'email' | 'chat'>('chat');
   const [manualJobId, setManualJobId] = useState('');
   const [aiResults, setAiResults] = useState<any>(null);
   const [isAiPanelOpen, setIsAiPanelOpen] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [activeJobId, setActiveJobId] = useState<string | null>(selectedJobId);
   const [isAiPanelResizing, setIsAiPanelResizing] = useState(false);
+  const [selectedModel, setSelectedModel] = useState<string>('gemini-2.5-flash-lite');
 
   useEffect(() => {
     const handleStart = () => setIsAiPanelResizing(true);
@@ -72,10 +74,10 @@ export function ApplicationsTab({ selectedJobId, onBack }: ApplicationsTabProps)
   });
 
   const analyzeMutation = useMutation({
-    mutationFn: (jobId: string) => {
+    mutationFn: ({ jobId, model }: { jobId: string; model: string }) => {
       setAiResults(null);
       setIsAiPanelOpen(true);
-      return aiService.analyzeResumes(jobId);
+      return aiService.analyzeResumes(jobId, model);
     },
     onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: ['job-applications'] });
@@ -113,12 +115,19 @@ export function ApplicationsTab({ selectedJobId, onBack }: ApplicationsTabProps)
     mutationFn: (data: { target_user_id: string; message: string; send_email: boolean }) =>
       userService.contactUser(data),
     onSuccess: () => {
-      toast.success('Message sent successfully!');
+      if (contactMode === 'email') {
+        toast.success('Email sent successfully!');
+      } else if (sendEmail) {
+        toast.success('Message and Email sent successfully!');
+      } else {
+        toast.success('Message sent successfully!');
+      }
       setSelectedApplicant(null);
       setMessage('');
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || 'Failed to send message.');
+      const type = contactMode === 'email' ? 'email' : 'message';
+      toast.error(error?.response?.data?.message || `Failed to send ${type}.`);
     },
   });
 
@@ -139,10 +148,90 @@ export function ApplicationsTab({ selectedJobId, onBack }: ApplicationsTabProps)
     });
   };
 
-  const handleOpenContactModal = (applicant: any, email: boolean) => {
+  const handleOpenContactModal = (app: JobApplication, email: boolean) => {
+    const applicant = app.applicant;
     setSelectedApplicant(applicant);
     setSendEmail(email);
-    if (email) setMessage(`Hi ${applicant.first_name}, I'd like to schedule an interview...`);
+    setContactMode(email ? 'email' : 'chat');
+
+    const jobsList = Array.isArray(jobsResponse?.data) ? jobsResponse.data : [];
+    const currentJob = jobsList.find((j: any) => j.id === app.job);
+    const companyName = currentJob?.company_name || currentJob?.company?.company_name || "";
+    const teamSignOff = companyName ? `${companyName} Recruitment Team` : "Recruitment Team";
+
+    if (app.status === 'REJECTED') {
+      let parsedAnalysis: any = null;
+      if (app.ai_analysis) {
+        try {
+          if (app.ai_analysis.trim().startsWith('{')) {
+            parsedAnalysis = JSON.parse(app.ai_analysis);
+          }
+        } catch (e) {
+          console.error("Failed to parse ai_analysis JSON", e);
+        }
+      }
+
+      let strengthsText = "";
+      let feedbackText = "";
+
+      if (parsedAnalysis) {
+        const strengths = parsedAnalysis.recruiter_view?.strengths || [];
+        if (strengths.length > 0) {
+          strengthsText = `During our evaluation, we recognized several strengths in your background:\n` +
+            strengths.slice(0, 2).map((s: string) => `• ${s}`).join('\n') + `\n\n`;
+        }
+
+        const gaps: string[] = [];
+        const missing = parsedAnalysis.intelligence?.skills_assessment?.missing_required || [];
+        if (missing.length > 0) {
+          missing.slice(0, 2).forEach((m: any) => {
+            if (m.skill) {
+              gaps.push(`Strengthen proficiency and hands-on projects with: ${m.skill}`);
+            }
+          });
+        }
+        const concerns = parsedAnalysis.recruiter_view?.concerns || [];
+        if (concerns.length > 0) {
+          concerns.slice(0, 2).forEach((c: string) => {
+            gaps.push(c);
+          });
+        }
+
+        if (gaps.length > 0) {
+          feedbackText = `To help you prepare for future roles and align better with requirements, we suggest focusing on the following areas of improvement:\n` +
+            gaps.map((g: string) => `• ${g}`).join('\n') + `\n\n`;
+        }
+      } else {
+        let rejectionReason = "identified that we will be moving forward with other candidates whose experience and qualifications more closely align with the requirements of this role";
+        if (app.ai_score !== null && app.ai_score !== undefined && app.ai_score < 50) {
+          rejectionReason = `highlighted some alignment gaps (AI Fit Score: ${app.ai_score}%) regarding the core technical skills required for this position`;
+        }
+        feedbackText = `Our screening process has ${rejectionReason}.\n\nTo help you stand out in the future, we recommend highlighting key projects, relevant certifications, or practical experience with the core skills required for this position on your resume.\n\n`;
+      }
+
+      const jobTitle = app.job_title || "the position";
+      let messageBody = `Hi ${applicant.first_name},\n\nThank you for taking the time to apply for the ${jobTitle} role. After a careful review of your application, we regret to inform you that we will not be moving forward with your candidacy at this time.\n\n`;
+
+      if (app.ai_score !== null && app.ai_score !== undefined) {
+        messageBody += `Our AI-assisted evaluation assessed your profile alignment at ${app.ai_score}% for this specific position.\n\n`;
+      }
+
+      if (strengthsText) {
+        messageBody += strengthsText;
+      }
+
+      if (feedbackText) {
+        messageBody += feedbackText;
+      }
+
+      messageBody += `We highly encourage you to update your resume incorporating these insights, and we would welcome you to apply again for future openings that match your refined profile.\n\nWe appreciate your interest in our team and wish you the best of luck in your job search and future professional endeavors.\n\nBest regards,\n${teamSignOff}`;
+
+      setMessage(messageBody);
+    } else if (email) {
+      setMessage(`Hi ${applicant.first_name},\n\nI'd like to schedule an interview to discuss your application and match for this position.\n\nPlease let me know your availability this week.\n\nBest regards,\n${teamSignOff}`);
+    } else {
+      setMessage(`Hi ${applicant.first_name}, I'd like to schedule an interview...`);
+    }
   };
 
   // Data mapping
@@ -164,7 +253,8 @@ export function ApplicationsTab({ selectedJobId, onBack }: ApplicationsTabProps)
   return (
     <div 
       className={cn(
-        "flex relative w-full h-full overflow-hidden",
+        "flex relative w-full",
+        isAiPanelOpen ? "h-[calc(100vh-4rem)] overflow-hidden" : "min-h-[calc(100vh-4rem)]",
         isAiPanelResizing ? "transition-none" : "transition-all duration-500"
       )}
       style={{
@@ -172,7 +262,10 @@ export function ApplicationsTab({ selectedJobId, onBack }: ApplicationsTabProps)
       }}
     >
       <div 
-        className="flex-1 w-full max-w-7xl mx-auto flex flex-col p-4 sm:p-6 lg:p-8 animate-in fade-in slide-in-from-bottom-4 duration-700"
+        className={cn(
+          "flex-1 w-full max-w-7xl mx-auto flex flex-col p-4 sm:p-6 lg:p-8 animate-in fade-in slide-in-from-bottom-4 duration-700",
+          isAiPanelOpen ? "h-full overflow-y-auto no-scrollbar" : ""
+        )}
       >
         {/* Header */}
         <div className="mb-2">
@@ -215,7 +308,7 @@ export function ApplicationsTab({ selectedJobId, onBack }: ApplicationsTabProps)
             onCopyId={handleCopyId}
             manualJobId={manualJobId}
             setManualJobId={setManualJobId}
-            onAnalyze={(id) => analyzeMutation.mutate(id)}
+            onAnalyze={(id) => analyzeMutation.mutate({ jobId: id, model: selectedModel })}
             isAnalyzePending={analyzeMutation.isPending}
           />
         </div>
@@ -291,6 +384,7 @@ export function ApplicationsTab({ selectedJobId, onBack }: ApplicationsTabProps)
           onClose={() => setSelectedApplicant(null)}
           onSend={handleContact}
           isPending={contactMutation.isPending}
+          mode={contactMode}
         />
 
         <AIScreeningPanel
@@ -298,6 +392,12 @@ export function ApplicationsTab({ selectedJobId, onBack }: ApplicationsTabProps)
           onClose={() => setIsAiPanelOpen(false)}
           isLoading={analyzeMutation.isPending}
           results={aiResults}
+          selectedModel={selectedModel}
+          setSelectedModel={setSelectedModel}
+          activeJobId={activeJobId}
+          onStartScreening={(jobId, model) => {
+            analyzeMutation.mutate({ jobId, model });
+          }}
           onLoadHistoryReport={(reportResults) => {
             setAiResults(reportResults);
             queryClient.invalidateQueries({ queryKey: ['job-applications'] });

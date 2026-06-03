@@ -6,7 +6,7 @@ import { aiService } from '@/services/ai.service';
 import {
   X, Sparkles, ChevronDown, ChevronUp, ChevronRight,
   Bot, FileText, Target, MessageSquare, Send,
-  Search, BrainCircuit, History, AlertCircle, Zap, CheckCircle2, Trash2, Lock
+  Search, BrainCircuit, History, AlertCircle, Zap, CheckCircle2, Trash2, Lock, Loader2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { AgentTaskModal } from '../aiagents/AgentTaskModal';
@@ -28,11 +28,62 @@ interface AIScreeningPanelProps {
   results: any;
   onLoadHistoryReport?: (results: any) => void;
   onViewDetails: (id: string) => void;
+  selectedModel: string;
+  setSelectedModel: (model: string) => void;
+  activeJobId: string | null;
+  onStartScreening: (jobId: string, model: string) => void;
 }
 
-export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHistoryReport, onViewDetails }: AIScreeningPanelProps) {
+export function AIScreeningPanel({
+  isOpen,
+  onClose,
+  isLoading,
+  results,
+  onLoadHistoryReport,
+  onViewDetails,
+  selectedModel,
+  setSelectedModel,
+  activeJobId,
+  onStartScreening
+}: AIScreeningPanelProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [agentModalOpen, setAgentModalOpen] = useState(false);
+  const [isModelMenuOpen, setIsModelMenuOpen] = useState(false);
+
+  const getModelLabel = (modelVal: string) => {
+    switch (modelVal) {
+      case 'gemini-3.5-flash':
+        return 'Gemini 3.5 Flash';
+      case 'gemini-3.5-flash-live':
+        return 'Gemini 3.5 Flash Live';
+      case 'gemini-3.0-flash-live':
+        return 'Gemini 3.0 Flash Live';
+      case 'gemini-3.1-pro-preview':
+        return 'Gemini 3.1 Pro (Prev)';
+      case 'gemini-3.1-flash-lite':
+        return 'Gemini 3.1 Flash Lite';
+      case 'gemini-3-pro-preview':
+        return 'Gemini 3 Pro (Prev)';
+      case 'gemini-3-flash-preview':
+        return 'Gemini 3 Flash (Prev)';
+      case 'gemini-2.5-flash':
+        return 'Gemini 2.5 Flash';
+      case 'gemini-2.5-flash-lite':
+        return 'Gemini 2.5 Flash Lite';
+      case 'gemini-2.5-pro':
+        return 'Gemini 2.5 Pro';
+      case 'gemini-2.0-flash':
+        return 'Gemini 2.0 Flash';
+      case 'gemini-2.0-flash-thinking-exp':
+        return 'Gemini 2.0 Thinking';
+      case 'gemini-2.0-pro-exp':
+        return 'Gemini 2.0 Pro (Exp)';
+      case 'text-multilingual-embedding-002':
+        return 'Gemini Multilingual Embedding 2';
+      default:
+        return modelVal;
+    }
+  };
   const [selectedCandidateName, setSelectedCandidateName] = useState<string | undefined>(undefined);
   const [activeTab, setActiveTab] = useState<'results' | 'history'>('results');
   const [isAutoRefreshing, setIsAutoRefreshing] = useState(false);
@@ -44,8 +95,8 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
   const planPrice = (userSubscription?.status === 'active' && userSubscription?.plan_details)
     ? Number(userSubscription.plan_details.price) : 0;
 
-  // Metrics (strengths, concerns, trust score, ATS score) unlock at Growth (12000)
-  const isMetricsLocked = planPrice < 12000;
+  // Metrics (strengths, concerns, trust score, ATS score) unlock only at Enterprise (18000)
+  const isMetricsLocked = planPrice < 18000;
   // Deploy Agent unlocks only at Enterprise (18000)
   const isAgentDeployLocked = planPrice < 18000;
 
@@ -110,6 +161,13 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
     };
   }, [isOpen]);
 
+  // Check if selected model is locked under current plan price, auto-fallback to default 2.x model
+  useEffect(() => {
+    if (selectedModel.startsWith('gemini-3') && planPrice < 18000) {
+      setSelectedModel('gemini-2.5-flash-lite');
+    }
+  }, [selectedModel, planPrice, setSelectedModel]);
+
   // Timer to track how long we've been processing
   useEffect(() => {
     let interval: any;
@@ -122,13 +180,11 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
   }, [results?.status]);
 
   const onRestartAnalysis = () => {
-    if (results?.job_id && onLoadHistoryReport) {
-      aiService.analyzeResumes(results.job_id).then(res => {
-        onLoadHistoryReport(res.data);
-        setProcessingTime(0);
-      }).catch(() => {
-        toast.error("Failed to restart. Please check server.");
-      });
+    const targetJobId = results?.job_id || activeJobId;
+    if (targetJobId) {
+      onStartScreening(targetJobId, selectedModel);
+    } else {
+      toast.error("No job selected to run screening.");
     }
   };
 
@@ -205,11 +261,11 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
   return (
     <div
       className={cn(
-        "absolute top-0 bottom-0 right-0 bg-white dark:bg-[#0B0F19] z-30 flex flex-col font-sans",
-        !isResizing && "transition-all duration-500 ease-in-out",
+        "absolute top-0 bottom-0 right-0 bg-background/95 backdrop-blur-xl z-30 flex flex-col font-sans border-l border-border shadow-2xl",
+        !isResizing && "transition-all duration-300 ease-in-out",
         isOpen 
-          ? "translate-x-0 border-l border-border shadow-2xl" 
-          : "translate-x-full border-none shadow-none pointer-events-none"
+          ? "translate-x-0 opacity-100" 
+          : "translate-x-full opacity-0 pointer-events-none"
       )}
       style={{
         width: isOpen ? `${panelWidth}px` : '0px',
@@ -220,55 +276,81 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
         <div
           onMouseDown={startResize}
           className={cn(
-            "absolute left-0 top-0 bottom-0 w-1 cursor-ew-resize hover:bg-[#7C3AED]/20 active:bg-[#7C3AED]/40 z-50 transition-colors",
-            isResizing && "bg-[#7C3AED]/30 w-1.5"
+            "absolute left-0 top-0 bottom-0 w-1 cursor-ew-resize hover:bg-purple-500/20 active:bg-purple-500/40 z-50 transition-colors",
+            isResizing && "bg-purple-500/30 w-1.5"
           )}
         />
       )}
 
       {/* Inner wrapper with fixed width to prevent content squishing during resizing */}
       <div
-        className="h-full flex flex-col"
+        className="h-full flex flex-col bg-background"
         style={{
           width: isOpen ? `${panelWidth}px` : '480px',
         }}
       >
       {/* Header */}
-      <div className="relative pt-6 pb-4 px-6 flex items-center justify-between bg-white dark:bg-[#0B0F19] border-b border-border">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-sm bg-muted/10 flex items-center justify-center shadow-sm border border-[#7C3AED]/20">
-            <Sparkles className="w-5 h-5 text-[#7C3AED]" />
+      <div className="p-3 border-b border-border flex justify-between items-center bg-muted/40 shrink-0">
+        <div>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-sm bg-purple-500 animate-pulse shadow-[0_0_8px_rgba(139,92,246,0.5)]" />
+            <h2 className="text-[14px] font-bold text-foreground tracking-tight">
+              AI Screening
+            </h2>
           </div>
-          <div>
-            <h1 className="text-base font-bold text-foreground tracking-tight">Recruitment copilot</h1>
-            <p className="text-[10px] font-bold text-[#8B5CF6] tracking-widest">
-              {activeTab === 'results' ? (isLoading ? "Analyzing..." : "Analysis ready") : "History"}
-            </p>
-          </div>
+          <p className="text-[10px] text-foreground/70 mt-0.5 font-semibold">
+            {activeTab === 'results' ? (
+              isProcessing ? (
+                "Analyzing candidates..."
+              ) : results ? (
+                `Analysis ready${results.model_used ? ` • ${getModelLabel(results.model_used)}` : ''}`
+              ) : (
+                "Analysis ready"
+              )
+            ) : (
+              "Screening history"
+            )}
+          </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
+          {/* Results Tab Button */}
           <button
-            onClick={() => setActiveTab(activeTab === 'results' ? 'history' : 'results')}
+            onClick={() => setActiveTab('results')}
             className={cn(
-              "p-2 rounded-sm transition-all",
-              activeTab === 'history' ? "bg-[#7C3AED]/10 text-[#7C3AED]" : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+              "p-1 hover:bg-muted rounded-[3px] transition-colors shrink-0 border border-border shadow-sm flex items-center justify-center relative",
+              activeTab === 'results' ? "bg-purple-600/10 text-purple-600 border-purple-600/20" : "text-foreground/50 hover:text-foreground"
             )}
-            title="View history"
+            title="Results"
           >
-            <History className="w-5 h-5" />
+            <Sparkles className="w-3.5 h-3.5" />
           </button>
+
+          {/* History Tab Button */}
+          <button
+            onClick={() => setActiveTab('history')}
+            className={cn(
+              "p-1 hover:bg-muted rounded-[3px] transition-colors shrink-0 border border-border shadow-sm flex items-center justify-center relative",
+              activeTab === 'history' ? "bg-purple-600/10 text-purple-600 border-purple-600/20" : "text-foreground/50 hover:text-foreground"
+            )}
+            title="History"
+          >
+            <History className="w-3.5 h-3.5" />
+          </button>
+
+          {/* Close Panel Button */}
           <button
             onClick={onClose}
-            className="p-2 text-muted-foreground hover:bg-muted/50 hover:text-foreground rounded-sm transition-colors"
+            className="p-1.5 hover:bg-muted rounded-[3px] transition-colors text-foreground hover:text-purple-500 border border-border shadow-sm shrink-0"
+            title="Close sidebar"
           >
-            <X className="w-5 h-5" />
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
           </button>
         </div>
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-6 bg-white dark:bg-[#0B0F19] scrollbar-hide">
+      <div className="flex-1 overflow-y-auto p-3 space-y-3.5 bg-background scrollbar-thin scrollbar-thumb-border">
         {activeTab === 'results' ? (
           isProcessing ? (
             <div className="flex flex-col items-center justify-center h-full space-y-6 px-12 text-center">
@@ -297,7 +379,7 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
                   <div className="space-y-2">
                     <p className="text-sm font-black text-slate-900 dark:text-white tracking-tight">Ai engine processing</p>
                     <p className="text-xs text-slate-500 font-medium leading-relaxed">
-                      We are analyzing the resumes in the background.
+                      We are analyzing the resumes using <strong className="text-purple-600 dark:text-purple-400 font-extrabold">{getModelLabel(selectedModel)}</strong> in the background.
                       This usually takes 15-30 seconds per resume.
                     </p>
                     <div className="pt-4 space-y-3">
@@ -369,6 +451,16 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
                                 <>{cand.score}% match</>
                               )}
                             </div>
+                            {(cand.skills_match_pct !== undefined && cand.skills_match_pct > 0) && (
+                              <div className={cn("flex items-center gap-1 text-[11px] font-bold text-slate-500 dark:text-slate-400 relative", isMetricsLocked && "select-none")}>
+                                <span>•</span>
+                                {isMetricsLocked ? (
+                                  <span className="blur-[5px] pointer-events-none">{cand.skills_match_pct}% skills match</span>
+                                ) : (
+                                  <span>{cand.skills_match_pct}% skills match</span>
+                                )}
+                              </div>
+                            )}
                             {ai?.startup_fit && (
                               <div className={cn(
                                 "flex items-center gap-1 text-[11px] font-bold",
@@ -418,6 +510,93 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
                       {/* Expanded Structured Insights */}
                       {isExpanded && ai && (
                         <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800 animate-in fade-in duration-500">
+
+                          {/* Knockout Warning Banner */}
+                          {cand.knockout_applied && (
+                            <div className="bg-rose-500/10 border border-rose-500/20 rounded-sm p-3.5 flex items-start gap-2.5 animate-in fade-in slide-in-from-top-1 duration-200">
+                              <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+                              <div className="space-y-1">
+                                <p className="text-[10px] font-black text-rose-500 tracking-wider uppercase">
+                                  AI Knockout Rule Triggered
+                                </p>
+                                <p className="text-xs text-rose-700 dark:text-rose-300 font-semibold leading-relaxed">
+                                  This candidate's fit score was capped at <span className="font-extrabold">{cand.score}%</span> due to: <span className="italic font-bold">"{cand.knockout_reason || ai.knockout_reason || 'Knockout criteria met'}"</span>.
+                                </p>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Skills Alignment */}
+                          {cand.analysis?.intelligence?.skills_assessment && (
+                            <div className="relative">
+                              <div className={cn("space-y-2 border border-slate-100 dark:border-slate-800 rounded-sm p-3.5 bg-slate-50/50 dark:bg-slate-900/30", isMetricsLocked && "blur-[6px] select-none pointer-events-none")}>
+                                <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 tracking-widest uppercase flex items-center gap-1.5 mb-2">
+                                  <Target className="w-3.5 h-3.5 text-[#7C3AED]" /> Skills Alignment
+                                </p>
+
+                                {/* Matched Required Skills */}
+                                {cand.analysis.intelligence.skills_assessment.matched_required?.length > 0 ? (
+                                  <div className="space-y-1.5">
+                                    <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 tracking-wide">
+                                      Matched Skills ({cand.analysis.intelligence.skills_assessment.matched_required.length})
+                                    </p>
+                                    <div className="flex flex-col gap-1">
+                                      {cand.analysis.intelligence.skills_assessment.matched_required.map((m: any, i: number) => (
+                                        <div key={i} className="text-xs font-medium text-slate-600 dark:text-slate-400 flex items-start gap-1.5">
+                                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
+                                          <div>
+                                            <span className="font-semibold text-slate-800 dark:text-slate-200">{m.skill}</span>
+                                            {m.evidence && (
+                                              <span className="text-slate-400 dark:text-slate-500 text-[11px] font-normal italic ml-1">
+                                                ({m.evidence})
+                                              </span>
+                                            )}
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <p className="text-xs text-slate-400 dark:text-slate-500 italic">No matched skills identified.</p>
+                                )}
+
+                                {/* Divider if both exist */}
+                                {cand.analysis.intelligence.skills_assessment.matched_required?.length > 0 && 
+                                 cand.analysis.intelligence.skills_assessment.missing_required?.length > 0 && (
+                                  <div className="h-px bg-slate-200 dark:bg-slate-800 my-2.5" />
+                                )}
+
+                                {/* Missing Required Skills */}
+                                {cand.analysis.intelligence.skills_assessment.missing_required?.length > 0 && (
+                                  <div className="space-y-1.5">
+                                    <p className="text-[10px] font-bold text-rose-600 dark:text-rose-400 tracking-wide">
+                                      Missing Required Skills ({cand.analysis.intelligence.skills_assessment.missing_required.length})
+                                    </p>
+                                    <div className="flex flex-col gap-1">
+                                      {cand.analysis.intelligence.skills_assessment.missing_required.map((m: any, i: number) => (
+                                        <div key={i} className="text-xs font-medium text-slate-600 dark:text-slate-400 flex items-start gap-1.5">
+                                          <span className="w-1.5 h-1.5 rounded-full bg-rose-400 mt-1.5 shrink-0" />
+                                          <div className="flex flex-wrap items-center gap-1.5">
+                                            <span className="font-semibold text-slate-800 dark:text-slate-200">{m.skill}</span>
+                                            {m.impact && (
+                                              <span className={cn(
+                                                "text-[9px] font-bold px-1.5 py-0.2 rounded-sm uppercase tracking-wide",
+                                                m.impact.toLowerCase() === 'critical' ? "bg-rose-500/10 text-rose-500 border border-rose-500/20" :
+                                                m.impact.toLowerCase() === 'moderate' ? "bg-amber-500/10 text-amber-500 border border-amber-500/20" :
+                                                "bg-slate-500/10 text-slate-500 border border-slate-500/20"
+                                              )}>
+                                                {m.impact}
+                                              </span>
+                                            )}
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
 
                           {/* Strengths & Concerns */}
                           <div className="relative">
@@ -672,6 +851,7 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
                     <div className="flex items-center gap-2 mt-0.5">
                       <p className="text-[11px] text-muted-foreground truncate font-medium">
                         {report.results.total_applicants} candidates • Top {report.results.top_candidates[0]?.score || 0}%
+                        {report.results.model_used && ` • ${getModelLabel(report.results.model_used)}`}
                       </p>
                       <span className="text-[10px] font-bold text-muted-foreground/60 whitespace-nowrap ml-auto">
                         {new Date(report.created_at).toLocaleDateString([], { month: 'short', day: 'numeric' })}
@@ -701,20 +881,105 @@ export function AIScreeningPanel({ isOpen, onClose, isLoading, results, onLoadHi
         )}
       </div>
 
-      {/* Footer Chat Input */}
-      <div className="p-4 border-t border-border bg-white dark:bg-[#0B0F19]">
-        <div className="relative group">
-          <input
-            type="text"
-            placeholder="Ask anything about the candidates..."
-            className="w-full bg-muted/20 border border-border rounded-sm py-3 px-4 pr-12 text-[13px] focus:outline-none focus:ring-1 focus:ring-[#7C3AED]/20 focus:border-[#7C3AED] transition-all placeholder:text-muted-foreground/40 font-medium text-foreground"
-            disabled={!results}
-          />
+      {/* Footer Action Bar: Model Selector and Trigger Button */}
+      <div className="p-3 border-t border-border bg-white dark:bg-[#0B0F19] shrink-0">
+        <div className="flex items-center justify-between gap-3">
+          {/* Left Side: Model Selector Dropdown */}
+          <div className="flex items-center gap-2 relative">
+            <span className="text-[10px] font-bold text-muted-foreground tracking-wider uppercase shrink-0">
+              Model
+            </span>
+            <div className="relative">
+              <button
+                onClick={() => setIsModelMenuOpen(!isModelMenuOpen)}
+                disabled={isProcessing}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-muted/85 dark:bg-slate-800 hover:bg-muted dark:hover:bg-slate-700 border border-border rounded-[3px] text-[10px] font-bold text-black dark:text-white transition-all shadow-sm disabled:opacity-50"
+              >
+                <span>{getModelLabel(selectedModel)}</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="6" height="6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" className={cn("transition-transform duration-200", isModelMenuOpen ? "rotate-180" : "")}><polyline points="18 15 12 9 6 15" /></svg>
+              </button>
+
+              {/* Model Choice Menu Popover */}
+              {isModelMenuOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setIsModelMenuOpen(false)}
+                  />
+                  <div className="absolute bottom-full left-0 mb-1.5 w-48 bg-popover border border-border rounded-[4px] shadow-xl p-1 z-50 flex flex-col animate-in fade-in slide-in-from-bottom-1 duration-200">
+                    {[
+                      { value: 'gemini-3.5-flash', label: 'Gemini 3.5 Flash' },
+                      { value: 'gemini-3.5-flash-live', label: 'Gemini 3.5 Flash Live' },
+                      { value: 'gemini-3.0-flash-live', label: 'Gemini 3.0 Flash Live' },
+                      { value: 'gemini-3.1-pro-preview', label: 'Gemini 3.1 Pro (Preview)' },
+                      { value: 'gemini-3.1-flash-lite', label: 'Gemini 3.1 Flash Lite' },
+                      { value: 'gemini-3-pro-preview', label: 'Gemini 3 Pro (Preview)' },
+                      { value: 'gemini-3-flash-preview', label: 'Gemini 3 Flash (Preview)' },
+                      { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
+                      { value: 'gemini-2.5-flash-lite', label: 'Gemini 2.5 Flash Lite' },
+                      { value: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro' },
+                      { value: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash' },
+                      { value: 'gemini-2.0-flash-thinking-exp', label: 'Gemini 2.0 Thinking' },
+                      { value: 'gemini-2.0-pro-exp', label: 'Gemini 2.0 Pro (Exp)' },
+                      { value: 'text-multilingual-embedding-002', label: 'Gemini Multilingual Embedding 2' }
+                    ].map((m) => {
+                      const isModelLocked = m.value.startsWith('gemini-3') && planPrice < 18000;
+                      return (
+                        <button
+                          key={m.value}
+                          onClick={() => {
+                            if (isModelLocked) {
+                              toast.error('Gemini 3.x models are locked', {
+                                description: 'These models are only available on the Enterprise AI OS plan. Please upgrade your subscription to unlock.'
+                              });
+                              return;
+                            }
+                            setSelectedModel(m.value);
+                            setIsModelMenuOpen(false);
+                          }}
+                          className={cn(
+                            "w-full text-left px-2 py-1.5 rounded-[3px] text-[10px] font-bold flex items-center justify-between gap-1.5 transition-colors text-black dark:text-white",
+                            selectedModel === m.value ? "bg-purple-600/10 text-purple-600 hover:text-purple-600" : "hover:bg-muted",
+                            isModelLocked && "opacity-50 hover:bg-transparent"
+                          )}
+                        >
+                          <span>{m.label}</span>
+                          {isModelLocked && <Lock className="w-3 h-3 text-amber-500" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Right Side: Run/Restart Button */}
           <button
-            className="absolute right-2 top-2 p-1.5 bg-[#7C3AED] text-white rounded-sm hover:bg-[#6D28D9] transition-colors disabled:opacity-30 shadow-sm"
-            disabled={!results}
+            onClick={onRestartAnalysis}
+            disabled={isProcessing || (!results?.job_id && !activeJobId)}
+            className={cn(
+              "px-3 py-1.5 bg-foreground text-background hover:bg-purple-600 hover:text-white border border-border rounded-[3px] text-[10px] font-bold transition-all disabled:opacity-20 disabled:cursor-not-allowed active:scale-[0.98] flex items-center gap-1.5 shadow-sm shrink-0",
+              isProcessing && "bg-muted text-muted-foreground"
+            )}
+            title={results ? "Re-run AI Screening" : "Run AI Screening"}
           >
-            <Send className="w-4 h-4" />
+            {isProcessing ? (
+              <>
+                <Loader2 className="w-3 h-3 animate-spin" />
+                <span>Running...</span>
+              </>
+            ) : results ? (
+              <>
+                <Sparkles className="w-3 h-3 animate-pulse" />
+                <span>Re-run</span>
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-3 h-3" />
+                <span>Run</span>
+              </>
+            )}
           </button>
         </div>
       </div>

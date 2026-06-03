@@ -18,9 +18,11 @@ import {
   ChevronDown,
   Files,
   Clock,
-  Settings
+  Settings,
+  Lock
 } from 'lucide-react';
 import { HRSection } from './hr-header';
+import { useAuth } from '@/hooks/useAuth';
 
 interface HRSidebarProps {
   activeTab: HRSection;
@@ -131,6 +133,11 @@ export function HRSidebar({
   setIsCollapsed: controlledSetIsCollapsed
 }: HRSidebarProps) {
   const router = useRouter();
+  const { userSubscription } = useAuth();
+  const planPrice = (userSubscription?.status === 'active' && userSubscription?.plan_details)
+    ? Number(userSubscription.plan_details.price) : 0;
+  const isAgentLocked = planPrice < 18000;
+
   const [localIsCollapsed, setLocalIsCollapsed] = useState(false);
 
   const isCollapsed = controlledIsCollapsed !== undefined ? controlledIsCollapsed : localIsCollapsed;
@@ -249,19 +256,21 @@ export function HRSidebar({
                     <div className="pl-8 space-y-1 animate-in fade-in slide-in-from-top-1 duration-200">
                       {item.subItems?.map((sub) => {
                         const isActive = activeTab === sub.id;
+                        const isSubLocked = (sub.id === 'agent-scheduling' || sub.id === 'agent-settings') && isAgentLocked;
                         return (
                           <button
                             key={sub.id}
                             onClick={() => handleNavigation(sub.id)}
                             data-agent={`nav-tab-hr-sub-${sub.id}`}
                             className={cn(
-                              "w-full flex items-center px-3 py-1.5 text-xs font-semibold rounded-sm transition-all cursor-pointer",
+                              "w-full flex items-center justify-between px-3 py-1.5 text-xs font-semibold rounded-sm transition-all cursor-pointer",
                               isActive
                                 ? "text-[#0a66c2] bg-blue-50/5 font-bold"
                                 : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                             )}
                           >
-                            {sub.label}
+                            <span>{sub.label}</span>
+                            {isSubLocked && <Lock className="w-3 h-3 text-amber-500 shrink-0" />}
                           </button>
                         );
                       })}

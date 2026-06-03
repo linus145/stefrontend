@@ -27,9 +27,9 @@ export function RecruiterShell() {
 
   // Check if user has an active premium plan
   const isPremium = !!(userSubscription &&
-                    userSubscription.status === 'active' &&
-                    userSubscription.plan_details &&
-                    Number(userSubscription.plan_details.price) > 0);
+    userSubscription.status === 'active' &&
+    userSubscription.plan_details &&
+    Number(userSubscription.plan_details.price) > 0);
 
   // Check if user has a company (only when authenticated and premium)
   const { data: companyCheck, isLoading: companyLoading } = useQuery({

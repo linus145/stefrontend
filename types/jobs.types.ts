@@ -137,6 +137,7 @@ export interface JobApplication {
   ai_analysis?: string;
   applied_at: string;
   updated_at: string;
+  is_synced?: boolean;
 }
 
 // ─── Dashboard Stats ────────────────────────────────────────────

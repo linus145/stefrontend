@@ -9,7 +9,7 @@ interface ApplicationCardProps {
   isExpanded: boolean;
   onToggleExpand: () => void;
   onUpdateStatus: (appId: string, status: string, employmentType?: string) => void;
-  onContact: (applicant: any, sendEmail: boolean) => void;
+  onContact: (app: JobApplication, sendEmail: boolean) => void;
   isUpdatePending: boolean;
 }
 
@@ -59,9 +59,14 @@ export function ApplicationCard({
             <h4 className="text-sm font-semibold text-foreground">
               {app.applicant.first_name} {app.applicant.last_name}
             </h4>
-            <span className={cn("px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase border", getStatusColor(app.status))}>
+            <span className={cn("px-2 py-0.5 rounded-none text-[10px] font-bold uppercase border", getStatusColor(app.status))}>
               {app.status}
             </span>
+            {app.is_synced && (
+              <span className="px-2 py-0.5 rounded-none text-[10px] font-bold uppercase border bg-purple-500/10 text-purple-600 border-purple-500/20">
+                Synced
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
@@ -85,16 +90,18 @@ export function ApplicationCard({
         {/* Action Symbols */}
         <div className="flex items-center gap-1.5 shrink-0">
           <button
-            onClick={(e) => { e.stopPropagation(); onContact(app.applicant, true); }}
+            onClick={(e) => { e.stopPropagation(); onContact(app, true); }}
+            data-agent="contact-email-button"
             className="p-2 rounded-sm bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 transition-all"
             title="Send Email"
           >
             <Mail className="w-4 h-4" />
           </button>
           <button
-            onClick={(e) => { e.stopPropagation(); onContact(app.applicant, false); }}
+            onClick={(e) => { e.stopPropagation(); onContact(app, false); }}
+            data-agent="contact-message-button"
             className="p-2 rounded-sm bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 transition-all"
-            title="Send Message"
+            title="Send Chat"
           >
             <MessageSquare className="w-4 h-4" />
           </button>
@@ -115,7 +122,7 @@ export function ApplicationCard({
                 onClick={(e) => { e.stopPropagation(); onUpdateStatus(app.id, 'SHORTLISTED'); }} 
                 data-agent="mark-shortlisted"
                 className="p-2 rounded-sm bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 transition-all" 
-                title="Shortlist"
+                title="Accept"
               >
                 <CheckCircle className="w-4 h-4" />
               </button>
@@ -135,7 +142,7 @@ export function ApplicationCard({
                 onClick={(e) => { e.stopPropagation(); onUpdateStatus(app.id, 'SHORTLISTED'); }} 
                 data-agent="mark-shortlisted"
                 className="p-2 rounded-sm bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 transition-all" 
-                title="Shortlist"
+                title="Accept"
               >
                 <CheckCircle className="w-4 h-4" />
               </button>
@@ -170,7 +177,7 @@ export function ApplicationCard({
                       onClick={() => onUpdateStatus(app.id, s)}
                       data-agent={`mark-status-${s.toLowerCase()}`}
                       className={cn(
-                        "px-2.5 py-1 rounded-sm text-[10px] font-bold uppercase border transition-all flex items-center gap-1.5",
+                        "px-2.5 py-1 rounded-none text-[10px] font-bold uppercase border transition-all flex items-center gap-1.5",
                         app.status === s
                           ? cn(getStatusColor(s), "ring-2 ring-offset-1 ring-offset-background")
                           : "bg-muted/30 text-muted-foreground border-border hover:opacity-80 disabled:opacity-30"

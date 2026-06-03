@@ -40,6 +40,9 @@ export function HRShell() {
   // HR Tools require Growth (12000) or Enterprise (18000) plan
   const hasPremium = userSubscription && Number(userSubscription.plan_details?.price) >= 12000 && userSubscription.status === 'active';
 
+  // Agent Settings and Agent Scheduling require Enterprise (18000) plan
+  const isAgentAccessible = userSubscription && Number(userSubscription.plan_details?.price) >= 18000 && userSubscription.status === 'active';
+
   const handleSidebarCollapse = (collapsed: boolean) => {
     setIsSidebarCollapsed(collapsed);
     if (typeof window !== 'undefined') {
@@ -117,8 +120,38 @@ export function HRShell() {
           />
         )}
         {activeTab === 'payroll' && <PayrollTab />}
-        {activeTab === 'agent-settings' && <AgentSettingsTab />}
-        {activeTab === 'agent-scheduling' && <AgentSchedulingTab />}
+        {activeTab === 'agent-settings' && (
+          isAgentAccessible ? <AgentSettingsTab /> : (
+            <PremiumLocker
+              title="Autonomous AI Agent & Settings"
+              description="Unlock single-prompt pipeline execution, custom voice training, automated shift scheduling, self-healing workflow execution, and direct workforce policy training."
+              features={[
+                "Autonomous Onboarding & Provisioning",
+                "Single-Prompt Multi-System Execution",
+                "Automatic Shift & Rostering Generator",
+                "Conversational Leave Scheduler",
+                "Dedicated Support Engine Integration"
+              ]}
+              backPath="/Hrtools?tab=dashboard"
+            />
+          )
+        )}
+        {activeTab === 'agent-scheduling' && (
+          isAgentAccessible ? <AgentSchedulingTab /> : (
+            <PremiumLocker
+              title="Autonomous AI Agent & Scheduling"
+              description="Unlock single-prompt pipeline execution, custom voice training, automated shift scheduling, self-healing workflow execution, and direct workforce policy training."
+              features={[
+                "Autonomous Onboarding & Provisioning",
+                "Single-Prompt Multi-System Execution",
+                "Automatic Shift & Rostering Generator",
+                "Conversational Leave Scheduler",
+                "Dedicated Support Engine Integration"
+              ]}
+              backPath="/Hrtools?tab=dashboard"
+            />
+          )
+        )}
         {activeTab === 'templates' && <TemplatesTab />}
         {activeTab.startsWith('performance') && <PerformanceTab subTab={activeTab} />}
         {activeTab === 'organization' && <OrgTab />}

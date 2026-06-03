@@ -19,11 +19,11 @@ export const AgentPlanView: React.FC<AgentPlanViewProps> = ({
         <span className="w-1.5 h-1.5 rounded-[1px] bg-blue-500 animate-pulse" />
         Strategy Planning Feed
       </div>
-      
+
       <div className="space-y-3.5">
         {planMessages.map((msg) => (
-          <div 
-            key={msg.id} 
+          <div
+            key={msg.id}
             className={cn(
               "flex gap-3 items-start animate-in fade-in duration-200",
               msg.sender === 'user' ? "justify-end" : "justify-start"
@@ -35,7 +35,7 @@ export const AgentPlanView: React.FC<AgentPlanViewProps> = ({
               </div>
             )}
             <div className="flex flex-col max-w-[85%]">
-              <div 
+              <div
                 className={cn(
                   "px-3 py-2 rounded-[4px] text-[10px] leading-relaxed shadow-sm border",
                   msg.sender === 'user'
@@ -59,7 +59,7 @@ export const AgentPlanView: React.FC<AgentPlanViewProps> = ({
             )}
           </div>
         ))}
-        
+
         {isPlanBotTyping && (
           <div className="flex gap-3 justify-start items-start animate-pulse">
             <div className="w-7 h-7 rounded-[3px] bg-blue-500/10 flex items-center justify-center text-blue-600 shrink-0 shadow-sm border border-blue-500/20">

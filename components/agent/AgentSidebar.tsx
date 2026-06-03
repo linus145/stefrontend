@@ -659,7 +659,7 @@ export const AgentSidebar: React.FC = () => {
 
       <div
         className={cn(
-          "fixed top-0 bottom-0 right-0 lg:inset-y-auto lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)] z-30 flex flex-col bg-background/95 backdrop-blur-xl border-l border-border shrink-0 overflow-hidden shadow-2xl",
+          "fixed top-0 bottom-0 right-0 lg:inset-y-auto lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)] z-[110] flex flex-col bg-background/95 backdrop-blur-xl border-l border-border shrink-0 overflow-hidden shadow-2xl",
           !isResizing && "transition-all duration-300 ease-in-out",
           isVisible
             ? "translate-x-0 opacity-100"

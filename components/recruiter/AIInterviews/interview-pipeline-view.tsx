@@ -37,6 +37,7 @@ interface InterviewSession {
     username: string;
     password: string;
   } | null;
+  application_status?: string | null;
 }
 
 interface InterviewPipelineViewProps {
@@ -115,11 +116,23 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
     }
   };
 
+  const getAppStatusStyle = (status: string) => {
+    switch (status.toUpperCase()) {
+      case 'PENDING': return 'bg-amber-500/10 text-amber-600 border-amber-500/20';
+      case 'REVIEWED': return 'bg-blue-500/10 text-blue-600 border-blue-500/20';
+      case 'SHORTLISTED': return 'bg-cyan-500/10 text-cyan-600 border-cyan-500/20';
+      case 'INTERVIEW': return 'bg-purple-500/10 text-purple-600 border-purple-500/20';
+      case 'ONBOARDED': return 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20';
+      case 'REJECTED': return 'bg-red-500/10 text-red-500 border-red-500/20';
+      default: return 'bg-slate-500/10 text-slate-500 border-slate-500/20';
+    }
+  };
+
   const RenderTableBody = () => {
     if (isLoading) {
       return Array.from({ length: 4 }).map((_, i) => (
         <tr key={i} className="border-b border-border/50 last:border-0 animate-pulse">
-          {Array.from({ length: 7 }).map((__, j) => (
+          {Array.from({ length: 8 }).map((__, j) => (
             <td key={j} className="px-4 py-5">
               <div className="h-3.5 bg-muted rounded w-full opacity-40" />
             </td>
@@ -131,7 +144,7 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
     if (filteredSessions.length === 0) {
       return (
         <tr>
-          <td colSpan={7} className="px-6 py-20 text-center">
+          <td colSpan={8} className="px-6 py-20 text-center">
             <p className="text-sm font-medium opacity-40">No matching interview sessions found.</p>
           </td>
         </tr>
@@ -156,11 +169,24 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
         {/* Status */}
         <td className="px-4 py-3">
           <span className={cn(
-            "inline-flex px-2 py-0.5 rounded-sm text-[10px] font-bold capitalize border whitespace-nowrap",
+            "inline-flex px-2 py-0.5 rounded-none text-[10px] font-bold capitalize border whitespace-nowrap",
             getStatusStyle(session.status)
           )}>
             {session.status.toLowerCase().replace(/_/g, ' ')}
           </span>
+        </td>
+        {/* App Status */}
+        <td className="px-4 py-3">
+          {session.application_status ? (
+            <span className={cn(
+              "inline-flex px-2 py-0.5 rounded-none text-[10px] font-bold uppercase border whitespace-nowrap",
+              getAppStatusStyle(session.application_status)
+            )}>
+              {session.application_status}
+            </span>
+          ) : (
+            <span className="text-[11px] text-muted-foreground/40 italic">-</span>
+          )}
         </td>
         {/* Rounds */}
         <td className="px-4 py-3 text-center">
@@ -384,13 +410,14 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-muted/30 border-b border-border">
-                <th className="pl-6 pr-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[20%]">Candidate</th>
-                <th className="px-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[18%]">Email</th>
-                <th className="px-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[15%]">Role</th>
-                <th className="px-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[10%]">Status</th>
+                <th className="pl-6 pr-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[18%]">Candidate</th>
+                <th className="px-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[17%]">Email</th>
+                <th className="px-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[13%]">Role</th>
+                <th className="px-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[10%]">Config Status</th>
+                <th className="px-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[10%]">Applicant Status</th>
                 <th className="px-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[7%] text-center">Rounds</th>
                 <th className="px-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[15%]">Exam Access</th>
-                <th className="pl-4 pr-6 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[15%] text-right">Action</th>
+                <th className="pl-4 pr-6 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[10%] text-right">Action</th>
               </tr>
             </thead>
             <tbody>

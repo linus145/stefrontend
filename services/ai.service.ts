@@ -29,8 +29,8 @@ export const aiService = {
     return api.get<{ data: AIScreeningReport[] }>('/ai/screening/history/');
   },
 
-  analyzeResumes: (jobId: string): Promise<any> => {
-    return api.post(`/ai/screening/analyze/${jobId}/`, {});
+  analyzeResumes: (jobId: string, model?: string): Promise<any> => {
+    return api.post(`/ai/screening/analyze/${jobId}/`, { model });
   },
 
   deleteScreeningReport: (reportId: string): Promise<any> => {

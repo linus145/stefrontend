@@ -112,14 +112,14 @@ export const AgentGoalInput: React.FC<AgentGoalInputProps> = ({
                 className="flex items-center gap-1.5 px-3 py-1 bg-muted/80 hover:bg-muted border border-border rounded-[3px] text-[10px] font-bold text-black dark:text-white transition-all shadow-sm"
               >
                 <span>{sidebarMode === 'ACT' ? 'Act Mode' : 'Plan Mode'}</span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="6" height="6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" className={cn("transition-transform duration-200", isModeMenuOpen ? "rotate-180" : "")}><polyline points="18 15 12 9 6 15"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="6" height="6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" className={cn("transition-transform duration-200", isModeMenuOpen ? "rotate-180" : "")}><polyline points="18 15 12 9 6 15" /></svg>
               </button>
 
               {/* Mode Choice Menu Popover */}
               {isModeMenuOpen && (
                 <>
-                  <div 
-                    className="fixed inset-0 z-40" 
+                  <div
+                    className="fixed inset-0 z-40"
                     onClick={() => setIsModeMenuOpen(false)}
                   />
                   <div className="absolute bottom-full left-0 mb-1.5 w-48 bg-popover border border-border rounded-[4px] shadow-xl p-1 z-50 flex flex-col animate-in fade-in slide-in-from-bottom-1 duration-200">

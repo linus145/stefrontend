@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, CreditCard } from 'lucide-react';
 import { PricingTable } from '@/components/Public/pricing/pricing-table';
 import { PlanOverview } from './plan-overview';
 import { PaymentUnderReview } from './payment-under-review';
@@ -13,6 +13,7 @@ export function BillingTab() {
   const { userSubscription } = useAuth();
   const [showPlans, setShowPlans] = useState(false);
   const [hasInitializedPlans, setHasInitializedPlans] = useState(false);
+  const [subTab, setSubTab] = useState<'overview' | 'payment'>('overview');
 
   const isVerified = userSubscription?.is_payment_verified ?? false;
   const planName = userSubscription?.plan_details?.name || 'Free Tier';
@@ -44,6 +45,9 @@ export function BillingTab() {
           lastPlanIdRef.current = planId;
           if (showPlans) {
             setShowPlans(false);
+          }
+          if (hasPlan) {
+            setSubTab('payment');
           }
         }
       }
@@ -104,34 +108,87 @@ export function BillingTab() {
         <p className="text-xs text-muted-foreground mt-1">Manage your active subscription plan, payments, and invoices</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Plan Overview Card */}
-        <div className="lg:col-span-2 space-y-6">
-          <PlanOverview
-            planName={planName}
-            planPrice={planPrice}
-            isActive={isActive}
-            isPending={isPending}
-            isFree={isFree}
-            latestPayment={latestPayment}
-            getNextRenewalDate={getNextRenewalDate}
-            setShowPlans={setShowPlans}
-          />
+      {/* Sub tabs navigation */}
+      <div className="flex gap-2 border-b border-border/60 pb-px mb-6">
+        <button
+          onClick={() => setSubTab('overview')}
+          className={`pb-3 px-4 text-xs font-bold transition-all relative cursor-pointer ${
+            subTab === 'overview'
+              ? 'text-[#0a66c2] border-b-2 border-[#0a66c2]'
+              : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          Overview & Plans
+        </button>
+        <button
+          onClick={() => setSubTab('payment')}
+          className={`pb-3 px-4 text-xs font-bold transition-all relative cursor-pointer ${
+            subTab === 'payment'
+              ? 'text-[#0a66c2] border-b-2 border-[#0a66c2]'
+              : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          Payment Upload & History
+        </button>
+      </div>
 
-          {/* Under Review Visual Card */}
-          {isPending && latestPayment?.status === 'pending' && (
+      {subTab === 'overview' ? (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Plan Overview Card */}
+          <div className="lg:col-span-2 space-y-6">
+            <PlanOverview
+              planName={planName}
+              planPrice={planPrice}
+              isActive={isActive}
+              isPending={isPending}
+              isFree={isFree}
+              latestPayment={latestPayment}
+              getNextRenewalDate={getNextRenewalDate}
+              setShowPlans={setShowPlans}
+            />
+
+            {/* Under Review visual summary at overview tab as well */}
+            {isPending && latestPayment?.status === 'pending' && (
+              <PaymentUnderReview latestPayment={latestPayment} />
+            )}
+          </div>
+
+          {/* Feature inclusions card (ChatGPT-style checklist) */}
+          <PlanFeatures planName={planName} isFree={isFree} />
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {/* Under Review visual card */}
+          {latestPayment?.status === 'pending' && (
             <PaymentUnderReview latestPayment={latestPayment} />
           )}
 
-          {/* Manual Payment QR Code & Screenshot Uploader Form */}
-          {isPending && (!latestPayment || latestPayment?.status === 'rejected') && (
+          {/* If free and no pending premium plan, prompt to choose a plan */}
+          {isFree && !latestPayment ? (
+            <div className="bg-card border border-border rounded-md p-8 text-center space-y-4 max-w-xl mx-auto shadow-sm">
+              <div className="w-12 h-12 rounded-full bg-[#0a66c2]/10 flex items-center justify-center text-[#0a66c2] mx-auto">
+                <CreditCard className="w-6 h-6" />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-foreground">No Manual Payment Required</h4>
+                <p className="text-xs text-muted-foreground mt-1.5 leading-normal max-w-md mx-auto">
+                  You are currently active on the Free Tier. To unlock premium AI resume screening, candidate evaluation reports, and workspace matching, select a premium plan first.
+                </p>
+              </div>
+              <button
+                onClick={() => setShowPlans(true)}
+                className="h-9 px-4 rounded-sm bg-[#0a66c2] hover:bg-[#004182] text-white font-bold text-xs shadow-sm shadow-[#0a66c2]/10 hover:opacity-95 transition-all cursor-pointer active:scale-95 inline-flex items-center gap-1.5"
+              >
+                <span>Browse Premium Plans</span>
+                <ArrowLeft className="w-3.5 h-3.5 rotate-180" />
+              </button>
+            </div>
+          ) : (
+            /* Manual Payment QR Code & Screenshot Uploader Form */
             <PaymentUploader planPrice={planPrice} latestPayment={latestPayment} />
           )}
         </div>
-
-        {/* Feature inclusions card (ChatGPT-style checklist) */}
-        <PlanFeatures planName={planName} isFree={isFree} />
-      </div>
+      )}
     </div>
   );
 }

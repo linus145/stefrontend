@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { axiosInstance } from '@/lib/axios';
 import { toast } from 'sonner';
-import { AlertCircle, Clipboard, Upload, Loader2, FileCheck, Mail } from 'lucide-react';
+import { AlertCircle, Clipboard, Upload, Loader2, FileCheck, Mail, Info } from 'lucide-react';
 
 interface PaymentUploaderProps {
   planPrice: number;
@@ -94,48 +94,7 @@ export function PaymentUploader({ planPrice, latestPayment }: PaymentUploaderPro
     }
   };
 
-  // SVG QR Code Visual
-  const uipQR = (
-    <svg viewBox="0 0 100 100" className="w-36 h-36 text-slate-800 dark:text-slate-200" fill="currentColor">
-      <rect x="0" y="0" width="25" height="25" rx="1.5" />
-      <rect x="4" y="4" width="17" height="17" fill="white" />
-      <rect x="8" y="8" width="9" height="9" />
-      
-      <rect x="75" y="0" width="25" height="25" rx="1.5" />
-      <rect x="79" y="4" width="17" height="17" fill="white" />
-      <rect x="83" y="8" width="9" height="9" />
-      
-      <rect x="0" y="75" width="25" height="25" rx="1.5" />
-      <rect x="7" y="79" width="11" height="11" fill="white" stroke="white" strokeWidth="2" />
-      <rect x="8" y="83" width="9" height="9" />
-      
-      <rect x="35" y="5" width="5" height="5" />
-      <rect x="45" y="8" width="8" height="5" />
-      <rect x="60" y="5" width="5" height="12" />
-      <rect x="35" y="18" width="15" height="5" />
-      
-      <rect x="5" y="35" width="5" height="18" />
-      <rect x="15" y="45" width="10" height="5" />
-      <rect x="25" y="35" width="5" height="8" />
-      
-      <rect x="35" y="35" width="12" height="12" />
-      <rect x="53" y="35" width="5" height="5" />
-      <rect x="63" y="42" width="8" height="8" />
-      
-      <rect x="35" y="55" width="5" height="8" />
-      <rect x="45" y="60" width="12" height="5" />
-      <rect x="63" y="55" width="5" height="18" />
-      
-      <rect x="80" y="35" width="8" height="5" />
-      <rect x="85" y="48" width="5" height="12" />
-      <rect x="73" y="65" width="12" height="5" />
-      
-      <rect x="35" y="75" width="8" height="8" />
-      <rect x="50" y="82" width="5" height="12" />
-      <rect x="60" y="75" width="5" height="5" />
-      <rect x="60" y="85" width="12" height="5" />
-    </svg>
-  );
+  // Payment QR Code is loaded dynamically from public/paymentqr.webp
 
   return (
     <div className="bg-card border border-border rounded-md p-6 shadow-sm space-y-6 animate-in slide-in-from-bottom-2 duration-300">
@@ -158,11 +117,43 @@ export function PaymentUploader({ planPrice, latestPayment }: PaymentUploaderPro
         <p className="text-xs text-muted-foreground mt-1">Scan the UPI QR code below, complete the transfer, and upload your payment details to activate your premium workspace.</p>
       </div>
 
+      {/* Payment Notice Banner */}
+      <div className="p-4 rounded-sm border border-blue-500/15 bg-blue-500/[0.02] dark:border-blue-500/20 dark:bg-blue-500/[0.03] space-y-2.5">
+        <div className="flex items-center gap-2 text-[#0a66c2] dark:text-blue-400">
+          <Info className="w-4 h-4 shrink-0" />
+          <h6 className="text-[10px] font-extrabold uppercase tracking-wider">Payment Notice</h6>
+        </div>
+        <div className="text-[11px] text-muted-foreground leading-relaxed space-y-2">
+          <p className="font-bold text-foreground">Thank you for choosing B2Linq.</p>
+          <p>
+            At this stage, payments are processed directly through our official UPI QR code rather than through a third-party payment gateway. This allows us to keep the platform simple while we continue to expand our infrastructure.
+          </p>
+          <p>
+            After completing your payment, please upload the payment screenshot or transaction reference ID for verification. Once verified, your subscription will be activated by our team.
+          </p>
+          <p>
+            Please ensure that you send the exact amount displayed on the payment page. B2Linq is not responsible for payments sent to incorrect accounts, incorrect amounts, or payments made outside the official QR code displayed within this platform.
+          </p>
+          <p>
+            If you experience any issues, our support team will be happy to assist you.
+          </p>
+          <p className="text-[10px] font-bold text-foreground/85 mt-2 border-t border-border/50 pt-2">
+            By proceeding, you acknowledge and agree to this payment verification process.
+          </p>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
         {/* QR Code and Credentials (Left side) */}
         <div className="md:col-span-2 p-5 bg-muted/10 border border-border/80 rounded-sm flex flex-col items-center text-center justify-center space-y-4">
           <div className="p-4 bg-white rounded-md border border-slate-200/50 shadow-sm relative group overflow-hidden">
-            {uipQR}
+            <div className="w-36 h-36 relative overflow-hidden flex items-center justify-center bg-black rounded-sm">
+              <img
+                src="/paymentqr.webp"
+                alt="Payment QR"
+                className="w-full h-full object-cover object-top"
+              />
+            </div>
           </div>
           <div>
             <span className="text-[9px] font-extrabold uppercase bg-[#0a66c2]/10 text-[#0a66c2] px-2 py-0.5 rounded border border-[#0a66c2]/20">Scan & Pay</span>
@@ -179,6 +170,10 @@ export function PaymentUploader({ planPrice, latestPayment }: PaymentUploaderPro
                   <Clipboard className="w-3.5 h-3.5" />
                 </button>
               </div>
+            </div>
+            <div>
+              <span className="text-[9px] text-muted-foreground block uppercase font-bold tracking-wider">Account Name</span>
+              <span className="font-semibold text-foreground mt-0.5 block text-[11px]">Lakkavaram Ponnuswami Linus (LP Linus)</span>
             </div>
             <div>
               <span className="text-[9px] text-muted-foreground block uppercase font-bold tracking-wider">Account Beneficiary</span>

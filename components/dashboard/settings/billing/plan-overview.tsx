@@ -33,8 +33,8 @@ export function PlanOverview({
       
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/60 pb-6 mb-6">
         <div>
-          <span className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground">Current Plan</span>
-          <h4 className="text-2xl font-black text-foreground tracking-tight mt-1 flex items-center gap-2">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Current Plan</span>
+          <h4 className="text-2xl font-bold text-foreground tracking-tight mt-1 flex items-center gap-2">
             {planName}
             {isActive && (
               <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-450 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
@@ -67,7 +67,7 @@ export function PlanOverview({
         <div className="shrink-0">
           <div className="flex items-baseline text-slate-900 dark:text-white">
             <span className="text-xl font-bold mr-0.5">₹</span>
-            <span className="text-3xl font-black tracking-tight">
+            <span className="text-3xl font-bold tracking-tight">
               {Number(planPrice) === 0 ? '0' : Number(planPrice).toLocaleString('en-IN')}
             </span>
             <span className="text-slate-500 dark:text-slate-400 text-xs font-semibold ml-1">/ mo</span>

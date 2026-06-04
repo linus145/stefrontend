@@ -29,9 +29,28 @@ interface JobsViewProps {
   onNavigateToMessages?: (userId: string) => void;
   initialSearch?: string | null;
   initialJobId?: string | null;
+  onSectionChange?: (section: any, id?: string | null) => void;
 }
 
-export function JobsView({ isCollapsed, onNavigateToMessages, initialSearch, initialJobId }: JobsViewProps) {
+const desktopFilters = [
+  'IT',
+  'Non-IT',
+  'Remote',
+  'Hybrid',
+  'Full-time',
+  'Part-time',
+  'Contract',
+  'Internship',
+  'Freelance',
+  'Entry Level',
+  'Mid Level',
+  'Senior Level'
+];
+
+const mobilePrimaryFilters = ['IT', 'Freelance', 'Remote'];
+const mobileSecondaryFilters = ['Full-time', 'Contract', 'Internship', 'Non-IT', 'Hybrid', 'Part-time', 'Entry Level', 'Mid Level', 'Senior Level'];
+
+export function JobsView({ isCollapsed, onNavigateToMessages, initialSearch, initialJobId, onSectionChange }: JobsViewProps) {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<'browse' | 'applications'>('browse');
   const [searchQuery, setSearchQuery] = useState(initialSearch || '');
@@ -146,6 +165,10 @@ export function JobsView({ isCollapsed, onNavigateToMessages, initialSearch, ini
   };
 
   const handleMessageRecruiter = async (recruiterId: string) => {
+    if (!recruiterId) {
+      toast.info("Hiring manager details are pending for this startup. We have notified their HR team.");
+      return;
+    }
     try {
       await chatService.sendDirectMessage(recruiterId);
       if (onNavigateToMessages) {
@@ -166,7 +189,15 @@ export function JobsView({ isCollapsed, onNavigateToMessages, initialSearch, ini
   };
 
   return (
-    <div className="flex flex-col">
+    <div 
+      className="flex flex-col"
+      style={{
+        '--radius-sm': '6px',
+        '--radius-md': '8px',
+        '--radius-lg': '10px',
+        '--radius': '10px',
+      } as React.CSSProperties}
+    >
       {/* Search and Filters Header */}
       <div className="mb-6 flex flex-col gap-4">
         <div className="relative w-full group">
@@ -178,7 +209,11 @@ export function JobsView({ isCollapsed, onNavigateToMessages, initialSearch, ini
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
-                setActiveSearchQuery(searchQuery);
+                if (onSectionChange && searchQuery.trim()) {
+                  onSectionChange('search', searchQuery.trim());
+                } else {
+                  setActiveSearchQuery(searchQuery);
+                }
               }
             }}
             className="w-full pl-12 pr-4 py-3 bg-card border border-border rounded-sm text-[13px] font-medium focus:ring-1 focus:ring-primary/20 focus:border-primary/30 outline-none transition-all shadow-sm"
@@ -190,7 +225,7 @@ export function JobsView({ isCollapsed, onNavigateToMessages, initialSearch, ini
             <button
               onClick={() => setSelectedCategory(prev => prev === 'B2_APPLY' ? null : 'B2_APPLY')}
               className={cn(
-                "flex items-center gap-2 px-3 md:px-4 py-2 rounded-sm text-[10px] font-bold uppercase tracking-wider whitespace-nowrap shadow-sm transition-all duration-300 border",
+                "flex items-center gap-2 px-3 md:px-4 py-2 rounded-sm text-[10px] font-bold uppercase tracking-wider whitespace-nowrap shadow-sm transition-all duration-300 border shrink-0",
                 selectedCategory === 'B2_APPLY'
                   ? "bg-[#0a66c2] text-white border-[#0a66c2] shadow-md shadow-[#0a66c2]/20"
                   : "bg-card border-border text-[#0a66c2] hover:bg-[#0a66c2]/5"
@@ -199,12 +234,14 @@ export function JobsView({ isCollapsed, onNavigateToMessages, initialSearch, ini
               <Zap className="w-3 h-3 fill-current" />
               B2 Apply
             </button>
-            {['IT', 'Freelance', 'Remote'].map((filter) => (
+
+            {/* Desktop Filters (visible only on md and up) */}
+            {desktopFilters.map((filter) => (
               <button
-                key={filter}
+                key={`desktop-${filter}`}
                 onClick={() => setSelectedCategory(prev => prev === filter ? null : filter)}
                 className={cn(
-                  "px-3 md:px-4 py-2 text-[10px] font-bold uppercase tracking-wider rounded-sm transition-all duration-300 whitespace-nowrap shadow-sm border",
+                  "hidden md:inline-flex px-3 md:px-4 py-2 text-[10px] font-bold uppercase tracking-wider rounded-sm transition-all duration-300 whitespace-nowrap shadow-sm border shrink-0",
                   selectedCategory === filter
                     ? "bg-[#0a66c2] text-white border-[#0a66c2] shadow-md shadow-[#0a66c2]/20"
                     : "bg-card border-border text-muted-foreground hover:text-foreground hover:bg-muted/50 hover:border-[#0a66c2]/30"
@@ -213,6 +250,23 @@ export function JobsView({ isCollapsed, onNavigateToMessages, initialSearch, ini
                 {filter}
               </button>
             ))}
+
+            {/* Mobile Primary Filters (visible only on mobile) */}
+            {mobilePrimaryFilters.map((filter) => (
+              <button
+                key={`mobile-primary-${filter}`}
+                onClick={() => setSelectedCategory(prev => prev === filter ? null : filter)}
+                className={cn(
+                  "md:hidden px-3 py-2 text-[10px] font-bold uppercase tracking-wider rounded-sm transition-all duration-300 whitespace-nowrap shadow-sm border shrink-0",
+                  selectedCategory === filter
+                    ? "bg-[#0a66c2] text-white border-[#0a66c2] shadow-md shadow-[#0a66c2]/20"
+                    : "bg-card border-border text-muted-foreground hover:text-foreground hover:bg-muted/50 hover:border-[#0a66c2]/30"
+                )}
+              >
+                {filter}
+              </button>
+            ))}
+
             <button
               onClick={() => setShowMobileMore(!showMobileMore)}
               className="md:hidden p-2 bg-card border border-border text-muted-foreground rounded-sm hover:text-foreground hover:bg-muted/50 transition-all shadow-sm flex items-center justify-center outline-none shrink-0"
@@ -221,13 +275,13 @@ export function JobsView({ isCollapsed, onNavigateToMessages, initialSearch, ini
             </button>
           </div>
           {showMobileMore && (
-            <div className="flex items-center gap-2 overflow-x-auto pb-1 animate-in slide-in-from-top-1 duration-200 scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-              {['Full-time', 'Contract', 'Internship', 'Non-IT'].map((filter) => (
+            <div className="md:hidden flex items-center gap-2 overflow-x-auto pb-1 animate-in slide-in-from-top-1 duration-200 scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+              {mobileSecondaryFilters.map((filter) => (
                 <button
                   key={`mobile-extra-${filter}`}
                   onClick={() => setSelectedCategory(prev => prev === filter ? null : filter)}
                   className={cn(
-                    "px-3 py-2 text-[10px] font-bold uppercase tracking-wider rounded-sm transition-all duration-300 whitespace-nowrap shadow-sm border",
+                    "px-3 py-2 text-[10px] font-bold uppercase tracking-wider rounded-sm transition-all duration-300 whitespace-nowrap shadow-sm border shrink-0",
                     selectedCategory === filter
                       ? "bg-[#0a66c2] text-white border-[#0a66c2] shadow-md shadow-[#0a66c2]/20"
                       : "bg-card border-border text-muted-foreground hover:text-foreground hover:bg-muted/50 hover:border-[#0a66c2]/30"
@@ -243,7 +297,7 @@ export function JobsView({ isCollapsed, onNavigateToMessages, initialSearch, ini
 
       <div className="flex gap-6 items-start">
         <div className={cn(
-          "flex-1 bg-card border border-border/50 rounded-lg transition-all",
+          "flex-1 bg-card border border-border/50 rounded-sm transition-all",
           selectedJob ? "hidden lg:block lg:flex-[0.4]" : "w-full"
         )}>
           {isLoading ? (
@@ -252,7 +306,7 @@ export function JobsView({ isCollapsed, onNavigateToMessages, initialSearch, ini
             </div>
           ) : (activeTab === 'browse' ? jobs : applications).length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
-              <div className="w-20 h-20 rounded-2xl bg-muted/20 flex items-center justify-center mb-6">
+              <div className="w-20 h-20 rounded-sm bg-muted/20 flex items-center justify-center mb-6">
                 <Briefcase className="w-8 h-8 text-muted-foreground opacity-20" />
               </div>
               <h3 className="text-xl font-semibold text-foreground mb-2">
@@ -282,7 +336,12 @@ export function JobsView({ isCollapsed, onNavigateToMessages, initialSearch, ini
                           <JobCard
                             job={job}
                             isSelected={selectedJob?.id === job.id}
-                            onClick={() => setSelectedJob(job)}
+                            onClick={() => {
+                              setSelectedJob(job);
+                              jobsService.getJobDetail(job.id).then(res => {
+                                if (res.status === 'success' && res.data) setSelectedJob(res.data);
+                              });
+                            }}
                           />
                           {index === 4 && (
                             <div className="p-6 bg-muted/10 border-y border-border/50 my-2">
@@ -330,7 +389,7 @@ export function JobsView({ isCollapsed, onNavigateToMessages, initialSearch, ini
         </div>
 
         <div className={cn(
-          "lg:flex-[0.6] flex flex-col bg-card border border-border rounded-lg overflow-hidden transition-all",
+          "lg:flex-[0.6] flex flex-col bg-card border border-border rounded-sm overflow-hidden transition-all",
           "h-[calc(100vh-9rem)] lg:h-[calc(100vh-5.5rem)] lg:sticky lg:top-20 lg:self-start",
           selectedJob ? "flex" : "hidden"
         )}>
@@ -346,7 +405,7 @@ export function JobsView({ isCollapsed, onNavigateToMessages, initialSearch, ini
             />
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-center p-10 opacity-40">
-              <div className="w-24 h-24 rounded-3xl bg-muted flex items-center justify-center mb-6">
+              <div className="w-24 h-24 rounded-sm bg-muted flex items-center justify-center mb-6">
                 <Briefcase className="w-10 h-10 text-muted-foreground" />
               </div>
               <h3 className="text-xl font-bold text-foreground mb-2">Select a job</h3>

@@ -90,7 +90,7 @@ export function SettingsView({ isCollapsed }: { isCollapsed?: boolean }) {
 
   return (
     <div className={cn(
-      "flex-1 min-h-screen bg-background flex flex-col md:flex-row transition-all duration-300 ease-in-out"
+      "flex-1 min-h-screen md:min-h-0 bg-background flex flex-col md:flex-row transition-all duration-300 ease-in-out md:h-[calc(100vh-4rem)] md:overflow-hidden"
     )}>
       {/* Settings Navigation (Mobile) */}
       <div className={cn(
@@ -177,7 +177,7 @@ export function SettingsView({ isCollapsed }: { isCollapsed?: boolean }) {
       </div>
 
       {/* Desktop: Sidebar navigation */}
-      <div className="hidden md:block w-72 border-r border-border p-6 bg-sidebar/40 shrink-0">
+      <div className="hidden md:block w-72 border-r border-border p-6 bg-sidebar/40 shrink-0 overflow-y-auto">
         <h2 className="text-xl font-semibold text-foreground mb-8 tracking-tight px-4">Settings</h2>
         <nav className="space-y-1">
           {menuItems.map((item) => (
@@ -229,19 +229,6 @@ export function SettingsView({ isCollapsed }: { isCollapsed?: boolean }) {
               <HelpTab />
             </TabsContent>
           </Tabs>
-
-          {/* Footer Actions */}
-          {activeTab !== 'Billing' && activeTab !== 'Account' && (
-            <div className="pt-6 sm:pt-8 border-t border-border flex flex-col sm:flex-row justify-end gap-3 sticky bottom-0 bg-background/80 backdrop-blur-sm z-20 py-4 -mx-4 sm:-mx-6 lg:-mx-10 px-4 sm:px-6 lg:px-10">
-              <Button variant="ghost" className="rounded-sm font-bold text-xs text-muted-foreground uppercase tracking-widest px-6 h-11">
-                Discard
-              </Button>
-              <Button className="rounded-sm bg-[#0a66c2] hover:bg-[#004182] text-white font-bold text-xs uppercase tracking-widest px-8 h-11 shadow-md shadow-[#0a66c2]/10 hover:translate-y-[-1px] active:scale-95 transition-all">
-                <Save className="w-4 h-4 mr-2" />
-                Save Changes
-              </Button>
-            </div>
-          )}
         </div>
       </div>
     </div>

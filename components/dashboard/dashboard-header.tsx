@@ -15,7 +15,7 @@ import { axiosInstance } from '@/lib/axios';
 export type DashboardSection = 'dashboard' | 'Profile' | 'messages' | 'network' | 'settings' | 'jobs' | 'news' | 'hire' | 'create-post' | 'notifications' | 'premium';
 import { getOptimizedImage } from '@/lib/imagekit';
 
-import { GlobalSearch } from './global-search';
+import { GlobalSearch } from './search/global-search';
 
 interface DashboardHeaderProps {
    isRightCollapsed?: boolean;
@@ -33,9 +33,9 @@ export function DashboardHeader({
 }: DashboardHeaderProps) {
    const { user, userSubscription, fetchSubscription } = useAuth();
    const isPremium = !!(userSubscription &&
-                     userSubscription.status === 'active' &&
-                     userSubscription.plan_details &&
-                     Number(userSubscription.plan_details.price) > 0);
+      userSubscription.status === 'active' &&
+      userSubscription.plan_details &&
+      Number(userSubscription.plan_details.price) > 0);
    const queryClient = useQueryClient();
    const [showNotifications, setShowNotifications] = React.useState(false);
    const [showProfileMenu, setShowProfileMenu] = React.useState(false);
@@ -70,134 +70,134 @@ export function DashboardHeader({
       }
    };
 
-    const handleGoToBilling = (e?: React.MouseEvent) => {
-       if (e) e.stopPropagation();
-       onSectionChange('settings');
-       const url = new URL(window.location.href);
-       url.searchParams.set('tab', 'Billing');
-       window.history.replaceState(null, '', url.pathname + url.search);
-       window.dispatchEvent(new Event('settings-tab-change'));
-       setShowProfileMenu(false);
-       setShowMobileProfileSidebar(false);
-    };
+   const handleGoToBilling = (e?: React.MouseEvent) => {
+      if (e) e.stopPropagation();
+      onSectionChange('settings');
+      const url = new URL(window.location.href);
+      url.searchParams.set('tab', 'Billing');
+      window.history.replaceState(null, '', url.pathname + url.search);
+      window.dispatchEvent(new Event('settings-tab-change'));
+      setShowProfileMenu(false);
+      setShowMobileProfileSidebar(false);
+   };
 
-    const handleActivateSub = async (e: React.MouseEvent) => {
-       e.stopPropagation();
-       // Prevent self-activation of premium subscriptions via header
-       if (Number(userSubscription?.plan_details?.price ?? 0) > 0) {
-          toast.error("Verification Required", {
-             description: "Premium plans must be verified manually by an administrator. Routing to billing uploader...",
-          });
-          handleGoToBilling();
-          return;
-       }
+   const handleActivateSub = async (e: React.MouseEvent) => {
+      e.stopPropagation();
+      // Prevent self-activation of premium subscriptions via header
+      if (Number(userSubscription?.plan_details?.price ?? 0) > 0) {
+         toast.error("Verification Required", {
+            description: "Premium plans must be verified manually by an administrator. Routing to billing uploader...",
+         });
+         handleGoToBilling();
+         return;
+      }
 
-       setIsActivating(true);
-       try {
-          const response = await axiosInstance.post('/subscription/my-subscription/', {
-             action: 'activate',
-          });
-          if (response.data) {
-             await fetchSubscription();
-             toast.success('Subscription activated successfully!', {
-                description: `Welcome to the ${userSubscription?.plan_details?.name || 'Premium Plan'}! All premium features are now unlocked.`,
-             });
-          }
-       } catch (error: any) {
-          console.error('Error activating subscription:', error);
-          toast.error(
-             error.response?.data?.error || 'Failed to activate subscription. Please try again.'
-          );
-       } finally {
-          setIsActivating(false);
-       }
-    };
+      setIsActivating(true);
+      try {
+         const response = await axiosInstance.post('/subscription/my-subscription/', {
+            action: 'activate',
+         });
+         if (response.data) {
+            await fetchSubscription();
+            toast.success('Subscription activated successfully!', {
+               description: `Welcome to the ${userSubscription?.plan_details?.name || 'Premium Plan'}! All premium features are now unlocked.`,
+            });
+         }
+      } catch (error: any) {
+         console.error('Error activating subscription:', error);
+         toast.error(
+            error.response?.data?.error || 'Failed to activate subscription. Please try again.'
+         );
+      } finally {
+         setIsActivating(false);
+      }
+   };
 
-    const renderPendingSubBox = (isMobile: boolean) => {
-       if (!userSubscription?.plan_details) return null;
-       
-       const planPrice = Number(userSubscription.plan_details.price ?? 0);
-       const isFreePlan = planPrice === 0;
-       const isVerified = userSubscription.is_payment_verified ?? false;
-       const latestPayment = userSubscription.latest_payment && userSubscription.latest_payment.plan === userSubscription.plan
-           ? userSubscription.latest_payment
-           : null;
-       
-       const isPendingSub = !isFreePlan ? !isVerified : userSubscription.status === 'pending';
-       if (!isPendingSub) return null;
-       
-       const paddingClass = isMobile ? "px-5 py-3.5 mx-4 my-2" : "px-3 py-2 mx-2 my-1.5";
-       const fontTitleClass = isMobile ? "text-[11px]" : "text-[10px]";
-       const fontBtnClass = isMobile ? "text-[11px] h-8" : "text-[10px] h-7";
+   const renderPendingSubBox = (isMobile: boolean) => {
+      if (!userSubscription?.plan_details) return null;
 
-       if (!isFreePlan) {
-          if (latestPayment?.status === 'pending') {
-             return (
-                <div className={cn(paddingClass, "bg-amber-500/10 border border-amber-500/20 rounded flex flex-col gap-2 shadow-sm animate-in fade-in duration-300")}>
-                   <p className={cn(fontTitleClass, "text-amber-700 dark:text-amber-400 font-bold leading-normal")}>
-                      Payment verification is under progress for {userSubscription.plan_details.name}.
-                   </p>
-                   <button
-                      onClick={(e) => handleGoToBilling(e)}
-                      className={cn(fontBtnClass, "w-full bg-amber-500 hover:bg-amber-600 text-white font-bold rounded flex items-center justify-center gap-1 transition-all cursor-pointer active:scale-[0.98]")}
-                   >
-                      <span>View Status</span>
-                   </button>
-                </div>
-             );
-          } else if (latestPayment?.status === 'rejected') {
-             return (
-                <div className={cn(paddingClass, "bg-rose-500/10 border border-rose-500/20 rounded flex flex-col gap-2 shadow-sm animate-in fade-in duration-300")}>
-                   <p className={cn(fontTitleClass, "text-rose-700 dark:text-rose-400 font-bold leading-normal")}>
-                      Verification Rejected! Please re-submit proof.
-                   </p>
-                   <button
-                      onClick={(e) => handleGoToBilling(e)}
-                      className={cn(fontBtnClass, "w-full bg-rose-500 hover:bg-rose-600 text-white font-bold rounded flex items-center justify-center gap-1 transition-all cursor-pointer active:scale-[0.98]")}
-                   >
-                      <span>Resolve Now</span>
-                   </button>
-                </div>
-             );
-          } else {
-             return (
-                <div className={cn(paddingClass, "bg-amber-500/10 border border-amber-500/20 rounded flex flex-col gap-2 shadow-sm animate-in fade-in duration-300")}>
-                   <p className={cn(fontTitleClass, "text-amber-700 dark:text-amber-400 font-bold leading-normal")}>
-                      Payment Verification Required for {userSubscription.plan_details.name}.
-                   </p>
-                   <button
-                      onClick={(e) => handleGoToBilling(e)}
-                      className={cn(fontBtnClass, "w-full bg-amber-500 hover:bg-amber-600 text-white font-bold rounded flex items-center justify-center gap-1 transition-all cursor-pointer active:scale-[0.98]")}
-                   >
-                      <span>Verify Payment</span>
-                   </button>
-                </div>
-             );
-          }
-       } else {
-          return (
-             <div className={cn(paddingClass, "bg-amber-500/10 border border-amber-500/20 rounded flex flex-col gap-2 shadow-sm animate-in fade-in duration-300")}>
-                <p className={cn(fontTitleClass, "text-amber-700 dark:text-amber-400 font-bold leading-normal")}>
-                   Your Free Tier is pending activation.
-                </p>
-                <button
-                   onClick={handleActivateSub}
-                   disabled={isActivating}
-                   className={cn(fontBtnClass, "w-full bg-amber-500 hover:bg-amber-600 text-white font-bold rounded flex items-center justify-center gap-1.5 transition-all cursor-pointer disabled:opacity-75 active:scale-[0.98]")}
-                >
-                   {isActivating ? (
-                      <>
-                         <Loader2 className="w-3 h-3 animate-spin" />
-                         <span>Activating...</span>
-                      </>
-                   ) : (
-                      <span>Activate Plan Now</span>
-                   )}
-                </button>
-             </div>
-          );
-       }
-    };
+      const planPrice = Number(userSubscription.plan_details.price ?? 0);
+      const isFreePlan = planPrice === 0;
+      const isVerified = userSubscription.is_payment_verified ?? false;
+      const latestPayment = userSubscription.latest_payment && userSubscription.latest_payment.plan === userSubscription.plan
+         ? userSubscription.latest_payment
+         : null;
+
+      const isPendingSub = !isFreePlan ? !isVerified : userSubscription.status === 'pending';
+      if (!isPendingSub) return null;
+
+      const paddingClass = isMobile ? "px-5 py-3.5 mx-4 my-2" : "px-3 py-2 mx-2 my-1.5";
+      const fontTitleClass = isMobile ? "text-[11px]" : "text-[10px]";
+      const fontBtnClass = isMobile ? "text-[11px] h-8" : "text-[10px] h-7";
+
+      if (!isFreePlan) {
+         if (latestPayment?.status === 'pending') {
+            return (
+               <div className={cn(paddingClass, "bg-amber-500/10 border border-amber-500/20 rounded flex flex-col gap-2 shadow-sm animate-in fade-in duration-300")}>
+                  <p className={cn(fontTitleClass, "text-amber-700 dark:text-amber-400 font-bold leading-normal")}>
+                     Payment verification is under progress for {userSubscription.plan_details.name}.
+                  </p>
+                  <button
+                     onClick={(e) => handleGoToBilling(e)}
+                     className={cn(fontBtnClass, "w-full bg-amber-500 hover:bg-amber-600 text-white font-bold rounded flex items-center justify-center gap-1 transition-all cursor-pointer active:scale-[0.98]")}
+                  >
+                     <span>View Status</span>
+                  </button>
+               </div>
+            );
+         } else if (latestPayment?.status === 'rejected') {
+            return (
+               <div className={cn(paddingClass, "bg-rose-500/10 border border-rose-500/20 rounded flex flex-col gap-2 shadow-sm animate-in fade-in duration-300")}>
+                  <p className={cn(fontTitleClass, "text-rose-700 dark:text-rose-400 font-bold leading-normal")}>
+                     Verification Rejected! Please re-submit proof.
+                  </p>
+                  <button
+                     onClick={(e) => handleGoToBilling(e)}
+                     className={cn(fontBtnClass, "w-full bg-rose-500 hover:bg-rose-600 text-white font-bold rounded flex items-center justify-center gap-1 transition-all cursor-pointer active:scale-[0.98]")}
+                  >
+                     <span>Resolve Now</span>
+                  </button>
+               </div>
+            );
+         } else {
+            return (
+               <div className={cn(paddingClass, "bg-amber-500/10 border border-amber-500/20 rounded flex flex-col gap-2 shadow-sm animate-in fade-in duration-300")}>
+                  <p className={cn(fontTitleClass, "text-amber-700 dark:text-amber-400 font-bold leading-normal")}>
+                     Payment Verification Required for {userSubscription.plan_details.name}.
+                  </p>
+                  <button
+                     onClick={(e) => handleGoToBilling(e)}
+                     className={cn(fontBtnClass, "w-full bg-amber-500 hover:bg-amber-600 text-white font-bold rounded flex items-center justify-center gap-1 transition-all cursor-pointer active:scale-[0.98]")}
+                  >
+                     <span>Verify Payment</span>
+                  </button>
+               </div>
+            );
+         }
+      } else {
+         return (
+            <div className={cn(paddingClass, "bg-amber-500/10 border border-amber-500/20 rounded flex flex-col gap-2 shadow-sm animate-in fade-in duration-300")}>
+               <p className={cn(fontTitleClass, "text-amber-700 dark:text-amber-400 font-bold leading-normal")}>
+                  Your Free Tier is pending activation.
+               </p>
+               <button
+                  onClick={handleActivateSub}
+                  disabled={isActivating}
+                  className={cn(fontBtnClass, "w-full bg-amber-500 hover:bg-amber-600 text-white font-bold rounded flex items-center justify-center gap-1.5 transition-all cursor-pointer disabled:opacity-75 active:scale-[0.98]")}
+               >
+                  {isActivating ? (
+                     <>
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                        <span>Activating...</span>
+                     </>
+                  ) : (
+                     <span>Activate Plan Now</span>
+                  )}
+               </button>
+            </div>
+         );
+      }
+   };
 
    const toggleMenu = (e: React.MouseEvent) => {
       e.stopPropagation();
@@ -340,7 +340,7 @@ export function DashboardHeader({
          )}
 
          <header className={cn(
-            "fixed top-0 left-0 right-0 z-40",
+            "fixed top-0 left-0 right-0 z-[60]",
             "h-20 lg:h-16 bg-background/80 backdrop-blur-md border-b border-border"
          )}>
             {/* ═══ MOBILE HEADER (lg:hidden) ═══ */}
@@ -421,138 +421,138 @@ export function DashboardHeader({
                ) : (
                   <div className="flex-1 flex items-center justify-center h-full min-w-0">
                      <nav className="hidden lg:flex items-center gap-0 xl:gap-1 h-full min-w-0 xl:-translate-x-12 transition-transform">
-                     <button
-                        onClick={() => onSectionChange('dashboard')}
-                        className="relative h-full flex flex-col items-center justify-center px-2 xl:px-3 group/tab min-w-[52px]"
-                     >
-                        <Home className={cn(
-                           "w-[20px] h-[20px] mb-1 transition-all group-hover/tab:scale-110",
-                           activeSection === 'dashboard' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
-                        )} />
-                        <span className={cn(
-                           "text-[10px] font-bold uppercase tracking-tight transition-colors",
-                           activeSection === 'dashboard' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
-                        )}>Home</span>
-                        {activeSection === 'dashboard' && <div className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
-                     </button>
-
-                     <button
-                        onClick={() => onSectionChange('network')}
-                        className="relative h-full flex flex-col items-center justify-center px-2 xl:px-3 group/tab min-w-[52px]"
-                     >
-                        <NetworkIcon className={cn(
-                           "w-[20px] h-[20px] mb-1 transition-all group-hover/tab:scale-110",
-                           activeSection === 'network' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
-                        )} />
-                        <span className={cn(
-                           "text-[10px] font-bold uppercase tracking-tight transition-colors",
-                           activeSection === 'network' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
-                        )}>Network</span>
-                        {activeSection === 'network' && <div className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
-                     </button>
-
-                     <button
-                        onClick={() => onSectionChange('messages')}
-                        className="relative h-full flex flex-col items-center justify-center px-2 xl:px-3 group/tab min-w-[52px]"
-                     >
-                        <MessageSquare className={cn(
-                           "w-[20px] h-[20px] mb-1 transition-all group-hover/tab:scale-110",
-                           activeSection === 'messages' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
-                        )} />
-                        <span className={cn(
-                           "text-[10px] font-bold uppercase tracking-tight transition-colors",
-                           activeSection === 'messages' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
-                        )}>Messages</span>
-                        {activeSection === 'messages' && <div className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
-                     </button>
-
-                     <button
-                        onClick={() => onSectionChange('jobs')}
-                        className="relative h-full flex flex-col items-center justify-center px-2 xl:px-3 group/tab min-w-[52px]"
-                     >
-                        <Briefcase className={cn(
-                           "w-[20px] h-[20px] mb-1 transition-all group-hover/tab:scale-110",
-                           activeSection === 'jobs' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
-                        )} />
-                        <span className={cn(
-                           "text-[10px] font-bold uppercase tracking-tight transition-colors",
-                           activeSection === 'jobs' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
-                        )}>Jobs</span>
-                        {activeSection === 'jobs' && <div className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
-                     </button>
-
-                     <button
-                        onClick={() => onSectionChange('news')}
-                        className="relative h-full flex flex-col items-center justify-center px-2 xl:px-3 group/tab min-w-[52px]"
-                     >
-                        <div className="relative">
-                           <Newspaper className={cn(
+                        <button
+                           onClick={() => onSectionChange('dashboard')}
+                           className="relative h-full flex flex-col items-center justify-center px-2 xl:px-3 group/tab min-w-[52px]"
+                        >
+                           <Home className={cn(
                               "w-[20px] h-[20px] mb-1 transition-all group-hover/tab:scale-110",
-                              activeSection === 'news' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
+                              activeSection === 'dashboard' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
                            )} />
-                           <div className="absolute -top-1 -right-3 px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-500 text-[7px] font-black uppercase tracking-tighter scale-75">New</div>
-                        </div>
-                        <span className={cn(
-                           "text-[10px] font-bold uppercase tracking-tight transition-colors",
-                           activeSection === 'news' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
-                        )}>News</span>
-                        {activeSection === 'news' && <div className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
-                     </button>
+                           <span className={cn(
+                              "text-[10px] font-bold uppercase tracking-tight transition-colors",
+                              activeSection === 'dashboard' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
+                           )}>Home</span>
+                           {activeSection === 'dashboard' && <div className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
+                        </button>
 
-                     <button
-                        onClick={() => onSectionChange('notifications')}
-                        className="relative h-full flex flex-col items-center justify-center px-2 xl:px-3 group/tab min-w-[52px]"
-                     >
-                        <div className="relative">
-                           <Bell className={cn(
+                        <button
+                           onClick={() => onSectionChange('network')}
+                           className="relative h-full flex flex-col items-center justify-center px-2 xl:px-3 group/tab min-w-[52px]"
+                        >
+                           <NetworkIcon className={cn(
                               "w-[20px] h-[20px] mb-1 transition-all group-hover/tab:scale-110",
-                              activeSection === 'notifications' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
+                              activeSection === 'network' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
                            )} />
-                           {unreadCount > 0 && (
-                              <span className="absolute -top-1 -right-1 min-w-[14px] h-[14px] rounded-full bg-rose-500 flex items-center justify-center text-[7px] font-black text-white border border-background">
-                                 {unreadCount}
-                              </span>
-                           )}
-                        </div>
-                        <span className={cn(
-                           "text-[10px] font-bold uppercase tracking-tight transition-colors",
-                           activeSection === 'notifications' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
-                        )}>Notifications</span>
-                        {activeSection === 'notifications' && <div className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
-                     </button>
+                           <span className={cn(
+                              "text-[10px] font-bold uppercase tracking-tight transition-colors",
+                              activeSection === 'network' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
+                           )}>Network</span>
+                           {activeSection === 'network' && <div className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
+                        </button>
 
-                     <a
-                        href="/recruiter"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={(e) => {
-                           if (!isPremium) {
-                              e.preventDefault();
-                              toast.error("Upgrade to Premium", {
-                                 description: "You need an active premium subscription to access the recruiter platform and AI hiring features."
-                              });
-                           }
-                        }}
-                        className="relative h-full flex flex-col items-center justify-center px-2 xl:px-3 group/tab min-w-[52px]"
-                     >
-                        <div className="relative">
-                           <Users className={cn(
+                        <button
+                           onClick={() => onSectionChange('messages')}
+                           className="relative h-full flex flex-col items-center justify-center px-2 xl:px-3 group/tab min-w-[52px]"
+                        >
+                           <MessageSquare className={cn(
                               "w-[20px] h-[20px] mb-1 transition-all group-hover/tab:scale-110",
-                              activeSection === 'hire' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
+                              activeSection === 'messages' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
                            )} />
-                           <div className="absolute -top-1.5 -right-4 px-1.5 py-0.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-[4px] text-[7px] font-black uppercase tracking-wider scale-75 shadow-[0_0_10px_rgba(16,185,129,0.5)] border border-emerald-400/20">
-                              New
+                           <span className={cn(
+                              "text-[10px] font-bold uppercase tracking-tight transition-colors",
+                              activeSection === 'messages' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
+                           )}>Messages</span>
+                           {activeSection === 'messages' && <div className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
+                        </button>
+
+                        <button
+                           onClick={() => onSectionChange('jobs')}
+                           className="relative h-full flex flex-col items-center justify-center px-2 xl:px-3 group/tab min-w-[52px]"
+                        >
+                           <Briefcase className={cn(
+                              "w-[20px] h-[20px] mb-1 transition-all group-hover/tab:scale-110",
+                              activeSection === 'jobs' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
+                           )} />
+                           <span className={cn(
+                              "text-[10px] font-bold uppercase tracking-tight transition-colors",
+                              activeSection === 'jobs' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
+                           )}>Jobs</span>
+                           {activeSection === 'jobs' && <div className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
+                        </button>
+
+                        <button
+                           onClick={() => onSectionChange('news')}
+                           className="relative h-full flex flex-col items-center justify-center px-2 xl:px-3 group/tab min-w-[52px]"
+                        >
+                           <div className="relative">
+                              <Newspaper className={cn(
+                                 "w-[20px] h-[20px] mb-1 transition-all group-hover/tab:scale-110",
+                                 activeSection === 'news' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
+                              )} />
+                              <div className="absolute -top-1 -right-3 px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-500 text-[7px] font-black uppercase tracking-tighter scale-75">New</div>
                            </div>
-                        </div>
-                        <span className={cn(
-                           "text-[10px] font-bold uppercase tracking-tight transition-colors whitespace-nowrap",
-                           activeSection === 'hire' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
-                        )}>Hire with AI</span>
-                        {activeSection === 'hire' && <div className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
-                     </a>
-                  </nav>
+                           <span className={cn(
+                              "text-[10px] font-bold uppercase tracking-tight transition-colors",
+                              activeSection === 'news' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
+                           )}>News</span>
+                           {activeSection === 'news' && <div className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
+                        </button>
 
-               </div>
+                        <button
+                           onClick={() => onSectionChange('notifications')}
+                           className="relative h-full flex flex-col items-center justify-center px-2 xl:px-3 group/tab min-w-[52px]"
+                        >
+                           <div className="relative">
+                              <Bell className={cn(
+                                 "w-[20px] h-[20px] mb-1 transition-all group-hover/tab:scale-110",
+                                 activeSection === 'notifications' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
+                              )} />
+                              {unreadCount > 0 && (
+                                 <span className="absolute -top-1 -right-1 min-w-[14px] h-[14px] rounded-full bg-rose-500 flex items-center justify-center text-[7px] font-black text-white border border-background">
+                                    {unreadCount}
+                                 </span>
+                              )}
+                           </div>
+                           <span className={cn(
+                              "text-[10px] font-bold uppercase tracking-tight transition-colors",
+                              activeSection === 'notifications' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
+                           )}>Notifications</span>
+                           {activeSection === 'notifications' && <div className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
+                        </button>
+
+                        <a
+                           href="/recruiter"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           onClick={(e) => {
+                              if (!isPremium) {
+                                 e.preventDefault();
+                                 toast.error("Upgrade to Premium", {
+                                    description: "You need an active premium subscription to access the recruiter platform and AI hiring features."
+                                 });
+                              }
+                           }}
+                           className="relative h-full flex flex-col items-center justify-center px-2 xl:px-3 group/tab min-w-[52px]"
+                        >
+                           <div className="relative">
+                              <Users className={cn(
+                                 "w-[20px] h-[20px] mb-1 transition-all group-hover/tab:scale-110",
+                                 activeSection === 'hire' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
+                              )} />
+                              <div className="absolute -top-1.5 -right-4 px-1.5 py-0.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-[4px] text-[7px] font-black uppercase tracking-wider scale-75 shadow-[0_0_10px_rgba(16,185,129,0.5)] border border-emerald-400/20">
+                                 New
+                              </div>
+                           </div>
+                           <span className={cn(
+                              "text-[10px] font-bold uppercase tracking-tight transition-colors whitespace-nowrap",
+                              activeSection === 'hire' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
+                           )}>Hire with AI</span>
+                           {activeSection === 'hire' && <div className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
+                        </a>
+                     </nav>
+
+                  </div>
                )}
 
                {/* Right Section: Actions / Profile */}
@@ -583,26 +583,26 @@ export function DashboardHeader({
                         className="relative mb-0.5"
                      >
                         <div className={cn(
-                            "w-7 h-7 lg:w-6 lg:h-6 rounded-full relative z-10 transition-all duration-300 flex items-center justify-center p-[1.5px]",
-                            isPremium 
-                              ? "bg-[conic-gradient(from_0deg,#4285F4,#EA4335,#FBBC05,#34A853,#4285F4)] animate-[spin_5s_linear_infinite]" 
+                           "w-7 h-7 lg:w-6 lg:h-6 rounded-full relative z-10 transition-all duration-300 flex items-center justify-center p-[1.5px]",
+                           isPremium
+                              ? "bg-[conic-gradient(from_0deg,#4285F4,#EA4335,#FBBC05,#34A853,#4285F4)] animate-[spin_5s_linear_infinite]"
                               : "border border-muted-foreground/30 group-hover/profile:border-foreground",
-                            !isPremium && (activeSection === 'Profile' || activeSection === 'settings' || showProfileMenu) && "border-primary"
-                         )}>
-                            <div className="w-full h-full rounded-full bg-background overflow-hidden flex items-center justify-center">
-                               {user?.profile?.profile_image_url ? (
-                                  <img
-                                     src={`${getOptimizedImage(user.profile.profile_image_url)}&v=${user.updated_at ? new Date(user.updated_at).getTime() : Date.now()}`}
-                                     alt="Profile"
-                                     className="w-full h-full object-cover rounded-full"
-                                  />
-                               ) : (
-                                  <div className="w-full h-full bg-primary flex items-center justify-center text-[10px] font-bold text-white uppercase rounded-full">
-                                     {user?.first_name?.[0] || 'U'}
-                                  </div>
-                               )}
-                            </div>
-                         </div>
+                           !isPremium && (activeSection === 'Profile' || activeSection === 'settings' || showProfileMenu) && "border-primary"
+                        )}>
+                           <div className="w-full h-full rounded-full bg-background overflow-hidden flex items-center justify-center">
+                              {user?.profile?.profile_image_url ? (
+                                 <img
+                                    src={`${getOptimizedImage(user.profile.profile_image_url)}&v=${user.updated_at ? new Date(user.updated_at).getTime() : Date.now()}`}
+                                    alt="Profile"
+                                    className="w-full h-full object-cover rounded-full"
+                                 />
+                              ) : (
+                                 <div className="w-full h-full bg-primary flex items-center justify-center text-[10px] font-bold text-white uppercase rounded-full">
+                                    {user?.first_name?.[0] || 'U'}
+                                 </div>
+                              )}
+                           </div>
+                        </div>
                      </div>
 
                      <div
@@ -651,7 +651,7 @@ export function DashboardHeader({
                            </div>
 
                            {renderPendingSubBox(false)}
- 
+
                            <button
                               onClick={() => {
                                  onSectionChange('Profile');

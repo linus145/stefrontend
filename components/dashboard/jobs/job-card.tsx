@@ -22,7 +22,7 @@ export function JobCard({ job, isSelected, onClick }: JobCardProps) {
     >
       <button 
         onClick={(e) => e.stopPropagation()}
-        className="absolute top-4 right-4 p-1 rounded-full text-muted-foreground hover:bg-muted opacity-0 group-hover:opacity-100 transition-opacity"
+        className="absolute top-4 right-4 p-1 rounded-sm text-muted-foreground hover:bg-muted opacity-0 group-hover:opacity-100 transition-opacity"
       >
         <X className="w-4 h-4" />
       </button>
@@ -46,21 +46,21 @@ export function JobCard({ job, isSelected, onClick }: JobCardProps) {
           
           <div className="mt-2 space-y-1">
             <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-              <span className="w-4 h-4 rounded-full bg-emerald-500/10 flex items-center justify-center">
+              <span className="w-4 h-4 rounded-sm bg-emerald-500/10 flex items-center justify-center">
                 <CheckCircle2 className="w-3 h-3 text-emerald-600" />
               </span>
               {job.hiring_status === 'ACTIVELY_HIRING' ? 'Actively hiring' : 'Actively reviewing applicants'}
             </div>
             <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
               <div className="flex items-center gap-1">
-                <span className="w-4 h-4 rounded-full bg-blue-500/10 flex items-center justify-center">
+                <span className="w-4 h-4 rounded-sm bg-blue-500/10 flex items-center justify-center">
                   <CheckCircle2 className="w-3 h-3 text-blue-600" />
                 </span>
                 {job.open_positions} {job.open_positions === 1 ? 'opening' : 'openings'}
               </div>
               {job.department && (
                 <div className="flex items-center gap-1">
-                  <span className="w-4 h-4 rounded-full bg-violet-500/10 flex items-center justify-center">
+                  <span className="w-4 h-4 rounded-sm bg-violet-500/10 flex items-center justify-center">
                     <Briefcase className="w-3 h-3 text-violet-600" />
                   </span>
                   {job.department}

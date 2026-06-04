@@ -70,6 +70,10 @@ export function DashboardViewShell() {
 
   // Close mobile sidebar on navigation
   const handleSectionChange = (section: DashboardSection, userId: string | null = null, intent?: 'connection' | 'direct') => {
+    if ((section as string) === 'search') {
+      router.push(`/jobs/search?q=${encodeURIComponent(userId || '')}`);
+      return;
+    }
     if (section === activeSection && userId === selectedProfileId) return;
     setIsTransitioning(true);
     setActiveSection(section);
@@ -145,6 +149,7 @@ export function DashboardViewShell() {
                 initialSearch={selectedProfileId?.includes('-') ? null : selectedProfileId}
                 initialJobId={selectedProfileId?.includes('-') ? selectedProfileId : null}
                 onNavigateToMessages={(userId) => handleSectionChange('messages', userId, 'direct')}
+                onSectionChange={handleSectionChange}
               />
             </div>
           </div>
@@ -222,7 +227,8 @@ export function DashboardViewShell() {
 
         <div className={cn(
           "flex-1 flex flex-col min-w-0 pt-16 pb-16 lg:pb-0",
-          activeSection === 'messages' ? "h-screen overflow-hidden" : "min-h-0"
+          activeSection === 'messages' ? "h-screen overflow-hidden" : "min-h-0",
+          activeSection === 'settings' ? "md:h-screen md:overflow-hidden" : ""
         )}>
           {renderContent()}
         </div>

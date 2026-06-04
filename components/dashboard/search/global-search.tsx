@@ -1,19 +1,27 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Search, Loader2, Briefcase, Newspaper, User } from 'lucide-react';
 import { searchFiltersService } from '@/services/search-filters.service';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { useSearchParams } from 'next/navigation';
 
 interface GlobalSearchProps {
   onSectionChange: (section: any, id?: string | null) => void;
 }
 
 export function GlobalSearch({ onSectionChange }: GlobalSearchProps) {
-  const [query, setQuery] = React.useState('');
+  const searchParams = useSearchParams();
+  const urlQuery = searchParams.get('q') || '';
+  const [query, setQuery] = React.useState(urlQuery);
   const [results, setResults] = React.useState<any>(null);
   const [isSearching, setIsSearching] = React.useState(false);
   const [showDropdown, setShowDropdown] = React.useState(false);
   const searchRef = React.useRef<HTMLDivElement>(null);
+
+  // Sync URL query to state
+  useEffect(() => {
+    setQuery(urlQuery);
+  }, [urlQuery]);
 
   // Debounced Search Effect
   React.useEffect(() => {
@@ -59,7 +67,7 @@ export function GlobalSearch({ onSectionChange }: GlobalSearchProps) {
         onFocus={() => query.trim().length >= 2 && setShowDropdown(true)}
         onKeyDown={(e) => {
           if (e.key === 'Enter' && query.trim()) {
-            onSectionChange('jobs', query.trim());
+            onSectionChange('search', query.trim());
             setShowDropdown(false);
           }
         }}
@@ -79,7 +87,7 @@ export function GlobalSearch({ onSectionChange }: GlobalSearchProps) {
             {/* Quick Search Row */}
             {query.trim().length >= 1 && (
               <button
-                onClick={() => { onSectionChange('jobs', query.trim()); setShowDropdown(false); }}
+                onClick={() => { onSectionChange('search', query.trim()); setShowDropdown(false); }}
                 className="flex items-center gap-3 px-4 py-2.5 hover:bg-muted/50 transition-colors border-b border-border/30 group"
               >
                 <Search className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
@@ -96,7 +104,7 @@ export function GlobalSearch({ onSectionChange }: GlobalSearchProps) {
                   <div className="py-1">
                     <div className="px-4 py-1.5 flex items-center justify-between">
                       <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider">Jobs</span>
-                      <button onClick={() => { onSectionChange('jobs', query); setShowDropdown(false); }} className="text-[10px] font-bold text-primary hover:opacity-70">View all</button>
+                      <button onClick={() => { onSectionChange('search', query); setShowDropdown(false); }} className="text-[10px] font-bold text-primary hover:opacity-70">View all</button>
                     </div>
                     <div className="px-1 pb-1">
                       {results.jobs.map((job: any) => (

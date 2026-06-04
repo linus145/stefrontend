@@ -8,6 +8,11 @@ export interface SearchFilters {
   experience_level?: string;
   category?: string;
   status?: string;
+  location?: string;
+  salary_min?: string | number;
+  salary_max?: string | number;
+  easy_apply?: boolean | string;
+  posted_date?: string;
 }
 
 export const searchFiltersService = {
@@ -17,13 +22,29 @@ export const searchFiltersService = {
   searchJobs: (filters: SearchFilters = {}): Promise<BaseAPIResponse<any[]>> => {
     const params = new URLSearchParams();
     Object.entries(filters).forEach(([key, value]) => {
-      if (value) params.append(key, value);
+      if (value !== undefined && value !== null && value !== '') {
+        params.append(key, String(value));
+      }
     });
 
     return api.get<any>(`/search/jobs/?${params.toString()}`).then(res => {
       const items = res.results || res.data || [];
       return { status: 'success', message: '', data: items };
     });
+  },
+
+  /**
+   * Search public jobs with pagination metadata preserved.
+   */
+  searchJobsPaginated: (filters: SearchFilters & { page?: number; page_size?: number } = {}): Promise<any> => {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        params.append(key, String(value));
+      }
+    });
+
+    return api.get<any>(`/search/jobs/?${params.toString()}`);
   },
 
   /**

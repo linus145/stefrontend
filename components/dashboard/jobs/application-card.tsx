@@ -35,7 +35,7 @@ export function ApplicationCard({ application, isSelected, onClick }: Applicatio
           
           <div className="mt-2 flex items-center gap-2">
             <span className={cn(
-              "px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border",
+              "px-2.5 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider border",
               application.status === 'PENDING' ? "bg-amber-500/5 text-amber-600 border-amber-500/20" :
               application.status === 'ONBOARDED' ? "bg-emerald-500/5 text-emerald-600 border-emerald-500/20" :
               "bg-blue-500/5 text-blue-500 border-blue-500/20"

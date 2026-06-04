@@ -138,7 +138,7 @@
   -webkit-overflow-scrolling: touch;
   scroll-behavior: smooth;
   overscroll-behavior: contain;
-  
+
   /* GPU layer promotion to prevent repaint lag on scroll */
   transform: translate3d(0, 0, 0);
   will-change: scroll-position;

@@ -16,6 +16,7 @@ export function PaymentUploader({ planPrice, latestPayment }: PaymentUploaderPro
   
   // Manual payment form state
   const [transactionId, setTransactionId] = useState('');
+  const [bankName, setBankName] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('UPI');
   const [paymentType, setPaymentType] = useState('new');
   const [upgradeUpiOrPhone, setUpgradeUpiOrPhone] = useState('');
@@ -47,6 +48,10 @@ export function PaymentUploader({ planPrice, latestPayment }: PaymentUploaderPro
       toast.error('Please enter a Transaction Reference ID.');
       return;
     }
+    if (!bankName.trim()) {
+      toast.error('Please enter your Bank Name.');
+      return;
+    }
     if (paymentType === 'upgrade' && !upgradeUpiOrPhone.trim()) {
       toast.error('Please enter your PhonePe Number or UPI ID for verification.');
       return;
@@ -60,6 +65,7 @@ export function PaymentUploader({ planPrice, latestPayment }: PaymentUploaderPro
     const formData = new FormData();
     formData.append('action', 'submit_payment');
     formData.append('transaction_id', transactionId.trim());
+    formData.append('bank_name', bankName.trim());
     formData.append('payment_method', paymentMethod);
     formData.append('payment_type', paymentType);
     if (paymentType === 'upgrade') {
@@ -79,6 +85,7 @@ export function PaymentUploader({ planPrice, latestPayment }: PaymentUploaderPro
           description: 'Our admin team will verify the transaction and activate your plan shortly.',
         });
         setTransactionId('');
+        setBankName('');
         setUpgradeUpiOrPhone('');
         setPaymentType('new');
         setScreenshotFile(null);
@@ -172,6 +179,10 @@ export function PaymentUploader({ planPrice, latestPayment }: PaymentUploaderPro
               </div>
             </div>
             <div>
+              <span className="text-[9px] text-muted-foreground block uppercase font-bold tracking-wider">Receiving Bank Name</span>
+              <span className="font-semibold text-foreground mt-0.5 block text-[11px]">ICICI Bank</span>
+            </div>
+            <div>
               <span className="text-[9px] text-muted-foreground block uppercase font-bold tracking-wider">Account Name</span>
               <span className="font-semibold text-foreground mt-0.5 block text-[11px]">Lakkavaram Ponnuswami Linus (LP Linus)</span>
             </div>
@@ -199,6 +210,18 @@ export function PaymentUploader({ planPrice, latestPayment }: PaymentUploaderPro
               <option value="IMPS">IMPS IMmediate Transfer</option>
               <option value="NEFT">NEFT / RTGS Transfer</option>
             </select>
+          </div>
+
+          <div className="space-y-1.5 animate-in fade-in duration-300">
+            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block ml-0.5">Your Bank Name (Payer Bank)</label>
+            <input
+              type="text"
+              placeholder="e.g. HDFC Bank, ICICI Bank, SBI"
+              value={bankName}
+              onChange={(e) => setBankName(e.target.value)}
+              className="w-full h-10 px-3 border border-border bg-background rounded-sm text-xs font-medium text-foreground placeholder:text-muted-foreground/60 focus:ring-1 focus:ring-primary/40 focus:outline-none shadow-sm"
+              required
+            />
           </div>
 
           <div className="space-y-1.5 animate-in fade-in duration-300">

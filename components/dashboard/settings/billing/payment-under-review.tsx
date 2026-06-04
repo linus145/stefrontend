@@ -26,6 +26,12 @@ export function PaymentUnderReview({ latestPayment }: PaymentUnderReviewProps) {
             <span className="text-[10px] text-muted-foreground block uppercase font-bold tracking-wider">Transaction VPA/Ref ID</span>
             <span className="font-semibold text-foreground select-all mt-0.5 block">{latestPayment?.transaction_id}</span>
           </div>
+          {latestPayment?.bank_name && (
+            <div>
+              <span className="text-[10px] text-muted-foreground block uppercase font-bold tracking-wider">Payer Bank Name</span>
+              <span className="font-semibold text-foreground mt-0.5 block">{latestPayment?.bank_name}</span>
+            </div>
+          )}
           <div>
             <span className="text-[10px] text-muted-foreground block uppercase font-bold tracking-wider">Payment Mode</span>
             <span className="font-semibold text-foreground mt-0.5 block">{latestPayment?.payment_method}</span>

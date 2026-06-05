@@ -60,6 +60,9 @@ export function Header() {
           <Link href="/blogs" className="hover:text-slate-900 dark:hover:text-slate-50 transition-colors">Blog</Link>
           <Link href="/careers" className="hover:text-slate-900 dark:hover:text-slate-50 transition-colors">Careers</Link>
           <Link href="/book-demo" className="hover:text-slate-900 dark:hover:text-slate-50 transition-colors">Contact</Link>
+          <Link href="/seedemo" className="hover:text-slate-900 dark:hover:text-slate-50 transition-colors">See Demo</Link>
+
+
         </nav>
 
         {/* Auth CTA & Theme Toggle */}
@@ -111,6 +114,9 @@ export function Header() {
             </Link>
             <Link href="/careers" onClick={() => setIsMobileMenuOpen(false)} className="py-3 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-50 transition-colors border-b border-slate-100 dark:border-slate-850">
               Careers
+            </Link>
+            <Link href="/seedemo" onClick={() => setIsMobileMenuOpen(false)} className="py-3 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-50 transition-colors border-b border-slate-100 dark:border-slate-850">
+              See Demo
             </Link>
             <Link href="/book-demo" onClick={() => setIsMobileMenuOpen(false)} className="py-3 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-50 transition-colors">
               Contact

@@ -483,8 +483,8 @@ export function EmployeesTab({ defaultRole = 'EMPLOYEE' }: EmployeesTabProps) {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex flex-col gap-1 text-[11px] font-semibold text-muted-foreground">
-                      <div className="flex items-center gap-2"><Mail className="h-3 w-3 text-[#0a66c2]/60"/> {employee.email}</div>
-                      <div className="flex items-center gap-2"><Phone className="h-3 w-3 text-[#0a66c2]/60"/> {employee.phone || 'No contact'}</div>
+                      <div className="flex items-center gap-2"><Mail className="h-3 w-3 text-[#0a66c2]/60" /> {employee.email}</div>
+                      <div className="flex items-center gap-2"><Phone className="h-3 w-3 text-[#0a66c2]/60" /> {employee.phone || 'No contact'}</div>
                     </div>
                   </td>
                   <td className="px-4 py-3">
@@ -503,7 +503,7 @@ export function EmployeesTab({ defaultRole = 'EMPLOYEE' }: EmployeesTabProps) {
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-1.5">
-                      
+
                       <button
                         onClick={() => setSelectedEmployeeId(employee.id)}
                         data-agent="employee-details-btn"

@@ -111,9 +111,9 @@ export const jobsService = {
   },
 
   updateApplicationStatus: (applicationId: string, status: string, employmentType?: string): Promise<BaseAPIResponse<JobApplication>> => {
-    return api.patch<BaseAPIResponse<JobApplication>>(`/jobs/applications/${applicationId}/status/`, { 
+    return api.patch<BaseAPIResponse<JobApplication>>(`/jobs/applications/${applicationId}/status/`, {
       status,
-      employment_type: employmentType 
+      employment_type: employmentType
     });
   },
 

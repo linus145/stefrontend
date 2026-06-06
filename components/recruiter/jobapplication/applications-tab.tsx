@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { ArrowLeft, Loader2, Users, FileText, Sparkles } from 'lucide-react';
 import { JobApplication } from '@/types/jobs.types';
+import { AgentUIController } from '@/agent/ui/AgentUIController';
 
 // Modules
 import { ApplicationCard } from './application-card';
@@ -37,13 +38,34 @@ export function ApplicationsTab({ selectedJobId, onBack }: ApplicationsTabProps)
   const [activeJobId, setActiveJobId] = useState<string | null>(selectedJobId);
   const [isAiPanelResizing, setIsAiPanelResizing] = useState(false);
   const [selectedModel, setSelectedModel] = useState<string>('gemini-2.5-flash-lite');
+  const [windowWidth, setWindowWidth] = useState<number>(typeof window !== 'undefined' ? window.innerWidth : 1200);
+  const [isAgentSidebarOpen, setIsAgentSidebarOpen] = useState<boolean>(false);
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setWindowWidth(window.innerWidth);
+      setIsAgentSidebarOpen(AgentUIController.getInstance().getIsVisible());
+    }
+
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    const handleAgentSidebarToggle = (e: any) => {
+      setIsAgentSidebarOpen(e.detail.isVisible);
+    };
+
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('agent-ui-toggle', handleAgentSidebarToggle);
+
     const handleStart = () => setIsAiPanelResizing(true);
     const handleStop = () => setIsAiPanelResizing(false);
     window.addEventListener('ai-panel-resize-start', handleStart);
     window.addEventListener('ai-panel-resize-stop', handleStop);
+
     return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('agent-ui-toggle', handleAgentSidebarToggle);
       window.removeEventListener('ai-panel-resize-start', handleStart);
       window.removeEventListener('ai-panel-resize-stop', handleStop);
     };
@@ -250,18 +272,23 @@ export function ApplicationsTab({ selectedJobId, onBack }: ApplicationsTabProps)
     { label: 'Rejected', value: 'REJECTED', color: 'bg-red-500' },
   ];
 
+  // Determine if we should apply padding-right to make room for AI panel
+  // If the viewport is too small or if Agent sidebar is open and squeezing the remaining width,
+  // we do not apply padding-right, allowing the AI panel to float over the content as an overlay.
+  const shouldApplyPadding = isAiPanelOpen && windowWidth >= 1200 && !(isAgentSidebarOpen && windowWidth < 1350);
+
   return (
-    <div 
+    <div
       className={cn(
         "flex relative w-full",
         isAiPanelOpen ? "h-[calc(100vh-4rem)] overflow-hidden" : "min-h-[calc(100vh-4rem)]",
         isAiPanelResizing ? "transition-none" : "transition-all duration-500"
       )}
       style={{
-        paddingRight: isAiPanelOpen ? 'var(--ai-panel-width, 480px)' : '0px'
+        paddingRight: shouldApplyPadding ? 'var(--ai-panel-width, 480px)' : '0px'
       }}
     >
-      <div 
+      <div
         className={cn(
           "flex-1 w-full max-w-7xl mx-auto flex flex-col p-4 sm:p-6 lg:p-8 animate-in fade-in slide-in-from-bottom-4 duration-700",
           isAiPanelOpen ? "h-full overflow-y-auto no-scrollbar" : ""

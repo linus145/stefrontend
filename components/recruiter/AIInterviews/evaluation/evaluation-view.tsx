@@ -33,6 +33,7 @@ export function EvaluationView() {
       queryClient.invalidateQueries({ queryKey: ['session-detail', selectedSessionId] });
       queryClient.invalidateQueries({ queryKey: ['employees'] });
       queryClient.invalidateQueries({ queryKey: ['onboarding-employees'] });
+      queryClient.invalidateQueries({ queryKey: ['recruiter-stats'] });
       toast.success('Candidate successfully onboarded to HR System!');
     },
     onError: () => toast.error('Failed to onboard candidate.')

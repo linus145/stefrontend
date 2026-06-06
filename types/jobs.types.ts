@@ -151,6 +151,7 @@ export interface RecruiterDashboardStats {
   pending_applications: number;
   reviewed: number;
   shortlisted: number;
+  interview: number;
   rejected: number;
   hired: number;
 }

@@ -73,7 +73,7 @@ export function JobSelector({
         </div>
         {activeJobId && (
           <div className="mt-2 flex items-center gap-2 group">
-            <code 
+            <code
               data-agent="active-job-id-display"
               className="text-[10px] bg-muted px-2 py-1 rounded text-muted-foreground font-mono"
             >

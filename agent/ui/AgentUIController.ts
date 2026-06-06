@@ -3,13 +3,17 @@ export class AgentUIController {
   private isVisible: boolean = false;
   private isExternalOpen: boolean = false;
 
-  private constructor() {}
+  private constructor() { }
 
   public static getInstance(): AgentUIController {
     if (!AgentUIController.instance) {
       AgentUIController.instance = new AgentUIController();
     }
     return AgentUIController.instance;
+  }
+
+  public getIsVisible(): boolean {
+    return this.isVisible;
   }
 
   public toggleSidebar() {

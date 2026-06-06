@@ -35,7 +35,7 @@ export function ContactModal({
         <div className="flex items-center justify-between p-6 pb-4">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center border border-blue-500/20 ring-4 ring-blue-500/5">
-               <UserIcon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+              <UserIcon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
               <h2 className="text-[12px] font-bold text-slate-900 dark:text-white uppercase tracking-wider leading-none mb-1.5">Outreach to {selectedApplicant.first_name}</h2>
@@ -57,7 +57,7 @@ export function ContactModal({
           {/* Message Input */}
           <div className="space-y-3">
             <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-               <MessageSquare className="w-3 h-3 opacity-70" /> Communication Template
+              <MessageSquare className="w-3 h-3 opacity-70" /> Communication Template
             </label>
             <textarea
               value={message}
@@ -70,8 +70,8 @@ export function ContactModal({
 
           {/* Notification Checkbox */}
           {mode === 'chat' && (
-            <div 
-              className="flex items-center gap-3 p-4 rounded-md bg-blue-500/5 border border-blue-500/10 group cursor-pointer hover:bg-blue-500/[0.08] transition-colors" 
+            <div
+              className="flex items-center gap-3 p-4 rounded-md bg-blue-500/5 border border-blue-500/10 group cursor-pointer hover:bg-blue-500/[0.08] transition-colors"
               onClick={() => setSendEmail(!sendEmail)}
             >
               <div className="relative flex items-center">
@@ -84,9 +84,9 @@ export function ContactModal({
                   className="peer w-5 h-5 rounded-sm border-border text-blue-500 focus:ring-blue-500/50 bg-background cursor-pointer appearance-none border-2 checked:bg-blue-500 checked:border-blue-500 transition-all"
                 />
                 <div className="absolute left-0 top-0 w-5 h-5 flex items-center justify-center pointer-events-none text-white opacity-0 peer-checked:opacity-100 scale-50 peer-checked:scale-100 transition-all">
-                   <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="4">
-                      <path d="M5 13l4 4L19 7" />
-                   </svg>
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="4">
+                    <path d="M5 13l4 4L19 7" />
+                  </svg>
                 </div>
               </div>
               <label htmlFor="sendEmailApp" className="text-[10px] font-bold text-slate-500 uppercase tracking-widest group-hover:text-blue-500 cursor-pointer flex items-center gap-2 select-none transition-colors">
@@ -117,7 +117,7 @@ export function ContactModal({
               </>
             ) : (
               <>
-                <Send className="w-3.5 h-3.5 opacity-90" /> 
+                <Send className="w-3.5 h-3.5 opacity-90" />
                 <span>Dispatch Outreach</span>
               </>
             )}

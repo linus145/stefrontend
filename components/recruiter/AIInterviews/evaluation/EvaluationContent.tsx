@@ -37,6 +37,7 @@ interface InterviewSessionDetail {
   status: string;
   overall_score: number | null;
   application_id: string | null;
+  application_status?: string | null;
   rounds: InterviewRound[];
 }
 
@@ -175,15 +176,15 @@ export const EvaluationContent = ({
 
                 {session.application_id && (
                   <button
-                    disabled={isOnboarding || session.status === 'ONBOARDED'}
+                    disabled={isOnboarding || session.application_status === 'ONBOARDED'}
                     onClick={() => onOnboard(session.application_id!)}
                     className={cn(
                       "flex-1 px-6 h-10 rounded-sm bg-emerald-600 text-white text-[12px] font-bold shadow-lg shadow-emerald-600/20 hover:bg-emerald-500 hover:-translate-y-0.5 transition-all active:scale-95 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2",
-                      (isOnboarding || session.status === 'ONBOARDED') && "bg-muted text-muted-foreground shadow-none"
+                      (isOnboarding || session.application_status === 'ONBOARDED') && "bg-muted text-muted-foreground shadow-none"
                     )}
                   >
                     <CheckCircle2 className="w-4 h-4" />
-                    {isOnboarding ? "Onboarding..." : session.status === 'ONBOARDED' ? "Onboarded" : "Onboard Candidate"}
+                    {isOnboarding ? "Onboarding..." : session.application_status === 'ONBOARDED' ? "Onboarded" : "Onboard Candidate"}
                   </button>
                 )}
               </div>

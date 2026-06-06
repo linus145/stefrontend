@@ -75,10 +75,11 @@ export function OverviewTab({ onNavigate }: OverviewTabProps) {
             <h3 className="text-sm font-bold text-foreground uppercase tracking-wider mb-5">
               Application Pipeline
             </h3>
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
               <PipelineStage label="Pending" count={stats?.pending_applications ?? 0} color="amber" />
               <PipelineStage label="Reviewed" count={stats?.reviewed ?? 0} color="blue" />
               <PipelineStage label="Shortlisted" count={stats?.shortlisted ?? 0} color="cyan" />
+              <PipelineStage label="Interview" count={stats?.interview ?? 0} color="purple" />
               <PipelineStage label="Hired" count={stats?.hired ?? 0} color="emerald" />
               <PipelineStage label="Rejected" count={stats?.rejected ?? 0} color="red" />
             </div>
@@ -151,6 +152,7 @@ function PipelineStage({ label, count, color }: { label: string; count: number; 
     amber: 'bg-amber-500',
     blue: 'bg-blue-500',
     cyan: 'bg-cyan-500',
+    purple: 'bg-purple-500',
     emerald: 'bg-emerald-500',
     red: 'bg-red-500',
   };

@@ -76,7 +76,7 @@ export function ApplicationCard({
               <Clock className="w-3 h-3" /> {new Date(app.applied_at).toLocaleDateString()}
             </span>
             {app.ai_score !== null && app.ai_score !== undefined && (
-              <span 
+              <span
                 data-agent="ai-match-score"
                 className={cn("flex items-center gap-1 font-bold", getAIScoreColor(app.ai_score))}
               >
@@ -110,26 +110,26 @@ export function ApplicationCard({
 
           {app.status === 'PENDING' && (
             <>
-              <button 
-                onClick={(e) => { e.stopPropagation(); onUpdateStatus(app.id, 'REVIEWED'); }} 
+              <button
+                onClick={(e) => { e.stopPropagation(); onUpdateStatus(app.id, 'REVIEWED'); }}
                 data-agent="mark-reviewed"
-                className="p-2 rounded-sm bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 transition-all" 
+                className="p-2 rounded-sm bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 transition-all"
                 title="Mark as Reviewed"
               >
                 <Eye className="w-4 h-4" />
               </button>
-              <button 
-                onClick={(e) => { e.stopPropagation(); onUpdateStatus(app.id, 'SHORTLISTED'); }} 
+              <button
+                onClick={(e) => { e.stopPropagation(); onUpdateStatus(app.id, 'SHORTLISTED'); }}
                 data-agent="mark-shortlisted"
-                className="p-2 rounded-sm bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 transition-all" 
+                className="p-2 rounded-sm bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 transition-all"
                 title="Accept"
               >
                 <CheckCircle className="w-4 h-4" />
               </button>
-              <button 
-                onClick={(e) => { e.stopPropagation(); onUpdateStatus(app.id, 'REJECTED'); }} 
+              <button
+                onClick={(e) => { e.stopPropagation(); onUpdateStatus(app.id, 'REJECTED'); }}
                 data-agent="mark-rejected"
-                className="p-2 rounded-sm bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-all" 
+                className="p-2 rounded-sm bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-all"
                 title="Reject"
               >
                 <XCircle className="w-4 h-4" />
@@ -138,18 +138,18 @@ export function ApplicationCard({
           )}
           {app.status === 'REVIEWED' && (
             <>
-              <button 
-                onClick={(e) => { e.stopPropagation(); onUpdateStatus(app.id, 'SHORTLISTED'); }} 
+              <button
+                onClick={(e) => { e.stopPropagation(); onUpdateStatus(app.id, 'SHORTLISTED'); }}
                 data-agent="mark-shortlisted"
-                className="p-2 rounded-sm bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 transition-all" 
+                className="p-2 rounded-sm bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 transition-all"
                 title="Accept"
               >
                 <CheckCircle className="w-4 h-4" />
               </button>
-              <button 
-                onClick={(e) => { e.stopPropagation(); onUpdateStatus(app.id, 'REJECTED'); }} 
+              <button
+                onClick={(e) => { e.stopPropagation(); onUpdateStatus(app.id, 'REJECTED'); }}
                 data-agent="mark-rejected"
-                className="p-2 rounded-sm bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-all" 
+                className="p-2 rounded-sm bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-all"
                 title="Reject"
               >
                 <XCircle className="w-4 h-4" />

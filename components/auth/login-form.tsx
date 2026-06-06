@@ -41,37 +41,49 @@ export function LoginForm() {
     
     const trimmedEmail = email.trim();
 
+    // 1. Client-Side Field Validation
+    const clientErrors: Record<string, string[]> = {};
     if (!trimmedEmail) {
-      setErrors({ email: ['Email is required'] });
-      toast.error('Required fields are missing');
+      clientErrors.email = ['Email is required'];
+    } else {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(trimmedEmail)) {
+        clientErrors.email = ['Invalid email format'];
+      }
+    }
+
+    if (loginMode === 'password') {
+      if (!password.trim()) {
+        clientErrors.password = ['Password is required'];
+      }
+    } else {
+      if (isOtpSent && !otp.trim()) {
+        clientErrors.otp = ['Verification code is required'];
+      }
+    }
+
+    if (Object.keys(clientErrors).length > 0) {
+      setErrors(clientErrors);
       return;
     }
 
     setIsSubmitting(true);
     try {
       if (loginMode === 'password') {
-        if (!password.trim()) {
-          setErrors({ password: ['Password is required'] });
-          toast.error('Password is required');
-          return;
-        }
         await login(email, password);
       } else {
         if (!isOtpSent) {
           await requestOtp(email);
           setIsOtpSent(true);
         } else {
-          if (!otp.trim()) {
-            toast.error('Please enter the verification code.');
-            return;
-          }
           await verifyOtp(email, otp);
         }
       }
     } catch (error: any) {
       if (error.status === 403 && error.data?.message?.includes('not verified')) {
         setLoginMode('otp');
-        setGeneralError('Email not verified. We have sent a verification code to your email.');
+        const unverifiedMsg = 'Email not verified. We have sent a verification code to your email.';
+        setGeneralError(unverifiedMsg);
         try {
           await requestOtp(email);
           setIsOtpSent(true);
@@ -80,11 +92,19 @@ export function LoginForm() {
         }
       } else if (error.data && typeof error.data === 'object') {
         setErrors(error.data);
-        if (error.data.detail || error.data.non_field_errors) {
-          setGeneralError(error.data.detail || error.data.non_field_errors[0]);
-        }
+        
+        // Loop over the backend errors: only toast general detail or message, field-level errors show below inputs
+        Object.entries(error.data).forEach(([field, fieldErrors]) => {
+          if (field === 'detail' || field === 'message' || field === 'non_field_errors') {
+            const msg = typeof fieldErrors === 'string' ? fieldErrors : (Array.isArray(fieldErrors) ? fieldErrors[0] : JSON.stringify(fieldErrors));
+            setGeneralError(msg);
+            toast.error(msg);
+          }
+        });
       } else {
-        setGeneralError(error.message || 'Action failed.');
+        const errorMsg = error.message || 'Action failed.';
+        setGeneralError(errorMsg);
+        toast.error(errorMsg);
       }
     } finally {
       setIsSubmitting(false);
@@ -225,6 +245,11 @@ export function LoginForm() {
                     className="w-full rounded-sm bg-[#f8fafc] dark:bg-[#151624] border border-slate-200/80 dark:border-slate-800/80 text-slate-900 dark:text-white pl-10 pr-4 py-2.5 text-sm transition-all focus:ring-1 focus:ring-[#5e3be1] focus:border-[#5e3be1] outline-none placeholder:text-slate-455"
                   />
                 </div>
+                {errors.otp && (
+                  <p className="text-[10px] font-medium text-red-500 mt-1">
+                    {errors.otp[0]}
+                  </p>
+                )}
                 <button
                   type="button"
                   onClick={() => setIsOtpSent(false)}

@@ -48,25 +48,40 @@ export function RegisterForm() {
 
     if (isVerifying) {
       if (!otp.trim()) {
-        toast.error('Please enter the verification code.');
+        toast.error('Verification Code: Please enter the verification code.');
         return;
       }
       setIsSubmitting(true);
       try {
         await verifyOtp(formData.email, otp);
       } catch (error: any) {
-        setGeneralError(error.response?.data?.message || error.data?.message || 'Verification failed.');
+        const verifyErrorMsg = error.response?.data?.message || error.data?.message || 'Verification failed.';
+        setGeneralError(verifyErrorMsg);
+        toast.error(verifyErrorMsg);
       } finally {
         setIsSubmitting(false);
       }
       return;
     }
 
-    // Basic frontend validation
+    // Basic frontend validation with custom field errors (no toasts)
     const newErrors: Record<string, string[]> = {};
-    if (!formData.first_name.trim()) newErrors.first_name = ['First name is required'];
-    if (!formData.last_name.trim()) newErrors.last_name = ['Last name is required'];
-    if (!formData.email.trim()) newErrors.email = ['Email is required'];
+    if (!formData.first_name.trim()) {
+      newErrors.first_name = ['First name is required'];
+    }
+    if (!formData.last_name.trim()) {
+      newErrors.last_name = ['Last name is required'];
+    }
+    
+    const emailTrimmed = formData.email.trim();
+    if (!emailTrimmed) {
+      newErrors.email = ['Email is required'];
+    } else {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(emailTrimmed)) {
+        newErrors.email = ['Invalid email format'];
+      }
+    }
     
     if (!formData.password.trim()) {
       newErrors.password = ['Password is required'];
@@ -80,7 +95,6 @@ export function RegisterForm() {
     
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      toast.error('Registration Form Incomplete');
       return;
     }
     
@@ -93,7 +107,22 @@ export function RegisterForm() {
     } catch (error: any) {
       const fieldErrors = error.data?.data || error.data || {};
       setErrors(fieldErrors);
-      setGeneralError(error.data?.message || error.message || 'Registration failed.');
+      
+      const regErrorMsg = error.data?.message || error.message || 'Registration failed.';
+      setGeneralError(regErrorMsg);
+      
+      // Parse fieldErrors: only toast general detail or message, field-level errors show below inputs
+      if (fieldErrors && typeof fieldErrors === 'object') {
+        Object.entries(fieldErrors).forEach(([field, fieldErrorsList]) => {
+          if (field === 'detail' || field === 'message' || field === 'non_field_errors') {
+            const msg = typeof fieldErrorsList === 'string' ? fieldErrorsList : (Array.isArray(fieldErrorsList) ? fieldErrorsList[0] : JSON.stringify(fieldErrorsList));
+            setGeneralError(msg);
+            toast.error(msg);
+          }
+        });
+      } else {
+        toast.error(regErrorMsg);
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -146,6 +175,11 @@ export function RegisterForm() {
                         )}
                       />
                     </div>
+                    {errors.first_name && (
+                      <p className="text-[10px] font-medium text-red-500 mt-1">
+                        {errors.first_name[0]}
+                      </p>
+                    )}
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider" htmlFor="last_name">
@@ -161,6 +195,11 @@ export function RegisterForm() {
                         errors.last_name ? 'border-red-400 dark:border-red-500/50' : 'border-slate-200 dark:border-slate-800'
                       )}
                     />
+                    {errors.last_name && (
+                      <p className="text-[10px] font-medium text-red-500 mt-1">
+                        {errors.last_name[0]}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -191,6 +230,11 @@ export function RegisterForm() {
                       <option value="OPERATIONS">Operations</option>
                     </select>
                   </div>
+                  {errors.role && (
+                    <p className="text-[10px] font-medium text-red-500 mt-1">
+                      {errors.role[0]}
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-1.5">
@@ -214,6 +258,11 @@ export function RegisterForm() {
                       )}
                     />
                   </div>
+                  {errors.email && (
+                    <p className="text-[10px] font-medium text-red-500 mt-1">
+                      {errors.email[0]}
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-4">
@@ -245,6 +294,11 @@ export function RegisterForm() {
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
                     </div>
+                    {errors.password && (
+                      <p className="text-[10px] font-medium text-red-500 mt-1">
+                        {errors.password[0]}
+                      </p>
+                    )}
                   </div>
 
                   <div className="space-y-1.5">
@@ -275,6 +329,11 @@ export function RegisterForm() {
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
                     </div>
+                    {errors.confirm_password && (
+                      <p className="text-[10px] font-medium text-red-500 mt-1">
+                        {errors.confirm_password[0]}
+                      </p>
+                    )}
                   </div>
                 </div>
               </>

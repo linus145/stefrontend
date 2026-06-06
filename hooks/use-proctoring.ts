@@ -19,7 +19,17 @@ export const useProctoring = (config: ProctoringConfig) => {
   const blurStartTime = useRef<number | null>(null);
   const splitStartTime = useRef<number | null>(null);
 
+  const lastLoggedTimes = useRef<Record<string, number>>({});
+
   const logViolation = useCallback(async (type: string, metadata: any = {}, severity: 'LOW' | 'MEDIUM' | 'HIGH' = 'MEDIUM') => {
+    // 15 seconds cooldown for identical violation types to prevent request storms
+    const now = Date.now();
+    const lastLogged = lastLoggedTimes.current[type] || 0;
+    if (now - lastLogged < 15000) {
+      return;
+    }
+    lastLoggedTimes.current[type] = now;
+
     try {
       violationCount.current += 1;
       const duration = metadata.duration_seconds || 0.0;

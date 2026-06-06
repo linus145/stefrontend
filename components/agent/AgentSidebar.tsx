@@ -15,6 +15,18 @@ import { AgentGoalInput } from './AgentGoalInput';
 import { aiAgentService } from '@/services/ai-agents.service';
 import { useAuth } from '@/hooks/useAuth';
 
+const generateUUID = () => {
+  if (typeof window !== 'undefined' && window.crypto && window.crypto.randomUUID) {
+    return window.crypto.randomUUID();
+  }
+  // Standard UUID v4 generator fallback
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+};
+
 export const AgentSidebar: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [goal, setGoal] = useState('');
@@ -32,6 +44,7 @@ export const AgentSidebar: React.FC = () => {
   const [lastQuestion, setLastQuestion] = useState('');
   const [availableOptions, setAvailableOptions] = useState<string[]>([]);
   const [sidebarMode, setSidebarMode] = useState<'ACT' | 'PLAN'>('ACT');
+  const [currentConversationId, setCurrentConversationId] = useState<string>('');
 
   // Load sidebar mode on mount to avoid SSR hydration mismatch
   useEffect(() => {
@@ -39,6 +52,14 @@ export const AgentSidebar: React.FC = () => {
       const savedMode = localStorage.getItem('agent_sidebar_mode');
       if (savedMode === 'ACT' || savedMode === 'PLAN') {
         setSidebarMode(savedMode);
+      }
+      const savedConvId = localStorage.getItem('agent_current_conversation_id');
+      if (savedConvId) {
+        setCurrentConversationId(savedConvId);
+      } else {
+        const fallbackId = generateUUID();
+        setCurrentConversationId(fallbackId);
+        localStorage.setItem('agent_current_conversation_id', fallbackId);
       }
     }
   }, []);
@@ -50,7 +71,7 @@ export const AgentSidebar: React.FC = () => {
     }
   };
 
-  const [planMessages, setPlanMessages] = useState<Array<{ id: string; sender: 'bot' | 'user'; text: string }>>([
+  const [planMessages, setPlanMessages] = useState<Array<{ id: string; sender: 'bot' | 'user'; text: string; timestamp?: number; conversation_id?: string }>>([
     {
       id: 'init',
       sender: 'bot',
@@ -165,9 +186,33 @@ export const AgentSidebar: React.FC = () => {
           const mapped = chatRes.map((c: any) => ({
             id: c.id,
             sender: (c.sender === 'user' ? 'user' : 'bot') as 'user' | 'bot',
-            text: c.text
+            text: c.text,
+            timestamp: c.timestamp ? new Date(c.timestamp).getTime() : undefined,
+            conversation_id: c.conversation_id || undefined
           }));
-          setPlanMessages(mapped);
+          setPlanMessages([
+            {
+              id: 'init',
+              sender: 'bot',
+              text: "Hello! I am your conversational AI. 👋\n\nAsk me anything about your recruitment campaigns, candidate requirements, or interview structures!"
+            },
+            ...mapped
+          ]);
+
+          if (typeof window !== 'undefined' && !localStorage.getItem('agent_current_conversation_id')) {
+            const lastWithId = [...mapped].reverse().find(m => m.conversation_id);
+            const activeId = lastWithId?.conversation_id || generateUUID();
+            setCurrentConversationId(activeId);
+            localStorage.setItem('agent_current_conversation_id', activeId);
+          }
+        } else {
+          setPlanMessages([
+            {
+              id: 'init',
+              sender: 'bot',
+              text: "Hello! I am your conversational AI. 👋\n\nAsk me anything about your recruitment campaigns, candidate requirements, or interview structures!"
+            }
+          ]);
         }
 
         // Fetch Autonomous Execution history
@@ -183,7 +228,7 @@ export const AgentSidebar: React.FC = () => {
     if (isVisible || showHistoryView) {
       fetchHistories();
     }
-  }, [isVisible, showHistoryView]);
+  }, [isVisible, showHistoryView, sidebarMode]);
 
   // Clear Chat History
   const handleClearChatHistory = async () => {
@@ -196,8 +241,33 @@ export const AgentSidebar: React.FC = () => {
           text: "Hello! I am your conversational AI. 👋\n\nAsk me anything about your recruitment campaigns, candidate requirements, or interview structures!"
         }
       ]);
+      const newId = generateUUID();
+      setCurrentConversationId(newId);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('agent_current_conversation_id', newId);
+      }
     } catch (error) {
       console.error("Failed to clear chat history:", error);
+    }
+  };
+
+  const handleDeleteConversation = async (convId: string) => {
+    try {
+      await api.delete(`/autonomousagent1/chat/clear/?conversation_id=${convId}`);
+      
+      // Filter out deleted messages locally
+      setPlanMessages(prev => prev.filter(m => m.id === 'init' || m.conversation_id !== convId));
+      
+      // If the deleted conversation was the active one, start a new chat session
+      if (currentConversationId === convId) {
+        const newId = generateUUID();
+        setCurrentConversationId(newId);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('agent_current_conversation_id', newId);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to delete conversation:", error);
     }
   };
 
@@ -224,8 +294,12 @@ export const AgentSidebar: React.FC = () => {
       setAvailableOptions([]);
       setPendingResponse(null);
 
-      // 4. Clear conversation history in backend & state
-      await handleClearChatHistory();
+      // 4. Start a new chat session locally by generating a new UUID
+      const newId = generateUUID();
+      setCurrentConversationId(newId);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('agent_current_conversation_id', newId);
+      }
 
       // 5. Add custom status log
       addLog("✨ Started a new conversation. All states reset successfully.", "success");
@@ -475,26 +549,39 @@ export const AgentSidebar: React.FC = () => {
     const userText = goal;
     setGoal('');
 
+    // Ensure we have a valid currentConversationId before sending
+    let activeConvId = currentConversationId;
+    if (!activeConvId) {
+      activeConvId = generateUUID();
+      setCurrentConversationId(activeConvId);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('agent_current_conversation_id', activeConvId);
+      }
+    }
+
     // Add User message
     const userMsgId = Math.random().toString(36).substr(2, 9);
-    const updatedMessages: { id: string; sender: 'user' | 'bot'; text: string }[] = [
+    const updatedMessages: { id: string; sender: 'user' | 'bot'; text: string; timestamp?: number; conversation_id?: string }[] = [
       ...planMessages,
-      { id: userMsgId, sender: 'user' as const, text: userText }
+      { id: userMsgId, sender: 'user' as const, text: userText, conversation_id: activeConvId }
     ];
     setPlanMessages(updatedMessages);
     setIsPlanBotTyping(true);
 
     try {
-      await api.post('/autonomousagent1/chat/history/', { sender: 'user', text: userText });
+      await api.post('/autonomousagent1/chat/history/', { sender: 'user', text: userText, conversation_id: activeConvId });
     } catch (err) {
       console.error("Failed to save chat to history:", err);
     }
 
     try {
-      const historyContext = planMessages.map(m => ({
-        sender: m.sender,
-        text: m.text
-      }));
+      // Filter context to only include the current conversation session's history
+      const historyContext = planMessages
+        .filter(m => m.id !== 'init' && m.conversation_id === activeConvId)
+        .map(m => ({
+          sender: m.sender,
+          text: m.text
+        }));
 
       const token = localStorage.getItem('token') || '';
       const response = await fetch('/api/ai/plan-chat/', {
@@ -515,27 +602,28 @@ export const AgentSidebar: React.FC = () => {
       if (resJson.status === 'success' && resJson.data?.reply) {
         const replyText = resJson.data.reply;
         try {
-          await api.post('/autonomousagent1/chat/history/', { sender: 'bot', text: replyText });
+          await api.post('/autonomousagent1/chat/history/', { sender: 'bot', text: replyText, conversation_id: activeConvId });
         } catch (err) {
           console.error("Failed to save AI chat to history:", err);
         }
         setPlanMessages(prev => [...prev, {
           id: Math.random().toString(36).substr(2, 9),
           sender: 'bot',
-          text: replyText
+          text: replyText,
+          conversation_id: activeConvId
         }]);
       } else {
         const fallbackText = "I have compiled a custom hiring strategy for you:\n\n1. Target matches on GitHub and LinkedIn with active profiles.\n2. Filter candidates based on required technical skill matrices.\n3. Send invitation rounds using AI Interviews.\n\nLet me know if you would like me to configure specific questions!";
         try {
-          await api.post('/autonomousagent1/chat/history/', { sender: 'bot', text: fallbackText });
+          await api.post('/autonomousagent1/chat/history/', { sender: 'bot', text: fallbackText, conversation_id: activeConvId });
         } catch (err) {
           console.error("Failed to save AI chat to history:", err);
         }
-        // Fallback strategy template
         setPlanMessages(prev => [...prev, {
           id: Math.random().toString(36).substr(2, 9),
           sender: 'bot',
-          text: fallbackText
+          text: fallbackText,
+          conversation_id: activeConvId
         }]);
       }
     } catch (err) {
@@ -543,14 +631,15 @@ export const AgentSidebar: React.FC = () => {
       setIsPlanBotTyping(false);
       const fallbackText = "I have compiled a custom hiring strategy for you:\n\n1. Target matches on GitHub and LinkedIn with active profiles.\n2. Filter candidates based on required technical skill matrices.\n3. Send invitation rounds using AI Interviews.\n\nLet me know if you would like me to configure specific questions!";
       try {
-        await api.post('/autonomousagent1/chat/history/', { sender: 'bot', text: fallbackText });
+        await api.post('/autonomousagent1/chat/history/', { sender: 'bot', text: fallbackText, conversation_id: activeConvId });
       } catch (err) {
         console.error("Failed to save AI chat to history:", err);
       }
       setPlanMessages(prev => [...prev, {
         id: Math.random().toString(36).substr(2, 9),
         sender: 'bot',
-        text: fallbackText
+        text: fallbackText,
+        conversation_id: activeConvId
       }]);
     }
   };
@@ -756,6 +845,16 @@ export const AgentSidebar: React.FC = () => {
                 onClearChatHistory={handleClearChatHistory}
                 onDeleteExecution={handleDeleteExecution}
                 onClose={() => setShowHistoryView(false)}
+                currentConversationId={currentConversationId}
+                onSelectConversation={(id) => {
+                  setCurrentConversationId(id);
+                  if (typeof window !== 'undefined') {
+                    localStorage.setItem('agent_current_conversation_id', id);
+                  }
+                  setShowHistoryView(false);
+                }}
+                onDeleteConversation={handleDeleteConversation}
+                defaultSubTab={sidebarMode}
               />
             </div>
           ) : sidebarMode === 'ACT' ? (
@@ -781,7 +880,10 @@ export const AgentSidebar: React.FC = () => {
           ) : (
             <div ref={planScrollRef} className="flex-1 overflow-y-auto p-3 space-y-3.5 scrollbar-thin scrollbar-thumb-border">
               <AgentPlanView
-                planMessages={planMessages}
+                planMessages={planMessages.filter(msg => {
+                  if (msg.id === 'init') return true;
+                  return msg.conversation_id === currentConversationId;
+                })}
                 isPlanBotTyping={isPlanBotTyping}
                 planScrollRef={planScrollRef}
               />

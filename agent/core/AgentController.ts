@@ -593,6 +593,9 @@ export class AgentController {
         AgentMemory.getInstance().setExecutionId(null);
       }
       await aiAgentService.updateExecution(this.currentExecutionId, data);
+      if (status === 'success' || status === 'failed') {
+        this.currentExecutionId = null;
+      }
     } catch (e) {
       console.error('Failed to update backend execution record:', e);
     }

@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils';
 export function RegisterForm() {
   const router = useRouter();
   const { logout, requestOtp, verifyOtp, isAuthenticated, isLoading } = useAuth();
-  
+
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
@@ -72,7 +72,7 @@ export function RegisterForm() {
     if (!formData.last_name.trim()) {
       newErrors.last_name = ['Last name is required'];
     }
-    
+
     const emailTrimmed = formData.email.trim();
     if (!emailTrimmed) {
       newErrors.email = ['Email is required'];
@@ -82,7 +82,7 @@ export function RegisterForm() {
         newErrors.email = ['Invalid email format'];
       }
     }
-    
+
     if (!formData.password.trim()) {
       newErrors.password = ['Password is required'];
     } else if (formData.password.length < 8) {
@@ -92,12 +92,12 @@ export function RegisterForm() {
     if (formData.password !== confirmPassword) {
       newErrors.confirm_password = ['Passwords do not match'];
     }
-    
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
-    
+
     setIsSubmitting(true);
     try {
       await api.post('/auth/register/', formData);
@@ -107,10 +107,10 @@ export function RegisterForm() {
     } catch (error: any) {
       const fieldErrors = error.data?.data || error.data || {};
       setErrors(fieldErrors);
-      
+
       const regErrorMsg = error.data?.message || error.message || 'Registration failed.';
       setGeneralError(regErrorMsg);
-      
+
       // Parse fieldErrors: only toast general detail or message, field-level errors show below inputs
       if (fieldErrors && typeof fieldErrors === 'object') {
         Object.entries(fieldErrors).forEach(([field, fieldErrorsList]) => {
@@ -135,7 +135,7 @@ export function RegisterForm() {
   return (
     <div className="w-full pb-10">
       <div className="relative w-full rounded-sm bg-white dark:bg-[#121320] shadow-[0_20px_40px_rgba(0,0,0,0.08)] dark:shadow-[0_20px_40px_rgba(0,0,0,0.3)] border border-slate-200 dark:border-slate-800 overflow-hidden transition-all duration-500">
-        
+
         <div className="p-6 sm:p-7 flex flex-col gap-5">
           <div className="text-center">
             <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
@@ -145,7 +145,7 @@ export function RegisterForm() {
               Get started with B2Linq
             </p>
           </div>
-          
+
           {generalError && (
             <div className="p-3 rounded-sm bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 text-red-600 dark:text-red-400 text-xs font-semibold animate-in fade-in slide-in-from-top-2 duration-300">
               {generalError}
@@ -405,11 +405,11 @@ export function RegisterForm() {
           </div>
         </div>
       </div>
-      
+
       <div className="mt-6 text-center text-xs font-semibold text-slate-500 dark:text-slate-400">
         Already have an account?{' '}
         <Link href="/login" className="font-bold text-[#5e3be1] dark:text-[#8c74f5] hover:underline">
-          Sign In 
+          Sign In
         </Link>
       </div>
     </div>

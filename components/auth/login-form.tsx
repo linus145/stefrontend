@@ -38,7 +38,7 @@ export function LoginForm() {
     e.preventDefault();
     setErrors({});
     setGeneralError(null);
-    
+
     const trimmedEmail = email.trim();
 
     // 1. Client-Side Field Validation
@@ -92,7 +92,7 @@ export function LoginForm() {
         }
       } else if (error.data && typeof error.data === 'object') {
         setErrors(error.data);
-        
+
         // Loop over the backend errors: only toast general detail or message, field-level errors show below inputs
         Object.entries(error.data).forEach(([field, fieldErrors]) => {
           if (field === 'detail' || field === 'message' || field === 'non_field_errors') {
@@ -114,7 +114,7 @@ export function LoginForm() {
   return (
     <div className="w-full">
       <div className="relative w-full rounded-sm bg-white dark:bg-[#121320] shadow-[0_20px_40px_rgba(0,0,0,0.08)] dark:shadow-[0_20px_40px_rgba(0,0,0,0.3)] border border-slate-200 dark:border-slate-800 overflow-hidden transition-all duration-500">
-        
+
         <div className="p-6 sm:p-7 flex flex-col gap-5">
           <div className="text-center">
             <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
@@ -124,7 +124,7 @@ export function LoginForm() {
               Welcome back to B2Linq
             </p>
           </div>
-          
+
           {generalError && (
             <div className="p-3 rounded-sm bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 text-red-600 dark:text-red-400 text-xs font-semibold animate-in fade-in slide-in-from-top-2 duration-300">
               {generalError}
@@ -312,7 +312,7 @@ export function LoginForm() {
           </div>
         </div>
       </div>
-      
+
       {/* Signup Redirection footer below card */}
       <div className="mt-6 text-center text-xs font-semibold text-slate-500 dark:text-slate-400">
         Don't have an account?{' '}

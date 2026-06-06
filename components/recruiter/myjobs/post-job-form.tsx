@@ -215,6 +215,7 @@ export function PostJobForm({ editJob, onClose, onSuccess }: PostJobFormProps) {
         {/* Back */}
         <button
         onClick={onClose}
+        data-agent="back-to-jobs-button"
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors group"
       >
         <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
@@ -598,6 +599,7 @@ export function PostJobForm({ editJob, onClose, onSuccess }: PostJobFormProps) {
             <button
               type="button"
               onClick={onClose}
+              data-agent="cancel-job-form-button"
               className="px-6 py-2 rounded-sm border border-border text-sm font-semibold text-muted-foreground hover:bg-muted/50 transition-all"
             >
               Cancel

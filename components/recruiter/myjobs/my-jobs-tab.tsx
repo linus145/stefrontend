@@ -275,18 +275,24 @@ export function MyJobsTab({ isApproved, onViewApplications }: MyJobsTabProps) {
                   <div className="flex items-center gap-2 shrink-0">
                     <button
                       onClick={() => onViewApplications(job.id)}
+                      data-agent="view-applications-button"
+                      data-agent-job-id={job.id}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-[2px] bg-blue-500/10 text-blue-600 text-xs font-semibold hover:bg-blue-500/20 transition-all"
                     >
                       <Eye className="w-3.5 h-3.5" /> Applications
                     </button>
                     <button
                       onClick={() => setEditingJob(job)}
+                      data-agent="edit-job-button"
+                      data-agent-job-id={job.id}
                       className="p-2 rounded-[2px] text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-all"
                     >
                       <Edit3 className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => setJobToDelete(job.id)}
+                      data-agent="delete-job-button"
+                      data-agent-job-id={job.id}
                       className="p-2 rounded-[2px] text-muted-foreground hover:bg-red-500/10 hover:text-red-500 transition-all"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -318,6 +324,7 @@ export function MyJobsTab({ isApproved, onViewApplications }: MyJobsTabProps) {
             <div className="mt-8 flex flex-col sm:flex-row items-center gap-2">
               <Button
                 variant="outline"
+                data-agent="cancel-delete-job-button"
                 className="w-full sm:flex-1 h-10 font-bold text-xs uppercase tracking-wider border-border hover:bg-muted/50 rounded-sm transition-all"
                 onClick={() => setJobToDelete(null)}
               >
@@ -325,6 +332,7 @@ export function MyJobsTab({ isApproved, onViewApplications }: MyJobsTabProps) {
               </Button>
               <Button
                 variant="destructive"
+                data-agent="confirm-delete-job-button"
                 className="w-full sm:flex-1 h-10 font-bold text-xs uppercase tracking-wider rounded-sm shadow-md shadow-red-500/10 transition-all bg-red-600 hover:bg-red-700 text-white border-none"
                 disabled={deleteMutation.isPending}
                 onClick={() => {

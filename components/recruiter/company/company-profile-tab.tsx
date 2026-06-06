@@ -382,6 +382,8 @@ function HRProfilesManager() {
                       <div className="flex items-center gap-1 shrink-0">
                         <button
                           onClick={() => setEditingProfile(profile)}
+                          data-agent="edit-hr-profile-button"
+                          data-agent-profile-id={profile.id}
                           className="p-1.5 text-muted-foreground hover:text-blue-500 hover:bg-muted/50 rounded-sm transition-colors"
                           title="Edit"
                         >
@@ -401,6 +403,8 @@ function HRProfilesManager() {
                               },
                             });
                           }}
+                          data-agent="delete-hr-profile-button"
+                          data-agent-profile-id={profile.id}
                           className="p-1.5 text-muted-foreground hover:text-red-500 hover:bg-muted/50 rounded-sm transition-colors"
                           title="Delete"
                         >

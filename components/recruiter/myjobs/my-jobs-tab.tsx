@@ -285,17 +285,23 @@ export function MyJobsTab({ isApproved, onViewApplications }: MyJobsTabProps) {
                       onClick={() => setEditingJob(job)}
                       data-agent="edit-job-button"
                       data-agent-job-id={job.id}
-                      className="p-2 rounded-[2px] text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-all"
+                      title="Edit Job"
+                      aria-label="Edit Job"
+                      className="p-2 rounded-[2px] text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-all flex items-center justify-center"
                     >
                       <Edit3 className="w-4 h-4" />
+                      <span className="sr-only">Edit Job</span>
                     </button>
                     <button
                       onClick={() => setJobToDelete(job.id)}
                       data-agent="delete-job-button"
                       data-agent-job-id={job.id}
-                      className="p-2 rounded-[2px] text-muted-foreground hover:bg-red-500/10 hover:text-red-500 transition-all"
+                      title="Delete Job"
+                      aria-label="Delete Job"
+                      className="p-2 rounded-[2px] text-muted-foreground hover:bg-red-500/10 hover:text-red-500 transition-all flex items-center justify-center"
                     >
                       <Trash2 className="w-4 h-4" />
+                      <span className="sr-only">Delete Job</span>
                     </button>
                   </div>
                 </div>

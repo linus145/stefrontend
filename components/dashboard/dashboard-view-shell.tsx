@@ -7,6 +7,7 @@ import { RightSidebar } from '@/components/dashboard/right-sidebar';
 import { Feed } from '@/components/dashboard/feed';
 import { EcosystemContent } from '@/components/dashboard/ecosystem-content';
 import { MessagesView } from '@/components/dashboard/messages/messages-view';
+import { LinkedInMessenger } from '@/components/dashboard/messages/popupmessageview/linkedin-messenger';
 import { NetworkView } from '@/components/dashboard/network/network-view';
 import { SettingsView } from '@/components/dashboard/settings/settings/settings-view';
 import { DashboardHeader } from '@/components/dashboard/dashboard-header';
@@ -246,6 +247,13 @@ export function DashboardViewShell() {
           activeSection={activeSection}
           onSectionChange={handleSectionChange}
         />
+
+        {/* LinkedIn-style Floating Messenger */}
+        {activeSection !== 'messages' && (
+          <div className="hidden md:block">
+            <LinkedInMessenger />
+          </div>
+        )}
       </div>
     </DashboardThemeProvider>
   );

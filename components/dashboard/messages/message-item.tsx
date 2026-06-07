@@ -16,6 +16,8 @@ interface MessageItemProps {
   text: string;
   time: string;
   avatar?: string;
+  textSize?: string;
+  paddingSize?: string;
   onDelete: () => void;
 }
 
@@ -25,20 +27,25 @@ export function MessageItem({
   text,
   time,
   avatar,
+  textSize = "text-[12px] sm:text-xs",
+  paddingSize = "px-2.5 py-1.5 sm:px-3 sm:py-2",
   onDelete
 }: MessageItemProps) {
   return (
     <div className={cn("flex gap-3 max-w-[90%] sm:max-w-[85%] items-end group/item", isMine ? "ml-auto flex-row-reverse" : "")}>
       {!isMine && (
-        <img src={avatar} className="w-8 h-8 rounded-lg object-cover shrink-0 border border-border shadow-sm" alt="" />
+        <img src={avatar} className="w-8 h-8 rounded-full object-cover shrink-0 border border-border shadow-sm" alt="" />
       )}
       <div className={cn("flex flex-col relative", isMine ? "items-end" : "items-start")}>
         <div className={cn(
-          "px-3 sm:px-4 py-2.5 sm:py-3 rounded-md text-[13px] leading-relaxed shadow-sm font-normal",
+          "rounded-md leading-normal shadow-sm font-normal",
+          textSize,
+          paddingSize,
           isMine
             ? "bg-primary/10 text-foreground rounded-br-none border border-primary/20"
             : "bg-muted/50 text-foreground border border-border rounded-bl-none"
         )}>
+
           {text}
         </div>
 

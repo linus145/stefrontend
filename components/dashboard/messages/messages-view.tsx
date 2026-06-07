@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Loader2, MessageSquare } from 'lucide-react';
+import { Loader2, MessageSquare, MoreHorizontal } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { chatService, ChatRoom, Message } from '@/services/chat.service';
@@ -16,6 +16,7 @@ import { RoomSidebar } from './room-sidebar';
 import { ChatHeader } from './chat-header';
 import { ChatThread } from './chat-thread';
 import { ChatInput } from './chat-input';
+
 
 export function MessagesView({
   isCollapsed,
@@ -253,62 +254,101 @@ export function MessagesView({
   }
 
   return (
-    <div className={cn(
-      "flex-1 h-full bg-background flex transition-all duration-300 ease-in-out"
-    )}>
-      {/* Conversations Sidebar */}
-      <RoomSidebar
-        rooms={rooms}
-        activeRoomId={activeRoomId}
-        currentUser={currentUser}
-        handleRoomSwitch={handleRoomSwitch}
-      />
+    <div className="flex-1 h-full bg-white dark:bg-background p-3 sm:p-4 lg:p-6 flex justify-center items-center overflow-hidden">
+      <div className="max-w-[1128px] w-full h-full flex gap-5 overflow-hidden">
+        {/* Main Messenger Box */}
+        <div className="flex-1 h-full bg-card dark:bg-[#111827] border border-border rounded-lg flex overflow-hidden shadow-sm">
 
-      {/* Main Chat Panel */}
-      <div className={cn(
-        "flex-1 flex flex-col bg-background relative overflow-hidden",
-        activeRoomId && activeRoom ? "flex" : "hidden md:flex"
-      )}>
-        {activeRoomId && activeRoom ? (
-          <>
-            <ChatHeader
-              activeRoom={activeRoom}
-              otherParticipant={otherParticipant}
-              isConnected={isConnected}
-              handleBackToList={handleBackToList}
-            />
+          {/* Conversations Sidebar */}
+          <RoomSidebar
+            rooms={rooms}
+            activeRoomId={activeRoomId}
+            currentUser={currentUser}
+            handleRoomSwitch={handleRoomSwitch}
+          />
 
-            <ChatThread
-              isSwitching={isSwitching}
-              isLoadingHistory={isLoadingHistory}
-              displayMessages={displayMessages}
-              currentUser={currentUser}
-              handleDeleteMessage={handleDeleteMessage}
-              messagesEndRef={messagesEndRef}
-            />
+          {/* Main Chat Panel */}
+          <div className={cn(
+            "flex-1 flex flex-col bg-card dark:bg-[#111827] relative overflow-hidden",
+            activeRoomId && activeRoom ? "flex" : "hidden md:flex"
+          )}>
+            {activeRoomId && activeRoom ? (
+              <>
+                <ChatHeader
+                  activeRoom={activeRoom}
+                  otherParticipant={otherParticipant}
+                  isConnected={isConnected}
+                  handleBackToList={handleBackToList}
+                />
 
-            <ChatInput
-              messageInput={messageInput}
-              setMessageInput={setMessageInput}
-              handleKeyPress={handleKeyPress}
-              handleSend={handleSend}
-              showEmojiPicker={showEmojiPicker}
-              setShowEmojiPicker={setShowEmojiPicker}
-              onEmojiClick={onEmojiClick}
-              isDark={isDark}
-              emojiPickerRef={emojiPickerRef}
-            />
-          </>
-        ) : (
-          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-            <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary mb-6 shadow-sm">
-              <MessageSquare className="w-7 h-7" />
-            </div>
-            <h3 className="text-lg font-semibold text-foreground mb-2 tracking-tight">Your Messages</h3>
-            <p className="text-sm text-muted-foreground max-w-[240px] leading-relaxed">Select a conversation from the list to start chatting.</p>
+                <ChatThread
+                  isSwitching={isSwitching}
+                  isLoadingHistory={isLoadingHistory}
+                  displayMessages={displayMessages}
+                  currentUser={currentUser}
+                  handleDeleteMessage={handleDeleteMessage}
+                  messagesEndRef={messagesEndRef}
+                />
+
+                <ChatInput
+                  messageInput={messageInput}
+                  setMessageInput={setMessageInput}
+                  handleKeyPress={handleKeyPress}
+                  handleSend={handleSend}
+                  showEmojiPicker={showEmojiPicker}
+                  setShowEmojiPicker={setShowEmojiPicker}
+                  onEmojiClick={onEmojiClick}
+                  isDark={isDark}
+                  emojiPickerRef={emojiPickerRef}
+                />
+              </>
+            ) : (
+              <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-card dark:bg-[#111827]">
+                <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary mb-6 shadow-sm">
+                  <MessageSquare className="w-7 h-7" />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground mb-2 tracking-tight">Your Messages</h3>
+                <p className="text-sm text-muted-foreground max-w-[240px] leading-relaxed">Select a conversation from the list to start chatting.</p>
+              </div>
+            )}
           </div>
-        )}
+        </div>
+
+        {/* Right Column (Aramco Promo & Footer) - Visible on lg screens and above */}
+        <div className="hidden lg:flex flex-col gap-4 w-[280px] xl:w-[300px] shrink-0 self-start">
+          {/* Promoted Card */}
+          <div className="bg-card dark:bg-[#111827] border border-border rounded-lg p-4 shadow-sm relative overflow-hidden min-h-[200px] flex flex-col justify-between">
+            <div className="flex justify-between items-center mb-3">
+              <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Promoted</span>
+              <button className="text-muted-foreground hover:text-foreground cursor-pointer">
+                <MoreHorizontal className="w-3.5 h-3.5" />
+              </button>
+            </div>
+            <div className="flex-1 flex items-center justify-center">
+              <span className="text-[11px] text-muted-foreground italic font-normal">Advertisement</span>
+            </div>
+          </div>
+
+          {/* Footer Links */}
+          <div className="px-2 py-1 text-[10px] text-muted-foreground flex flex-wrap gap-x-2 gap-y-1 justify-center leading-relaxed font-normal">
+            <a href="#" className="hover:underline hover:text-primary transition-all">About</a>
+            <a href="#" className="hover:underline hover:text-primary transition-all">Accessibility</a>
+            <a href="#" className="hover:underline hover:text-primary transition-all">Help Center</a>
+            <a href="#" className="hover:underline hover:text-primary transition-all">Privacy & Terms</a>
+            <a href="#" className="hover:underline hover:text-primary transition-all">Ad Choices</a>
+            <a href="#" className="hover:underline hover:text-primary transition-all">Advertising</a>
+            <a href="#" className="hover:underline hover:text-primary transition-all">Business Services</a>
+            <a href="#" className="hover:underline hover:text-primary transition-all">Get the B2linq app</a>
+            <a href="#" className="hover:underline hover:text-primary transition-all">More</a>
+            
+            <div className="w-full text-center mt-3 font-semibold text-[9.5px]">
+              B2linq Corporation © 2026
+            </div>
+          </div>
+
+        </div>
       </div>
     </div>
   );
 }
+

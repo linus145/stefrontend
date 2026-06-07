@@ -8,7 +8,29 @@ interface PostPageProps {
   params: Promise<{ id: string }>;
 }
 
+function decodePostId(encoded: string): string {
+  try {
+    let b64 = encoded.replace(/-/g, '+').replace(/_/g, '/');
+    while (b64.length % 4) {
+      b64 += '=';
+    }
+    return atob(b64);
+  } catch (e) {
+    return encoded;
+  }
+}
+
 function extractUuid(param: string): string {
+  const parts = param.split('-');
+  const lastPart = parts[parts.length - 1];
+  
+  if (lastPart) {
+    const decoded = decodePostId(lastPart);
+    if (decoded.length === 36 && decoded.includes('-')) {
+      return decoded;
+    }
+  }
+
   if (param.length >= 36) {
     const uuid = param.substring(param.length - 36);
     if (uuid.includes('-')) {

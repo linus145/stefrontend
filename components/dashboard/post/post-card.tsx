@@ -30,6 +30,15 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { getOptimizedImage } from '@/lib/imagekit';
 
+function encodePostId(uuid: string): string {
+  try {
+    const b64 = btoa(uuid);
+    return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+  } catch (e) {
+    return uuid;
+  }
+}
+
 interface PostCardProps {
   post: Post;
   onLike: (postId: string) => void;
@@ -74,7 +83,8 @@ export function PostCard({ post, onLike, onNavigateToProfile }: PostCardProps) {
           .substring(0, 50)
           .replace(/-$/, '')
       : 'post';
-    const shareUrl = `${window.location.origin}/posts/${slug || 'post'}-${post.id}`;
+    const encodedId = encodePostId(post.id);
+    const shareUrl = `${window.location.origin}/posts/${slug || 'post'}-${encodedId}`;
     // Check if navigator.share is available
     if (navigator.share) {
       navigator.share({

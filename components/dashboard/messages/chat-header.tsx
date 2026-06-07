@@ -48,7 +48,7 @@ export function ChatHeader({
             {displayName}
           </h3>
           <p className="text-[11px] text-muted-foreground truncate leading-normal font-normal">
-            {subtitle || otherParticipant?.profile?.company_name || otherParticipant?.profile?.hr_name || 'Professional'}
+            {subtitle || otherParticipant?.profile?.company_name || otherParticipant?.profile?.hr_name || (otherParticipant?.role ? otherParticipant.role.charAt(0).toUpperCase() + otherParticipant.role.slice(1).toLowerCase() : 'Professional')}
           </p>
         </div>
       </div>

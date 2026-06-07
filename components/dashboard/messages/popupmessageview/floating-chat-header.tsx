@@ -44,8 +44,8 @@ export function FloatingChatHeader({
         </div>
         <div className="truncate">
           <h4 className="text-xs font-semibold text-foreground truncate leading-tight">{displayName}</h4>
-          <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
-            {isConnected ? 'Online' : 'Connecting...'}
+          <p className="text-[9.5px] text-muted-foreground truncate leading-normal font-normal">
+            {partner?.role ? partner.role.charAt(0).toUpperCase() + partner.role.slice(1).toLowerCase() : 'Professional'}
           </p>
         </div>
       </div>

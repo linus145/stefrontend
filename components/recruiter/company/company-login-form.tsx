@@ -142,7 +142,7 @@ export function CompanyLoginForm() {
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="w-full flex items-center justify-center gap-2 rounded-sm bg-gradient-to-r from-blue-600 to-cyan-600 py-3 text-sm font-semibold text-white shadow-sm hover:shadow-lg hover:from-blue-500 hover:to-cyan-500 transition-all disabled:opacity-70 disabled:cursor-not-allowed mt-4"
+                            className="w-full flex items-center justify-center gap-2 rounded-sm bg-[#0a66c2] hover:bg-[#004182] py-3 text-sm font-semibold text-white shadow-lg shadow-[#0a66c2]/20 transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed mt-4"
                         >
                             {isSubmitting ? 'Signing in...' : 'Sign In as Company'}
                             {!isSubmitting && <ArrowRight className="h-4 w-4" />}

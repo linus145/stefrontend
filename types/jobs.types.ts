@@ -42,6 +42,7 @@ export interface CompanyRegisterPayload {
   location?: string;
   logo_url?: string;
   banner_url?: string;
+  phone?: string;
 }
 
 // ─── Job Posts ───────────────────────────────────────────────────

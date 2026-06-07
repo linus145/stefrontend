@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
 import Link from 'next/link';
-import { ArrowRight, Mail, Lock, User, Briefcase, Eye, EyeOff } from 'lucide-react';
+import { ArrowRight, Mail, Lock, User, Briefcase, Eye, EyeOff, Phone } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { GoogleLoginButton } from './google-login-button';
 import { cn } from '@/lib/utils';
@@ -18,6 +18,7 @@ export function RegisterForm() {
     first_name: '',
     last_name: '',
     email: '',
+    phone_number: '',
     password: '',
     role: 'FOUNDER' // Default
   });
@@ -80,6 +81,16 @@ export function RegisterForm() {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(emailTrimmed)) {
         newErrors.email = ['Invalid email format'];
+      }
+    }
+
+    const phoneTrimmed = formData.phone_number.trim();
+    if (!phoneTrimmed) {
+      newErrors.phone_number = ['Mobile number is required'];
+    } else {
+      const phoneRegex = /^\+?1?\d{9,15}$/;
+      if (!phoneRegex.test(phoneTrimmed)) {
+        newErrors.phone_number = ['Invalid phone number format'];
       }
     }
 
@@ -265,6 +276,34 @@ export function RegisterForm() {
                   )}
                 </div>
 
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider" htmlFor="phone_number">
+                    Mobile Number
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                      <Phone className="h-4 w-4" />
+                    </div>
+                    <input
+                      id="phone_number"
+                      type="tel"
+                      placeholder="+1234567890"
+                      disabled={isSubmitting}
+                      value={formData.phone_number}
+                      onChange={handleChange}
+                      className={cn(
+                        "w-full rounded-sm bg-[#f8fafc] dark:bg-[#151624] border text-slate-900 dark:text-white pl-10 pr-4 py-2.5 text-sm transition-all focus:ring-1 focus:ring-[#5e3be1] focus:border-[#5e3be1] outline-none",
+                        errors.phone_number ? 'border-red-400 dark:border-red-500/50' : 'border-slate-200 dark:border-slate-800'
+                      )}
+                    />
+                  </div>
+                  {errors.phone_number && (
+                    <p className="text-[10px] font-medium text-red-500 mt-1">
+                      {errors.phone_number[0]}
+                    </p>
+                  )}
+                </div>
+
                 <div className="space-y-4">
                   <div className="space-y-1.5">
                     <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider" htmlFor="password">
@@ -375,7 +414,7 @@ export function RegisterForm() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full flex items-center justify-center gap-2 rounded-sm bg-[#5e3be1] hover:bg-[#4b2ec7] py-3 text-sm font-bold text-white shadow-lg shadow-[#5e3be1]/20 transition-all duration-300 disabled:opacity-70 mt-2 cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 rounded-sm bg-[#0a66c2] hover:bg-[#004182] py-3 text-sm font-bold text-white shadow-lg shadow-[#0a66c2]/20 transition-all duration-300 disabled:opacity-70 mt-2 cursor-pointer"
             >
               {isSubmitting ? (isVerifying ? 'Verifying...' : 'Creating Account...') : (isVerifying ? 'Verify & Continue' : 'Create Account')}
             </button>

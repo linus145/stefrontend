@@ -106,7 +106,17 @@ export function CompanyProfileTab({ company }: CompanyProfileTabProps) {
                   </span>
                 )}
               </div>
-              <p className="text-xs text-muted-foreground font-medium">{company.industry} • {company.company_size} • {company.total_jobs} jobs posted</p>
+              <p className="text-xs text-muted-foreground font-medium flex items-center gap-1.5 truncate">
+                <span>{company.industry} • {company.company_size} • {company.total_jobs} jobs posted</span>
+                {company.website && (
+                  <>
+                    <span>•</span>
+                    <a href={company.website} target="_blank" rel="noreferrer" className="text-[#0a66c2] hover:underline flex items-center gap-0.5 font-semibold">
+                      <Globe className="h-3 w-3" /> Website
+                    </a>
+                  </>
+                )}
+              </p>
             </div>
           </div>
         </div>

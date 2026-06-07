@@ -158,7 +158,7 @@ export function OnboardingTab() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#0a66c2]/60" />
             <Input
               placeholder="Search directory..."
-              className="pl-10 h-10 bg-white border border-border ring-offset-background focus-visible:ring-1 focus-visible:ring-[#0a66c2]/50 focus-visible:border-[#0a66c2]/50 rounded-sm text-sm font-medium placeholder:text-muted-foreground/60 shadow-sm transition-all"
+              className="pl-10 h-10 bg-background border border-border text-foreground ring-offset-background focus-visible:ring-1 focus-visible:ring-[#0a66c2]/50 focus-visible:border-[#0a66c2]/50 rounded-sm text-sm font-medium placeholder:text-muted-foreground/60 shadow-sm transition-all"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               data-agent="onboarding-search-input"
@@ -166,7 +166,7 @@ export function OnboardingTab() {
           </div>
 
           <DropdownMenu>
-            <DropdownMenuTrigger data-agent="onboarding-sort-trigger" className="h-10 px-4 flex items-center justify-center gap-2 rounded-sm text-[11px] font-bold border border-border/60 bg-white hover:bg-blue-50/30 text-muted-foreground transition-all outline-none whitespace-nowrap shadow-sm">
+            <DropdownMenuTrigger data-agent="onboarding-sort-trigger" className="h-10 px-4 flex items-center justify-center gap-2 rounded-sm text-[11px] font-bold border border-border bg-background hover:bg-muted text-foreground transition-all outline-none whitespace-nowrap shadow-sm">
               <Calendar className="h-3.5 w-3.5 text-[#0a66c2]" />
               {ordering === '-created_at' ? 'Newest' : 'Oldest'}
             </DropdownMenuTrigger>
@@ -190,10 +190,10 @@ export function OnboardingTab() {
 
           <div className="flex items-center gap-2">
             <div className="relative w-36">
-              <span className="absolute -top-2.5 left-2 bg-white px-1 text-[10px] font-bold text-muted-foreground z-10">Start Date</span>
+              <span className="absolute -top-2.5 left-2 bg-background px-1 text-[10px] font-bold text-muted-foreground z-10">Start Date</span>
               <Input
                 type="date"
-                className="h-10 bg-white border border-border focus-visible:ring-1 focus-visible:ring-[#0a66c2]/50 focus-visible:border-[#0a66c2]/50 rounded-sm text-sm font-medium text-foreground shadow-sm transition-all relative"
+                className="h-10 bg-background border border-border focus-visible:ring-1 focus-visible:ring-[#0a66c2]/50 focus-visible:border-[#0a66c2]/50 rounded-sm text-sm font-medium text-foreground shadow-sm transition-all relative"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
                 data-agent="onboarding-start-date-input"
@@ -201,10 +201,10 @@ export function OnboardingTab() {
             </div>
             <span className="text-muted-foreground/50 font-medium">-</span>
             <div className="relative w-36">
-              <span className="absolute -top-2.5 left-2 bg-white px-1 text-[10px] font-bold text-muted-foreground z-10">End Date</span>
+              <span className="absolute -top-2.5 left-2 bg-background px-1 text-[10px] font-bold text-muted-foreground z-10">End Date</span>
               <Input
                 type="date"
-                className="h-10 bg-white border border-border focus-visible:ring-1 focus-visible:ring-[#0a66c2]/50 focus-visible:border-[#0a66c2]/50 rounded-sm text-sm font-medium text-foreground shadow-sm transition-all relative"
+                className="h-10 bg-background border border-border focus-visible:ring-1 focus-visible:ring-[#0a66c2]/50 focus-visible:border-[#0a66c2]/50 rounded-sm text-sm font-medium text-foreground shadow-sm transition-all relative"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
                 data-agent="onboarding-end-date-input"

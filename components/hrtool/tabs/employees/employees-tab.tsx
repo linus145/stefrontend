@@ -294,7 +294,7 @@ export function EmployeesTab({ defaultRole = 'EMPLOYEE' }: EmployeesTabProps) {
           </button>
           <Input
             placeholder="Search directory..."
-            className="pl-10 h-10 bg-white border border-border ring-offset-background focus-visible:ring-1 focus-visible:ring-[#0a66c2]/50 focus-visible:border-[#0a66c2]/50 rounded-sm text-sm font-medium placeholder:text-muted-foreground/60 shadow-sm transition-all"
+            className="pl-10 h-10 bg-background border border-border text-foreground ring-offset-background focus-visible:ring-1 focus-visible:ring-[#0a66c2]/50 focus-visible:border-[#0a66c2]/50 rounded-sm text-sm font-medium placeholder:text-muted-foreground/60 shadow-sm transition-all"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             data-agent="employee-search-input"
@@ -312,14 +312,14 @@ export function EmployeesTab({ defaultRole = 'EMPLOYEE' }: EmployeesTabProps) {
                 if (e.key === 'Enter') handleApplyFilters();
               }}
               data-agent="employee-type-filter"
-              className="h-10 w-full bg-white border border-border focus-visible:ring-1 focus-visible:ring-[#0a66c2]/50 focus-visible:border-[#0a66c2]/50 rounded-sm text-[11px] font-bold text-muted-foreground px-3 shadow-sm transition-all focus:outline-none cursor-pointer"
+              className="h-10 w-full bg-background border border-border text-foreground focus-visible:ring-1 focus-visible:ring-[#0a66c2]/50 focus-visible:border-[#0a66c2]/50 rounded-sm text-[11px] font-bold px-3 shadow-sm transition-all focus:outline-none cursor-pointer"
             >
-              <option value="ALL">All Types</option>
-              <option value="FULL_TIME">Permanent</option>
-              <option value="CONTRACT">Contract</option>
-              <option value="INTERN">Intern</option>
-              <option value="ON_LEAVE">On Leave</option>
-              <option value="TERMINATED">Terminated</option>
+              <option value="ALL" className="bg-background text-foreground">All Types</option>
+              <option value="FULL_TIME" className="bg-background text-foreground">Permanent</option>
+              <option value="CONTRACT" className="bg-background text-foreground">Contract</option>
+              <option value="INTERN" className="bg-background text-foreground">Intern</option>
+              <option value="ON_LEAVE" className="bg-background text-foreground">On Leave</option>
+              <option value="TERMINATED" className="bg-background text-foreground">Terminated</option>
             </select>
           </div>
 
@@ -332,11 +332,11 @@ export function EmployeesTab({ defaultRole = 'EMPLOYEE' }: EmployeesTabProps) {
                 if (e.key === 'Enter') handleApplyFilters();
               }}
               data-agent="employee-designation-filter"
-              className="h-10 w-full bg-white border border-border focus-visible:ring-1 focus-visible:ring-[#0a66c2]/50 focus-visible:border-[#0a66c2]/50 rounded-sm text-[11px] font-bold text-muted-foreground px-3 shadow-sm transition-all focus:outline-none cursor-pointer"
+              className="h-10 w-full bg-background border border-border text-foreground focus-visible:ring-1 focus-visible:ring-[#0a66c2]/50 focus-visible:border-[#0a66c2]/50 rounded-sm text-[11px] font-bold px-3 shadow-sm transition-all focus:outline-none cursor-pointer"
             >
-              <option value="ALL">All Designations</option>
+              <option value="ALL" className="bg-background text-foreground">All Designations</option>
               {designations.map((d: any) => (
-                <option key={d.id} value={d.id}>{d.title}</option>
+                <option key={d.id} value={d.id} className="bg-background text-foreground">{d.title}</option>
               ))}
             </select>
           </div>
@@ -350,18 +350,18 @@ export function EmployeesTab({ defaultRole = 'EMPLOYEE' }: EmployeesTabProps) {
                 if (e.key === 'Enter') handleApplyFilters();
               }}
               data-agent="employee-department-filter"
-              className="h-10 w-full bg-white border border-border focus-visible:ring-1 focus-visible:ring-[#0a66c2]/50 focus-visible:border-[#0a66c2]/50 rounded-sm text-[11px] font-bold text-muted-foreground px-3 shadow-sm transition-all focus:outline-none cursor-pointer"
+              className="h-10 w-full bg-background border border-border text-foreground focus-visible:ring-1 focus-visible:ring-[#0a66c2]/50 focus-visible:border-[#0a66c2]/50 rounded-sm text-[11px] font-bold px-3 shadow-sm transition-all focus:outline-none cursor-pointer"
             >
-              <option value="ALL">All Departments</option>
+              <option value="ALL" className="bg-background text-foreground">All Departments</option>
               {departments.map((d: any) => (
-                <option key={d.id} value={d.id}>{d.name}</option>
+                <option key={d.id} value={d.id} className="bg-background text-foreground">{d.name}</option>
               ))}
             </select>
           </div>
 
           {/* Sort / Ordering */}
           <DropdownMenu>
-            <DropdownMenuTrigger data-agent="employee-sort-trigger" className="h-10 px-4 flex items-center justify-center gap-2 rounded-sm text-[11px] font-bold border border-border bg-white hover:bg-blue-50/30 text-muted-foreground transition-all outline-none whitespace-nowrap shadow-sm">
+            <DropdownMenuTrigger data-agent="employee-sort-trigger" className="h-10 px-4 flex items-center justify-center gap-2 rounded-sm text-[11px] font-bold border border-border bg-background hover:bg-muted text-foreground transition-all outline-none whitespace-nowrap shadow-sm">
               <Calendar className="h-3.5 w-3.5 text-[#0a66c2]" />
               {orderingInput === '-created_at' ? 'Newest' : 'Oldest'}
             </DropdownMenuTrigger>
@@ -386,10 +386,10 @@ export function EmployeesTab({ defaultRole = 'EMPLOYEE' }: EmployeesTabProps) {
           {/* Date range filters (moved to the last position) */}
           <div className="flex items-center gap-2">
             <div className="relative w-32">
-              <span className="absolute -top-2.5 left-2 bg-white px-1 text-[9px] font-bold text-muted-foreground z-10">Start Date</span>
+              <span className="absolute -top-2.5 left-2 bg-background px-1 text-[9px] font-bold text-muted-foreground z-10">Start Date</span>
               <Input
                 type="date"
-                className="h-10 bg-white border border-border focus-visible:ring-1 focus-visible:ring-[#0a66c2]/50 focus-visible:border-[#0a66c2]/50 rounded-sm text-xs font-medium text-foreground shadow-sm transition-all relative"
+                className="h-10 bg-background border border-border text-foreground focus-visible:ring-1 focus-visible:ring-[#0a66c2]/50 focus-visible:border-[#0a66c2]/50 rounded-sm text-xs font-medium shadow-sm transition-all relative"
                 value={startDateInput}
                 onChange={(e) => setStartDateInput(e.target.value)}
                 onKeyDown={(e) => {
@@ -400,10 +400,10 @@ export function EmployeesTab({ defaultRole = 'EMPLOYEE' }: EmployeesTabProps) {
             </div>
             <span className="text-muted-foreground/50 font-medium">-</span>
             <div className="relative w-32">
-              <span className="absolute -top-2.5 left-2 bg-white px-1 text-[9px] font-bold text-muted-foreground z-10">End Date</span>
+              <span className="absolute -top-2.5 left-2 bg-background px-1 text-[9px] font-bold text-muted-foreground z-10">End Date</span>
               <Input
                 type="date"
-                className="h-10 bg-white border border-border focus-visible:ring-1 focus-visible:ring-[#0a66c2]/50 focus-visible:border-[#0a66c2]/50 rounded-sm text-xs font-medium text-foreground shadow-sm transition-all relative"
+                className="h-10 bg-background border border-border text-foreground focus-visible:ring-1 focus-visible:ring-[#0a66c2]/50 focus-visible:border-[#0a66c2]/50 rounded-sm text-xs font-medium shadow-sm transition-all relative"
                 value={endDateInput}
                 onChange={(e) => setEndDateInput(e.target.value)}
                 onKeyDown={(e) => {

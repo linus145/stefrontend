@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import Link from 'next/link';
 import {
   Building2, ArrowRight, Globe, MapPin, Users, Calendar,
-  Briefcase, ChevronLeft, Loader2, AlertCircle,Mail,Lock,EyeOff,Eye} from 'lucide-react';
+  Briefcase, ChevronLeft, Loader2, AlertCircle,Mail,Lock,EyeOff,Eye,Phone} from 'lucide-react';
 
 const INDUSTRY_OPTIONS = [
   'Technology', 'Healthcare', 'Finance', 'Education', 'E-commerce',
@@ -40,6 +40,7 @@ export function CompanyRegisterForm() {
     company_email: '',
     company_password: '',
     confirmPassword: '',
+    phone: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string[]>>({});
@@ -70,6 +71,13 @@ export function CompanyRegisterForm() {
     if (!formData.company_password) newErrors.company_password = ['Password is required'];
     if (formData.company_password !== formData.confirmPassword) {
       newErrors.confirmPassword = ['Passwords do not match'];
+    }
+    
+    if (formData.phone.trim()) {
+      const phoneRegex = /^\+?1?\d{9,15}$/;
+      if (!phoneRegex.test(formData.phone.trim())) {
+        newErrors.phone = ['Invalid phone number format'];
+      }
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -146,7 +154,17 @@ export function CompanyRegisterForm() {
                   </div>
                   {errors.company_email && <p className="text-[10px] text-red-500">{errors.company_email[0]}</p>}
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                
+                <div className="space-y-2">
+                  <label className="text-[11px] font-semibold text-muted-foreground uppercase" htmlFor="phone">Mobile Number</label>
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/70" />
+                    <input id="phone" type="tel" value={formData.phone} onChange={handleChange} placeholder="+1234567890" className={`w-full rounded-sm bg-muted/50 border ${errors.phone ? 'border-red-400' : 'border-border'} text-foreground pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 outline-none`} />
+                  </div>
+                  {errors.phone && <p className="text-[10px] text-red-500">{errors.phone[0]}</p>}
+                </div>
+
+                <div className="space-y-4">
                   <div className="space-y-2">
                     <label className="text-[11px] font-semibold text-muted-foreground uppercase" htmlFor="company_password">Password *</label>
                     <div className="relative">
@@ -156,9 +174,10 @@ export function CompanyRegisterForm() {
                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
                     </div>
+                    {errors.company_password && <p className="text-[10px] text-red-500">{errors.company_password[0]}</p>}
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[11px] font-semibold text-muted-foreground uppercase" htmlFor="confirmPassword">Confirm *</label>
+                    <label className="text-[11px] font-semibold text-muted-foreground uppercase" htmlFor="confirmPassword">Confirm Password *</label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/70" />
                       <input id="confirmPassword" type={showPassword ? 'text' : 'password'} value={formData.confirmPassword} onChange={handleChange} placeholder="••••••••" className={`w-full rounded-sm bg-muted/50 border ${errors.confirmPassword ? 'border-red-400' : 'border-border'} text-foreground pl-10 pr-10 py-2 text-sm focus:ring-1 focus:ring-blue-500 outline-none`} />
@@ -166,9 +185,9 @@ export function CompanyRegisterForm() {
                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
                     </div>
+                    {errors.confirmPassword && <p className="text-[10px] text-red-500">{errors.confirmPassword[0]}</p>}
                   </div>
                 </div>
-                {errors.confirmPassword && <p className="text-[10px] text-red-500">{errors.confirmPassword[0]}</p>}
               </div>
 
             <div className="space-y-2">
@@ -329,7 +348,7 @@ export function CompanyRegisterForm() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full flex items-center justify-center gap-2 rounded-sm bg-gradient-to-r from-blue-600 to-cyan-600 py-3 text-sm font-semibold text-white shadow-sm hover:shadow-lg hover:from-blue-500 hover:to-cyan-500 transition-all disabled:opacity-70 disabled:cursor-not-allowed mt-2"
+              className="w-full flex items-center justify-center gap-2 rounded-sm bg-[#0a66c2] hover:bg-[#004182] py-3 text-sm font-semibold text-white shadow-lg shadow-[#0a66c2]/20 transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed mt-2"
             >
               {isSubmitting ? (
                 <>

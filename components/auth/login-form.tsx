@@ -278,7 +278,7 @@ export function LoginForm() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full flex items-center justify-center gap-2 rounded-sm bg-[#5e3be1] hover:bg-[#4b2ec7] py-3 text-sm font-bold text-white shadow-lg shadow-[#5e3be1]/20 transition-all duration-300 disabled:opacity-70 mt-1 cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 rounded-sm bg-[#0a66c2] hover:bg-[#004182] py-3 text-sm font-bold text-white shadow-lg shadow-[#0a66c2]/20 transition-all duration-300 disabled:opacity-70 mt-1 cursor-pointer"
             >
               {isSubmitting ? (
                 loginMode === 'password' ? 'Signing in...' : (isOtpSent ? 'Verifying...' : 'Sending...')

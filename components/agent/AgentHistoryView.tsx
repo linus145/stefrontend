@@ -125,7 +125,7 @@ export const AgentHistoryView: React.FC<AgentHistoryViewProps> = ({
           
           {/* Conversations List */}
           {conversations.length > 0 ? (
-            <div className="space-y-2 max-h-[320px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-muted">
+            <div className="space-y-2 max-h-[320px] overflow-y-auto pr-1 scrollbar-none">
               {conversations.map((conv) => (
                 <div 
                   key={conv.id} 
@@ -184,7 +184,7 @@ export const AgentHistoryView: React.FC<AgentHistoryViewProps> = ({
             Autonomous Runs History
           </span>
           
-          <div className="space-y-2 max-h-[380px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-muted">
+          <div className="space-y-2 max-h-[380px] overflow-y-auto pr-1 scrollbar-none">
             {executionHistory.length === 0 ? (
               <div className="text-[9px] text-foreground/40 italic py-4 text-center border border-dashed border-border rounded-[4px] bg-muted/10">
                 No execution runs recorded yet.

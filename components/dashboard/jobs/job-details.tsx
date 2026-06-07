@@ -43,8 +43,8 @@ export function JobDetails({ job, applications, onClose, onApply, onEasyApply, i
         
         <div className="flex gap-3 mb-3">
           <div className="w-12 h-12 rounded-sm bg-card border border-border/50 flex items-center justify-center overflow-hidden shrink-0">
-            {job.company_logo ? (
-              <img src={job.company_logo} alt="" className="w-full h-full object-contain p-1.5" />
+            {(job.company?.logo_url || job.company_logo) ? (
+              <img src={job.company?.logo_url || job.company_logo} alt="" className="w-full h-full object-contain p-1.5" />
             ) : (
               <Briefcase className="w-6 h-6 text-muted-foreground" />
             )}
@@ -52,7 +52,7 @@ export function JobDetails({ job, applications, onClose, onApply, onEasyApply, i
           <div className="flex-1 min-w-0">
             <h2 className="text-[15px] font-black text-foreground leading-tight tracking-tight hover:underline cursor-pointer truncate">{job.title}</h2>
             <div className="flex items-center gap-1.5 mt-0.5 flex-wrap text-[11px] text-muted-foreground">
-              <span className="text-foreground hover:underline cursor-pointer font-bold">{job.company_name}</span>
+              <span className="text-foreground hover:underline cursor-pointer font-bold">{job.company?.company_name || job.company_name}</span>
               <span>•</span>
               <span>{job.location}</span>
               <span>•</span>
@@ -195,14 +195,14 @@ export function JobDetails({ job, applications, onClose, onApply, onEasyApply, i
           <h3 className="text-[10px] font-black uppercase tracking-wider text-muted-foreground mb-3">About the company</h3>
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 rounded-sm bg-card border border-border/50 flex items-center justify-center overflow-hidden shadow-sm">
-              {job.company_logo ? (
-                <img src={job.company_logo} alt="" className="w-full h-full object-contain p-1" />
+              {(job.company?.logo_url || job.company_logo) ? (
+                <img src={job.company?.logo_url || job.company_logo} alt="" className="w-full h-full object-contain p-1" />
               ) : (
                 <Briefcase className="w-5 h-5 text-muted-foreground" />
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <h4 className="text-xs font-bold text-foreground hover:underline cursor-pointer truncate">{job.company_name}</h4>
+              <h4 className="text-xs font-bold text-foreground hover:underline cursor-pointer truncate">{job.company?.company_name || job.company_name}</h4>
               <p className="text-[10px] text-muted-foreground">530,783 followers</p>
             </div>
             <button className="flex items-center gap-1 px-3 py-1 border border-[#0a66c2] text-[#0a66c2] rounded-sm text-[10px] font-bold hover:bg-[#0a66c2]/5 transition-all shrink-0 cursor-pointer">

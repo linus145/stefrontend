@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Globe, Image as ImageIcon, Video, FileText, BarChart2, MoreHorizontal, Loader2, Lock, ChevronDown, Smile, Wand2 } from 'lucide-react';
+import { X, Globe, Image as ImageIcon, Video, FileText, BarChart2, Calendar, MoreHorizontal, Loader2, Lock, ChevronDown, Smile, Wand2 } from 'lucide-react';
 import EmojiPicker, { Theme, EmojiClickData } from 'emoji-picker-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useDashboardTheme } from '@/context/DashboardThemeContext';
@@ -300,15 +300,21 @@ export function MobilePostView({ onClose, onPostSuccess }: MobilePostViewProps) 
             <span className="text-[10px] font-bold uppercase tracking-tighter opacity-0 group-hover:opacity-100 transition-opacity">Photo</span>
           </button>
           
-          <button className="flex flex-col items-center gap-1 hover:text-primary transition-all group cursor-not-allowed opacity-40">
-            <div className="p-2 rounded-full transition-colors">
-              <Video className="w-6 h-6" />
+          <button
+            onClick={() => toast.info('Video uploading feature is coming soon!')}
+            className="flex flex-col items-center gap-1 transition-all group"
+          >
+            <div className="p-2 rounded-full hover:bg-emerald-500/10 transition-colors">
+              <Video className="w-6 h-6 text-emerald-500" />
             </div>
           </button>
-
-          <button className="flex flex-col items-center gap-1 hover:text-primary transition-all group cursor-not-allowed opacity-40">
-            <div className="p-2 rounded-full transition-colors">
-              <BarChart2 className="w-6 h-6" />
+          
+          <button
+            onClick={() => toast.info('Post scheduling feature is coming soon!')}
+            className="flex flex-col items-center gap-1 transition-all group"
+          >
+            <div className="p-2 rounded-full hover:bg-[#b49cf8]/10 transition-colors">
+              <Calendar className="w-6 h-6 text-[#b49cf8]" />
             </div>
           </button>
 

@@ -102,4 +102,9 @@ export const aiInterviewsService = {
   resendInvite: async (sessionId: string) => {
     return api.post<any>(`/AIrounds/session/${sessionId}/resend-invite/`);
   },
+
+  // Get manifest of unevaluated questions for a job role (for bulk evaluation)
+  bulkEvaluate: async (jobId: string) => {
+    return api.post<any>('/AIrounds/bulk-evaluate/', { job_id: jobId });
+  },
 };

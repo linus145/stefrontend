@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { hrOrgService } from '@/services/hr';
+import { hrOrgService, hrEmployeeService } from '@/services/hr';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -10,6 +10,7 @@ import {
   Globe, MapPin, Calendar, FileText, Loader2, Save
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
@@ -40,6 +41,11 @@ export function OrgTab() {
   const { data: designations, isLoading: desigLoading } = useQuery({
     queryKey: ['designations'],
     queryFn: () => hrOrgService.getDesignations(),
+  });
+
+  const { data: managers, isLoading: managersLoading } = useQuery({
+    queryKey: ['managers'],
+    queryFn: () => hrEmployeeService.getEmployees({ role: 'MANAGER', status: 'ACTIVE', page_size: 100 }),
   });
 
   const { data: organization, isLoading: orgLoading } = useQuery({
@@ -138,7 +144,7 @@ export function OrgTab() {
       </div>
 
       {activeSubTab === 'structure' ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Departments */}
           <section className="space-y-4">
             <div className="flex items-center justify-between">
@@ -150,7 +156,7 @@ export function OrgTab() {
                 {departments?.data?.results?.length || 0} Total
               </Badge>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3">
               {departments?.data?.results?.map((dept: any) => (
                 <Card key={dept.id} className="bg-card/45 border-border/40 hover:bg-muted/40 transition-all cursor-pointer group rounded-sm shadow-sm hover:shadow-md hover:border-blue-500/20">
                   <CardContent className="py-2.5 px-3 flex items-center justify-between">
@@ -183,7 +189,7 @@ export function OrgTab() {
                 {designations?.data?.results?.length || 0} Total
               </Badge>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3">
               {designations?.data?.results?.map((desig: any) => (
                 <Card key={desig.id} className="bg-card/45 border-border/40 hover:bg-muted/40 transition-all cursor-pointer group rounded-sm shadow-sm hover:shadow-md hover:border-blue-500/20">
                   <CardContent className="py-2.5 px-3 flex items-center justify-between">
@@ -199,6 +205,39 @@ export function OrgTab() {
                     <Button data-agent={`org-desig-add-btn-${desig.id}`} variant="ghost" size="icon" className="rounded-sm h-7 w-7 flex-shrink-0 hover:bg-blue-50/50 hover:text-blue-600">
                       <Plus className="h-3.5 w-3.5 text-muted-foreground/75" />
                     </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </section>
+
+          {/* Managers */}
+          <section className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                Managers
+              </h3>
+              <Badge className="bg-blue-500/10 text-blue-600 border-none font-bold text-[10px] rounded-sm">
+                {managers?.data?.results?.length || 0} Total
+              </Badge>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3">
+              {managers?.data?.results?.map((manager: any) => (
+                <Card key={manager.id} className="bg-card/45 border-border/40 hover:bg-muted/40 transition-all cursor-pointer group rounded-sm shadow-sm hover:shadow-md hover:border-blue-500/20">
+                  <CardContent className="py-2.5 px-3 flex items-center justify-between">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <Avatar className="h-8 w-8 border border-border/50 shadow-sm rounded-sm">
+                        <AvatarImage src={manager.avatar} className="rounded-sm" />
+                        <AvatarFallback className="bg-blue-500/5 text-[#0a66c2] font-bold rounded-sm text-[10px]">
+                          {manager.first_name?.[0] || ''}{manager.last_name?.[0] || ''}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0">
+                        <h4 className="text-[13px] font-bold tracking-tight truncate text-foreground/90">{manager.first_name} {manager.last_name}</h4>
+                        <p className="text-[10px] font-semibold text-[#0a66c2]/80 mt-0.5">{manager.subordinates_count || 0} Direct Reports</p>
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
               ))}

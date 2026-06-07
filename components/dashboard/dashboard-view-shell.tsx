@@ -125,19 +125,19 @@ export function DashboardViewShell() {
             {/* Recruiter CTA Banner - Hidden on mobile for cleaner UX */}
             <a
               href="/recruiter/register"
-              className="hidden md:block group relative mb-8 w-full rounded-sm overflow-hidden border border-black bg-muted/20 hover:bg-muted/40 transition-all"
+              className="hidden md:block group relative mb-8 w-full rounded-sm overflow-hidden border border-border/60 bg-muted/20 hover:bg-muted/40 transition-all"
             >
               <div className="flex items-center justify-between px-6 py-5">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-sm bg-emerald-500/10 flex items-center justify-center group-hover:scale-105 transition-transform">
-                    <Users className="w-6 h-6 text-emerald-600" />
+                  <div className="w-12 h-12 rounded-sm bg-[#0a66c2]/10 flex items-center justify-center group-hover:scale-105 transition-transform">
+                    <Users className="w-6 h-6 text-[#0a66c2]" />
                   </div>
                   <div>
                     <p className="text-base font-bold text-foreground">Are you a company? Start posting jobs</p>
                     <p className="text-sm text-muted-foreground">Reach thousands of founders and professionals on B2linq</p>
                   </div>
                 </div>
-                <div className="hidden sm:flex items-center gap-2 px-5 py-2.5 rounded-sm bg-emerald-500 text-white text-sm font-bold shadow-sm hover:bg-emerald-600 transition-all">
+                <div className="hidden sm:flex items-center gap-2 px-5 py-2.5 rounded-sm bg-[#0a66c2] text-white text-sm font-bold shadow-md shadow-[#0a66c2]/20 hover:bg-[#004182] transition-all">
                   Register Now →
                 </div>
               </div>

@@ -232,14 +232,14 @@ export function HRSidebar({
                     className={cn(
                       "w-full flex items-center justify-between px-3 py-2 text-sm font-medium transition-all group rounded-sm cursor-pointer",
                       isNavParentActive
-                        ? "bg-blue-50/5 text-[#0a66c2] font-semibold"
+                        ? "bg-[#0a66c2] text-white font-semibold shadow-lg shadow-blue-500/20"
                         : "text-muted-foreground hover:bg-muted hover:text-foreground"
                     )}
                   >
                     <div className="flex items-center gap-3">
                       <item.icon className={cn(
                         "w-5 h-5 shrink-0 transition-colors",
-                        isNavParentActive ? "text-[#0a66c2]" : "text-muted-foreground group-hover:text-[#0a66c2]"
+                        isNavParentActive ? "text-white" : "text-muted-foreground group-hover:text-[#0a66c2]"
                       )} />
                       {!isCollapsed && <span className="truncate">{item.label}</span>}
                     </div>
@@ -247,7 +247,7 @@ export function HRSidebar({
                       <ChevronDown className={cn(
                         "w-4 h-4 transition-transform duration-200",
                         isExpanded && "rotate-180",
-                        isNavParentActive ? "text-[#0a66c2]" : "text-muted-foreground/70"
+                        isNavParentActive ? "text-white" : "text-muted-foreground/70"
                       )} />
                     )}
                   </button>
@@ -265,7 +265,7 @@ export function HRSidebar({
                             className={cn(
                               "w-full flex items-center justify-between px-3 py-1.5 text-xs font-semibold rounded-sm transition-all cursor-pointer",
                               isActive
-                                ? "text-[#0a66c2] bg-blue-50/5 font-bold"
+                                ? "bg-[#0a66c2] text-white font-bold shadow-md shadow-blue-500/10"
                                 : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                             )}
                           >

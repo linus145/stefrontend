@@ -251,16 +251,16 @@ export function OnboardingTab() {
                         <MoreHorizontal className="h-4 w-4" />
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="rounded-sm border-border/50 bg-card/95 backdrop-blur-md min-w-[140px] shadow-xl">
-                        <DropdownMenuItem 
+                        <DropdownMenuItem
                           onClick={() => setSelectedEmployeeId(employee.id)}
-                          data-agent="onboarding-details-btn" 
+                          data-agent="onboarding-details-btn"
                           className="text-xs font-semibold py-2 cursor-pointer focus:bg-[#0a66c2]/10 focus:text-[#0a66c2] transition-colors rounded-sm"
                         >
                           <User className="mr-2 h-3.5 w-3.5 opacity-60" /> Details
                         </DropdownMenuItem>
-                        <DropdownMenuItem 
+                        <DropdownMenuItem
                           onClick={() => toast.info(`Interview details are available under Recruiter -> Interview Pipeline tab for ${employee.first_name}.`)}
-                          data-agent="onboarding-interview-btn" 
+                          data-agent="onboarding-interview-btn"
                           className="text-xs font-semibold py-2 cursor-pointer focus:bg-[#0a66c2]/10 focus:text-[#0a66c2] transition-colors rounded-sm"
                         >
                           <BrainCircuit className="mr-2 h-3.5 w-3.5 opacity-60" /> Interview

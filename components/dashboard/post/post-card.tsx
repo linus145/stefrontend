@@ -64,15 +64,26 @@ export function PostCard({ post, onLike, onNavigateToProfile }: PostCardProps) {
   };
 
   const handleShare = () => {
+    const slug = post.content
+      ? post.content
+          .trim()
+          .toLowerCase()
+          .replace(/[^a-z0-9\s-]/g, '')
+          .replace(/\s+/g, '-')
+          .replace(/-+/g, '-')
+          .substring(0, 50)
+          .replace(/-$/, '')
+      : 'post';
+    const shareUrl = `${window.location.origin}/posts/${slug || 'post'}-${post.id}`;
     // Check if navigator.share is available
     if (navigator.share) {
       navigator.share({
         title: 'B2linq Post',
         text: post.content,
-        url: window.location.href,
+        url: shareUrl,
       }).catch(console.error);
     } else {
-      navigator.clipboard.writeText(window.location.href);
+      navigator.clipboard.writeText(shareUrl);
       toast.success("Link captured to clipboard.");
     }
   };

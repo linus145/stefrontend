@@ -42,7 +42,7 @@ const fallbackPlans: Plan[] = [
     employee_self_service: 'None',
     system_integrations: 'None',
     analytics_governance: 'None',
-    highlights: ['User Dashboard Access', 'Job Application Portal', '1-10 Employees', 'No HRMS Features']
+    highlights: ['100 Monthly AI Credits', 'User Dashboard Access', 'Job Application Portal', '1-10 Employees', 'No HRMS Features']
   },
   {
     id: 'basic',
@@ -58,7 +58,7 @@ const fallbackPlans: Plan[] = [
     employee_self_service: 'Basic static dashboard to view company links/documents.',
     system_integrations: '2 Core tools (e.g., 1 ATS + 1 HRMS).',
     analytics_governance: 'Standard compliance & system event reporting.',
-    highlights: ['Manual Tools', '2 Core integrations', '1-100 Employees', 'Auto-triggers & data sync']
+    highlights: ['500 Monthly AI Credits', 'Manual Tools', '2 Core integrations', '1-100 Employees', 'Auto-triggers & data sync']
   },
   {
     id: 'growth',
@@ -75,6 +75,7 @@ const fallbackPlans: Plan[] = [
     system_integrations: 'Unlimited Standard integrations (Slack, Teams, Workday, BambooHR).',
     analytics_governance: 'Team-level usage summaries and operational bottleneck tracking.',
     highlights: [
+      '1,000 Monthly AI Credits',
       'Full Conversational Agent(Interactive Chat AI)',
       'Unlimited Standard integrations',
       'Standard ATS Integrations',
@@ -108,6 +109,7 @@ const fallbackPlans: Plan[] = [
     system_integrations: 'Custom Enterprise software integrations via custom API schemas.',
     analytics_governance: 'Proactive organizational health & employee burnout/retention risk tracking.',
     highlights: [
+      '1,500 Monthly AI Credits',
       'Full Agentic Autonomous(Single-prompt end-to-end)',
       'Custom Enterprise software integrations',
       'API & ERP Integrations',

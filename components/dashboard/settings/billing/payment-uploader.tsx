@@ -104,7 +104,7 @@ export function PaymentUploader({ planPrice, latestPayment }: PaymentUploaderPro
   // Payment QR Code is loaded dynamically from public/paymentqr.webp
 
   return (
-    <div className="bg-card border border-border rounded-md p-6 shadow-sm space-y-6 animate-in slide-in-from-bottom-2 duration-300">
+    <div className="bg-card border border-border rounded-sm p-6 shadow-sm space-y-6 animate-in slide-in-from-bottom-2 duration-300">
       {/* Rejection Notice Banner */}
       {latestPayment?.status === 'rejected' && (
         <div className="p-4 rounded-sm border border-rose-500/25 bg-rose-500/[0.03] flex items-start gap-3">
@@ -153,7 +153,7 @@ export function PaymentUploader({ planPrice, latestPayment }: PaymentUploaderPro
       <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
         {/* QR Code and Credentials (Left side) */}
         <div className="md:col-span-2 p-5 bg-muted/10 border border-border/80 rounded-sm flex flex-col items-center text-center justify-center space-y-4">
-          <div className="p-4 bg-white rounded-md border border-slate-200/50 shadow-sm relative group overflow-hidden">
+          <div className="p-4 bg-white rounded-sm border border-slate-200/50 shadow-sm relative group overflow-hidden">
             <div className="w-36 h-36 relative overflow-hidden flex items-center justify-center bg-black rounded-sm">
               <img
                 src="/paymentqr.webp"

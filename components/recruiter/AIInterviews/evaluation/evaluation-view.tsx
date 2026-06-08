@@ -131,6 +131,7 @@ export function EvaluationView() {
       toast.success('Deep analysis completed!');
       refetchSessions();
       refetchDetail();
+      queryClient.invalidateQueries({ queryKey: ['userCredits'] });
     } catch (e) {
       toast.error("Analysis engine encountered an error. Please try again.");
     } finally {
@@ -195,6 +196,7 @@ export function EvaluationView() {
             toast.success(data.message || `Bulk evaluation complete!`);
             refetchSessions();
             if (selectedSessionId) refetchDetail();
+            queryClient.invalidateQueries({ queryKey: ['userCredits'] });
             setTimeout(() => {
               setIsBulkEvaluating(false);
               setBulkProgress({ current: 0, total: 0, candidateName: '', percent: 0 });
@@ -251,11 +253,11 @@ export function EvaluationView() {
 
       {/* Main Content */}
       <div className="flex-1 overflow-y-auto no-scrollbar bg-background relative">
-        {/* Bulk Evaluate Floating Button */}
+        {/* Bulk Evaluate Floating Button - Commented out for future implementation
         {!isBulkEvaluating && (
           <button
             onClick={() => { setShowBulkModal(true); setSelectedJobId(null); }}
-            disabled={uniqueJobs.length === 0 || isEvaluating}
+            disabled={true}
             data-agent="bulk-evaluate-btn"
             className="absolute top-4 right-6 z-20 flex items-center gap-2 px-4 h-9 rounded-md bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-[11px] font-bold shadow-lg shadow-blue-600/25 hover:shadow-blue-600/40 hover:-translate-y-0.5 transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0"
           >
@@ -263,6 +265,7 @@ export function EvaluationView() {
             Bulk Evaluate
           </button>
         )}
+        */}
 
         {/* Bulk Evaluation Progress Bar */}
         {isBulkEvaluating && (

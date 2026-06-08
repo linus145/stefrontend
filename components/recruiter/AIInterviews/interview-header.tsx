@@ -9,7 +9,8 @@ import {
   Settings2,
   Users2,
   PieChart,
-  ClipboardCheck
+  ClipboardCheck,
+  Coins
 } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
@@ -18,6 +19,8 @@ import { NotificationPopover } from '@/components/dashboard/notifications/notifi
 import { AgentUIController } from '@/agent/ui/AgentUIController';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { useQuery } from '@tanstack/react-query';
+import { creditsService } from '@/services/credits.service';
 
 interface InterviewHeaderProps {
   companyName: string;
@@ -28,6 +31,13 @@ interface InterviewHeaderProps {
 export function AIInterviewsHeader({ companyName, activeSection, onSectionChange }: InterviewHeaderProps) {
   const { userSubscription } = useAuth();
   const hasPremium = userSubscription && Number(userSubscription.plan_details?.price) >= 12000 && userSubscription.status === 'active';
+
+  const { data: creditsData } = useQuery({
+    queryKey: ['userCredits'],
+    queryFn: () => creditsService.getBalance(),
+    refetchInterval: 30000,
+  });
+  const creditBalance = creditsData?.data?.balance ?? 0;
 
   const handleAgentClick = () => {
     if (!hasPremium) {
@@ -95,6 +105,13 @@ export function AIInterviewsHeader({ companyName, activeSection, onSectionChange
       {/* Right: Actions */}
       <div className="flex items-center gap-3 sm:gap-5">
         <ThemeToggle />
+        <div
+          className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-bold shadow-sm shrink-0"
+          title="AI Credits Balance"
+        >
+          <Coins className="w-4 h-4 text-amber-500 shrink-0" />
+          <span>{creditBalance} Credits</span>
+        </div>
 
           <NotificationPopover currentDashboard="INTERVIEW" />
 

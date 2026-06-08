@@ -5,7 +5,7 @@ import {
   User, Lock, Bell, Eye, EyeOff, Shield, Camera,
   Mail, Phone, Save, Trash2, Smartphone,
   MapPin, Globe, CreditCard, LogOut, ChevronDown, CheckCircle2,
-  HelpCircle
+  HelpCircle, Coins
 } from 'lucide-react';
 import { HelpTab } from '../help/help-tab';
 import { useAuth } from '@/hooks/useAuth';
@@ -18,10 +18,16 @@ import { NotificationsTab } from '../notification/notifications-tab';
 import { SecurityTab } from '../security/security-tab';
 import { BillingTab } from '../billing/billing-tab';
 import { ProfileEditForm } from '../../profile/profile-edit-form';
+import { CreditView } from '@/components/creditsystem/credit-view';
 
-type SettingsTab = 'Account' | 'Privacy' | 'Notifications' | 'Security' | 'Billing' | 'Help';
+type SettingsTab = 'Account' | 'Privacy' | 'Notifications' | 'Security' | 'Billing' | 'Help' | 'Credits';
 
-export function SettingsView({ isCollapsed }: { isCollapsed?: boolean }) {
+interface SettingsViewProps {
+  isCollapsed?: boolean;
+  onSectionChange?: (section: any) => void;
+}
+
+export function SettingsView({ isCollapsed, onSectionChange }: SettingsViewProps) {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<SettingsTab>('Account');
   const [showMobileDetail, setShowMobileDetail] = useState(false);
@@ -31,7 +37,7 @@ export function SettingsView({ isCollapsed }: { isCollapsed?: boolean }) {
       const checkTab = () => {
         const params = new URLSearchParams(window.location.search);
         const tab = params.get('tab');
-        if (tab && ['Account', 'Privacy', 'Notifications', 'Security', 'Billing'].includes(tab)) {
+        if (tab && ['Account', 'Privacy', 'Notifications', 'Security', 'Billing', 'Credits'].includes(tab)) {
           setActiveTab(tab as SettingsTab);
           // If on mobile, expand the tab detail view directly
           setShowMobileDetail(true);
@@ -47,37 +53,43 @@ export function SettingsView({ isCollapsed }: { isCollapsed?: boolean }) {
   const menuItems: { id: SettingsTab; icon: React.ReactNode; label: string; description: string }[] = [
     {
       id: 'Account',
-      icon: <User className="w-5 h-5" />,
+      icon: <User className="w-4 h-4" />,
       label: 'My Account',
       description: 'Manage your profile details and professional identity'
     },
     {
       id: 'Privacy',
-      icon: <Eye className="w-5 h-5" />,
+      icon: <Eye className="w-4 h-4" />,
       label: 'Privacy & Visibility',
       description: 'Control your visibility and who can see your activity'
     },
     {
       id: 'Notifications',
-      icon: <Bell className="w-5 h-5" />,
-      label: 'Notifications',
+      icon: <Bell className="w-4 h-4" />,
+      label: 'Notification Settings',
       description: 'Configure how you receive alerts and updates'
     },
     {
       id: 'Security',
-      icon: <Shield className="w-5 h-5" />,
+      icon: <Shield className="w-4 h-4" />,
       label: 'Security & Login',
       description: 'Protect your account with password and 2FA'
     },
     {
       id: 'Billing',
-      icon: <CreditCard className="w-5 h-5" />,
+      icon: <CreditCard className="w-4 h-4" />,
       label: 'Billing & Plans',
       description: 'View pricing, features and manage your subscriptions'
     },
     {
+      id: 'Credits',
+      icon: <Coins className="w-4 h-4" />,
+      label: 'AI Credits',
+      description: 'View balance, transaction logs and usage rates'
+    },
+    {
       id: 'Help',
-      icon: <HelpCircle className="w-5 h-5" />,
+      icon: <HelpCircle className="w-4 h-4" />,
       label: 'Help & Support',
       description: 'Find contact numbers and request help from our team'
     },
@@ -106,18 +118,18 @@ export function SettingsView({ isCollapsed }: { isCollapsed?: boolean }) {
             <button
               key={item.id}
               onClick={() => handleTabClick(item.id)}
-              className="w-full flex items-center justify-between p-4 rounded-sm border border-border bg-card hover:bg-muted/30 transition-all text-left group"
+              className="w-full flex items-center justify-between p-3 rounded-sm border border-border bg-card hover:bg-muted/30 transition-all text-left group"
             >
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-[#0a66c2]/10 flex items-center justify-center text-[#0a66c2] group-hover:scale-110 transition-transform">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-[#0a66c2]/10 flex items-center justify-center text-[#0a66c2] group-hover:scale-110 transition-transform shrink-0">
                   {item.icon}
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-foreground">{item.label}</h3>
-                  <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-1">{item.description}</p>
+                  <h3 className="text-xs font-bold text-foreground">{item.label}</h3>
+                  <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-1">{item.description}</p>
                 </div>
               </div>
-              <ChevronDown className="w-4 h-4 text-muted-foreground -rotate-90" />
+              <ChevronDown className="w-3.5 h-3.5 text-muted-foreground -rotate-90" />
             </button>
           ))}
 
@@ -152,7 +164,7 @@ export function SettingsView({ isCollapsed }: { isCollapsed?: boolean }) {
             {menuItems.find(m => m.id === activeTab)?.label}
           </h2>
         </div>
-        <div className="flex-1 p-6">
+        <div className="flex-1 p-4 sm:p-6">
           <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as SettingsTab)} className="w-full">
             <TabsContent value="Account">
               {user && <ProfileEditForm initialUser={user} isSettingsTab={true} />}
@@ -169,6 +181,11 @@ export function SettingsView({ isCollapsed }: { isCollapsed?: boolean }) {
             <TabsContent value="Billing">
               <BillingTab />
             </TabsContent>
+            <TabsContent value="Credits">
+              <div className="bg-white dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/80 rounded-sm p-6 sm:p-8 shadow-sm backdrop-blur-sm">
+                <CreditView />
+              </div>
+            </TabsContent>
             <TabsContent value="Help">
               <HelpTab />
             </TabsContent>
@@ -177,15 +194,15 @@ export function SettingsView({ isCollapsed }: { isCollapsed?: boolean }) {
       </div>
 
       {/* Desktop: Sidebar navigation */}
-      <div className="hidden md:block w-72 border-r border-border p-6 bg-sidebar/40 shrink-0 overflow-y-auto">
-        <h2 className="text-xl font-semibold text-foreground mb-8 tracking-tight px-4">Settings</h2>
+      <div className="hidden md:block w-64 border-r border-border p-5 bg-sidebar/40 shrink-0 overflow-y-auto">
+        <h2 className="text-lg font-bold text-foreground mb-6 tracking-tight px-3">Settings</h2>
         <nav className="space-y-1">
           {menuItems.map((item) => (
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
               className={cn(
-                "w-full flex items-center gap-3 px-4 py-3 rounded-sm text-sm font-medium transition-all group",
+                "w-full flex items-center gap-2.5 px-3 py-2.5 rounded-sm text-xs font-semibold transition-all group",
                 activeTab === item.id
                   ? "bg-[#0a66c2]/10 text-[#0a66c2] border border-[#0a66c2]/20 shadow-sm"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
@@ -207,7 +224,7 @@ export function SettingsView({ isCollapsed }: { isCollapsed?: boolean }) {
       <div className="hidden md:flex flex-1 p-4 sm:p-6 lg:p-10 overflow-y-auto">
         <div className={cn(
           "mx-auto space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500 w-full transition-all duration-300",
-          activeTab === 'Billing' ? "max-w-6xl" : activeTab === 'Account' ? "max-w-4xl" : "max-w-3xl"
+          (activeTab === 'Billing' || activeTab === 'Credits') ? "max-w-6xl" : activeTab === 'Account' ? "max-w-4xl" : "max-w-3xl"
         )}>
           <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as SettingsTab)} className="w-full">
             <TabsContent value="Account">
@@ -224,6 +241,11 @@ export function SettingsView({ isCollapsed }: { isCollapsed?: boolean }) {
             </TabsContent>
             <TabsContent value="Billing">
               <BillingTab />
+            </TabsContent>
+            <TabsContent value="Credits">
+              <div className="bg-white dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/80 rounded-sm p-6 sm:p-8 shadow-sm backdrop-blur-sm">
+                <CreditView />
+              </div>
             </TabsContent>
             <TabsContent value="Help">
               <HelpTab />

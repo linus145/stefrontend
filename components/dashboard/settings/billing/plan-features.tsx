@@ -11,12 +11,13 @@ interface PlanFeaturesProps {
 export function PlanFeatures({ planName, isFree }: PlanFeaturesProps) {
   return (
     <div className="space-y-6">
-      <div className="bg-card border border-border rounded-md p-6 shadow-sm h-full">
+      <div className="bg-card border border-border rounded-sm p-6 shadow-sm h-full">
         <h5 className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-4">Included in your plan</h5>
         
         <ul className="space-y-3.5 text-xs">
           {isFree ? (
             <>
+              <FeatureItem label="100 Monthly AI Credits" enabled />
               <FeatureItem label="Candidate Job Board Access" enabled />
               <FeatureItem label="Basic Applicant Dashboard" enabled />
               <FeatureItem label="1-10 Employees limit" enabled />
@@ -26,6 +27,7 @@ export function PlanFeatures({ planName, isFree }: PlanFeaturesProps) {
             </>
           ) : planName.toLowerCase().includes('basic') ? (
             <>
+              <FeatureItem label="500 Monthly AI Credits" enabled />
               <FeatureItem label="ATS & HRMS Data Syncing" enabled />
               <FeatureItem label="Auto welcome & NDA packets" enabled />
               <FeatureItem label="Up to 100 Employees limit" enabled />
@@ -35,6 +37,7 @@ export function PlanFeatures({ planName, isFree }: PlanFeaturesProps) {
             </>
           ) : planName.toLowerCase().includes('growth') ? (
             <>
+              <FeatureItem label="1,000 Monthly AI Credits" enabled />
               <FeatureItem label="Full Conversational AI Agent" enabled />
               <FeatureItem label="AI Resume Screening & Score" enabled />
               <FeatureItem label="Up to 500 Employees limit" enabled />
@@ -45,6 +48,7 @@ export function PlanFeatures({ planName, isFree }: PlanFeaturesProps) {
           ) : (
             /* Enterprise AI OS */
             <>
+              <FeatureItem label="1,500 Monthly AI Credits" enabled />
               <FeatureItem label="Full Agentic Autonomous Systems" enabled />
               <FeatureItem label="Custom Enterprise API & ERP" enabled />
               <FeatureItem label="Unlimited Employees limit" enabled />

@@ -119,14 +119,14 @@ export function ProfileEditForm({ initialUser, isSettingsTab = false }: ProfileE
               Back to Dashboard
             </button>
           )}
-          <h1 className="text-xl sm:text-2xl font-semibold text-foreground tracking-tight">Edit Profile</h1>
-          <p className="text-sm text-muted-foreground">Manage your identity and digital presence across the B2linq platform.</p>
+          <h1 className="text-lg sm:text-xl font-semibold text-foreground tracking-tight">Edit Profile</h1>
+          <p className="text-xs text-muted-foreground">Manage your identity and digital presence across the B2linq platform.</p>
         </div>
         <Button
           onClick={handleSubmit}
           disabled={isUpdating}
           className={cn(
-            "text-primary-foreground px-6 sm:px-8 h-11 rounded-md font-bold text-xs transition-all flex items-center gap-2 w-full sm:w-auto justify-center",
+            "text-primary-foreground px-6 sm:px-8 h-11 rounded-sm font-bold text-xs transition-all flex items-center gap-2 w-full sm:w-auto justify-center",
             isSettingsTab
               ? "bg-[#0a66c2] hover:bg-[#004182] shadow-lg shadow-[#0a66c2]/20"
               : "bg-primary hover:opacity-90 shadow-lg shadow-primary/20"
@@ -142,62 +142,62 @@ export function ProfileEditForm({ initialUser, isSettingsTab = false }: ProfileE
         <div className="space-y-4">
           <div className="flex items-center gap-2 px-1">
             <UserIcon className={cn("w-4 h-4", isSettingsTab ? "text-[#0a66c2]" : "text-primary")} />
-            <h2 className="text-[13px] font-bold uppercase tracking-widest text-foreground opacity-80">Identity</h2>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-foreground opacity-80">Identity</h2>
           </div>
-          <div className="bg-card border border-border rounded-lg p-6 shadow-sm space-y-6">
+          <div className="bg-card border border-border rounded-sm p-4 sm:p-6 shadow-sm space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide ml-1">First Name</label>
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide ml-1">First Name</label>
                 <Input
                   name="first_name"
                   value={formData.first_name}
                   onChange={handleChange}
-                  className="h-11 bg-muted/30 border-border focus:ring-2 focus:ring-primary/20 focus:border-primary/40 rounded-md px-4 text-sm transition-all"
+                  className="h-11 bg-muted/30 border-border focus:ring-2 focus:ring-primary/20 focus:border-primary/40 rounded-sm px-4 text-xs transition-all"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide ml-1">Last Name</label>
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide ml-1">Last Name</label>
                 <Input
                   name="last_name"
                   value={formData.last_name}
                   onChange={handleChange}
-                  className="h-11 bg-muted/30 border-border focus:ring-2 focus:ring-primary/20 focus:border-primary/40 rounded-md px-4 text-sm transition-all"
+                  className="h-11 bg-muted/30 border-border focus:ring-2 focus:ring-primary/20 focus:border-primary/40 rounded-sm px-4 text-xs transition-all"
                 />
               </div>
             </div>
             <div className="space-y-2">
-              <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide ml-1">Primary Email</label>
+              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide ml-1">Primary Email</label>
               <Input
                 name="email"
                 value={formData.email}
                 readOnly
-                className="h-11 bg-muted/20 border-border/50 text-muted-foreground/70 rounded-md px-4 text-sm cursor-not-allowed border-dashed"
+                className="h-11 bg-muted/20 border-border/50 text-muted-foreground/70 rounded-sm px-4 text-xs cursor-not-allowed border-dashed"
               />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide ml-1">Headline</label>
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide ml-1">Headline</label>
                 <Input
                   name="headline"
                   value={formData.headline}
                   onChange={handleChange}
                   placeholder="e.g. Founder & CEO | AI Engineer"
-                  className="h-11 bg-muted/30 border-border focus:ring-2 focus:ring-primary/20 focus:border-primary/40 rounded-md px-4 text-sm transition-all"
+                  className="h-11 bg-muted/30 border-border focus:ring-2 focus:ring-primary/20 focus:border-primary/40 rounded-sm px-4 text-xs transition-all"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide ml-1">Mobile Number</label>
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide ml-1">Mobile Number</label>
                 <div className="relative">
                   <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-2 pr-2 border-r border-border/50 select-none">
-                    <span className={cn("text-[13px] font-bold", isSettingsTab ? "text-[#0a66c2]" : "text-primary")}>+91</span>
+                    <span className={cn("text-xs font-bold", isSettingsTab ? "text-[#0a66c2]" : "text-primary")}>+91</span>
                   </div>
                   <Input
                     name="phone_number"
                     value={formData.phone_number}
                     onChange={handleChange}
                     placeholder="00000 00000"
-                    className="h-11 bg-muted/30 border-border focus:ring-2 focus:ring-primary/20 focus:border-primary/40 rounded-md pl-16 pr-4 text-sm font-medium tracking-wide transition-all"
+                    className="h-11 bg-muted/30 border-border focus:ring-2 focus:ring-primary/20 focus:border-primary/40 rounded-sm pl-16 pr-4 text-xs font-medium tracking-wide transition-all"
                   />
                 </div>
               </div>
@@ -209,17 +209,17 @@ export function ProfileEditForm({ initialUser, isSettingsTab = false }: ProfileE
         <div className="space-y-4">
           <div className="flex items-center gap-2 px-1">
             <Shield className={cn("w-4 h-4 opacity-70", isSettingsTab ? "text-[#0a66c2]" : "text-primary")} />
-            <h2 className="text-[13px] font-bold uppercase tracking-widest text-foreground opacity-80">Professional Narrative</h2>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-foreground opacity-80">Professional Narrative</h2>
           </div>
-          <div className="bg-card border border-border rounded-lg p-6 shadow-sm">
+          <div className="bg-card border border-border rounded-sm p-4 sm:p-6 shadow-sm">
             <div className="space-y-2">
-              <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide ml-1">About</label>
+              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide ml-1">About</label>
               <Textarea
                 name="bio"
                 value={formData.bio}
                 onChange={handleChange}
                 placeholder="Describe your professional journey and mission..."
-                className="min-h-[160px] bg-muted/30 border-border focus:ring-2 focus:ring-primary/20 focus:border-primary/40 rounded-md p-4 text-[13px] leading-relaxed resize-none transition-all"
+                className="min-h-[160px] bg-muted/30 border-border focus:ring-2 focus:ring-primary/20 focus:border-primary/40 rounded-sm p-4 text-xs leading-relaxed resize-none transition-all"
               />
             </div>
           </div>
@@ -230,7 +230,7 @@ export function ProfileEditForm({ initialUser, isSettingsTab = false }: ProfileE
           <div className="flex items-center justify-between px-1">
             <div className="flex items-center gap-2">
               <Briefcase className={cn("w-4 h-4 opacity-70", isSettingsTab ? "text-[#0a66c2]" : "text-primary")} />
-              <h2 className="text-[13px] font-bold uppercase tracking-widest text-foreground opacity-80">Experience</h2>
+              <h2 className="text-xs font-bold uppercase tracking-widest text-foreground opacity-80">Experience</h2>
             </div>
             <Button
               type="button"
@@ -245,7 +245,7 @@ export function ProfileEditForm({ initialUser, isSettingsTab = false }: ProfileE
           </div>
           <div className="space-y-4">
             {formData.experience.map((exp: any, idx: number) => (
-              <div key={idx} className="bg-card border border-border rounded-lg p-6 shadow-sm relative group">
+              <div key={idx} className="bg-card border border-border rounded-sm p-4 sm:p-6 shadow-sm relative group">
                 <button
                   type="button"
                   onClick={() => removeArrayItem('experience', idx)}
@@ -255,55 +255,55 @@ export function ProfileEditForm({ initialUser, isSettingsTab = false }: ProfileE
                 </button>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide ml-1">Company</label>
+                    <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide ml-1">Company</label>
                     <Input
                       value={exp.company}
                       onChange={(e) => handleArrayChange('experience', idx, 'company', e.target.value)}
                       placeholder="Company Name"
-                      className="h-11 bg-muted/30 border-border rounded-md px-4 text-sm transition-all"
+                      className="h-11 bg-muted/30 border-border rounded-sm px-4 text-xs transition-all"
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide ml-1">Position</label>
+                    <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide ml-1">Position</label>
                     <Input
                       value={exp.position}
                       onChange={(e) => handleArrayChange('experience', idx, 'position', e.target.value)}
                       placeholder="e.g. Senior Software Engineer"
-                      className="h-11 bg-muted/30 border-border rounded-md px-4 text-sm transition-all"
+                      className="h-11 bg-muted/30 border-border rounded-sm px-4 text-xs transition-all"
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide ml-1">Start Date</label>
+                    <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide ml-1">Start Date</label>
                     <Input
                       type="date"
                       value={exp.start_date}
                       onChange={(e) => handleArrayChange('experience', idx, 'start_date', e.target.value)}
-                      className="h-11 bg-muted/30 border-border rounded-md px-4 text-sm transition-all"
+                      className="h-11 bg-muted/30 border-border rounded-sm px-4 text-xs transition-all"
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide ml-1">End Date</label>
+                    <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide ml-1">End Date</label>
                     <Input
                       type="date"
                       value={exp.end_date}
                       onChange={(e) => handleArrayChange('experience', idx, 'end_date', e.target.value)}
-                      className="h-11 bg-muted/30 border-border rounded-md px-4 text-sm transition-all"
+                      className="h-11 bg-muted/30 border-border rounded-sm px-4 text-xs transition-all"
                     />
                   </div>
                 </div>
                 <div className="mt-6 space-y-2">
-                  <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide ml-1">Description</label>
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide ml-1">Description</label>
                   <Textarea
                     value={exp.description}
                     onChange={(e) => handleArrayChange('experience', idx, 'description', e.target.value)}
                     placeholder="Briefly describe your responsibilities and achievements..."
-                    className="min-h-[100px] bg-muted/30 border-border rounded-md p-4 text-[13px] leading-relaxed resize-none transition-all"
+                    className="min-h-[100px] bg-muted/30 border-border rounded-sm p-4 text-xs leading-relaxed resize-none transition-all"
                   />
                 </div>
               </div>
             ))}
             {formData.experience.length === 0 && (
-              <div className="bg-card/50 border border-border border-dashed rounded-lg p-8 text-center">
+              <div className="bg-card/50 border border-border border-dashed rounded-sm p-5 sm:p-8 text-center">
                 <p className="text-sm text-muted-foreground">No experience listed yet. Share your professional journey.</p>
               </div>
             )}
@@ -315,7 +315,7 @@ export function ProfileEditForm({ initialUser, isSettingsTab = false }: ProfileE
           <div className="flex items-center justify-between px-1">
             <div className="flex items-center gap-2">
               <GraduationCap className={cn("w-4 h-4 opacity-70", isSettingsTab ? "text-[#0a66c2]" : "text-primary")} />
-              <h2 className="text-[13px] font-bold uppercase tracking-widest text-foreground opacity-80">Education</h2>
+              <h2 className="text-xs font-bold uppercase tracking-widest text-foreground opacity-80">Education</h2>
             </div>
             <Button
               type="button"
@@ -330,7 +330,7 @@ export function ProfileEditForm({ initialUser, isSettingsTab = false }: ProfileE
           </div>
           <div className="space-y-4">
             {formData.education.map((edu: any, idx: number) => (
-              <div key={idx} className="bg-card border border-border rounded-lg p-6 shadow-sm relative group">
+              <div key={idx} className="bg-card border border-border rounded-sm p-4 sm:p-6 shadow-sm relative group">
                 <button
                   type="button"
                   onClick={() => removeArrayItem('education', idx)}
@@ -340,64 +340,64 @@ export function ProfileEditForm({ initialUser, isSettingsTab = false }: ProfileE
                 </button>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide ml-1">School/University</label>
+                    <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide ml-1">School/University</label>
                     <Input
                       value={edu.school}
                       onChange={(e) => handleArrayChange('education', idx, 'school', e.target.value)}
                       placeholder="University Name"
-                      className="h-11 bg-muted/30 border-border rounded-md px-4 text-sm transition-all"
+                      className="h-11 bg-muted/30 border-border rounded-sm px-4 text-xs transition-all"
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide ml-1">Degree</label>
+                    <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide ml-1">Degree</label>
                     <Input
                       value={edu.degree}
                       onChange={(e) => handleArrayChange('education', idx, 'degree', e.target.value)}
                       placeholder="e.g. Bachelor of Technology"
-                      className="h-11 bg-muted/30 border-border rounded-md px-4 text-sm transition-all"
+                      className="h-11 bg-muted/30 border-border rounded-sm px-4 text-xs transition-all"
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide ml-1">Field of Study</label>
+                    <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide ml-1">Field of Study</label>
                     <Input
                       value={edu.field_of_study}
                       onChange={(e) => handleArrayChange('education', idx, 'field_of_study', e.target.value)}
                       placeholder="e.g. Computer Science"
-                      className="h-11 bg-muted/30 border-border rounded-md px-4 text-sm transition-all"
+                      className="h-11 bg-muted/30 border-border rounded-sm px-4 text-xs transition-all"
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide ml-1">CGPA / Grade</label>
+                    <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide ml-1">CGPA / Grade</label>
                     <Input
                       value={edu.cgpa}
                       onChange={(e) => handleArrayChange('education', idx, 'cgpa', e.target.value)}
                       placeholder="e.g. 9.5/10"
-                      className="h-11 bg-muted/30 border-border rounded-md px-4 text-sm transition-all"
+                      className="h-11 bg-muted/30 border-border rounded-sm px-4 text-xs transition-all"
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide ml-1">Start Date</label>
+                    <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide ml-1">Start Date</label>
                     <Input
                       type="date"
                       value={edu.start_date}
                       onChange={(e) => handleArrayChange('education', idx, 'start_date', e.target.value)}
-                      className="h-11 bg-muted/30 border-border rounded-md px-4 text-sm transition-all"
+                      className="h-11 bg-muted/30 border-border rounded-sm px-4 text-xs transition-all"
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide ml-1">End Date</label>
+                    <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide ml-1">End Date</label>
                     <Input
                       type="date"
                       value={edu.end_date}
                       onChange={(e) => handleArrayChange('education', idx, 'end_date', e.target.value)}
-                      className="h-11 bg-muted/30 border-border rounded-md px-4 text-sm transition-all"
+                      className="h-11 bg-muted/30 border-border rounded-sm px-4 text-xs transition-all"
                     />
                   </div>
                 </div>
               </div>
             ))}
             {formData.education.length === 0 && (
-              <div className="bg-card/50 border border-border border-dashed rounded-lg p-8 text-center">
+              <div className="bg-card/50 border border-border border-dashed rounded-sm p-5 sm:p-8 text-center">
                 <p className="text-sm text-muted-foreground">No education listed yet. Share your academic background.</p>
               </div>
             )}
@@ -408,12 +408,12 @@ export function ProfileEditForm({ initialUser, isSettingsTab = false }: ProfileE
         <div className="space-y-4">
           <div className="flex items-center gap-2 px-1">
             <Globe className={cn("w-4 h-4 opacity-50", isSettingsTab ? "text-[#0a66c2]" : "text-primary")} />
-            <h2 className="text-[13px] font-bold uppercase tracking-widest text-foreground opacity-80">Additional Information</h2>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-foreground opacity-80">Additional Information</h2>
           </div>
-          <div className="bg-card border border-border rounded-lg p-6 shadow-sm space-y-6">
+          <div className="bg-card border border-border rounded-sm p-4 sm:p-6 shadow-sm space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide ml-1">Location</label>
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide ml-1">Location</label>
                 <div className="relative">
                   <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
@@ -421,12 +421,12 @@ export function ProfileEditForm({ initialUser, isSettingsTab = false }: ProfileE
                     value={formData.location}
                     onChange={handleChange}
                     placeholder="City, Country"
-                    className="h-11 bg-muted/30 border-border focus:ring-2 focus:ring-primary/20 focus:border-primary/40 rounded-md pl-10 pr-4 text-sm transition-all"
+                    className="h-11 bg-muted/30 border-border focus:ring-2 focus:ring-primary/20 focus:border-primary/40 rounded-sm pl-10 pr-4 text-xs transition-all"
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide ml-1">Resume URL</label>
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide ml-1">Resume URL</label>
                 <div className="relative">
                   <FileText className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
@@ -434,19 +434,19 @@ export function ProfileEditForm({ initialUser, isSettingsTab = false }: ProfileE
                     value={formData.resume_url}
                     onChange={handleChange}
                     placeholder="https://drive.google.com/..."
-                    className="h-11 bg-muted/30 border-border focus:ring-2 focus:ring-primary/20 focus:border-primary/40 rounded-md pl-10 pr-4 text-sm transition-all"
+                    className="h-11 bg-muted/30 border-border focus:ring-2 focus:ring-primary/20 focus:border-primary/40 rounded-sm pl-10 pr-4 text-xs transition-all"
                   />
                 </div>
               </div>
               <div className="space-y-4">
-                <div className={cn("p-6 border rounded-lg", isSettingsTab ? "bg-[#0a66c2]/5 border-[#0a66c2]/20" : "bg-primary/5 border border-primary/20")}>
+                <div className={cn("p-4 sm:p-6 border rounded-sm", isSettingsTab ? "bg-[#0a66c2]/5 border-[#0a66c2]/20" : "bg-primary/5 border border-primary/20")}>
                   <div className="flex items-start gap-4">
                     <div className="mt-1">
-                      <ImageIcon className={cn("w-5 h-5 opacity-70", isSettingsTab ? "text-[#0a66c2]" : "text-primary")} />
+                      <ImageIcon className={cn("w-4 h-4 opacity-70", isSettingsTab ? "text-[#0a66c2]" : "text-primary")} />
                     </div>
                     <div>
-                      <h4 className="text-sm font-bold text-foreground mb-1">Visual Identity Management</h4>
-                      <p className="text-xs text-muted-foreground leading-relaxed">
+                      <h4 className="text-xs font-bold text-foreground mb-1">Visual Identity Management</h4>
+                      <p className="text-[11px] text-muted-foreground leading-relaxed">
                         To maintain a seamless experience, profile photos and banner images are now managed directly from your profile page.
                         Simply click the camera icon on your profile header to update your visual assets.
                       </p>
@@ -484,7 +484,7 @@ export function ProfileEditForm({ initialUser, isSettingsTab = false }: ProfileE
                 router.back();
               }
             }}
-            className="text-muted-foreground hover:text-foreground px-8 h-12 rounded-md font-bold text-xs transition-all active:scale-95 w-full sm:w-auto"
+            className="text-muted-foreground hover:text-foreground px-8 h-12 rounded-sm font-bold text-xs transition-all active:scale-95 w-full sm:w-auto"
           >
             Discard Changes
           </Button>
@@ -492,7 +492,7 @@ export function ProfileEditForm({ initialUser, isSettingsTab = false }: ProfileE
             type="submit"
             disabled={isUpdating}
             className={cn(
-              "text-primary-foreground px-10 h-12 rounded-md font-bold text-[13px] transition-all flex items-center gap-2 justify-center w-full sm:w-auto",
+              "text-primary-foreground px-10 h-12 rounded-sm font-bold text-xs transition-all flex items-center gap-2 justify-center w-full sm:w-auto",
               isSettingsTab
                 ? "bg-[#0a66c2] hover:bg-[#004182] shadow-xl shadow-[#0a66c2]/20"
                 : "bg-primary hover:opacity-90 shadow-xl shadow-primary/20"

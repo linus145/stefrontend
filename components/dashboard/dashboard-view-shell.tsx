@@ -14,6 +14,7 @@ import { DashboardHeader } from '@/components/dashboard/dashboard-header';
 import { JobsView } from '@/components/dashboard/jobs/jobs-view';
 import { NewsView } from '@/components/dashboard/news/news-view';
 import { NotificationsView } from '@/components/dashboard/notifications/notifications-view';
+import { CreditView } from '@/components/creditsystem/credit-view';
 import { GlobalLoader } from '@/components/ui/global-loader';
 import { DashboardThemeProvider } from '@/context/DashboardThemeContext';
 import { Briefcase, Newspaper, Users, ArrowLeft } from 'lucide-react';
@@ -60,7 +61,7 @@ export function DashboardViewShell() {
     if (!isLoading && isAuthenticated && typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       const section = params.get('section');
-      if (section && ['dashboard', 'Profile', 'jobs', 'news', 'messages', 'network', 'settings', 'hire', 'notifications', 'premium'].includes(section)) {
+      if (section && ['dashboard', 'Profile', 'jobs', 'news', 'messages', 'network', 'settings', 'hire', 'notifications', 'premium', 'credits'].includes(section)) {
         setActiveSection(section as DashboardSection);
         // Strip the query param to keep the URL clean
         const newUrl = window.location.pathname;
@@ -162,7 +163,7 @@ export function DashboardViewShell() {
       case 'network':
         return <NetworkView onSectionChange={handleSectionChange} />;
       case 'settings':
-        return <SettingsView />;
+        return <SettingsView onSectionChange={handleSectionChange} />;
       case 'hire':
         return (
           <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-8 animate-in fade-in slide-in-from-bottom-4 duration-1000 transition-all ease-out">
@@ -191,6 +192,23 @@ export function DashboardViewShell() {
               </button>
             </div>
             <PricingTable />
+          </div>
+        );
+      case 'credits':
+        return (
+          <div className="flex-1 p-4 sm:p-8 max-w-6xl mx-auto space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500 w-full overflow-y-auto">
+            <div className="flex items-center">
+              <button
+                onClick={() => handleSectionChange('dashboard')}
+                className="group flex items-center gap-2 px-4 py-2 rounded-sm border border-border bg-card/50 backdrop-blur-sm text-muted-foreground hover:text-primary hover:border-primary/30 transition-all text-xs font-bold shadow-sm cursor-pointer"
+              >
+                <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+                Back to Feed
+              </button>
+            </div>
+            <div className="bg-white dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/80 rounded-sm p-6 sm:p-8 shadow-sm backdrop-blur-sm">
+              <CreditView />
+            </div>
           </div>
         );
       case 'create-post':

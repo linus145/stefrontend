@@ -25,7 +25,7 @@ export function PlanOverview({
   setShowPlans,
 }: PlanOverviewProps) {
   return (
-    <div className="bg-card border border-border rounded-md p-6 shadow-sm relative overflow-hidden">
+    <div className="bg-card border border-border rounded-sm p-6 shadow-sm relative overflow-hidden">
       {/* Ambient Background Glow for active premium */}
       {isActive && (
         <div className="absolute -right-20 -top-20 h-40 w-40 rounded-full blur-[80px] bg-emerald-500/10 dark:bg-emerald-500/5 -z-10" />
@@ -37,22 +37,22 @@ export function PlanOverview({
           <h4 className="text-2xl font-bold text-foreground tracking-tight mt-1 flex items-center gap-2">
             {planName}
             {isActive && (
-              <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-450 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+              <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-450 bg-emerald-500/10 px-2 py-0.5 rounded-sm border border-emerald-500/20">
                 Active
               </span>
             )}
             {isPending && latestPayment?.status === 'pending' && (
-              <span className="text-[10px] font-bold text-amber-600 dark:text-amber-450 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 animate-pulse">
+              <span className="text-[10px] font-bold text-amber-600 dark:text-amber-450 bg-amber-500/10 px-2 py-0.5 rounded-sm border border-amber-500/20 animate-pulse">
                 Pending Verification
               </span>
             )}
             {isPending && (!latestPayment || latestPayment?.status === 'rejected') && (
-              <span className="text-[10px] font-bold text-rose-600 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20">
+              <span className="text-[10px] font-bold text-rose-600 bg-rose-500/10 px-2 py-0.5 rounded-sm border border-rose-500/20">
                 Payment Required
               </span>
             )}
             {isFree && (
-              <span className="text-[10px] font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700/50">
+              <span className="text-[10px] font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-sm border border-slate-200 dark:border-slate-700/50">
                 Free Tier
               </span>
             )}

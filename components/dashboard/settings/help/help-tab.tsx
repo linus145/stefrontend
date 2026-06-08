@@ -45,7 +45,7 @@ export function HelpTab() {
 
       <div className="max-w-2xl">
         {/* Email Support Card */}
-        <Card className="rounded-sm border-border bg-card shadow-sm p-8 flex flex-col justify-between relative overflow-hidden group">
+        <Card className="rounded-sm border-border bg-card shadow-sm p-6 flex flex-col justify-between relative overflow-hidden group">
           <div className="space-y-5">
             <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-450 group-hover:scale-110 transition-transform">
               <Mail className="w-5 h-5" />

@@ -9,7 +9,7 @@ interface PaymentUnderReviewProps {
 
 export function PaymentUnderReview({ latestPayment }: PaymentUnderReviewProps) {
   return (
-    <div className="bg-card border border-amber-500/25 bg-amber-500/[0.02] rounded-md p-6 shadow-sm flex flex-col md:flex-row items-start gap-5 animate-in slide-in-from-bottom-2 duration-300">
+    <div className="bg-card border border-amber-500/25 bg-amber-500/[0.02] rounded-sm p-6 shadow-sm flex flex-col md:flex-row items-start gap-5 animate-in slide-in-from-bottom-2 duration-300">
       <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-600 shrink-0">
         <FileCheck className="w-6 h-6 animate-pulse" />
       </div>

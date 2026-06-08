@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { aiInterviewsService } from '@/services/ai-interviews.service';
 import { jobsService } from '@/services/jobs.service';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Sparkles, BrainCircuit, Copy } from 'lucide-react';
 
 type RoundType = 'TECHNICAL' | 'CODING' | 'HR' | 'BEHAVIORAL' | 'SYSTEM_DESIGN';
@@ -61,6 +61,7 @@ const SUGGESTED_FRAMEWORKS: Record<string, string[]> = {
 };
 
 export function InterviewConfigView({ initialApplicationId, initialSessionId, onBack }: InterviewConfigViewProps) {
+  const queryClient = useQueryClient();
   const [step, setStep] = useState(1);
   const [selectedJobId, setSelectedJobId] = useState('');
   const [selectedApplicationIds, setSelectedApplicationIds] = useState<string[]>([]);
@@ -279,6 +280,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                 marks: 10
               }))
             });
+            queryClient.invalidateQueries({ queryKey: ['userCredits'] });
             toast.success(`AI generated ${taskData.questions.length} questions.`, { id: toastId });
             return;
           }
@@ -301,6 +303,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
             marks: 10
           }))
         });
+        queryClient.invalidateQueries({ queryKey: ['userCredits'] });
         toast.success(`AI generated ${response.data.questions.length} questions.`, { id: toastId });
       } else if (response.status === 'error') {
         toast.error(response.message || "AI failed to generate questions.", { id: toastId });

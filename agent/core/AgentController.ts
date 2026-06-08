@@ -122,7 +122,7 @@ export class AgentController {
     if (activeExecution && activeExecution.active !== false && (activeExecution.status === 'running' || activeExecution.status === 'pending')) {
       console.log(`[AgentController] Rehydrating active execution from backend: ${activeExecution.id}`);
       this.currentExecutionId = activeExecution.id;
-      
+
       const goalDetails = activeExecution.goal_details;
       this.llmGoal = goalDetails?.goal || activeExecution.metadata?.goal || '';
       this.originalGoal = goalDetails?.goal || activeExecution.metadata?.goal || '';
@@ -179,8 +179,8 @@ export class AgentController {
 
       // Resume execution
       this.isRunning = true;
-      this.stream.emit('status', `🔄 Resuming active goal: ${this.originalGoal}`);
-      
+      this.stream.emit('status', `Resuming active goal: ${this.originalGoal}`);
+
       setTimeout(() => {
         if (this._isLLMMode) {
           this.runLLMLoop(this.llmGoal, undefined, true);
@@ -215,7 +215,7 @@ export class AgentController {
 
     if (this.shouldUseLLM(goal)) {
       this._isLLMMode = true;
-      this.stream.emit('status', `🤖 Starting AI-powered autonomous agent...`);
+      this.stream.emit('status', `Starting AI-powered autonomous agent...`);
       await this.createBackendExecution(goal);
       await this.runLLMLoop(goal);
     } else {
@@ -248,7 +248,7 @@ export class AgentController {
     if (this.isRunning) return;
 
     if (!this.llmGoal && !this.currentPlan) {
-      this.stream.emit('status', `⚠️ No active task found to resume.`);
+      this.stream.emit('status', `No active task found to resume.`);
       return;
     }
 
@@ -263,13 +263,13 @@ export class AgentController {
 
     if (this.llmGoal) {
       this._isLLMMode = true;
-      this.stream.emit('status', `🔄 Resuming AI-powered autonomous agent...`);
+      this.stream.emit('status', `Resuming AI-powered autonomous agent...`);
       await this.runLLMLoop(this.llmGoal, undefined, true);
     } else if (this.currentPlan) {
-      this.stream.emit('status', `🔄 Resuming planned execution...`);
+      this.stream.emit('status', `Resuming planned execution...`);
       this.executePlan();
     } else {
-      this.stream.emit('status', `⚠️ Resume failed: state inconsistent.`);
+      this.stream.emit('status', `Resume failed: state inconsistent.`);
       this.isRunning = false;
     }
   }
@@ -284,15 +284,15 @@ export class AgentController {
     try {
       while (this.isRunning && this.llmIteration < AgentController.MAX_LLM_ITERATIONS) {
         this.llmIteration++;
-        this.stream.emit('status', `Iteration ${this.llmIteration}/${AgentController.MAX_LLM_ITERATIONS} — Observing page...`);
+        this.stream.emit('status', `Iteration ${this.llmIteration}/${AgentController.MAX_LLM_ITERATIONS} - Observing page... [Goal: "${this.originalGoal || this.llmGoal}"]`);
 
         await this.wait(800);
 
         const pageState = this.observer.capture();
-        this.stream.emit('status', `📸 Captured ${pageState.visible_elements.length} elements | ${pageState.active_step || pageState.url}`);
+        this.stream.emit('status', `Captured ${pageState.visible_elements.length} elements | ${pageState.active_step || pageState.url}`);
 
         if (!this.isRunning) break;
-        this.stream.emit('status', `🧠 Analyzing with AI...`);
+        this.stream.emit('status', `Analyzing with AI...`);
 
         let action: LLMAction;
         try {
@@ -306,13 +306,13 @@ export class AgentController {
           });
           userResponse = undefined;
         } catch (error: any) {
-          this.stream.emit('status', `⚠️ LLM request failed: ${error.message}. Retrying...`);
+          this.stream.emit('status', `LLM request failed: ${error.message}. Retrying...`);
           await this.wait(3000);
           continue;
         }
 
         if (action.thinking) {
-          this.stream.emit('status', `🧠 ${action.thinking}`);
+          this.stream.emit('status', `${action.thinking}`);
           // Save Decision to backend
           if (this.currentExecutionId) {
             aiAgentService.saveDecision(this.currentExecutionId, {
@@ -330,7 +330,7 @@ export class AgentController {
         }
 
         if (action.action_type === 'ask_user') {
-          this.stream.emit('status', `❓ Agent is asking you a question...`);
+          this.stream.emit('status', `Agent is asking you a question...`);
           this._isWaitingForUser = true;
           this._userResponse = null;
 
@@ -348,7 +348,7 @@ export class AgentController {
 
           if (this._userResponse) {
             const reply = this._userResponse;
-            this.stream.emit('status', `✅ User responded: "${reply}"`);
+            this.stream.emit('status', `User responded: "${reply}"`);
             userResponse = reply;
             this._userResponse = null;
 
@@ -369,7 +369,7 @@ export class AgentController {
             await this.updateBackendExecution('running', this.llmActionHistory);
             continue;
           } else {
-            this.stream.emit('status', `⏱️ No response received. Stopping.`);
+            this.stream.emit('status', `No response received. Stopping.`);
             this.isRunning = false;
             this.stream.emit('task_failed', { task: { description: 'Waiting for Input' }, error: 'Execution terminated' });
             await this.updateBackendExecution('failed', this.llmActionHistory);
@@ -382,7 +382,7 @@ export class AgentController {
 
         if (!this.isRunning) break;
 
-        this.stream.emit('status', `⚡ Executing: ${description}`);
+        this.stream.emit('status', `Executing: ${description}`);
 
         // Save Checkpoint before execution
         if (this.currentExecutionId) {
@@ -403,7 +403,7 @@ export class AgentController {
           this.stream.emit('action_complete', { type: action.action_type, description });
         } catch (error: any) {
           success = false;
-          this.stream.emit('status', `❌ Action failed: ${error.message}`);
+          this.stream.emit('status', `Action failed: ${error.message}`);
         }
 
         const historyItem = {
@@ -429,7 +429,7 @@ export class AgentController {
         );
 
         if (isOnPipeline && hasReturnedToPipeline && this.llmIteration > 3) {
-          this.stream.emit('status', `✅ Full flow completed. Returned to pipeline. Stopping.`);
+          this.stream.emit('status', `Full flow completed. Returned to pipeline. Stopping.`);
           this.stream.emit('goal_complete', this.llmGoal);
           await this.updateBackendExecution('success', this.llmActionHistory);
           break;
@@ -442,7 +442,7 @@ export class AgentController {
       }
 
       if (this.llmIteration >= AgentController.MAX_LLM_ITERATIONS) {
-        this.stream.emit('status', `⚠️ Reached max iterations (${AgentController.MAX_LLM_ITERATIONS}). Stopping.`);
+        this.stream.emit('status', `Reached max iterations (${AgentController.MAX_LLM_ITERATIONS}). Stopping.`);
         await this.updateBackendExecution('failed', this.llmActionHistory);
       }
 
@@ -509,13 +509,13 @@ export class AgentController {
 
       case 'navigate':
         if (!action.value) throw new Error('No path for navigate');
-        
+
         // Pass execution ID to next page
         const navUrl = new URL(action.value, window.location.origin);
         if (this.currentExecutionId) {
           navUrl.searchParams.set('execution_id', this.currentExecutionId);
         }
-        
+
         window.location.href = navUrl.toString();
         break;
 
@@ -560,11 +560,11 @@ export class AgentController {
         actions_performed: [],
         metadata: { goal, plan: plan || null, goal_id: goalRes.id }
       });
-      
+
       if (res && res.id) {
         this.currentExecutionId = res.id;
         AgentMemory.getInstance().setExecutionId(res.id);
-        
+
         // Link execution to goal
         await aiAgentService.updateExecution(res.id, {
           goal: goalRes.id
@@ -671,13 +671,13 @@ export class AgentController {
                 sessionStorage.setItem('agent_paused_tab_transition', i.toString());
               }
               task.status = 'paused';
-              this.stream.emit('status', `🔔 Phase Completed. Ready to proceed to the next tab.`);
+              this.stream.emit('status', `Phase Completed. Ready to proceed to the next tab.`);
               this.stream.emit('task_paused', task);
 
               if (typeof window !== 'undefined') {
                 window.dispatchEvent(new CustomEvent('agent-ask-user', {
                   detail: {
-                    message: `AI Screening completed successfully! 📊 Would you like to proceed to the Interview Pipeline (${action.value}) now? Click the Play (Continue) button in the sidebar to proceed.`,
+                    message: `AI Screening completed successfully! Would you like to proceed to the Interview Pipeline (${action.value}) now? Click the Play (Continue) button in the sidebar to proceed.`,
                     options: ['Click the Play/Continue button to proceed']
                   }
                 }));
@@ -701,7 +701,7 @@ export class AgentController {
             task.status = 'paused';
             this.stream.emit('status', 'Continuing execution on new page...');
             this.isRunning = false;
-            
+
             window.open(targetUrl.toString(), '_blank');
             return;
           }
@@ -715,7 +715,7 @@ export class AgentController {
         task.status = 'failed';
         this.stream.emit('task_failed', { task, error: (error as Error).message });
         this.isRunning = false;
-        
+
         const errItem = {
           action_type: 'error',
           description: `Task failed: ${(error as Error).message}`

@@ -1,8 +1,10 @@
 'use client';
 
 import React from 'react';
-import { Search, Bell, Heart, MessageSquare, Loader2, UserPlus, UserMinus, Home, Briefcase, Users, Newspaper, Network as NetworkIcon, Menu, Settings, User, LogOut, ChevronDown, Wallet, Rocket, ArrowUpCircle, HelpCircle, Sparkles, Crown } from 'lucide-react';
+import { Search, Bell, Heart, MessageSquare, Loader2, UserPlus, UserMinus, Home, Briefcase, Users, Newspaper, Network as NetworkIcon, Menu, Settings, User, LogOut, ChevronDown, Wallet, Rocket, ArrowUpCircle, HelpCircle, Sparkles, Crown, Coins } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import Link from 'next/link';
+import { creditsService } from '@/services/credits.service';
 import { cn } from '@/lib/utils';
 import { ThemeToggle } from './theme-toggle';
 import { postService } from '@/services/post.service';
@@ -12,7 +14,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { formatDistanceToNow } from 'date-fns';
 import { api } from '@/lib/api';
 import { axiosInstance } from '@/lib/axios';
-export type DashboardSection = 'dashboard' | 'Profile' | 'messages' | 'network' | 'settings' | 'jobs' | 'news' | 'hire' | 'create-post' | 'notifications' | 'premium';
+export type DashboardSection = 'dashboard' | 'Profile' | 'messages' | 'network' | 'settings' | 'jobs' | 'news' | 'hire' | 'create-post' | 'notifications' | 'premium' | 'credits';
 import { getOptimizedImage } from '@/lib/imagekit';
 
 import { GlobalSearch } from './search/global-search';
@@ -50,6 +52,13 @@ export function DashboardHeader({
       refetchInterval: 30000,
    });
 
+   const { data: creditsData } = useQuery({
+      queryKey: ['userCredits'],
+      queryFn: () => creditsService.getBalance(),
+      refetchInterval: 60000,
+   });
+   const creditBalance = creditsData?.data?.balance ?? 0;
+
    const markReadMutation = useMutation({
       mutationFn: notificationService.markNotificationRead,
       onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notifications'] }),
@@ -75,6 +84,17 @@ export function DashboardHeader({
       onSectionChange('settings');
       const url = new URL(window.location.href);
       url.searchParams.set('tab', 'Billing');
+      window.history.replaceState(null, '', url.pathname + url.search);
+      window.dispatchEvent(new Event('settings-tab-change'));
+      setShowProfileMenu(false);
+      setShowMobileProfileSidebar(false);
+   };
+
+   const handleGoToCredits = (e?: React.MouseEvent) => {
+      if (e) e.stopPropagation();
+      onSectionChange('settings');
+      const url = new URL(window.location.href);
+      url.searchParams.set('tab', 'Credits');
       window.history.replaceState(null, '', url.pathname + url.search);
       window.dispatchEvent(new Event('settings-tab-change'));
       setShowProfileMenu(false);
@@ -259,6 +279,12 @@ export function DashboardHeader({
                                     </span>
                                  )}
                               </div>
+                              <div className="flex items-center justify-between text-[9px] font-bold text-muted-foreground uppercase tracking-wider">
+                                 <span>AI Credits</span>
+                                 <span className="text-[10px] font-extrabold text-amber-600 dark:text-amber-450 uppercase">
+                                    {creditBalance}
+                                 </span>
+                              </div>
                               <div className="h-[2px] w-full rounded-full bg-gradient-to-r from-[#4285F4] via-[#EA4335] via-[#FBBC05] to-[#34A853]" />
                            </div>
                         </div>
@@ -380,20 +406,30 @@ export function DashboardHeader({
                   </div>
                </div>
 
-               {/* Right: Message Icon */}
-               {activeSection !== 'premium' ? (
+               {/* Right: Message Icon & Credits */}
+               <div className="flex items-center gap-1.5 shrink-0">
                   <button
-                     onClick={() => onSectionChange('messages')}
-                     className="w-9 h-9 flex items-center justify-center rounded-full text-muted-foreground hover:text-primary transition-all active:scale-95 shrink-0"
+                     onClick={(e) => handleGoToCredits(e)}
+                     className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-[11px] font-bold transition-all active:scale-95 shrink-0 shadow-sm"
+                     title="View Credits Dashboard"
                   >
-                     <MessageSquare className={cn(
-                        "w-5 h-5",
-                        activeSection === 'messages' && "text-primary"
-                     )} />
+                     <Coins className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                     <span>{creditBalance}</span>
                   </button>
-               ) : (
-                  <div className="w-9 h-9" />
-               )}
+                  {activeSection !== 'premium' ? (
+                     <button
+                        onClick={() => onSectionChange('messages')}
+                        className="w-9 h-9 flex items-center justify-center rounded-full text-muted-foreground hover:text-primary transition-all active:scale-95 shrink-0"
+                     >
+                        <MessageSquare className={cn(
+                           "w-5 h-5",
+                           activeSection === 'messages' && "text-primary"
+                        )} />
+                     </button>
+                  ) : (
+                     <div className="w-9 h-9" />
+                  )}
+               </div>
             </div>
 
             {/* ═══ DESKTOP HEADER (hidden lg:flex) ═══ */}
@@ -561,8 +597,14 @@ export function DashboardHeader({
                      <div className="hidden lg:block">
                         <ThemeToggle />
                      </div>
-
-
+                     <button
+                        onClick={(e) => handleGoToCredits(e)}
+                        className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-bold hover:bg-amber-500/20 transition-all shadow-sm shrink-0 active:scale-[0.98]"
+                        title="View Credits Dashboard"
+                     >
+                        <Coins className="w-4 h-4 text-amber-500 shrink-0" />
+                        <span>{creditBalance} Credits</span>
+                     </button>
                   </div>
 
                   {/* <button className="hidden lg:flex items-center gap-2 px-3 xl:px-4 py-2 rounded-xl bg-primary/5 border border-primary/20 text-foreground text-[10px] font-bold hover:bg-primary/10 transition-all shadow-sm group whitespace-nowrap">
@@ -645,6 +687,12 @@ export function DashboardHeader({
                                           Free Tier
                                        </span>
                                     )}
+                                 </div>
+                                 <div className="flex items-center justify-between text-[9px] font-bold text-muted-foreground uppercase tracking-wider">
+                                    <span>AI Credits</span>
+                                    <span className="text-[10px] font-extrabold text-amber-600 dark:text-amber-450 uppercase">
+                                       {creditBalance}
+                                    </span>
                                  </div>
                                  <div className="h-[2px] w-full rounded-full bg-gradient-to-r from-[#4285F4] via-[#EA4335] via-[#FBBC05] to-[#34A853]" />
                               </div>

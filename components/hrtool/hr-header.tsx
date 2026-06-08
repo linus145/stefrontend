@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Menu, Bell, Building2, MessageSquare, ChevronDown, LayoutGrid, Users, Calendar, FileText, BarChart3, Settings } from 'lucide-react';
+import { Menu, Bell, Building2, MessageSquare, ChevronDown, LayoutGrid, Users, Calendar, FileText, BarChart3, Settings, Coins } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ThemeToggle } from '@/components/dashboard/theme-toggle';
 import Link from 'next/link';
@@ -9,6 +9,8 @@ import { NotificationPopover } from '@/components/dashboard/notifications/notifi
 import { AgentUIController } from '@/agent/ui/AgentUIController';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { useQuery } from '@tanstack/react-query';
+import { creditsService } from '@/services/credits.service';
 
 export type HRSection =
   | 'dashboard'
@@ -67,6 +69,13 @@ export function HRHeader({
   const { userSubscription } = useAuth();
   const hasPremium = userSubscription && Number(userSubscription.plan_details?.price) >= 12000 && userSubscription.status === 'active';
 
+  const { data: creditsData } = useQuery({
+    queryKey: ['userCredits'],
+    queryFn: () => creditsService.getBalance(),
+    refetchInterval: 30000,
+  });
+  const creditBalance = creditsData?.data?.balance ?? 0;
+
   const handleAgentClick = () => {
     if (!hasPremium) {
       toast.error("Premium feature locked", {
@@ -97,6 +106,13 @@ export function HRHeader({
 
       <div className="flex items-center gap-3 sm:gap-5">
         <ThemeToggle />
+        <div
+          className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-bold shadow-sm shrink-0"
+          title="AI Credits Balance"
+        >
+          <Coins className="w-4 h-4 text-amber-500 shrink-0" />
+          <span>{creditBalance} Credits</span>
+        </div>
         <NotificationPopover currentDashboard="HR" dotColorClass="bg-[#0a66c2]" />
 
         {/* AI Agent Header Button */}

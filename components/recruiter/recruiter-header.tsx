@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Menu, Bell, Building2, MessageSquare, ChevronDown, ExternalLink, LayoutGrid } from 'lucide-react';
+import { Menu, Bell, Building2, MessageSquare, ChevronDown, ExternalLink, LayoutGrid, Coins } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ThemeToggle } from '@/components/dashboard/theme-toggle';
 import Link from 'next/link';
@@ -10,6 +10,8 @@ import { NotificationPopover } from '@/components/dashboard/notifications/notifi
 import { AgentUIController } from '@/agent/ui/AgentUIController';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { useQuery } from '@tanstack/react-query';
+import { creditsService } from '@/services/credits.service';
 
 interface RecruiterHeaderProps {
   companyName: string;
@@ -37,8 +39,15 @@ export function RecruiterHeader({
   onMobileMenuToggle
 }: RecruiterHeaderProps) {
   const [showMore, setShowMore] = useState(false);
-  const { userSubscription } = useAuth();
+  const { user, userSubscription } = useAuth();
   const hasPremium = userSubscription && userSubscription.plan_details?.price > 0 && userSubscription.status === 'active';
+
+  const { data: creditsData } = useQuery({
+    queryKey: ['userCredits'],
+    queryFn: () => creditsService.getBalance(),
+    refetchInterval: 30000,
+  });
+  const creditBalance = creditsData?.data?.balance ?? 0;
 
   const handleAgentClick = () => {
     if (!hasPremium) {
@@ -177,6 +186,14 @@ export function RecruiterHeader({
         <ThemeToggle />
 
         <div className="flex items-center gap-2 sm:gap-4">
+          <div
+            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-bold shadow-sm shrink-0"
+            title="AI Credits Balance"
+          >
+            <Coins className="w-4 h-4 text-amber-500 shrink-0" />
+            <span>{creditBalance} Credits</span>
+          </div>
+
           <button onClick={() => onTabChange('messages')} className="relative text-muted-foreground hover:text-foreground transition-all hover:scale-105 active:scale-95" title="Messages">
             <MessageSquare className="w-5 h-5" />
             <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-blue-500 rounded-full border border-background"></span>

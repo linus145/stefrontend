@@ -13,6 +13,23 @@ import { Plus, X, Sparkles, AlertCircle, Trash2 } from 'lucide-react';
 export function PayrollAdjustmentsClient() {
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
+
+  const { data: settingsRes } = useQuery({
+    queryKey: ['payroll-settings'],
+    queryFn: () => hrPayrollService.getSettingsConfigs(),
+  });
+
+  const getCurrencySymbol = (code: string) => {
+    switch (code?.toUpperCase()) {
+      case 'INR': return '₹';
+      case 'EUR': return '€';
+      case 'GBP': return '£';
+      case 'AED': return 'د.إ ';
+      default: return '$';
+    }
+  };
+
+  const currencySymbol = getCurrencySymbol(settingsRes?.data?.currency);
   const [form, setForm] = useState({
     employee_id: '',
     type: 'EARNING',
@@ -132,7 +149,7 @@ export function PayrollAdjustmentsClient() {
                         {toSentenceCase(item.type)}
                       </Badge>
                     </td>
-                    <td className="py-3 px-4 text-xs font-extrabold text-slate-900 dark:text-white">${parseFloat(item.amount || 0).toLocaleString()}</td>
+                    <td className="py-3 px-4 text-xs font-extrabold text-slate-900 dark:text-white">{currencySymbol}{parseFloat(item.amount || 0).toLocaleString()}</td>
                     <td className="py-3 px-4 text-xs font-semibold text-slate-450 truncate max-w-xs">{item.reason}</td>
                     <td className="py-3 px-4 text-right">
                       <Badge className="bg-emerald-100 text-emerald-800 border-none font-bold text-[9px] px-2 py-0.5 rounded-sm">
@@ -205,7 +222,7 @@ export function PayrollAdjustmentsClient() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[11px] font-bold text-slate-500 tracking-wide uppercase">Adjustment amount ($)</label>
+                <label className="text-[11px] font-bold text-slate-500 tracking-wide uppercase">Adjustment amount ({currencySymbol})</label>
                 <input 
                   type="number" 
                   value={form.amount}

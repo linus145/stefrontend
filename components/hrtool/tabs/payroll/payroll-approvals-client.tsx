@@ -200,7 +200,8 @@ export function PayrollApprovalsClient() {
               <thead>
                 <tr className="border-b border-slate-150 dark:border-slate-800/60 bg-slate-50/55 dark:bg-[#151624]/40">
                   <th className="py-2.5 px-4 text-[10px] font-bold tracking-wide text-slate-400">Employee details</th>
-                  <th className="py-2.5 px-4 text-[10px] font-bold tracking-wide text-slate-400">Basic salary</th>
+                  <th className="py-2.5 px-4 text-[10px] font-bold tracking-wide text-slate-400">Gross salary</th>
+                  <th className="py-2.5 px-4 text-[10px] font-bold tracking-wide text-slate-400">Bonus</th>
                   <th className="py-2.5 px-4 text-[10px] font-bold tracking-wide text-slate-400">Overtime</th>
                   <th className="py-2.5 px-4 text-[10px] font-bold tracking-wide text-slate-400">Reimbursement</th>
                   <th className="py-2.5 px-4 text-[10px] font-bold tracking-wide text-slate-400">Deductions (tax, pf)</th>
@@ -213,12 +214,12 @@ export function PayrollApprovalsClient() {
                 {isLoadingRecords ? (
                   [1, 2, 3].map(i => (
                     <tr key={i} className="border-b border-slate-100 dark:border-slate-800">
-                      <td colSpan={8} className="py-4 text-center"><div className="h-4 bg-slate-100 dark:bg-slate-800/40 animate-pulse rounded-sm w-3/4 mx-auto" /></td>
+                      <td colSpan={9} className="py-4 text-center"><div className="h-4 bg-slate-100 dark:bg-slate-800/40 animate-pulse rounded-sm w-3/4 mx-auto" /></td>
                     </tr>
                   ))
                 ) : runRecords.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="py-8 text-center text-xs text-slate-400 font-semibold tracking-wide">No computed records in this run.</td>
+                    <td colSpan={9} className="py-8 text-center text-xs text-slate-400 font-semibold tracking-wide">No computed records in this run.</td>
                   </tr>
                 ) : (
                   runRecords.map((rec: any) => (
@@ -242,6 +243,7 @@ export function PayrollApprovalsClient() {
                         </div>
                       </td>
                       <td className="py-3 px-4 text-xs text-slate-800 dark:text-slate-300 font-bold">{currencySymbol}{parseFloat(rec.gross_salary || 0).toLocaleString()}</td>
+                      <td className="py-3 px-4 text-xs text-slate-800 dark:text-slate-300 font-bold">{currencySymbol}{parseFloat(rec.bonus_amount || 0).toLocaleString()}</td>
                       <td className="py-3 px-4 text-xs text-slate-800 dark:text-slate-300 font-semibold">{currencySymbol}{parseFloat(rec.overtime_amount || 0).toLocaleString()}</td>
                       <td className="py-3 px-4 text-xs text-slate-800 dark:text-slate-300 font-semibold">{currencySymbol}{parseFloat(rec.reimbursement_amount || 0).toLocaleString()}</td>
                       <td className="py-3 px-4 text-xs text-red-500/90 font-bold">-{currencySymbol}{parseFloat(rec.deductions || 0).toLocaleString()}</td>

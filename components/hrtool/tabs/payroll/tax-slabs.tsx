@@ -47,7 +47,7 @@ export function TaxSlabs() {
   if (isLoadingTax) {
     return <LocalLoader />;
   }
-  
+
   return (
     <div className="space-y-4 animate-in fade-in duration-300">
       <div className="flex items-center justify-between">
@@ -55,7 +55,7 @@ export function TaxSlabs() {
           <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-200 font-medium">Income tax bracket configurations</h3>
           <p className="text-xs text-slate-500 font-medium">Configure progressive tax bracket thresholds for statutory compliance withholding.</p>
         </div>
-        <Button 
+        <Button
           onClick={() => {
             setTaxForm({
               slab_name: '',
@@ -109,23 +109,23 @@ export function TaxSlabs() {
       {isTaxModalOpen && (
         <div className="fixed inset-0 bg-slate-900/15 dark:bg-black/40 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200 pointer-events-none">
           <div className="bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800/80 rounded-sm w-full max-w-md shadow-2xl p-6 relative overflow-hidden animate-in zoom-in-95 duration-300 pointer-events-auto">
-            <button 
+            <button
               onClick={() => setIsTaxModalOpen(false)}
               className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer"
             >
               <X className="h-5 w-5" />
             </button>
-            
+
             <h3 className="text-sm font-extrabold text-slate-900 dark:text-white mb-2">Configure custom tax slab bracket</h3>
             <p className="text-xs text-slate-500 mb-5">Create progressive income tax bracket intervals for local tax regulations withholding.</p>
-            
+
             <div className="space-y-4">
               <div className="space-y-1.5">
                 <label className="text-[11px] font-bold text-slate-500 tracking-wide">Slab name</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={taxForm.slab_name}
-                  onChange={(e) => setTaxForm({...taxForm, slab_name: e.target.value})}
+                  onChange={(e) => setTaxForm({ ...taxForm, slab_name: e.target.value })}
                   data-agent="payroll-tax-slab-name-input"
                   placeholder="e.g. Higher bracket tier"
                   className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-sm px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
@@ -134,10 +134,10 @@ export function TaxSlabs() {
 
               <div className="space-y-1.5">
                 <label className="text-[11px] font-bold text-slate-500 tracking-wide">Withholding tax %</label>
-                <input 
-                  type="number" 
+                <input
+                  type="number"
                   value={taxForm.percentage}
-                  onChange={(e) => setTaxForm({...taxForm, percentage: e.target.value})}
+                  onChange={(e) => setTaxForm({ ...taxForm, percentage: e.target.value })}
                   data-agent="payroll-tax-percentage-input"
                   placeholder="e.g. 25"
                   className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-sm px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
@@ -147,10 +147,10 @@ export function TaxSlabs() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-[11px] font-bold text-slate-500 tracking-wide">Min income range ($)</label>
-                  <input 
-                    type="number" 
+                  <input
+                    type="number"
                     value={taxForm.min_amount}
-                    onChange={(e) => setTaxForm({...taxForm, min_amount: e.target.value})}
+                    onChange={(e) => setTaxForm({ ...taxForm, min_amount: e.target.value })}
                     data-agent="payroll-tax-min-amount-input"
                     placeholder="e.g. 10000"
                     className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-sm px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
@@ -159,10 +159,10 @@ export function TaxSlabs() {
 
                 <div className="space-y-1.5">
                   <label className="text-[11px] font-bold text-slate-500 tracking-wide">Max income range ($)</label>
-                  <input 
-                    type="number" 
+                  <input
+                    type="number"
                     value={taxForm.max_amount}
-                    onChange={(e) => setTaxForm({...taxForm, max_amount: e.target.value})}
+                    onChange={(e) => setTaxForm({ ...taxForm, max_amount: e.target.value })}
                     data-agent="payroll-tax-max-amount-input"
                     placeholder="Leave empty for infinity"
                     className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-sm px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
@@ -171,13 +171,13 @@ export function TaxSlabs() {
               </div>
 
               <div className="pt-2 flex items-center justify-end gap-3">
-                <Button 
+                <Button
                   onClick={() => setIsTaxModalOpen(false)}
                   className="border border-slate-200 bg-transparent text-slate-600 rounded-sm text-xs font-bold py-2 px-4 cursor-pointer"
                 >
                   Cancel
                 </Button>
-                <Button 
+                <Button
                   onClick={() => {
                     const parsedData: any = {
                       slab_name: taxForm.slab_name,

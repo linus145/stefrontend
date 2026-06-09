@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 
 export function PayrollSettingsClient() {
   const queryClient = useQueryClient();
-  
+
   const { data: settingsRes, isLoading } = useQuery({
     queryKey: ['payroll-settings'],
     queryFn: () => hrPayrollService.getSettingsConfigs(),
@@ -84,7 +84,7 @@ export function PayrollSettingsClient() {
 
       <form onSubmit={handleSave} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          
+
           {/* General Configurations */}
           <Card className="bg-white dark:bg-[#121320] border border-slate-150 rounded-sm shadow-sm">
             <CardHeader className="p-4 flex flex-row items-center justify-between pb-2">
@@ -92,7 +92,7 @@ export function PayrollSettingsClient() {
               <Landmark className="h-4.5 w-4.5 text-[#0a66c2]" />
             </CardHeader>
             <CardContent className="p-4 pt-0 space-y-4">
-              
+
               <div className="space-y-1.5">
                 <label className="text-[11px] font-bold text-slate-500 uppercase">Ledger Currency Symbol</label>
                 <select
@@ -141,29 +141,27 @@ export function PayrollSettingsClient() {
               <Cpu className="h-4.5 w-4.5 text-[#0a66c2]" />
             </CardHeader>
             <CardContent className="p-4 pt-0 space-y-4">
-              
+
               <div className="space-y-1.5">
                 <label className="text-[11px] font-bold text-slate-500 uppercase">Automated Calculation Process</label>
                 <div className="flex items-center gap-3">
                   <button
                     type="button"
                     onClick={() => setFormState({ ...formState, automation_enabled: true })}
-                    className={`flex-1 h-9 rounded-sm font-extrabold text-xs transition-all border ${
-                      formState.automation_enabled
+                    className={`flex-1 h-9 rounded-sm font-extrabold text-xs transition-all border ${formState.automation_enabled
                         ? 'bg-[#0a66c2] text-white border-[#0a66c2]'
                         : 'bg-white dark:bg-[#1c1d30] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800'
-                    }`}
+                      }`}
                   >
                     Enabled
                   </button>
                   <button
                     type="button"
                     onClick={() => setFormState({ ...formState, automation_enabled: false })}
-                    className={`flex-1 h-9 rounded-sm font-extrabold text-xs transition-all border ${
-                      !formState.automation_enabled
+                    className={`flex-1 h-9 rounded-sm font-extrabold text-xs transition-all border ${!formState.automation_enabled
                         ? 'bg-[#0a66c2] text-white border-[#0a66c2]'
                         : 'bg-white dark:bg-[#1c1d30] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800'
-                    }`}
+                      }`}
                   >
                     Disabled
                   </button>
@@ -187,7 +185,7 @@ export function PayrollSettingsClient() {
               <Workflow className="h-4.5 w-4.5 text-[#0a66c2]" />
             </CardHeader>
             <CardContent className="p-4 pt-0 space-y-6">
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Level 1: Finance Manager Stage */}
                 <div className="space-y-4 p-4 rounded-sm bg-slate-50/50 dark:bg-[#151624]/30 border border-slate-100 dark:border-slate-800/40">
@@ -195,23 +193,21 @@ export function PayrollSettingsClient() {
                     <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">Level 1: Finance Manager Approval</span>
                     <button
                       type="button"
-                      onClick={() => setFormState({ 
-                        ...formState, 
+                      onClick={() => setFormState({
+                        ...formState,
                         finance_approval_required: !formState.finance_approval_required,
-                        finance_manager: formState.finance_approval_required ? '' : formState.finance_manager 
+                        finance_manager: formState.finance_approval_required ? '' : formState.finance_manager
                       })}
-                      className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-205 ease-in-out focus:outline-none ${
-                        formState.finance_approval_required ? 'bg-[#0a66c2]' : 'bg-slate-200 dark:bg-slate-800/80'
-                      }`}
+                      className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-205 ease-in-out focus:outline-none ${formState.finance_approval_required ? 'bg-[#0a66c2]' : 'bg-slate-200 dark:bg-slate-800/80'
+                        }`}
                     >
                       <span
-                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-205 ease-in-out ${
-                          formState.finance_approval_required ? 'translate-x-5' : 'translate-x-0'
-                        }`}
+                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-205 ease-in-out ${formState.finance_approval_required ? 'translate-x-5' : 'translate-x-0'
+                          }`}
                       />
                     </button>
                   </div>
-                  
+
                   {formState.finance_approval_required && (
                     <div className="space-y-1.5 animate-in fade-in duration-205">
                       <label className="text-[10px] font-bold text-slate-500 uppercase">Designated Finance Manager</label>
@@ -237,23 +233,21 @@ export function PayrollSettingsClient() {
                     <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">Level 2: Director Approval</span>
                     <button
                       type="button"
-                      onClick={() => setFormState({ 
-                        ...formState, 
+                      onClick={() => setFormState({
+                        ...formState,
                         director_approval_required: !formState.director_approval_required,
-                        director: formState.director_approval_required ? '' : formState.director 
+                        director: formState.director_approval_required ? '' : formState.director
                       })}
-                      className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-205 ease-in-out focus:outline-none ${
-                        formState.director_approval_required ? 'bg-[#0a66c2]' : 'bg-slate-200 dark:bg-slate-800/80'
-                      }`}
+                      className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-205 ease-in-out focus:outline-none ${formState.director_approval_required ? 'bg-[#0a66c2]' : 'bg-slate-200 dark:bg-slate-800/80'
+                        }`}
                     >
                       <span
-                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-205 ease-in-out ${
-                          formState.director_approval_required ? 'translate-x-5' : 'translate-x-0'
-                        }`}
+                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-205 ease-in-out ${formState.director_approval_required ? 'translate-x-5' : 'translate-x-0'
+                          }`}
                       />
                     </button>
                   </div>
-                  
+
                   {formState.director_approval_required && (
                     <div className="space-y-1.5 animate-in fade-in duration-205">
                       <label className="text-[10px] font-bold text-slate-500 uppercase">Designated Director</label>

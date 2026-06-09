@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { CameraOffIcon, AlertTriangleIcon } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { toast } from 'sonner';
+import { motion } from 'framer-motion';
 import * as tf from '@tensorflow/tfjs';
 import * as blazeface from '@tensorflow-models/blazeface';
 import * as cocoSsd from '@tensorflow-models/coco-ssd';
@@ -16,6 +17,8 @@ interface SurveillanceOverlayProps {
 
 export const SurveillanceOverlay: React.FC<SurveillanceOverlayProps> = ({ onViolation, isActive, hideFloatingFeed = false }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const constraintsRef = useRef<HTMLDivElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [isCameraOn, setIsCameraOn] = useState(false);
   const [modelsLoaded, setModelsLoaded] = useState(false);
@@ -28,9 +31,10 @@ export const SurveillanceOverlay: React.FC<SurveillanceOverlayProps> = ({ onViol
 
   const startCamera = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { width: 320, height: 240, facingMode: 'user' } 
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: 320, height: 240, facingMode: 'user' }
       });
+      streamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         setHasPermission(true);
@@ -63,10 +67,11 @@ export const SurveillanceOverlay: React.FC<SurveillanceOverlayProps> = ({ onViol
     if (!videoRef.current || !faceModel.current || !objectModel.current || !isCameraOn) return;
 
     const video = videoRef.current;
+    if (video.videoWidth === 0 || video.videoHeight === 0 || video.readyState < 2) return;
 
     // 1. Face & Eye Detection
     const faces = await faceModel.current.estimateFaces(video, false);
-    
+
     let currentThreat = false;
     let threatMessage = "";
 
@@ -102,7 +107,7 @@ export const SurveillanceOverlay: React.FC<SurveillanceOverlayProps> = ({ onViol
         const rightEye = landmarks[0];
         const leftEye = landmarks[1];
         const eyeDist = Math.sqrt(Math.pow(rightEye[0] - leftEye[0], 2) + Math.pow(rightEye[1] - leftEye[1], 2));
-        
+
         if (eyeDist < 18 || isNaN(rightEye[0])) {
           setStatus(prev => ({ ...prev, eyes: 'COVERED' }));
           onViolation('EYES_HIDDEN', { action: 'eyes_covered' }, 'HIGH');
@@ -118,7 +123,7 @@ export const SurveillanceOverlay: React.FC<SurveillanceOverlayProps> = ({ onViol
     const predictions = await objectModel.current.detect(video);
     const THREAT_CLASSES = ['cell phone', 'remote', 'laptop', 'tv', 'monitor', 'book', 'mouse', 'keyboard', 'electronic', 'tablet'];
     const threat = predictions.find((p: any) => THREAT_CLASSES.includes(p.class) && p.score > 0.10);
-    
+
     if (threat) {
       const label = threat.class === 'tv' || threat.class === 'monitor' ? 'SCREEN' : threat.class.toUpperCase();
       setStatus(prev => ({ ...prev, object: `${label} DETECTED` }));
@@ -134,7 +139,7 @@ export const SurveillanceOverlay: React.FC<SurveillanceOverlayProps> = ({ onViol
     // 4. Persistent Toast Management
     if (currentThreat) {
       if (!threatToastId.current) {
-        threatToastId.current = toast.error(threatMessage, { 
+        threatToastId.current = toast.error(threatMessage, {
           duration: Infinity,
           className: "bg-red-600 text-white font-bold border-none shadow-2xl",
           icon: <AlertTriangleIcon className="animate-bounce" />
@@ -153,14 +158,25 @@ export const SurveillanceOverlay: React.FC<SurveillanceOverlayProps> = ({ onViol
       startCamera();
       loadModels();
     }
-    
+
     return () => {
-      if (videoRef.current && videoRef.current.srcObject) {
-        const stream = videoRef.current.srcObject as MediaStream;
-        stream.getTracks().forEach(track => track.stop());
+      let stopped = false;
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current = null;
+        stopped = true;
+      }
+      if (typeof window !== 'undefined' && (window as any).proctoringStream) {
+        const globalStream = (window as any).proctoringStream as MediaStream;
+        globalStream.getTracks().forEach(track => track.stop());
+        delete (window as any).proctoringStream;
+        stopped = true;
       }
       if (threatToastId.current) {
         toast.dismiss(threatToastId.current);
+      }
+      if (stopped) {
+        toast.success("AI Proctoring has been stopped.");
       }
     };
   }, [isActive]);
@@ -171,7 +187,7 @@ export const SurveillanceOverlay: React.FC<SurveillanceOverlayProps> = ({ onViol
 
     const interval = setInterval(() => {
       runDetection();
-    }, 500); 
+    }, 500);
 
     return () => clearInterval(interval);
   }, [modelsLoaded, isCameraOn, isActive]);
@@ -179,60 +195,67 @@ export const SurveillanceOverlay: React.FC<SurveillanceOverlayProps> = ({ onViol
   if (!isActive) return null;
 
   return (
-    <div className={cn("fixed bottom-4 right-4 z-50 group", hideFloatingFeed && "hidden")}>
-      <div className={cn(
-        "relative w-48 h-36 bg-slate-950 rounded-xl overflow-hidden border-2 shadow-2xl transition-all duration-300 group-hover:w-72 group-hover:h-52 ring-1 ring-black/50",
-        threatBbox ? "border-red-600 shadow-[0_0_30px_rgba(220,38,38,0.4)]" : "border-white/10"
-      )}>
-        {!hasPermission && hasPermission !== null && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-red-500/10 text-red-500 p-4 text-center">
-            <CameraOffIcon className="size-8 mb-2" />
-            <p className="text-[10px] font-bold uppercase tracking-wider">Camera Required</p>
-          </div>
-        )}
-        
-        <video
-          ref={videoRef}
-          autoPlay
-          muted
-          playsInline
-          className={`w-full h-full object-cover mirror-mode ${!isCameraOn ? 'hidden' : ''}`}
-          style={{ transform: 'scaleX(-1)' }}
-        />
-
-        {/* Threat Alert Vignette */}
-        {threatBbox && (
-          <div className="absolute inset-0 pointer-events-none border-[6px] border-red-600/30 animate-pulse z-0" />
-        )}
-
-        {/* Real-time Bounding Box for Threats */}
-        {threatBbox && (
-          <div 
-            className="absolute border-4 border-red-500 shadow-[0_0_20px_rgba(239,68,68,1)] animate-pulse rounded-lg pointer-events-none z-10"
-            style={{
-              // Flip X because of mirrored video and clamp to prevent overflow
-              left: `${Math.max(0, Math.min(95, 100 - ((threatBbox[0] + threatBbox[2]) / 320) * 100))}%`,
-              top: `${Math.max(0, Math.min(95, (threatBbox[1] / 240) * 100))}%`,
-              width: `${Math.min(100, (threatBbox[2] / 320) * 100)}%`,
-              height: `${Math.min(100, (threatBbox[3] / 240) * 100)}%`,
-            }}
-          >
-            <div className="absolute -top-6 left-0 bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded shadow-lg whitespace-nowrap uppercase tracking-tighter">
-              THREAT: {status.object}
+    <div ref={constraintsRef} className={cn("fixed inset-0 pointer-events-none z-50 overflow-hidden", hideFloatingFeed && "hidden")}>
+      <motion.div 
+        drag
+        dragConstraints={constraintsRef}
+        dragElastic={0.1}
+        dragMomentum={false}
+        className="pointer-events-auto absolute top-20 right-4 group cursor-grab active:cursor-grabbing select-none"
+      >
+        <div className={cn(
+          "relative w-32 aspect-[4/3] bg-slate-950 rounded-sm overflow-hidden border-2 shadow-2xl transition-all duration-300 group-hover:w-56 ring-1 ring-black/50",
+          threatBbox ? "border-red-600 shadow-[0_0_30px_rgba(220,38,38,0.4)]" : "border-white/10"
+        )}>
+          {!hasPermission && hasPermission !== null && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-red-500/10 text-red-500 p-4 text-center">
+              <CameraOffIcon className="size-8 mb-2" />
+              <p className="text-[10px] font-bold uppercase tracking-wider">Camera Required</p>
             </div>
+          )}
+          
+          <video
+            ref={videoRef}
+            autoPlay
+            muted
+            playsInline
+            className={`w-full h-full object-cover mirror-mode ${!isCameraOn ? 'hidden' : ''}`}
+            style={{ transform: 'scaleX(-1)' }}
+          />
+
+          {/* Threat Alert Vignette */}
+          {threatBbox && (
+            <div className="absolute inset-0 pointer-events-none border-[6px] border-red-600/30 animate-pulse z-0" />
+          )}
+
+          {/* Real-time Bounding Box for Threats */}
+          {threatBbox && (
+            <div 
+              className="absolute border-4 border-red-500 shadow-[0_0_20px_rgba(239,68,68,1)] animate-pulse rounded-lg pointer-events-none z-10"
+              style={{
+                // Flip X because of mirrored video and clamp to prevent overflow
+                left: `${Math.max(0, Math.min(95, 100 - ((threatBbox[0] + threatBbox[2]) / 320) * 100))}%`,
+                top: `${Math.max(0, Math.min(95, (threatBbox[1] / 240) * 100))}%`,
+                width: `${Math.min(100, (threatBbox[2] / 320) * 100)}%`,
+                height: `${Math.min(100, (threatBbox[3] / 240) * 100)}%`,
+              }}
+            >
+              <div className="absolute -top-6 left-0 bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded shadow-lg whitespace-nowrap uppercase tracking-tighter">
+                THREAT: {status.object}
+              </div>
+            </div>
+          )}
+
+          <div className="absolute top-2 left-2 flex items-center gap-1 bg-black/80 backdrop-blur-md px-2 py-0.5 rounded-full border border-white/20 z-20">
+            <div className={`size-1.5 rounded-full animate-pulse ${threatBbox ? 'bg-red-600 shadow-[0_0_10px_#dc2626]' : modelsLoaded ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+            <span className="text-[7px] text-white font-black tracking-wider uppercase">
+              {threatBbox ? 'VIOLATION' : modelsLoaded ? 'AI PROCTORING ACTIVE' : 'STARTING...'}
+            </span>
           </div>
-        )}
 
-        <div className="absolute top-2 left-2 flex items-center gap-1.5 bg-black/80 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 z-20">
-          <div className={`size-2 rounded-full animate-pulse ${threatBbox ? 'bg-red-600 shadow-[0_0_10px_#dc2626]' : modelsLoaded ? 'bg-emerald-500' : 'bg-amber-500'}`} />
-          <span className="text-[10px] text-white font-black tracking-tight uppercase">
-            {threatBbox ? 'VIOLATION DETECTED' : modelsLoaded ? 'AI PROCTORING ACTIVE' : 'INITIALIZING AI...'}
-          </span>
-        </div>
-
-        {/* Status Indicators overlay */}
-        <div className="absolute bottom-2 left-2 right-2 flex justify-between items-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-           <div className="flex gap-1">
+          {/* Status Indicators overlay */}
+          <div className="absolute bottom-2 left-2 right-2 flex justify-between items-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div className="flex gap-1">
               <div className={`px-1.5 py-0.5 border rounded text-[8px] font-medium ${status.face === 'OK' ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400' : 'bg-red-500/20 border-red-500/30 text-red-400'}`}>
                 FACE: {status.face}
               </div>
@@ -242,9 +265,10 @@ export const SurveillanceOverlay: React.FC<SurveillanceOverlayProps> = ({ onViol
               <div className={`px-1.5 py-0.5 border rounded text-[8px] font-medium ${status.object === 'OK' ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400' : 'bg-red-500/20 border-red-500/30 text-red-400'}`}>
                 ENV: {status.object}
               </div>
-           </div>
+            </div>
+          </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };

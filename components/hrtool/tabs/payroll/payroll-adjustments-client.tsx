@@ -8,16 +8,16 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { LocalLoader } from '@/components/ui/local-loader';
-import { Plus, X, Sparkles, AlertCircle } from 'lucide-react';
+import { Plus, X, Sparkles, AlertCircle, Trash2 } from 'lucide-react';
 
 export function PayrollAdjustmentsClient() {
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
   const [form, setForm] = useState({
     employee_id: '',
-    adjustment_type: 'BONUS',
+    type: 'EARNING',
     amount: '',
-    description: ''
+    reason: ''
   });
 
   const { data: adjustmentsRes, isLoading } = useQuery({
@@ -37,13 +37,38 @@ export function PayrollAdjustmentsClient() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['payroll-adjustments'] });
       setIsOpen(false);
-      setForm({ employee_id: '', adjustment_type: 'BONUS', amount: '', description: '' });
+      setForm({ employee_id: '', type: 'EARNING', amount: '', reason: '' });
       toast.success('Adjustment allocated successfully!');
     },
     onError: () => {
       toast.error('Failed to save payroll adjustment.');
     }
   });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => hrPayrollService.deletePayrollAdjustment(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['payroll-adjustments'] });
+      toast.success('Adjustment deleted successfully!');
+    },
+    onError: () => {
+      toast.error('Failed to delete payroll adjustment.');
+    }
+  });
+
+  const handleDelete = (id: string) => {
+    toast('Delete this payroll adjustment?', {
+      description: 'This will permanently remove the manual adjustment from payroll.',
+      action: {
+        onClick: () => deleteMutation.mutate(id),
+        label: 'Delete',
+      },
+      cancel: {
+        label: 'Cancel',
+        onClick: () => {},
+      },
+    });
+  };
 
   const toSentenceCase = (str: string) => {
     if (!str) return '';
@@ -77,18 +102,19 @@ export function PayrollAdjustmentsClient() {
                 <th className="py-2.5 px-4 text-[10px] font-bold tracking-wide text-slate-400 uppercase">Amount</th>
                 <th className="py-2.5 px-4 text-[10px] font-bold tracking-wide text-slate-400 uppercase">Description</th>
                 <th className="py-2.5 px-4 text-[10px] font-bold tracking-wide text-slate-400 uppercase text-right">Status</th>
+                <th className="py-2.5 px-4 text-[10px] font-bold tracking-wide text-slate-400 uppercase text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
               {isLoading ? (
                 [1, 2].map(i => (
                   <tr key={i} className="border-b border-slate-100 dark:border-slate-850">
-                    <td colSpan={5} className="py-4 text-center"><div className="h-4 bg-slate-100 dark:bg-slate-800 animate-pulse rounded-sm w-3/4 mx-auto" /></td>
+                    <td colSpan={6} className="py-4 text-center"><div className="h-4 bg-slate-100 dark:bg-slate-800 animate-pulse rounded-sm w-3/4 mx-auto" /></td>
                   </tr>
                 ))
               ) : list.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-8 text-center text-xs text-slate-400 font-semibold tracking-wide">No adjustments recorded yet.</td>
+                  <td colSpan={6} className="py-8 text-center text-xs text-slate-400 font-semibold tracking-wide">No adjustments recorded yet.</td>
                 </tr>
               ) : (
                 list.map((item: any) => (
@@ -103,15 +129,26 @@ export function PayrollAdjustmentsClient() {
                     </td>
                     <td className="py-3 px-4">
                       <Badge className="bg-[#0a66c2]/10 text-[#0a66c2] border-none font-bold text-[9px] px-2 py-0.5 rounded-sm">
-                        {toSentenceCase(item.adjustment_type)}
+                        {toSentenceCase(item.type)}
                       </Badge>
                     </td>
                     <td className="py-3 px-4 text-xs font-extrabold text-slate-900 dark:text-white">${parseFloat(item.amount || 0).toLocaleString()}</td>
-                    <td className="py-3 px-4 text-xs font-semibold text-slate-450 truncate max-w-xs">{item.description}</td>
+                    <td className="py-3 px-4 text-xs font-semibold text-slate-450 truncate max-w-xs">{item.reason}</td>
                     <td className="py-3 px-4 text-right">
                       <Badge className="bg-emerald-100 text-emerald-800 border-none font-bold text-[9px] px-2 py-0.5 rounded-sm">
                         Processed
                       </Badge>
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      <div className="flex justify-end">
+                        <button
+                          onClick={() => handleDelete(item.id)}
+                          className="text-rose-500/50 hover:text-rose-600 hover:bg-rose-500/10 p-1 rounded-sm transition-colors border border-border/40 h-6 w-6 flex items-center justify-center cursor-pointer"
+                          title="Delete Adjustment"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -158,14 +195,12 @@ export function PayrollAdjustmentsClient() {
               <div className="space-y-1.5">
                 <label className="text-[11px] font-bold text-slate-500 tracking-wide uppercase">Adjustment category</label>
                 <select 
-                  value={form.adjustment_type} 
-                  onChange={(e) => setForm({...form, adjustment_type: e.target.value})}
+                  value={form.type} 
+                  onChange={(e) => setForm({...form, type: e.target.value})}
                   className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-sm px-3 py-2 text-xs text-slate-900 dark:text-white outline-none cursor-pointer"
                 >
-                  <option value="BONUS">Bonus Reward</option>
-                  <option value="INCENTIVE">Direct Incentive</option>
-                  <option value="DEDUCTION">Manual Deduction Penalty</option>
-                  <option value="CORRECTION">Attendance Offset Correction</option>
+                  <option value="EARNING">Earning (Bonus, Incentive, etc.)</option>
+                  <option value="DEDUCTION">Deduction (Penalty, Offset, etc.)</option>
                 </select>
               </div>
 
@@ -183,8 +218,8 @@ export function PayrollAdjustmentsClient() {
               <div className="space-y-1.5">
                 <label className="text-[11px] font-bold text-slate-500 tracking-wide uppercase">Reason / Description</label>
                 <textarea 
-                  value={form.description}
-                  onChange={(e) => setForm({...form, description: e.target.value})}
+                  value={form.reason}
+                  onChange={(e) => setForm({...form, reason: e.target.value})}
                   placeholder="Provide explicit audit notes..."
                   className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-sm px-3 py-2 text-xs text-slate-900 dark:text-white outline-none h-16 resize-none"
                 />
@@ -201,9 +236,9 @@ export function PayrollAdjustmentsClient() {
                   onClick={() => {
                     const parsedData = {
                       employee: form.employee_id,
-                      adjustment_type: form.adjustment_type,
+                      type: form.type,
                       amount: parseFloat(form.amount),
-                      description: form.description
+                      reason: form.reason
                     };
                     mutation.mutate(parsedData);
                   }}

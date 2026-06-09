@@ -71,12 +71,12 @@ export function AIInterviewsHeader({ companyName, activeSection, onSectionChange
         </Link>
 
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-sm bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
+          <div className="w-7 h-7 rounded-sm bg-gradient-to-br from-[#0a66c2] to-[#004182] flex items-center justify-center">
             <BrainCircuit className="w-3.5 h-3.5 text-white" />
           </div>
           <div className="hidden sm:block">
             <h2 className="text-sm font-semibold text-foreground tracking-tight truncate max-w-[150px]">{companyName}</h2>
-            <p className="text-[10px] text-blue-500 font-semibold leading-none">Interview engine</p>
+            <p className="text-[10px] text-[#0a66c2] font-semibold leading-none">Interview engine</p>
           </div>
         </div>
       </div>
@@ -88,9 +88,9 @@ export function AIInterviewsHeader({ companyName, activeSection, onSectionChange
             key={item.id}
             onClick={() => onSectionChange(item.id)}
             className={cn(
-              "relative px-4 h-full text-[13px] font-medium transition-all hover:text-blue-500 shrink-0",
+              "relative px-4 h-full text-[13px] font-medium transition-all hover:text-[#0a66c2] shrink-0",
               activeSection === item.id
-                ? "text-blue-500 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-blue-500"
+                ? "text-[#0a66c2] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#0a66c2]"
                 : "text-muted-foreground"
             )}
           >
@@ -124,10 +124,10 @@ export function AIInterviewsHeader({ companyName, activeSection, onSectionChange
           <style>{`
             @keyframes highGlowPulse {
               0%, 100% {
-                filter: drop-shadow(0 0 3px rgba(59, 130, 246, 0.7)) drop-shadow(0 0 8px rgba(59, 130, 246, 0.4));
+                filter: drop-shadow(0 0 3px rgba(10, 102, 194, 0.7)) drop-shadow(0 0 8px rgba(10, 102, 194, 0.4));
               }
               50% {
-                filter: drop-shadow(0 0 6px rgba(59, 130, 246, 1)) drop-shadow(0 0 16px rgba(59, 130, 246, 0.8));
+                filter: drop-shadow(0 0 6px rgba(10, 102, 194, 1)) drop-shadow(0 0 16px rgba(10, 102, 194, 0.8));
               }
             }
             .high-glow-pulse {
@@ -143,7 +143,7 @@ export function AIInterviewsHeader({ companyName, activeSection, onSectionChange
             strokeLinecap="round"
             strokeLinejoin="round"
             className={cn(
-              "w-5 h-5 group-hover:rotate-12 transition-transform text-blue-500 dark:text-blue-400",
+              "w-5 h-5 group-hover:rotate-12 transition-transform text-[#0a66c2] dark:text-[#0a66c2]",
               hasPremium && "high-glow-pulse"
             )}
           >

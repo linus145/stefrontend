@@ -123,8 +123,8 @@ export function InterviewConfigModal({ isOpen, onClose, onSuccess }: ConfigModal
         {/* Modal Header */}
         <div className="p-6 border-b border-border flex items-center justify-between bg-muted/30">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-sm bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
-              <Settings2 className="w-5 h-5 text-blue-500" />
+            <div className="w-10 h-10 rounded-sm bg-[#0a66c2]/10 flex items-center justify-center border border-[#0a66c2]/20">
+              <Settings2 className="w-5 h-5 text-[#0a66c2]" />
             </div>
             <div>
               <h2 className="text-xl font-bold tracking-tight">Orchestrate AI Interview</h2>
@@ -170,8 +170,8 @@ export function InterviewConfigModal({ isOpen, onClose, onSuccess }: ConfigModal
                             className={cn(
                               "w-full p-4 rounded-sm border text-left transition-all flex items-center justify-between group",
                               selectedJobId === job.id 
-                                ? "bg-blue-500/5 border-blue-500 text-blue-500" 
-                                : "bg-background border-border hover:border-blue-500/30"
+                                ? "bg-[#0a66c2]/5 border-[#0a66c2] text-[#0a66c2]" 
+                                : "bg-background border-border hover:border-[#0a66c2]/30"
                             )}
                           >
                             <span className="text-sm font-semibold">{job.title}</span>
@@ -254,7 +254,7 @@ export function InterviewConfigModal({ isOpen, onClose, onSuccess }: ConfigModal
                   </div>
                   <button 
                     onClick={addRound}
-                    className="flex items-center gap-1 text-xs font-bold text-blue-500 hover:text-blue-600 uppercase tracking-wider"
+                    className="flex items-center gap-1 text-xs font-bold text-[#0a66c2] hover:text-[#004182] uppercase tracking-wider"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     Add Round
@@ -275,7 +275,7 @@ export function InterviewConfigModal({ isOpen, onClose, onSuccess }: ConfigModal
                           <select 
                             value={round.type}
                             onChange={(e) => updateRound(round.id, { type: e.target.value as RoundType })}
-                            className="w-full bg-background border border-border rounded-sm py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            className="w-full bg-background border border-border rounded-sm py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#0a66c2]"
                           >
                             <option value="TECHNICAL">Technical Interview</option>
                             <option value="CODING">Live Coding Session</option>
@@ -290,7 +290,7 @@ export function InterviewConfigModal({ isOpen, onClose, onSuccess }: ConfigModal
                           <select 
                             value={round.difficulty}
                             onChange={(e) => updateRound(round.id, { difficulty: e.target.value as any })}
-                            className="w-full bg-background border border-border rounded-sm py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            className="w-full bg-background border border-border rounded-sm py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#0a66c2]"
                           >
                             <option value="ENTRY">Entry Level</option>
                             <option value="MID">Mid Level</option>
@@ -305,7 +305,7 @@ export function InterviewConfigModal({ isOpen, onClose, onSuccess }: ConfigModal
                             type="number"
                             value={round.max_questions}
                             onChange={(e) => updateRound(round.id, { max_questions: parseInt(e.target.value) })}
-                            className="w-full bg-background border border-border rounded-sm py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            className="w-full bg-background border border-border rounded-sm py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#0a66c2]"
                           />
                         </div>
 
@@ -315,7 +315,7 @@ export function InterviewConfigModal({ isOpen, onClose, onSuccess }: ConfigModal
                             type="number"
                             value={round.timer_seconds}
                             onChange={(e) => updateRound(round.id, { timer_seconds: parseInt(e.target.value) })}
-                            className="w-full bg-background border border-border rounded-sm py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            className="w-full bg-background border border-border rounded-sm py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#0a66c2]"
                           />
                         </div>
 
@@ -348,7 +348,7 @@ export function InterviewConfigModal({ isOpen, onClose, onSuccess }: ConfigModal
           <button 
             onClick={() => step === 1 ? setStep(2) : handleConfigure()}
             disabled={(step === 1 && (!selectedJobId || selectedApplicationIds.length === 0)) || isSubmitting}
-            className="flex items-center gap-2 px-8 py-2.5 rounded-sm bg-blue-500 text-white text-sm font-semibold hover:bg-blue-600 transition-all active:scale-95 shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-8 py-2.5 rounded-sm bg-[#0a66c2] text-white text-sm font-semibold hover:bg-[#004182] transition-all active:scale-95 shadow-lg shadow-[#0a66c2]/20 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {step === 1 ? 'Next: Configure Rounds' : 'Orchestrate & Send Invites'}
             <ChevronRight className="w-4 h-4" />

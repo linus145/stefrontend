@@ -49,7 +49,7 @@ export function WorkRecords({ attendanceData, monthlyHours = 0.0 }: WorkRecordsP
           </div>
         </CardContent>
       </Card>
- 
+
       <Card className="bg-[#0a66c2] text-white shadow-xl shadow-blue-500/20 rounded-sm h-fit">
         <CardHeader className="p-3 pb-0">
           <CardTitle className="text-xs flex items-center gap-1.5 text-blue-50 font-bold uppercase tracking-wider">

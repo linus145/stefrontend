@@ -7,6 +7,9 @@ export const hrPayrollService = {
     
   getPayslips: (params?: any): Promise<BaseAPIResponse<PaginatedResponse<any>>> => 
     api.get<any>('/payroll/payslips/', { params }).then(res => ({ status: 'success', message: '', data: res })),
+
+  deletePayslip: (id: string): Promise<BaseAPIResponse<any>> => 
+    api.delete<any>(`/payroll/payslips/${id}/`).then(res => ({ status: 'success', message: '', data: res })),
     
   processPayroll: (id: string): Promise<BaseAPIResponse<any>> => 
     api.post<any>(`/payroll/runs/${id}/process/`).then(res => ({ status: 'success', message: '', data: res })),
@@ -70,6 +73,9 @@ export const hrPayrollService = {
 
   createPayrollAdjustment: (data: any): Promise<BaseAPIResponse<any>> => 
     api.post<any>('/payroll/adjustments/', data).then(res => ({ status: 'success', message: '', data: res })),
+
+  deletePayrollAdjustment: (id: string): Promise<BaseAPIResponse<any>> => 
+    api.delete<any>(`/payroll/adjustments/${id}/`).then(res => ({ status: 'success', message: '', data: res })),
 
   getTaxConfigs: (): Promise<BaseAPIResponse<PaginatedResponse<any>>> => 
     api.get<any>('/payroll/tax-configs/').then(res => ({ status: 'success', message: '', data: res })),

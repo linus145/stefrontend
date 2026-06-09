@@ -34,6 +34,10 @@ export function PayrollRuns() {
     queryFn: () => hrPayrollService.getPayrolls({ page }),
   });
 
+  // Auto-refetch when any run is in DRAFT status (background Celery task is processing)
+  const rawListForPolling = (Array.isArray(payrolls?.data?.results) ? payrolls.data.results : (Array.isArray(payrolls?.data) ? payrolls.data : [])) as any[];
+  const hasDraftRun = rawListForPolling.some((r: any) => r.status === 'DRAFT');
+
   // Fetch records when a payroll run is clicked
   useEffect(() => {
     if (selectedRun) {
@@ -63,6 +67,10 @@ export function PayrollRuns() {
       queryClient.invalidateQueries({ queryKey: ['payroll-approvals'] });
       setIsNewRunOpen(false);
       toast.success(res.message || 'Payroll generated successfully in Draft mode.');
+      // Schedule delayed refetches to catch Celery task completion
+      setTimeout(() => queryClient.invalidateQueries({ queryKey: ['payrolls'] }), 2000);
+      setTimeout(() => queryClient.invalidateQueries({ queryKey: ['payrolls'] }), 5000);
+      setTimeout(() => queryClient.invalidateQueries({ queryKey: ['payrolls'] }), 10000);
     },
     onError: (err: any) => {
       toast.error(err.response?.data?.error || 'Failed to generate payroll run.');
@@ -74,8 +82,19 @@ export function PayrollRuns() {
     onSuccess: (res: any) => {
       queryClient.invalidateQueries({ queryKey: ['payrolls'] });
       queryClient.invalidateQueries({ queryKey: ['payroll-analytics'] });
+      queryClient.invalidateQueries({ queryKey: ['payslips'] });
+      queryClient.invalidateQueries({ queryKey: ['payroll-approvals'] });
       setSelectedRun(null);
       toast.success(res.message || 'Payroll approved, finalized and paid successfully!');
+      // Delayed refetches to catch async payslip generation by Celery
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['payslips'] });
+        queryClient.invalidateQueries({ queryKey: ['payrolls'] });
+      }, 3000);
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['payslips'] });
+        queryClient.invalidateQueries({ queryKey: ['payrolls'] });
+      }, 8000);
     },
     onError: () => {
       toast.error('Failed to approve payroll cycle.');

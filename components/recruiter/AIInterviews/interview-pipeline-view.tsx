@@ -110,7 +110,7 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
   const getStatusStyle = (status: string) => {
     switch (status.toUpperCase()) {
       case 'COMPLETED': return 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
-      case 'IN_PROGRESS': return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
+      case 'IN_PROGRESS': return 'bg-[#0a66c2]/10 text-[#0a66c2] border-[#0a66c2]/20';
       case 'PENDING': return 'bg-amber-500/10 text-amber-500 border-amber-500/20';
       default: return 'bg-slate-500/10 text-slate-500 border-slate-500/20';
     }
@@ -119,7 +119,7 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
   const getAppStatusStyle = (status: string) => {
     switch (status.toUpperCase()) {
       case 'PENDING': return 'bg-amber-500/10 text-amber-600 border-amber-500/20';
-      case 'REVIEWED': return 'bg-blue-500/10 text-blue-600 border-blue-500/20';
+      case 'REVIEWED': return 'bg-[#0a66c2]/10 text-[#0a66c2] border-[#0a66c2]/20';
       case 'SHORTLISTED': return 'bg-cyan-500/10 text-cyan-600 border-cyan-500/20';
       case 'INTERVIEW': return 'bg-purple-500/10 text-purple-600 border-purple-500/20';
       case 'ONBOARDED': return 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20';
@@ -205,7 +205,7 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
                     navigator.clipboard.writeText(session.exam_credentials!.username);
                     toast.success('Username copied');
                   }}
-                  className="p-0.5 rounded-sm text-muted-foreground/40 hover:text-blue-500 hover:bg-blue-500/10 transition-all hover:scale-105 active:scale-95 shrink-0"
+                  className="p-0.5 rounded-sm text-muted-foreground/40 hover:text-[#0a66c2] hover:bg-[#0a66c2]/10 transition-all hover:scale-105 active:scale-95 shrink-0"
                   title="Copy Username"
                 >
                   <Copy className="w-3 h-3" />
@@ -220,7 +220,7 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
                     navigator.clipboard.writeText(session.exam_credentials!.password);
                     toast.success('Password copied');
                   }}
-                  className="p-0.5 rounded-sm text-muted-foreground/40 hover:text-blue-500 hover:bg-blue-500/10 transition-all hover:scale-105 active:scale-95 shrink-0"
+                  className="p-0.5 rounded-sm text-muted-foreground/40 hover:text-[#0a66c2] hover:bg-[#0a66c2]/10 transition-all hover:scale-105 active:scale-95 shrink-0"
                   title="Copy Password"
                 >
                   <Copy className="w-3 h-3" />
@@ -240,8 +240,8 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
               className={cn(
                 "px-3 py-1.5 rounded-sm text-[11px] font-bold transition-all active:scale-95 whitespace-nowrap",
                 !session.is_orchestrated
-                  ? "bg-blue-600 text-white hover:bg-blue-700 shadow-sm"
-                  : "border border-border hover:bg-blue-600 hover:text-white hover:border-blue-600"
+                  ? "bg-[#0a66c2] text-white hover:bg-[#004182] shadow-sm"
+                  : "border border-border hover:bg-[#0a66c2] hover:text-white hover:border-[#0a66c2]"
               )}
               title={!session.is_orchestrated ? 'Configure Interview' : 'Reconfigure Interview'}
             >
@@ -252,7 +252,7 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
               <button
                 onClick={() => resendInviteMutation.mutate(session.id)}
                 disabled={resendInviteMutation.isPending}
-                className="w-8 h-8 flex items-center justify-center rounded-sm bg-blue-600/5 text-blue-600 hover:bg-blue-600 hover:text-white transition-all active:scale-95 border border-blue-600/10 disabled:opacity-50 shrink-0"
+                className="w-8 h-8 flex items-center justify-center rounded-sm bg-[#0a66c2]/5 text-[#0a66c2] hover:bg-[#0a66c2] hover:text-white transition-all active:scale-95 border border-[#0a66c2]/10 disabled:opacity-50 shrink-0"
                 title="Resend Invitation Email"
               >
                 <Mail className="w-3.5 h-3.5" />
@@ -264,7 +264,7 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
                 <button
                   onClick={() => rescheduleMutation.mutate(session.application_id)}
                   disabled={rescheduleMutation.isPending}
-                  className="w-8 h-8 flex items-center justify-center rounded-sm bg-blue-600/5 text-blue-600 hover:bg-blue-600 hover:text-white transition-all active:scale-95 border border-blue-600/10 disabled:opacity-50"
+                  className="w-8 h-8 flex items-center justify-center rounded-sm bg-[#0a66c2]/5 text-[#0a66c2] hover:bg-[#0a66c2] hover:text-white transition-all active:scale-95 border border-[#0a66c2]/10 disabled:opacity-50"
                   title="Reschedule Interview"
                 >
                   <RefreshCw className={cn("w-3.5 h-3.5", rescheduleMutation.isPending && "animate-spin")} />
@@ -336,14 +336,14 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
           </button>
 
           <div className="relative w-full sm:w-72">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-blue-600" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#0a66c2]" />
             <input 
               type="text" 
               placeholder="Search candidate or role..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               data-agent="pipeline-search-input"
-              className="w-full bg-background border border-border rounded-sm py-2 pl-9 pr-3 text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-blue-600/50 shadow-sm transition-all"
+              className="w-full bg-background border border-border rounded-sm py-2 pl-9 pr-3 text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0a66c2]/50 shadow-sm transition-all"
             />
           </div>
 
@@ -367,7 +367,7 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-card border border-border p-4 rounded-sm shadow-sm flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-blue-600/10 text-blue-600 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-full bg-[#0a66c2]/10 text-[#0a66c2] flex items-center justify-center">
             <Users2 className="w-4 h-4" />
           </div>
           <div>
@@ -385,7 +385,7 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
           </div>
         </div>
         <div className="bg-card border border-border p-4 rounded-sm shadow-sm flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-full bg-[#0a66c2]/10 text-[#0a66c2] flex items-center justify-center">
             <BrainCircuit className="w-4 h-4" />
           </div>
           <div>

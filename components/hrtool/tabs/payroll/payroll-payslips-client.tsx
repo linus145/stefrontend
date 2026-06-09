@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { hrPayrollService } from '@/services/hr';
 import { api } from '@/lib/api';
 import { Card, CardContent } from '@/components/ui/card';
@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { LocalLoader } from '@/components/ui/local-loader';
 import {
-  Download, Mail, FileText, Search, Calendar, ChevronRight, ChevronDown, Filter, User, Briefcase, IndianRupee
+  Download, Mail, FileText, Search, Calendar, ChevronRight, ChevronDown, Filter, User, Briefcase, IndianRupee, Trash2
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -39,6 +39,8 @@ export function PayrollPayslipsClient() {
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [isSending, setIsSending] = useState<string | null>(null);
   const [isDownloading, setIsDownloading] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
   const handleDownload = async (id: string, name: string) => {
     try {
@@ -83,6 +85,37 @@ export function PayrollPayslipsClient() {
       toast.error(err?.message || "Failed to queue bulk emails");
     } finally {
       setIsSending(null);
+    }
+  };
+
+  const handleDelete = async (id: string, name: string) => {
+    if (!confirm(`Are you sure you want to delete the payslip for ${name}? This action cannot be undone.`)) return;
+    try {
+      setIsDeleting(id);
+      await hrPayrollService.deletePayslip(id);
+      toast.success(`Payslip for ${name} deleted successfully`);
+      queryClient.invalidateQueries({ queryKey: ['payslips'] });
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to delete payslip");
+    } finally {
+      setIsDeleting(null);
+    }
+  };
+
+  const handleDeleteAll = async (payslips: any[]) => {
+    const count = payslips.length;
+    if (!confirm(`Are you sure you want to delete all ${count} payslip${count !== 1 ? 's' : ''} in this period? This action cannot be undone.`)) return;
+    try {
+      setIsDeleting('bulk');
+      for (const item of payslips) {
+        await hrPayrollService.deletePayslip(item.id);
+      }
+      toast.success(`${count} payslip${count !== 1 ? 's' : ''} deleted successfully`);
+      queryClient.invalidateQueries({ queryKey: ['payslips'] });
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to delete payslips");
+    } finally {
+      setIsDeleting(null);
     }
   };
 
@@ -381,6 +414,18 @@ export function PayrollPayslipsClient() {
                     >
                       <Mail className="h-3 w-3" /> Email All
                     </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={isDeleting !== null}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteAll(group.payslips);
+                      }}
+                      className="h-7 px-2.5 border-red-200 hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-300 dark:hover:border-red-800 text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-400 font-bold text-[10px] rounded-sm cursor-pointer transition-all duration-200 mr-1 bg-transparent"
+                    >
+                      <Trash2 className="h-3 w-3" /> Delete All
+                    </Button>
                     <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-slate-500 transition-colors hidden sm:inline">
                       {isExpanded ? 'Collapse' : 'Expand'}
                     </span>
@@ -459,6 +504,20 @@ export function PayrollPayslipsClient() {
                           >
                             <Mail className="h-3.5 w-3.5" />
                           </Button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(item.id, `${item.employee_detail?.first_name || ''} ${item.employee_detail?.last_name || ''}`)}
+                            disabled={isDeleting !== null}
+                            title="Delete Payslip"
+                            className="inline-flex items-center justify-center border border-slate-200 dark:border-slate-800 hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-300 dark:hover:border-red-800 text-slate-600 dark:text-slate-450 hover:text-red-600 dark:hover:text-red-400 font-bold text-[10px] h-8 w-8 p-0 rounded-sm cursor-pointer transition-all duration-200 bg-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {isDeleting === item.id ? (
+                              <div className="h-3.5 w-3.5 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                              <Trash2 className="h-3.5 w-3.5" />
+                            )}
+                          </button>
                         </div>
                       </div>
                     ))}

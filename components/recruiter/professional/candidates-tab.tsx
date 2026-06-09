@@ -106,17 +106,17 @@ export function CandidatesTab() {
 
   const users = Array.isArray(usersResponse?.data) ? usersResponse.data : [];
 
-  const filteredUsers = aiCandidateIds 
+  const filteredUsers = aiCandidateIds
     ? users.filter(user => aiCandidateIds.includes(user.id))
     : users.filter(user => {
-        if (pipelineMap[user.id]) return false;
-        const matchesSearch = `${user.first_name} ${user.last_name} ${user.email} ${user.profile?.headline || ''}`.toLowerCase().includes(searchQuery.toLowerCase());
-        const roleMatch = jobTitles.length > 0 ? jobTitles.some(t => user.role?.toLowerCase().includes(t.toLowerCase()) || user.profile?.headline?.toLowerCase().includes(t.toLowerCase())) : true;
-        const locationMatch = locations.length > 0 ? locations.some(l => user.profile?.location?.toLowerCase().includes(l.toLowerCase())) : true;
-        const skillsMatch = skills.length > 0 ? skills.some(s => (`${user.profile?.headline || ''} ${JSON.stringify((user.profile as any)?.skills || '')}`.toLowerCase().includes(s.toLowerCase()))) : true;
+      if (pipelineMap[user.id]) return false;
+      const matchesSearch = `${user.first_name} ${user.last_name} ${user.email} ${user.profile?.headline || ''}`.toLowerCase().includes(searchQuery.toLowerCase());
+      const roleMatch = jobTitles.length > 0 ? jobTitles.some(t => user.role?.toLowerCase().includes(t.toLowerCase()) || user.profile?.headline?.toLowerCase().includes(t.toLowerCase())) : true;
+      const locationMatch = locations.length > 0 ? locations.some(l => user.profile?.location?.toLowerCase().includes(l.toLowerCase())) : true;
+      const skillsMatch = skills.length > 0 ? skills.some(s => (`${user.profile?.headline || ''} ${JSON.stringify((user.profile as any)?.skills || '')}`.toLowerCase().includes(s.toLowerCase()))) : true;
 
-        return matchesSearch && roleMatch && locationMatch && skillsMatch;
-      });
+      return matchesSearch && roleMatch && locationMatch && skillsMatch;
+    });
 
   const unsaveFromPipelineMutation = useMutation({
     mutationFn: (pipelineId: string) => jobsService.removeFromPipeline(pipelineId),

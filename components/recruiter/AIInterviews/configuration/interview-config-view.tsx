@@ -381,7 +381,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 border-b border-border pb-6">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Configuration workspace</h1>
-          <p className="text-[12px] font-medium text-blue-600 mt-1 opacity-80">Architect multi-round AI agents & security</p>
+          <p className="text-[12px] font-medium text-[#0a66c2] mt-1 opacity-80">Architect multi-round AI agents & security</p>
         </div>
 
         <div className="flex items-center gap-8">
@@ -401,7 +401,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
             >
               <span className={cn(
                 "w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold border transition-all",
-                step === s.n ? "bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-600/20" : "border-border"
+                step === s.n ? "bg-[#0a66c2] border-[#0a66c2] text-white shadow-lg shadow-[#0a66c2]/20" : "border-border"
               )}>
                 {s.n}
               </span>
@@ -409,7 +409,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
               {step === s.n && (
                 <motion.div
                   layoutId="activeStep"
-                  className="absolute -bottom-6 left-0 right-0 h-0.5 bg-blue-600"
+                  className="absolute -bottom-6 left-0 right-0 h-0.5 bg-[#0a66c2]"
                 />
               )}
             </button>
@@ -453,8 +453,8 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                         className={cn(
                           "p-5 rounded-sm border text-left transition-all hover:shadow-md relative overflow-hidden group",
                           selectedJobId === job.id
-                            ? "bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-600/10"
-                            : "bg-card border-border hover:border-blue-600/30"
+                            ? "bg-[#0a66c2] border-[#0a66c2] text-white shadow-lg shadow-[#0a66c2]/10"
+                            : "bg-card border-border hover:border-[#0a66c2]/30"
                         )}
                       >
                         <div className="relative z-10">
@@ -474,7 +474,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                           toast.info("Pipeline synchronized with latest job data.");
                         }}
                         data-agent="sync-pipeline-button"
-                        className="px-6 py-2 bg-blue-600 text-white text-[10px] font-bold rounded-sm hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20"
+                        className="px-6 py-2 bg-[#0a66c2] text-white text-[10px] font-bold rounded-sm hover:bg-[#004182] transition-all shadow-lg shadow-[#0a66c2]/20"
                       >
                         Sync
                       </button>
@@ -499,7 +499,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                     disabled={!selectedJobId || selectedApplicationIds.length === 0}
                     onClick={() => setStep(2)}
                     data-agent="proceed-to-architecture-button"
-                    className="w-full mt-6 bg-blue-600 text-white py-4 rounded-sm font-bold text-[13px] hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-30 flex items-center justify-center shadow-lg shadow-blue-600/20"
+                    className="w-full mt-6 bg-[#0a66c2] text-white py-4 rounded-sm font-bold text-[13px] hover:bg-[#004182] transition-all active:scale-95 disabled:opacity-30 flex items-center justify-center shadow-lg shadow-[#0a66c2]/20"
                   >
                     Next step
                   </button>
@@ -517,7 +517,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                       if (selectedApplicationIds.length === applications.length) setSelectedApplicationIds([]);
                       else setSelectedApplicationIds(applications.map(a => a.id));
                     }}
-                    className="text-[10px] font-bold text-blue-600 hover:opacity-70 transition-opacity"
+                    className="text-[10px] font-bold text-[#0a66c2] hover:opacity-70 transition-opacity"
                   >
                     {selectedApplicationIds.length === applications.length ? 'Deselect All' : 'Select All'}
                   </button>
@@ -539,8 +539,8 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                         className={cn(
                           "relative group p-5 rounded-sm border cursor-pointer transition-all hover:shadow-md",
                           selectedApplicationIds.includes(app.id)
-                            ? "bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-600/10"
-                            : "bg-card border-border hover:border-blue-600/30"
+                            ? "bg-[#0a66c2] border-[#0a66c2] text-white shadow-lg shadow-[#0a66c2]/10"
+                            : "bg-card border-border hover:border-[#0a66c2]/30"
                         )}
                       >
                         <input
@@ -571,7 +571,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                           </div>
                           {selectedApplicationIds.includes(app.id) && (
                             <div className="w-5 h-5 rounded-full bg-white flex items-center justify-center shadow-sm">
-                              <svg className="w-3 h-3 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" /></svg>
+                              <svg className="w-3 h-3 text-[#0a66c2]" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" /></svg>
                             </div>
                           )}
                         </div>
@@ -598,7 +598,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                 <button
                   onClick={addRound}
                   data-agent="add-round-button"
-                  className="px-4 py-2 rounded-sm border border-blue-600 text-blue-600 text-[10px] font-bold hover:bg-blue-600 hover:text-white transition-all shadow-sm"
+                  className="px-4 py-2 rounded-sm border border-[#0a66c2] text-[#0a66c2] text-[10px] font-bold hover:bg-[#0a66c2] hover:text-white transition-all shadow-sm"
                 >
                   Add
                 </button>
@@ -610,10 +610,10 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                     key={round.id}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="p-5 rounded-sm border border-border bg-card shadow-sm hover:border-blue-600/30 transition-all"
+                    className="p-5 rounded-sm border border-border bg-card shadow-sm hover:border-[#0a66c2]/30 transition-all"
                   >
                     <div className="flex items-center justify-between mb-4">
-                      <span className="text-[11px] font-bold px-2 py-0.5 bg-blue-600 text-white rounded-sm">Round #{index + 1}</span>
+                      <span className="text-[11px] font-bold px-2 py-0.5 bg-[#0a66c2] text-white rounded-sm">Round #{index + 1}</span>
                       {rounds.length > 1 && (
                         <button
                           onClick={() => removeRound(round.id)}
@@ -631,7 +631,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                           value={round.title}
                           onChange={(e) => updateRound(round.id, { title: e.target.value })}
                           data-agent={`round-designation-select-${index}`}
-                          className="w-full bg-muted/10 border border-border rounded-sm py-2 px-3 text-[11px] font-bold focus:outline-none focus:ring-1 focus:ring-blue-600 transition-all appearance-none"
+                          className="w-full bg-muted/10 border border-border rounded-sm py-2 px-3 text-[11px] font-bold focus:outline-none focus:ring-1 focus:ring-[#0a66c2] transition-all appearance-none"
                         >
                           <option value="" disabled>Select Round Type</option>
                           {metadata.designations.map((r: any) => (
@@ -647,7 +647,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                           value={round.round_category}
                           onChange={(e) => updateRound(round.id, { round_category: e.target.value as any })}
                           data-agent={`round-category-select-${index}`}
-                          className="w-full bg-muted/10 border border-border rounded-sm py-3 px-4 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-blue-600 transition-all appearance-none"
+                          className="w-full bg-muted/10 border border-border rounded-sm py-3 px-4 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-[#0a66c2] transition-all appearance-none"
                         >
                           {(metadata.round_categories || DEFAULT_CATEGORIES).map((c: any) => (
                             <option key={c.value} value={c.value}>{c.label}</option>
@@ -661,7 +661,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                           value={round.difficulty}
                           onChange={(e) => updateRound(round.id, { difficulty: e.target.value as any })}
                           data-agent={`evaluation-depth-select-${index}`}
-                          className="w-full bg-muted/10 border border-border rounded-sm py-3 px-4 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-blue-600 transition-all appearance-none"
+                          className="w-full bg-muted/10 border border-border rounded-sm py-3 px-4 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-[#0a66c2] transition-all appearance-none"
                         >
                           {metadata.difficulty_levels.map((l: any) => (
                             <option key={l.value} value={l.value}>{l.label}</option>
@@ -675,7 +675,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                           value={round.question_format}
                           onChange={(e) => updateRound(round.id, { question_format: e.target.value })}
                           data-agent={`question-format-select-${index}`}
-                          className="w-full bg-muted/10 border border-border rounded-sm py-3 px-4 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-blue-600 transition-all appearance-none"
+                          className="w-full bg-muted/10 border border-border rounded-sm py-3 px-4 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-[#0a66c2] transition-all appearance-none"
                         >
                           {metadata.question_formats.map((f: any) => (
                             <option key={f.value} value={f.value}>{f.label}</option>
@@ -697,7 +697,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                                 });
                               }}
                               data-agent={`programming-language-select-${index}`}
-                              className="w-full bg-muted/10 border border-border rounded-sm py-3 px-4 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-blue-600 transition-all appearance-none"
+                              className="w-full bg-muted/10 border border-border rounded-sm py-3 px-4 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-[#0a66c2] transition-all appearance-none"
                             >
                               <option value="">Auto-detect</option>
                               {metadata.programming_languages.map((l: any) => (
@@ -728,8 +728,8 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                                       className={cn(
                                         "flex items-center gap-2 p-3 rounded-sm border cursor-pointer transition-all text-[11px] font-bold select-none active:scale-[0.98]",
                                         isChecked
-                                          ? "bg-blue-600/10 border-blue-600/30 text-blue-600 shadow-sm shadow-blue-600/5"
-                                          : "bg-muted/5 border-border hover:border-blue-600/20 text-muted-foreground hover:text-foreground"
+                                          ? "bg-[#0a66c2]/10 border-[#0a66c2]/30 text-[#0a66c2] shadow-sm shadow-[#0a66c2]/5"
+                                          : "bg-muted/5 border-border hover:border-[#0a66c2]/20 text-muted-foreground hover:text-foreground"
                                       )}
                                     >
                                       <input
@@ -744,7 +744,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                                           }
                                           updateRound(round.id, { selected_topics: updated });
                                         }}
-                                        className="rounded border-border text-blue-600 focus:ring-blue-600 w-3.5 h-3.5 animate-none"
+                                        className="rounded border-border text-[#0a66c2] focus:ring-[#0a66c2] w-3.5 h-3.5 animate-none"
                                       />
                                       <span className="truncate">{topic}</span>
                                     </label>
@@ -769,7 +769,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                                     }
                                   }
                                 }}
-                                className="bg-muted/10 border border-dashed border-border rounded-sm px-3 py-2 text-[11px] font-semibold w-full max-w-xs focus:outline-none focus:border-blue-600 transition-all placeholder:opacity-50"
+                                className="bg-muted/10 border border-dashed border-border rounded-sm px-3 py-2 text-[11px] font-semibold w-full max-w-xs focus:outline-none focus:border-[#0a66c2] transition-all placeholder:opacity-50"
                               />
                             </div>
                           </div>
@@ -798,8 +798,8 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                                         className={cn(
                                           "flex items-center gap-2 p-3 rounded-sm border cursor-pointer transition-all text-[11px] font-bold select-none active:scale-[0.98]",
                                           isChecked
-                                            ? "bg-teal-600/10 border-teal-600/30 text-teal-600 shadow-sm shadow-teal-600/5"
-                                            : "bg-muted/5 border-border hover:border-teal-600/20 text-muted-foreground hover:text-foreground"
+                                            ? "bg-[#0a66c2]/10 border-[#0a66c2]/30 text-[#0a66c2] shadow-sm shadow-[#0a66c2]/5"
+                                            : "bg-muted/5 border-border hover:border-[#0a66c2]/20 text-muted-foreground hover:text-foreground"
                                         )}
                                       >
                                         <input
@@ -814,7 +814,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                                             }
                                             updateRound(round.id, { selected_frameworks: updated });
                                           }}
-                                          className="rounded border-border text-teal-600 focus:ring-teal-600 w-3.5 h-3.5 animate-none"
+                                          className="rounded border-border text-[#0a66c2] focus:ring-[#0a66c2] w-3.5 h-3.5 animate-none"
                                         />
                                         <span className="truncate">{framework}</span>
                                       </label>
@@ -839,7 +839,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                                       }
                                     }
                                   }}
-                                  className="bg-muted/10 border border-dashed border-border rounded-sm px-3 py-2 text-[11px] font-semibold w-full max-w-xs focus:outline-none focus:border-teal-600 transition-all placeholder:opacity-50"
+                                  className="bg-muted/10 border border-dashed border-border rounded-sm px-3 py-2 text-[11px] font-semibold w-full max-w-xs focus:outline-none focus:border-[#0a66c2] transition-all placeholder:opacity-50"
                                 />
                               </div>
                             </div>
@@ -854,7 +854,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                           value={round.max_questions}
                           onChange={(e) => updateRound(round.id, { max_questions: parseInt(e.target.value) })}
                           data-agent={`question-count-input-${index}`}
-                          className="w-full bg-muted/10 border border-border rounded-sm py-3 px-4 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-blue-600 transition-all"
+                          className="w-full bg-muted/10 border border-border rounded-sm py-3 px-4 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-[#0a66c2] transition-all"
                         />
                       </div>
 
@@ -865,17 +865,17 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                           value={round.timer_seconds}
                           onChange={(e) => updateRound(round.id, { timer_seconds: parseInt(e.target.value) })}
                           data-agent={`allocated-time-input-${index}`}
-                          className="w-full bg-muted/10 border border-border rounded-sm py-3 px-4 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-blue-600 transition-all"
+                          className="w-full bg-muted/10 border border-border rounded-sm py-3 px-4 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-[#0a66c2] transition-all"
                         />
                       </div>
 
                       {round.question_format === 'VIDEO' ? (
-                        <div className="md:col-span-2 p-6 rounded-sm bg-blue-600/[0.03] border border-blue-600/10 flex items-start gap-4">
-                          <div className="w-8 h-8 rounded-full bg-blue-600/10 text-blue-600 flex items-center justify-center shrink-0">
+                        <div className="md:col-span-2 p-6 rounded-sm bg-[#0a66c2]/[0.03] border border-[#0a66c2]/10 flex items-start gap-4">
+                          <div className="w-8 h-8 rounded-full bg-[#0a66c2]/10 text-[#0a66c2] flex items-center justify-center shrink-0">
                             <Sparkles className="w-4 h-4" />
                           </div>
                           <div>
-                            <p className="text-[12px] font-bold text-blue-600">AI HR Agent Active</p>
+                            <p className="text-[12px] font-bold text-[#0a66c2]">AI HR Agent Active</p>
                             <p className="text-[10px] text-muted-foreground mt-1 leading-relaxed">
                               This round is configured as a Live AI Voice/Video Interview. The AI HR Agent will act as the host, vocalizing tailored questions and transcribing spoken answers at runtime. Manual question layout is not required.
                             </p>
@@ -905,7 +905,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                               <button
                                 onClick={() => handleGenerateQuestions(round.id)}
                                 data-agent={`generate-questions-ai-button-${index}`}
-                                className="px-4 py-1.5 rounded-sm bg-blue-600 text-white text-[11px] font-bold hover:bg-blue-700 transition-all flex items-center gap-2"
+                                className="px-4 py-1.5 rounded-sm bg-[#0a66c2] text-white text-[11px] font-bold hover:bg-[#004182] transition-all flex items-center gap-2"
                               >
                                 <Sparkles className="w-3.5 h-3.5" />
                                 Generate with AI
@@ -936,12 +936,12 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                                         }}
                                         placeholder="Type your question here..."
                                         data-agent="question-text-textarea"
-                                        className="w-full bg-muted/10 border border-border rounded-sm py-3 px-4 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-blue-600 transition-all min-h-[60px]"
+                                        className="w-full bg-muted/10 border border-border rounded-sm py-3 px-4 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-[#0a66c2] transition-all min-h-[60px]"
                                       />
                                     </div>
 
                                     {typeof q === 'object' && q.mcq_options && q.mcq_options.length > 0 && (
-                                      <div className="space-y-2 border border-border/60 bg-blue-600/[0.01] p-4 rounded-sm">
+                                      <div className="space-y-2 border border-border/60 bg-[#0a66c2]/[0.01] p-4 rounded-sm">
                                         <label className="text-[10px] font-bold text-muted-foreground block uppercase tracking-wider opacity-60">MCQ Options Preview</label>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                           {q.mcq_options.map((opt: any, optIdx: number) => (
@@ -970,7 +970,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                                     )}
 
                                     <div>
-                                      <label className="text-[10px] font-bold text-blue-600 block mb-1 uppercase tracking-wider opacity-60 flex items-center gap-2">
+                                      <label className="text-[10px] font-bold text-[#0a66c2] block mb-1 uppercase tracking-wider opacity-60 flex items-center gap-2">
                                         <BrainCircuit className="w-3 h-3" />
                                         AI Generated Ideal Answer
                                       </label>
@@ -986,7 +986,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                                         }}
                                         placeholder="AI will generate an ideal answer to compare against..."
                                         data-agent="ideal-answer-textarea"
-                                        className="w-full bg-blue-600/[0.03] border border-blue-600/10 rounded-sm py-3 px-4 text-xs font-medium italic focus:outline-none focus:ring-1 focus:ring-blue-600 transition-all min-h-[60px]"
+                                        className="w-full bg-[#0a66c2]/[0.03] border border-[#0a66c2]/10 rounded-sm py-3 px-4 text-xs font-medium italic focus:outline-none focus:ring-1 focus:ring-[#0a66c2] transition-all min-h-[60px]"
                                       />
                                     </div>
                                   </div>
@@ -1005,7 +1005,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                                         updateRound(round.id, { questions: newQuestions });
                                       }}
                                       data-agent="marks-input"
-                                      className="w-full bg-muted/10 border border-border rounded-sm py-3 px-3 text-xs font-bold text-center focus:outline-none focus:ring-1 focus:ring-blue-600 transition-all"
+                                      className="w-full bg-muted/10 border border-border rounded-sm py-3 px-3 text-xs font-bold text-center focus:outline-none focus:ring-1 focus:ring-[#0a66c2] transition-all"
                                     />
                                   </div>
                                   <button
@@ -1053,7 +1053,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                               <span className="w-4 h-4 rounded-full bg-muted border border-border flex items-center justify-center text-[8px] font-bold text-muted-foreground">{i + 1}</span>
                               <span className="text-[11px] font-bold text-foreground truncate max-w-[180px]">{r.title || `Round ${i + 1}`}</span>
                             </div>
-                            <span className="text-[11px] font-bold text-blue-600">{roundMarks} pts</span>
+                            <span className="text-[11px] font-bold text-[#0a66c2]">{roundMarks} pts</span>
                           </div>
                         );
                       })}
@@ -1065,7 +1065,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-[11px] font-bold opacity-50">Total Potential Score</span>
-                      <span className="text-sm font-bold text-blue-600">
+                      <span className="text-sm font-bold text-[#0a66c2]">
                         {rounds.reduce((totalAcc, r) => totalAcc + (r.questions?.reduce((acc, q: any) => acc + (typeof q === 'string' ? 10 : (q.marks || 0)), 0) || 0), 0)} Marks
                       </span>
                     </div>
@@ -1077,7 +1077,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                     disabled={isSubmitting || isGenerating || rounds.some(r => r.question_format !== 'VIDEO' && (!r.questions || r.questions.length === 0))}
                     onClick={handleConfigure}
                     data-agent="dispatch-interviews-button"
-                    className="w-full py-5 rounded-sm bg-blue-600 text-white font-bold text-sm shadow-2xl shadow-blue-600/20 hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-30 flex items-center justify-center"
+                    className="w-full py-5 rounded-sm bg-[#0a66c2] text-white font-bold text-sm shadow-2xl shadow-[#0a66c2]/20 hover:bg-[#004182] transition-all active:scale-95 disabled:opacity-30 flex items-center justify-center"
                   >
                     {isSubmitting ? 'Dispatching Agents...' : isGenerating ? 'Generating...' : 'Dispatch AI Agents'}
                   </button>
@@ -1089,8 +1089,8 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                   </button>
                 </div>
 
-                <div className="p-6 bg-blue-600/5 rounded-sm border border-blue-600/10">
-                  <p className="text-[10px] font-bold text-blue-600 mb-3">Security Enforcement</p>
+                <div className="p-6 bg-[#0a66c2]/5 rounded-sm border border-[#0a66c2]/10">
+                  <p className="text-[10px] font-bold text-[#0a66c2] mb-3">Security Enforcement</p>
                   <p className="text-[10px] text-muted-foreground leading-relaxed font-medium">
                     All sessions are encrypted and monitored by real-time behavioral AI to ensure candidate authenticity and integrity.
                   </p>
@@ -1131,7 +1131,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                           navigator.clipboard.writeText(result.inviteLink);
                           toast.success('Invite link copied');
                         }}
-                        className="px-4 py-2 rounded-sm bg-muted border border-border text-[10px] font-bold hover:bg-blue-600 hover:text-white transition-all active:scale-95 whitespace-nowrap"
+                        className="px-4 py-2 rounded-sm bg-muted border border-border text-[10px] font-bold hover:bg-[#0a66c2] hover:text-white transition-all active:scale-95 whitespace-nowrap"
                       >
                         Copy Invite
                       </button>
@@ -1200,7 +1200,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
                 <button
                   onClick={onBack}
                   data-agent="return-to-pipeline-button"
-                  className="px-12 py-4 rounded-sm bg-blue-600 text-white font-bold text-sm shadow-xl shadow-blue-600/20 hover:bg-blue-700 transition-all active:scale-95"
+                  className="px-12 py-4 rounded-sm bg-[#0a66c2] text-white font-bold text-sm shadow-xl shadow-[#0a66c2]/20 hover:bg-[#004182] transition-all active:scale-95"
                 >
                   Return to Pipeline
                 </button>

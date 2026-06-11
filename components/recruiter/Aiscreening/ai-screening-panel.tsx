@@ -49,13 +49,20 @@ export function AIScreeningPanel({
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [agentModalOpen, setAgentModalOpen] = useState(false);
   const [isModelMenuOpen, setIsModelMenuOpen] = useState(false);
-  const [selectedProvider, setSelectedProvider] = useState<'gemini' | 'kimi'>('gemini');
-  const [hoveredProvider, setHoveredProvider] = useState<'gemini' | 'kimi'>('gemini');
+  const [selectedProvider, setSelectedProvider] = useState<'gemini' | 'kimi' | 'grok'>('gemini');
+  const [hoveredProvider, setHoveredProvider] = useState<'gemini' | 'kimi' | 'grok'>('gemini');
 
   const getModelLabel = (modelVal: string) => {
     switch (modelVal) {
       case 'kimi':
-        return 'Kimi Model';
+        return 'Kimi Reasoning';
+      case 'grok':
+        return 'Grok 4.0';
+      case 'grok-4-20-non-reasoning':
+        return 'Grok 4.20 Non-Reasoning';
+      case 'grok-4.1-non-reasoning':
+      case 'grok-4-1-fast-non-reasoning':
+        return 'Grok 4.1 Non-Reasoning';
       case 'gemini-3.5-flash':
         return 'Gemini 3.5 Flash';
       case 'gemini-3.5-flash-live':
@@ -176,7 +183,7 @@ export function AIScreeningPanel({
   // Sync selectedProvider & hoveredProvider with selectedModel on mount / change, and reset hoveredProvider on open/close
   useEffect(() => {
     if (selectedModel) {
-      const provider = selectedModel === 'kimi' ? 'kimi' : 'gemini';
+      const provider = selectedModel === 'kimi' ? 'kimi' : selectedModel.startsWith('grok') ? 'grok' : 'gemini';
       setSelectedProvider(provider);
       setHoveredProvider(provider);
     }
@@ -971,7 +978,7 @@ export function AIScreeningPanel({
                   disabled={isProcessing}
                   className="flex items-center gap-1.5 px-3 py-1.5 bg-muted/85 dark:bg-slate-800 hover:bg-muted dark:hover:bg-slate-700 border border-border rounded-[3px] text-[10px] font-bold text-black dark:text-white transition-all shadow-sm disabled:opacity-50"
                 >
-                  <span>{selectedModel === 'kimi' ? 'Kimi' : 'Google'} • {getModelLabel(selectedModel)}</span>
+                  <span>{selectedModel === 'kimi' ? 'Kimi' : selectedModel.startsWith('grok') ? 'Grok' : 'Google'} • {getModelLabel(selectedModel)}</span>
                   <svg xmlns="http://www.w3.org/2000/svg" width="6" height="6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" className={cn("transition-transform duration-200", isModelMenuOpen ? "rotate-180" : "")}><polyline points="18 15 12 9 6 15" /></svg>
                 </button>
 
@@ -1012,12 +1019,24 @@ export function AIScreeningPanel({
                           <span>Kimi</span>
                           <ChevronRight className="w-2.5 h-2.5 opacity-60" />
                         </button>
+                        <button
+                          type="button"
+                          onMouseEnter={() => setHoveredProvider('grok')}
+                          onClick={() => setHoveredProvider('grok')}
+                          className={cn(
+                            "w-full text-left px-2 py-1.5 rounded-[3px] text-[10px] font-bold transition-colors flex items-center justify-between",
+                            hoveredProvider === 'grok' ? "bg-purple-600/10 text-purple-600 font-extrabold" : "text-black dark:text-white hover:bg-muted"
+                          )}
+                        >
+                          <span>Grok</span>
+                          <ChevronRight className="w-2.5 h-2.5 opacity-60" />
+                        </button>
                       </div>
 
                       {/* Right Column: Models List */}
                       <div className="flex-1 pl-1.5 flex flex-col min-w-0">
                         <div className="px-1.5 py-1 text-[8px] font-black text-muted-foreground uppercase tracking-wider">
-                          Models ({hoveredProvider === 'gemini' ? 'Google' : 'Kimi'})
+                          Models ({hoveredProvider === 'gemini' ? 'Google' : hoveredProvider === 'kimi' ? 'Kimi' : 'Grok'})
                         </div>
                         <div className="h-[220px] overflow-y-auto space-y-0.5 scrollbar-thin pr-0.5">
                           {hoveredProvider === 'gemini' ? (
@@ -1063,10 +1082,32 @@ export function AIScreeningPanel({
                                 </button>
                               );
                             })
-                          ) : (
+                          ) : hoveredProvider === 'kimi' ? (
                             // Kimi Models
                             [
-                              { value: 'kimi', label: 'Kimi Model' }
+                              { value: 'kimi', label: 'Kimi Reasoning' }
+                            ].map((m) => {
+                              return (
+                                <button
+                                  key={m.value}
+                                  onClick={() => {
+                                    setSelectedModel(m.value);
+                                    setIsModelMenuOpen(false);
+                                  }}
+                                  className={cn(
+                                    "w-full text-left px-2 py-1.5 rounded-[3px] text-[10px] font-bold flex items-center justify-between gap-1.5 transition-colors text-black dark:text-white",
+                                    selectedModel === m.value ? "bg-purple-600/10 text-purple-600 hover:text-purple-600" : "hover:bg-muted"
+                                  )}
+                                >
+                                  <span>{m.label}</span>
+                                </button>
+                              );
+                            })
+                          ) : (
+                            // Grok Models
+                            [
+                              { value: 'grok-4-20-non-reasoning', label: 'Grok 4.20 Non-Reasoning' },
+                              { value: 'grok-4.1-non-reasoning', label: 'Grok 4.1 Non-Reasoning' }
                             ].map((m) => {
                               return (
                                 <button

@@ -81,8 +81,8 @@ export function AIInterviewsHeader({ companyName, activeSection, onSectionChange
         </div>
       </div>
 
-      {/* Middle: Specialized Navigation (Matching Recruiter Style) */}
-      <nav className="hidden md:flex items-center gap-1 h-full">
+      {/* Middle: Specialized Navigation (Matching Recruiter Style) - Hidden as we use the sidebar now */}
+      <nav className="hidden">
         {navItems.map((item) => (
           <button
             key={item.id}

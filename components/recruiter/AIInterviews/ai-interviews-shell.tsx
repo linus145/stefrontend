@@ -5,6 +5,7 @@ import { Settings2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { AIInterviewsHeader } from './interview-header';
+import { AIInterviewsSidebar } from './interview-sidebar';
 import { InterviewPipelineView } from './interview-pipeline-view';
 import { InterviewConfigView } from './configuration/interview-config-view';
 import { EvaluationView } from './evaluation/evaluation-view';
@@ -18,6 +19,20 @@ export function AIInterviewsShell() {
   const router = useRouter();
 
   const [activeSection, setActiveSection] = useState('pipeline');
+
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('interview-sidebar-collapsed') === 'true';
+    }
+    return false;
+  });
+
+  const handleSidebarCollapse = (collapsed: boolean) => {
+    setIsSidebarCollapsed(collapsed);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('interview-sidebar-collapsed', String(collapsed));
+    }
+  };
 
   // Interview Pipeline requires Growth (12000) or Enterprise (18000) plan
   const hasPremium = userSubscription && Number(userSubscription.plan_details?.price) >= 12000 && userSubscription.status === 'active';
@@ -120,7 +135,15 @@ export function AIInterviewsShell() {
         onSectionChange={setActiveSection}
       />
 
-      <main className="flex-1 flex flex-col min-w-0 pt-16">
+      <AIInterviewsSidebar
+        isCollapsed={isSidebarCollapsed}
+        onToggle={() => handleSidebarCollapse(!isSidebarCollapsed)}
+        activeSection={activeSection}
+        onSectionChange={setActiveSection}
+        companyName={company.company_name}
+      />
+
+      <main className={`flex-1 flex flex-col min-w-0 pt-16 transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'}`}>
         <div className="flex-1 custom-scrollbar">
           {renderContent()}
         </div>

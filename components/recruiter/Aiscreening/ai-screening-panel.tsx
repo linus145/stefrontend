@@ -49,9 +49,20 @@ export function AIScreeningPanel({
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [agentModalOpen, setAgentModalOpen] = useState(false);
   const [isModelMenuOpen, setIsModelMenuOpen] = useState(false);
+  const [selectedProvider, setSelectedProvider] = useState<'gemini' | 'kimi'>('gemini');
+
+  // Sync provider tab when model selection menu opens or active model changes
+  useEffect(() => {
+    if (isModelMenuOpen) {
+      const isKimi = selectedModel === 'kimi' || selectedModel === 'Kimi-K2.6';
+      setSelectedProvider(isKimi ? 'kimi' : 'gemini');
+    }
+  }, [isModelMenuOpen, selectedModel]);
 
   const getModelLabel = (modelVal: string) => {
     switch (modelVal) {
+      case 'kimi':
+        return 'Kimi Model';
       case 'gemini-3.5-flash':
         return 'Gemini 3.5 Flash';
       case 'gemini-3.5-flash-live':
@@ -191,7 +202,7 @@ export function AIScreeningPanel({
   const { data: historyData, isLoading: historyLoading, refetch: refetchHistory, isError: historyError } = useQuery({
     queryKey: ['screening-history'],
     queryFn: () => aiService.getScreeningHistory(),
-    enabled: isOpen,
+    enabled: true,
     retry: 3,
     refetchInterval: (query) => {
       const isProcessing = results?.status === 'processing';
@@ -204,10 +215,13 @@ export function AIScreeningPanel({
     mutationFn: (reportId: string) => aiService.deleteScreeningReport(reportId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['screening-history'] });
-      toast.success('Report deleted');
+      toast.success('Screening process cancelled.');
+      if (onLoadHistoryReport) {
+        onLoadHistoryReport(null);
+      }
     },
     onError: () => {
-      toast.error('Failed to delete report');
+      toast.error('Failed to cancel screening.');
     }
   });
 
@@ -251,6 +265,20 @@ export function AIScreeningPanel({
       }
     }
   }, [historyData, results, onLoadHistoryReport]);
+
+  // Automatically restore/load the latest screening report results for the active job from history if no results are loaded
+  useEffect(() => {
+    if (activeJobId && historyData?.data && !results) {
+      const jobReports = historyData.data.filter((r: any) => r.job_id === activeJobId);
+      if (jobReports.length > 0) {
+        const latestReport = jobReports[0];
+        if (latestReport.results && onLoadHistoryReport) {
+          onLoadHistoryReport(latestReport.results);
+        }
+      }
+    }
+  }, [historyData, activeJobId, results, onLoadHistoryReport]);
+
 
   const toggleExpand = (id: string) => {
     setExpandedId(expandedId === id ? null : id);
@@ -382,11 +410,29 @@ export function AIScreeningPanel({
                         We are analyzing the resumes using <strong className="text-purple-600 dark:text-purple-400 font-extrabold">{getModelLabel(selectedModel)}</strong> in the background.
                         This usually takes 15-30 seconds per resume.
                       </p>
-                      <div className="pt-4 space-y-3">
-                        <span className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-500/10 text-indigo-500 text-[10px] font-black tracking-widest rounded-sm">
-                          <span className="w-1.5 h-1.5 rounded-sm bg-indigo-500 animate-ping" />
-                          Auto-refreshing ({processingTime}s)
-                        </span>
+                      <div className="pt-4 space-y-3 w-full">
+                        <div className="flex flex-wrap items-center justify-center gap-2">
+                          <span className="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-500/10 text-indigo-500 text-[10px] font-black tracking-widest rounded-sm select-none">
+                            <span className="w-1.5 h-1.5 rounded-sm bg-indigo-500 animate-ping" />
+                            Auto-refreshing ({processingTime}s)
+                          </span>
+
+                          {(results?.report_id || results?.id) && (
+                            <button
+                              onClick={() => deleteMutation.mutate(results.report_id || results.id)}
+                              disabled={deleteMutation.isPending}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 text-[10px] font-black tracking-widest rounded-sm border border-rose-500/20 transition-all active:scale-95 transform cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
+                              title="Cancel screening"
+                            >
+                              {deleteMutation.isPending ? (
+                                <Loader2 className="w-3 h-3 animate-spin" />
+                              ) : (
+                                <X className="w-3.5 h-3.5" />
+                              )}
+                              Stop screening
+                            </button>
+                          )}
+                        </div>
 
                         {processingTime > 30 && (
                           <div className="pt-2 animate-in fade-in slide-in-from-bottom-2 duration-500">
@@ -404,9 +450,27 @@ export function AIScreeningPanel({
                   </>
                 )}
               </div>
+            ) : results && (results.status === 'failed' || results.status === 'error' || !results.top_candidates) ? (
+              <div className="flex flex-col items-center justify-center h-full space-y-6 px-12 text-center py-12">
+                <div className="w-12 h-12 bg-rose-500/10 rounded-sm flex items-center justify-center">
+                  <AlertCircle className="w-6 h-6 text-rose-500" />
+                </div>
+                <div className="space-y-2">
+                  <p className="text-sm font-black text-slate-900 dark:text-white tracking-tight">Screening failed</p>
+                  <p className="text-xs text-rose-500 font-medium">
+                    {results.error || 'An error occurred during resume screening.'}
+                  </p>
+                  <button
+                    onClick={onRestartAnalysis}
+                    className="mt-4 px-6 py-2 bg-indigo-600 text-white text-[10px] font-black tracking-widest rounded-sm shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 transition-all transform active:scale-95"
+                  >
+                    Restart screening
+                  </button>
+                </div>
+              </div>
             ) : results ? (
               <div className="space-y-6 pb-24">
-                {results.top_candidates.map((cand: any, idx: number) => {
+                {(results.top_candidates || []).map((cand: any, idx: number) => {
                   const isExpanded = expandedId === cand.id;
                   const ai = cand.analysis?.recruiter_view;
 
@@ -720,32 +784,7 @@ export function AIScreeningPanel({
                               </div>
                             </div>
 
-                            {/* Pipeline Disposition & Hiring Confidence (new fields) */}
-                            {(ai.pipeline_disposition || ai.hiring_confidence) && (
-                              <div className="grid grid-cols-2 gap-3">
-                                {ai.pipeline_disposition && (
-                                  <div className="bg-slate-50 dark:bg-slate-900/50 p-2.5 rounded-sm border border-slate-100 dark:border-slate-800">
-                                    <p className="text-[9px] font-bold text-slate-400 tracking-widest mb-1">Disposition</p>
-                                    <p className="text-xs font-bold text-violet-600 dark:text-violet-400 truncate">
-                                      {toTitleCase(ai.pipeline_disposition)}
-                                    </p>
-                                  </div>
-                                )}
-                                {ai.hiring_confidence && (
-                                  <div className="bg-slate-50 dark:bg-slate-900/50 p-2.5 rounded-sm border border-slate-100 dark:border-slate-800">
-                                    <p className="text-[9px] font-bold text-slate-400 tracking-widest mb-1">Hiring confidence</p>
-                                    <p className={cn(
-                                      "text-xs font-bold truncate",
-                                      ai.hiring_confidence === 'HIGH' ? "text-emerald-600 dark:text-emerald-400" :
-                                        ai.hiring_confidence === 'MEDIUM' ? "text-amber-600 dark:text-amber-400" :
-                                          "text-rose-600 dark:text-rose-400"
-                                    )}>
-                                      {toTitleCase(ai.hiring_confidence)}
-                                    </p>
-                                  </div>
-                                )}
-                              </div>
-                            )}
+
 
                             {/* Recruiter Action Memo (new field) */}
                             {ai.recruiter_action_memo && (
@@ -906,48 +945,85 @@ export function AIScreeningPanel({
                       className="fixed inset-0 z-40"
                       onClick={() => setIsModelMenuOpen(false)}
                     />
-                    <div className="absolute bottom-full left-0 mb-1.5 w-48 bg-popover border border-border rounded-[4px] shadow-xl p-1 z-50 flex flex-col animate-in fade-in slide-in-from-bottom-1 duration-200">
-                      {[
-                        { value: 'gemini-3.5-flash', label: 'Gemini 3.5 Flash' },
-                        { value: 'gemini-3.5-flash-live', label: 'Gemini 3.5 Flash Live' },
-                        { value: 'gemini-3.0-flash-live', label: 'Gemini 3.0 Flash Live' },
-                        { value: 'gemini-3.1-pro-preview', label: 'Gemini 3.1 Pro (Preview)' },
-                        { value: 'gemini-3.1-flash-lite', label: 'Gemini 3.1 Flash Lite' },
-                        { value: 'gemini-3-pro-preview', label: 'Gemini 3 Pro (Preview)' },
-                        { value: 'gemini-3-flash-preview', label: 'Gemini 3 Flash (Preview)' },
-                        { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
-                        { value: 'gemini-2.5-flash-lite', label: 'Gemini 2.5 Flash Lite' },
-                        { value: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro' },
-                        { value: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash' },
-                        { value: 'gemini-2.0-flash-thinking-exp', label: 'Gemini 2.0 Thinking' },
-                        { value: 'gemini-2.0-pro-exp', label: 'Gemini 2.0 Pro (Exp)' },
-                        { value: 'text-multilingual-embedding-002', label: 'Gemini Multilingual Embedding 2' }
-                      ].map((m) => {
-                        const isModelLocked = m.value.startsWith('gemini-3') && planPrice < 18000;
-                        return (
-                          <button
-                            key={m.value}
-                            onClick={() => {
-                              if (isModelLocked) {
-                                toast.error('Gemini 3.x models are locked', {
-                                  description: 'These models are only available on the Enterprise AI OS plan. Please upgrade your subscription to unlock.'
-                                });
-                                return;
-                              }
-                              setSelectedModel(m.value);
-                              setIsModelMenuOpen(false);
-                            }}
-                            className={cn(
-                              "w-full text-left px-2 py-1.5 rounded-[3px] text-[10px] font-bold flex items-center justify-between gap-1.5 transition-colors text-black dark:text-white",
-                              selectedModel === m.value ? "bg-purple-600/10 text-purple-600 hover:text-purple-600" : "hover:bg-muted",
-                              isModelLocked && "opacity-50 hover:bg-transparent"
-                            )}
-                          >
-                            <span>{m.label}</span>
-                            {isModelLocked && <Lock className="w-3 h-3 text-amber-500" />}
-                          </button>
-                        );
-                      })}
+                    <div className="absolute bottom-full left-0 mb-1.5 w-52 bg-popover border border-border rounded-[4px] shadow-xl p-1 z-50 flex flex-col animate-in fade-in slide-in-from-bottom-1 duration-200">
+                      {/* Provider Selector Tabs */}
+                      <div className="flex border-b border-border mb-1.5 p-0.5 gap-0.5 bg-muted/50 rounded-sm">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedProvider('gemini')}
+                          className={cn(
+                            "flex-1 py-1 text-[9px] font-black rounded-sm uppercase tracking-wider text-center transition-all",
+                            selectedProvider === 'gemini'
+                              ? "bg-white dark:bg-slate-800 text-purple-600 shadow-sm border border-border/20"
+                              : "text-muted-foreground hover:bg-muted"
+                          )}
+                        >
+                          Gemini
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedProvider('kimi')}
+                          className={cn(
+                            "flex-1 py-1 text-[9px] font-black rounded-sm uppercase tracking-wider text-center transition-all",
+                            selectedProvider === 'kimi'
+                              ? "bg-white dark:bg-slate-800 text-purple-600 shadow-sm border border-border/20"
+                              : "text-muted-foreground hover:bg-muted"
+                          )}
+                        >
+                          Kimi
+                        </button>
+                      </div>
+
+                      {/* Scrollable Model List */}
+                      <div className="max-h-48 overflow-y-auto space-y-0.5 scrollbar-thin">
+                        {[
+                          { value: 'kimi', label: 'Kimi Model' },
+                          { value: 'gemini-3.5-flash', label: 'Gemini 3.5 Flash' },
+                          { value: 'gemini-3.5-flash-live', label: 'Gemini 3.5 Flash Live' },
+                          { value: 'gemini-3.0-flash-live', label: 'Gemini 3.0 Flash Live' },
+                          { value: 'gemini-3.1-pro-preview', label: 'Gemini 3.1 Pro (Preview)' },
+                          { value: 'gemini-3.1-flash-lite', label: 'Gemini 3.1 Flash Lite' },
+                          { value: 'gemini-3-pro-preview', label: 'Gemini 3 Pro (Preview)' },
+                          { value: 'gemini-3-flash-preview', label: 'Gemini 3 Flash (Preview)' },
+                          { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
+                          { value: 'gemini-2.5-flash-lite', label: 'Gemini 2.5 Flash Lite' },
+                          { value: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro' },
+                          { value: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash' },
+                          { value: 'gemini-2.0-flash-thinking-exp', label: 'Gemini 2.0 Thinking' },
+                          { value: 'gemini-2.0-pro-exp', label: 'Gemini 2.0 Pro (Exp)' },
+                          { value: 'text-multilingual-embedding-002', label: 'Gemini Multilingual Embedding 2' }
+                        ]
+                        .filter(m => {
+                          const isKimi = m.value === 'kimi' || m.value === 'Kimi-K2.6';
+                          return selectedProvider === 'kimi' ? isKimi : !isKimi;
+                        })
+                        .map((m) => {
+                          const isModelLocked = m.value.startsWith('gemini-3') && planPrice < 18000;
+                          return (
+                            <button
+                              key={m.value}
+                              onClick={() => {
+                                if (isModelLocked) {
+                                  toast.error('Gemini 3.x models are locked', {
+                                    description: 'These models are only available on the Enterprise AI OS plan. Please upgrade your subscription to unlock.'
+                                  });
+                                  return;
+                                }
+                                setSelectedModel(m.value);
+                                setIsModelMenuOpen(false);
+                              }}
+                              className={cn(
+                                "w-full text-left px-2 py-1.5 rounded-[3px] text-[10px] font-bold flex items-center justify-between gap-1.5 transition-colors text-black dark:text-white",
+                                selectedModel === m.value ? "bg-purple-600/10 text-purple-600 hover:text-purple-600" : "hover:bg-muted",
+                                isModelLocked && "opacity-50 hover:bg-transparent"
+                              )}
+                            >
+                              <span>{m.label}</span>
+                              {isModelLocked && <Lock className="w-3 h-3 text-amber-500" />}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
                   </>
                 )}

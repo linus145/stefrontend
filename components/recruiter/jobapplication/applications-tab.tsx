@@ -26,7 +26,6 @@ interface ApplicationsTabProps {
 export function ApplicationsTab({ selectedJobId, onBack }: ApplicationsTabProps) {
   const queryClient = useQueryClient();
   const [statusFilter, setStatusFilter] = useState<string>('');
-  const [expandedAppId, setExpandedAppId] = useState<string | null>(null);
   const [selectedApplicant, setSelectedApplicant] = useState<JobApplication['applicant'] | null>(null);
   const [message, setMessage] = useState('');
   const [sendEmail, setSendEmail] = useState(true);
@@ -67,9 +66,14 @@ export function ApplicationsTab({ selectedJobId, onBack }: ApplicationsTabProps)
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('agent-ui-toggle', handleAgentSidebarToggle);
       window.removeEventListener('ai-panel-resize-start', handleStart);
-      window.removeEventListener('ai-panel-resize-stop', handleStop);
     };
   }, []);
+
+  // Clear AI results when active job changes to prevent cross-job data leaks
+  useEffect(() => {
+    setAiResults(null);
+  }, [activeJobId]);
+
 
   // Queries
   const { data: jobsResponse } = useQuery({
@@ -295,7 +299,7 @@ export function ApplicationsTab({ selectedJobId, onBack }: ApplicationsTabProps)
         )}
       >
         {/* Header */}
-        <div className="mb-2">
+        <div className="mb-2 shrink-0">
           <button
             onClick={onBack}
             className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-1 transition-colors group"
@@ -306,27 +310,24 @@ export function ApplicationsTab({ selectedJobId, onBack }: ApplicationsTabProps)
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h1 className="text-lg sm:text-xl font-bold text-foreground tracking-tight">Applications</h1>
-              <p className="text-sm text-muted-foreground mt-1 font-medium">
-                Review and manage applicants for your job postings
-              </p>
             </div>
             <button
               onClick={() => setIsAiPanelOpen(!isAiPanelOpen)}
               data-agent="ai-screening-button"
               className={cn(
-                "inline-flex items-center gap-2 px-4 py-2 rounded-sm text-xs font-bold transition-all border shrink-0",
+                "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[4px] text-[11px] font-bold transition-all border shrink-0",
                 isAiPanelOpen
-                  ? "bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-600/20"
-                  : "bg-white text-blue-600 border-blue-600/20 hover:bg-blue-50"
+                  ? "bg-[#0a66c2] text-white border-[#0a66c2] shadow-lg shadow-[#0a66c2]/20"
+                  : "bg-white text-[#0a66c2] border-[#0a66c2]/20 hover:bg-[#0a66c2]/5"
               )}
             >
-              <Sparkles className={cn("w-3.5 h-3.5", isAiPanelOpen ? "animate-pulse" : "")} />
+              <Sparkles className={cn("w-3 h-3", isAiPanelOpen ? "animate-pulse" : "")} />
               AI Screening
             </button>
           </div>
         </div>
 
-        <div className="mb-2">
+        <div className="mb-2 shrink-0">
           <JobSelector
             activeJobId={activeJobId}
             setActiveJobId={(id) => { setActiveJobId(id); setStatusFilter(''); }}
@@ -337,12 +338,13 @@ export function ApplicationsTab({ selectedJobId, onBack }: ApplicationsTabProps)
             setManualJobId={setManualJobId}
             onAnalyze={(id) => analyzeMutation.mutate({ jobId: id, model: selectedModel })}
             isAnalyzePending={analyzeMutation.isPending}
+            isAiPanelOpen={isAiPanelOpen}
           />
         </div>
 
         {!activeJobId ? (
           <div className="text-center py-20">
-            <div className="w-20 h-20 rounded-sm bg-muted/20 border border-dashed border-border/50 flex items-center justify-center mx-auto mb-6">
+            <div className="w-20 h-20 rounded-[4px] bg-muted/20 border border-dashed border-border/50 flex items-center justify-center mx-auto mb-6">
               <Users className="w-8 h-8 text-muted-foreground opacity-30" />
             </div>
             <h3 className="text-lg font-semibold text-foreground mb-2">Select a job</h3>
@@ -351,13 +353,13 @@ export function ApplicationsTab({ selectedJobId, onBack }: ApplicationsTabProps)
         ) : (
           <>
             {/* Status Filters */}
-            <div className="flex gap-2 mb-4 overflow-x-auto pb-1 no-scrollbar">
+            <div className="flex gap-2 mb-4 overflow-x-auto pb-1 no-scrollbar shrink-0">
               {statusOptions.map(opt => (
                 <button
                   key={opt.value}
                   onClick={() => setStatusFilter(opt.value)}
                   className={cn(
-                    "flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-xs font-semibold transition-all whitespace-nowrap border",
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-[4px] text-xs font-semibold transition-all whitespace-nowrap border",
                     statusFilter === opt.value
                       ? "bg-blue-500/10 text-blue-600 border-blue-500/30"
                       : "bg-muted/30 text-muted-foreground border-border hover:bg-muted/50"
@@ -376,7 +378,7 @@ export function ApplicationsTab({ selectedJobId, onBack }: ApplicationsTabProps)
               </div>
             ) : filteredApplications.length === 0 ? (
               <div className="text-center py-20">
-                <div className="w-20 h-20 rounded-sm bg-muted/20 border border-dashed border-border/50 flex items-center justify-center mx-auto mb-6">
+                <div className="w-20 h-20 rounded-[4px] bg-muted/20 border border-dashed border-border/50 flex items-center justify-center mx-auto mb-6">
                   <FileText className="w-8 h-8 text-muted-foreground opacity-30" />
                 </div>
                 <h3 className="text-lg font-semibold text-foreground mb-2">No applications yet</h3>
@@ -385,18 +387,32 @@ export function ApplicationsTab({ selectedJobId, onBack }: ApplicationsTabProps)
                 </p>
               </div>
             ) : (
-              <div className="space-y-3">
-                {filteredApplications.map((app: JobApplication) => (
-                  <ApplicationCard
-                    key={app.id}
-                    app={app}
-                    isExpanded={expandedAppId === app.id}
-                    onToggleExpand={() => setExpandedAppId(expandedAppId === app.id ? null : app.id)}
-                    onUpdateStatus={(id, status, employmentType) => updateStatusMutation.mutate({ appId: id, status, employmentType })}
-                    onContact={handleOpenContactModal}
-                    isUpdatePending={updateStatusMutation.isPending}
-                  />
-                ))}
+              <div className="bg-card border border-border rounded-[4px] overflow-hidden shadow-sm">
+                <div className="overflow-x-auto no-scrollbar">
+                  <table className="w-full border-collapse text-left">
+                    <thead>
+                      <tr className="bg-muted/30 border-b border-border">
+                        <th className="pl-6 pr-4 py-2.5 text-xs font-bold text-muted-foreground uppercase tracking-wider w-[24%]">Candidate</th>
+                        <th className="px-4 py-2.5 text-xs font-bold text-muted-foreground uppercase tracking-wider w-[13%]">Applied Date</th>
+                        <th className="px-4 py-2.5 text-xs font-bold text-muted-foreground uppercase tracking-wider w-[13%]">Match Score</th>
+                        <th className="px-4 py-2.5 text-xs font-bold text-muted-foreground uppercase tracking-wider w-[20%]">Documents</th>
+                        <th className="px-4 py-2.5 text-xs font-bold text-muted-foreground uppercase tracking-wider w-[15%]">Status</th>
+                        <th className="pl-4 pr-6 py-2.5 text-right text-xs font-bold text-muted-foreground uppercase tracking-wider w-[15%]">Quick Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredApplications.map((app: JobApplication) => (
+                        <ApplicationCard
+                          key={app.id}
+                          app={app}
+                          onUpdateStatus={(id, status, employmentType) => updateStatusMutation.mutate({ appId: id, status, employmentType })}
+                          onContact={handleOpenContactModal}
+                          isUpdatePending={updateStatusMutation.isPending}
+                        />
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
           </>
@@ -428,7 +444,9 @@ export function ApplicationsTab({ selectedJobId, onBack }: ApplicationsTabProps)
           onLoadHistoryReport={(reportResults) => {
             setAiResults(reportResults);
             queryClient.invalidateQueries({ queryKey: ['job-applications'] });
-            toast.success('AI Screening results loaded.');
+            if (reportResults) {
+              toast.success('AI Screening results loaded.');
+            }
 
             // Dispatch custom event to notify agent of screening scores
             if (reportResults?.top_candidates && reportResults.top_candidates.length > 0) {
@@ -443,9 +461,8 @@ export function ApplicationsTab({ selectedJobId, onBack }: ApplicationsTabProps)
             }
           }}
           onViewDetails={(id) => {
-            setExpandedAppId(id);
             setIsAiPanelOpen(false);
-            // Scroll to the card
+            // Scroll to the row
             setTimeout(() => {
               document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }, 100);

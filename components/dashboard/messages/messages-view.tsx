@@ -340,7 +340,7 @@ export function MessagesView({
             <a href="#" className="hover:underline hover:text-primary transition-all">Business Services</a>
             <a href="#" className="hover:underline hover:text-primary transition-all">Get the B2linq app</a>
             <a href="#" className="hover:underline hover:text-primary transition-all">More</a>
-            
+
             <div className="w-full text-center mt-3 font-semibold text-[9.5px]">
               B2linq Corporation © 2026
             </div>

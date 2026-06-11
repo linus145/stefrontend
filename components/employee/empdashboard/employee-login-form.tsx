@@ -28,7 +28,7 @@ export function EmployeeLoginForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
-    
+
     if (!email.trim() || !password.trim()) {
       toast.error('Please enter both email and password.');
       return;
@@ -83,28 +83,26 @@ export function EmployeeLoginForm() {
     <div className="w-full relative rounded-none sm:rounded-sm bg-transparent sm:bg-white/95 dark:bg-transparent sm:dark:bg-slate-900/40 backdrop-blur-none sm:backdrop-blur-md border-0 sm:border border-slate-200/80 dark:border-slate-800/80 shadow-none sm:shadow-2xl p-0 sm:p-8 overflow-hidden transition-all duration-300 sm:hover:border-slate-300/80 sm:dark:hover:border-slate-700/60 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Subtle accent bar at the top */}
       <div className="hidden sm:block absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#0a66c2] to-transparent" />
-      
+
       {/* Premium Sliding Segmented Role Switcher */}
       <div className="flex bg-slate-100 dark:bg-slate-950/80 p-1 rounded-sm border border-slate-200/60 dark:border-slate-800/60 mb-6 relative">
         <button
           type="button"
           onClick={() => setRole('EMPLOYEE')}
-          className={`flex-1 text-center py-2 text-xs font-bold uppercase tracking-wider rounded-sm transition-all duration-300 relative z-10 cursor-pointer ${
-            role === 'EMPLOYEE'
+          className={`flex-1 text-center py-2 text-xs font-bold uppercase tracking-wider rounded-sm transition-all duration-300 relative z-10 cursor-pointer ${role === 'EMPLOYEE'
               ? 'bg-[#0a66c2] text-white shadow-sm'
               : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
-          }`}
+            }`}
         >
           Employee
         </button>
         <button
           type="button"
           onClick={() => setRole('MANAGER')}
-          className={`flex-1 text-center py-2 text-xs font-bold uppercase tracking-wider rounded-sm transition-all duration-300 relative z-10 cursor-pointer ${
-            role === 'MANAGER'
+          className={`flex-1 text-center py-2 text-xs font-bold uppercase tracking-wider rounded-sm transition-all duration-300 relative z-10 cursor-pointer ${role === 'MANAGER'
               ? 'bg-[#0a66c2] text-white shadow-sm'
               : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
-          }`}
+            }`}
         >
           Manager
         </button>

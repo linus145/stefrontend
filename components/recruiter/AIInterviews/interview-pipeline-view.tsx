@@ -169,7 +169,7 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
         {/* Status */}
         <td className="px-4 py-3">
           <span className={cn(
-            "inline-flex px-2 py-0.5 rounded-none text-[10px] font-bold capitalize border whitespace-nowrap",
+            "inline-flex px-2 py-0.5 rounded-[4px] text-[10px] font-bold capitalize border whitespace-nowrap",
             getStatusStyle(session.status)
           )}>
             {session.status.toLowerCase().replace(/_/g, ' ')}
@@ -179,7 +179,7 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
         <td className="px-4 py-3">
           {session.application_status ? (
             <span className={cn(
-              "inline-flex px-2 py-0.5 rounded-none text-[10px] font-bold uppercase border whitespace-nowrap",
+              "inline-flex px-2 py-0.5 rounded-[4px] text-[10px] font-bold uppercase border whitespace-nowrap",
               getAppStatusStyle(session.application_status)
             )}>
               {session.application_status}

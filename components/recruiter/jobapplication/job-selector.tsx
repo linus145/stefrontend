@@ -14,6 +14,7 @@ interface JobSelectorProps {
   setManualJobId: (id: string) => void;
   onAnalyze: (id: string) => void;
   isAnalyzePending: boolean;
+  isAiPanelOpen?: boolean;
 }
 
 export function JobSelector({
@@ -25,7 +26,8 @@ export function JobSelector({
   manualJobId,
   setManualJobId,
   onAnalyze,
-  isAnalyzePending
+  isAnalyzePending,
+  isAiPanelOpen
 }: JobSelectorProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -43,17 +45,20 @@ export function JobSelector({
   }, [onAnalyze, setManualJobId]);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+    <div className={cn(
+      "grid grid-cols-1 gap-6 mb-4",
+      isAiPanelOpen ? "xl:grid-cols-2" : "md:grid-cols-2"
+    )}>
       <div>
         <label className="text-[11px] font-bold tracking-wider text-muted-foreground uppercase mb-2 block">
-          Select Active Job
+          jobs
         </label>
         <div className="relative">
           <select
             value={activeJobId || ''}
             onChange={(e) => setActiveJobId(e.target.value || null)}
             data-agent="active-job-select"
-            className="w-full rounded-sm bg-muted/30 dark:bg-slate-800 border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none appearance-none transition-all cursor-pointer"
+            className="w-full rounded-[4px] bg-muted/30 dark:bg-slate-800 border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none appearance-none transition-all cursor-pointer"
             style={{ colorScheme: 'dark' }}
           >
             <option value="" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100">-- Choose a job post --</option>
@@ -92,7 +97,7 @@ export function JobSelector({
 
       <div>
         <label className="text-[11px] font-bold tracking-wider text-muted-foreground uppercase mb-2 block">
-          Manual Job ID Trigger
+          job id
         </label>
         <div className="flex gap-2">
           <div className="relative flex-1">
@@ -103,14 +108,14 @@ export function JobSelector({
               placeholder="Paste Job UID here..."
               value={manualJobId}
               onChange={(e) => setManualJobId(e.target.value)}
-              className="w-full rounded-sm bg-muted/30 border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 outline-none transition-all font-mono"
+              className="w-full rounded-[4px] bg-muted/30 border border-border text-foreground px-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 outline-none transition-all font-mono"
             />
           </div>
           <button
             data-agent="manual-screen-button"
             onClick={() => manualJobId && onAnalyze(manualJobId)}
             disabled={isAnalyzePending || !manualJobId}
-            className="px-4 py-2.5 bg-foreground text-background text-xs font-bold rounded-sm hover:opacity-90 disabled:opacity-50 transition-all flex items-center gap-2"
+            className="px-4 py-2.5 bg-foreground text-background text-xs font-bold rounded-[4px] hover:opacity-90 disabled:opacity-50 transition-all flex items-center gap-2"
           >
             {isAnalyzePending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
             Screen

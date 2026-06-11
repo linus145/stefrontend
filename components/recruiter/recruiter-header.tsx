@@ -100,8 +100,8 @@ export function RecruiterHeader({
         </div>
       </div>
 
-      {/* Middle: Navigation Tabs (LinkedIn Style) */}
-      <div className="flex items-center gap-1 h-full min-w-0 flex-1 justify-center">
+      {/* Middle: Navigation Tabs (LinkedIn Style) - Hidden as we use the sidebar now */}
+      <div className="hidden">
         <nav className="flex items-center gap-1 overflow-x-auto no-scrollbar mask-fade-edges h-full">
           {NAVIGATION_ITEMS.map((item) => (
             <button
@@ -194,10 +194,6 @@ export function RecruiterHeader({
             <span>{creditBalance} Credits</span>
           </div>
 
-          <button onClick={() => onTabChange('messages')} className="relative text-muted-foreground hover:text-foreground transition-all hover:scale-105 active:scale-95" title="Messages">
-            <MessageSquare className="w-5 h-5" />
-            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-blue-500 rounded-full border border-background"></span>
-          </button>
 
           <NotificationPopover currentDashboard="RECRUITER" />
         </div>

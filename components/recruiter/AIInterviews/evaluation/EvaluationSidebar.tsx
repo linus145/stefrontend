@@ -33,7 +33,7 @@ const CircularProgress = ({ percentage }: { percentage: number }) => {
     <div className="relative inline-flex items-center justify-center shrink-0 ml-auto">
       <svg className="w-8 h-8 transform -rotate-90">
         <circle
-          className="text-slate-100"
+          className="text-muted/25"
           strokeWidth="2.5"
           stroke="currentColor"
           fill="transparent"
@@ -77,43 +77,40 @@ export const EvaluationSidebar = ({
     );
   }
 
-  if (sessions.length === 0) {
-    return (
-      <div className="p-8 text-center text-[11px] font-medium text-muted-foreground opacity-50 italic">
-        No candidates found
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {!isCollapsed && (
-        <div className="pt-[13px] pb-[13px] pl-3 pr-5 border-b border-border">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground opacity-50" />
+        <div className="pt-[13px] pb-[13px] px-3 border-b border-border flex justify-center">
+          <div className="relative w-full max-w-[230px]">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground opacity-65" />
             <input
               type="text"
               placeholder="Search..."
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="w-full bg-transparent border border-border/50 rounded-sm py-1.5 pl-9 pr-3 text-[11px] font-semibold text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/5 transition-all shadow-sm"
+              className="w-full bg-muted/40 border border-border rounded-[4px] py-1 pl-7 pr-2.5 text-[11px] font-semibold text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-muted-foreground/30 focus:ring-1 focus:ring-muted-foreground/10 transition-all shadow-sm hover:bg-muted/60"
             />
           </div>
         </div>
       )}
 
-      <div className="flex-1 overflow-y-auto no-scrollbar space-y-0.5 p-1">
-        {sessions.map((session) => (
-          <button
-            key={session.id}
-            onClick={() => onSelect(session.id)}
-            className={cn(
-              "w-full px-3 py-2 text-left transition-all group relative rounded-md flex items-center gap-3",
-              selectedId === session.id
-                ? "bg-blue-600/10 shadow-sm"
-                : "bg-transparent"
-            )}
-          >
+      <div className="flex-1 overflow-y-auto no-scrollbar space-y-0.5 p-1.5">
+        {sessions.length === 0 ? (
+          <div className="p-8 text-center text-[11px] font-medium text-muted-foreground opacity-50 italic">
+            No candidates found
+          </div>
+        ) : (
+          sessions.map((session) => (
+            <button
+              key={session.id}
+              onClick={() => onSelect(session.id)}
+              className={cn(
+                "w-full px-3 py-2 text-left transition-all group relative rounded-[4px] flex items-center gap-3 cursor-pointer",
+                selectedId === session.id
+                  ? "bg-secondary text-foreground font-semibold"
+                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+              )}
+            >
             {isCollapsed ? (
               <div className="flex flex-col items-center justify-center gap-1 w-full">
                 <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center text-[10px] font-bold border border-border group-hover:border-blue-600/30 transition-all shrink-0">
@@ -128,18 +125,18 @@ export const EvaluationSidebar = ({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 mb-0.5">
                     <h3 className={cn(
-                      "text-[13px] font-bold truncate",
+                      "text-[13px] font-semibold truncate",
                       selectedId === session.id ? "text-blue-600" : "text-foreground"
                     )}>
                       {session.candidate_name}
                     </h3>
                     <span className={cn(
-                      "w-1 h-1 rounded-full shrink-0",
+                      "w-1.5 h-1.5 rounded-full shrink-0",
                       session.status === 'COMPLETED' ? "bg-emerald-500" :
                         session.status === 'EVALUATING' ? "bg-blue-500" : "bg-amber-500"
                     )} />
                   </div>
-                  <p className="text-[11px] font-medium text-muted-foreground truncate opacity-70">
+                  <p className="text-[11px] font-medium text-muted-foreground truncate opacity-80">
                     {session.job_title}
                   </p>
                 </div>
@@ -149,7 +146,8 @@ export const EvaluationSidebar = ({
               </>
             )}
           </button>
-        ))}
+        ))
+      )}
       </div>
     </div>
   );

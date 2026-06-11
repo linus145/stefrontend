@@ -7,6 +7,7 @@ import { authService } from '@/services/auth.service';
 import { userService } from '@/services/user.service';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface AuthContextType {
   user: User | null;
@@ -35,6 +36,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const hasInitialized = useRef(false);
+  const queryClient = useQueryClient();
 
   const fetchSubscription = async () => {
     try {
@@ -60,6 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string, redirectTo: string = '/dashboard') => {
     setIsLoading(true);
     try {
+      queryClient.clear();
       const resp = await authService.login(email, password);
       setUser(resp.data.user);
       await fetchSubscription();
@@ -80,6 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const employeeLogin = async (email: string, password: string, redirectTo: string = '/employee/dashboard', role?: string) => {
     setIsLoading(true);
     try {
+      queryClient.clear();
       const resp = await authService.employeeLogin(email, password, role);
       setUser(resp.data.user);
       await fetchSubscription();
@@ -99,6 +103,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const googleLogin = async (token: string, redirectTo: string = '/dashboard') => {
     setIsLoading(true);
     try {
+      queryClient.clear();
       const resp = await authService.googleLogin(token);
       setUser(resp.data.user);
       await fetchSubscription();
@@ -133,6 +138,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const verifyOtp = async (email: string, otp: string, redirectTo: string = '/dashboard') => {
     setIsLoading(true);
     try {
+      queryClient.clear();
       const resp = await authService.verifyOtp(email, otp);
       setUser(resp.data.user);
       await fetchSubscription();
@@ -160,6 +166,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (e) {
       console.error('Logout request failed natively', e);
     } finally {
+      queryClient.clear();
       // Clear all state immediately
       setUser(null);
       setUserSubscription(null);

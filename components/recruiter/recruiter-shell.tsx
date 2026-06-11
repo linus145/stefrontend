@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
-import { RecruiterSection } from './recruiter-sidebar';
+import { RecruiterSidebar, RecruiterSection } from './recruiter-sidebar';
 import { RecruiterHeader } from './recruiter-header';
 import { OverviewTab } from './overview-tab';
 import { MyJobsTab } from './myjobs/my-jobs-tab';
@@ -24,6 +24,20 @@ export function RecruiterShell() {
 
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('recruiter-sidebar-collapsed') === 'true';
+    }
+    return false;
+  });
+
+  const handleSidebarCollapse = (collapsed: boolean) => {
+    setIsSidebarCollapsed(collapsed);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('recruiter-sidebar-collapsed', String(collapsed));
+    }
+  };
 
   // Check if user has an active premium plan
   const isPremium = !!(userSubscription &&
@@ -152,7 +166,18 @@ export function RecruiterShell() {
         onMobileMenuToggle={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
       />
 
-      <div className="flex-1 flex flex-col min-w-0 pt-16 pb-16 lg:pb-0">
+      <RecruiterSidebar
+        isCollapsed={isSidebarCollapsed}
+        onToggle={() => handleSidebarCollapse(!isSidebarCollapsed)}
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+        isMobileOpen={isMobileSidebarOpen}
+        onMobileClose={() => setIsMobileSidebarOpen(false)}
+        companyName={company.company_name}
+        companyLogo={company.logo_url}
+      />
+
+      <div className={`flex-1 flex flex-col min-w-0 pt-16 pb-16 lg:pb-0 transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'} ${activeTab === 'messages' ? 'h-screen overflow-hidden' : 'min-h-0'}`}>
         {renderContent()}
       </div>
     </div>

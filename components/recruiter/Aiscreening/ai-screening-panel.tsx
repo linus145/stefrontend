@@ -4,9 +4,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { aiService } from '@/services/ai.service';
 import {
-  X, Sparkles, ChevronDown, ChevronUp, ChevronRight,
+  X, Sparkles, ChevronDown, ChevronUp, ChevronRight, ChevronLeft,
   Bot, FileText, Target, MessageSquare, Send,
-  Search, BrainCircuit, History, AlertCircle, Zap, CheckCircle2, Trash2, Lock, Loader2
+  Search, BrainCircuit, History, AlertCircle, Zap, CheckCircle2, Trash2, Lock, Loader2, Plus
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { AgentTaskModal } from '../aiagents/AgentTaskModal';
@@ -50,14 +50,7 @@ export function AIScreeningPanel({
   const [agentModalOpen, setAgentModalOpen] = useState(false);
   const [isModelMenuOpen, setIsModelMenuOpen] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState<'gemini' | 'kimi'>('gemini');
-
-  // Sync provider tab when model selection menu opens or active model changes
-  useEffect(() => {
-    if (isModelMenuOpen) {
-      const isKimi = selectedModel === 'kimi' || selectedModel === 'Kimi-K2.6';
-      setSelectedProvider(isKimi ? 'kimi' : 'gemini');
-    }
-  }, [isModelMenuOpen, selectedModel]);
+  const [hoveredProvider, setHoveredProvider] = useState<'gemini' | 'kimi'>('gemini');
 
   const getModelLabel = (modelVal: string) => {
     switch (modelVal) {
@@ -97,6 +90,7 @@ export function AIScreeningPanel({
   };
   const [selectedCandidateName, setSelectedCandidateName] = useState<string | undefined>(undefined);
   const [activeTab, setActiveTab] = useState<'results' | 'history'>('results');
+  const [hasClearedActiveJob, setHasClearedActiveJob] = useState(false);
   const [isAutoRefreshing, setIsAutoRefreshing] = useState(false);
   const [processingTime, setProcessingTime] = useState(0);
   const queryClient = useQueryClient();
@@ -179,6 +173,27 @@ export function AIScreeningPanel({
     }
   }, [selectedModel, planPrice, setSelectedModel]);
 
+  // Sync selectedProvider & hoveredProvider with selectedModel on mount / change, and reset hoveredProvider on open/close
+  useEffect(() => {
+    if (selectedModel) {
+      const provider = selectedModel === 'kimi' ? 'kimi' : 'gemini';
+      setSelectedProvider(provider);
+      setHoveredProvider(provider);
+    }
+  }, [selectedModel, isModelMenuOpen]);
+
+  // Reset hasClearedActiveJob when activeJobId changes
+  useEffect(() => {
+    setHasClearedActiveJob(false);
+  }, [activeJobId]);
+
+  // Reset hasClearedActiveJob when results are loaded/change
+  useEffect(() => {
+    if (results) {
+      setHasClearedActiveJob(false);
+    }
+  }, [results]);
+
   // Timer to track how long we've been processing
   useEffect(() => {
     let interval: any;
@@ -197,6 +212,22 @@ export function AIScreeningPanel({
     } else {
       toast.error("No job selected to run screening.");
     }
+  };
+
+  const handleNewChat = () => {
+    const reportId = results?.report_id || results?.id;
+    if (results?.status === 'processing' && reportId) {
+      deleteMutation.mutate(reportId);
+      toast.info('Stopping current screening process to start fresh...');
+    } else {
+      toast.success('New screening session started.');
+    }
+    setHasClearedActiveJob(true);
+    if (onLoadHistoryReport) {
+      onLoadHistoryReport(null);
+    }
+    setActiveTab('results');
+    setExpandedId(null);
   };
 
   const { data: historyData, isLoading: historyLoading, refetch: refetchHistory, isError: historyError } = useQuery({
@@ -268,7 +299,7 @@ export function AIScreeningPanel({
 
   // Automatically restore/load the latest screening report results for the active job from history if no results are loaded
   useEffect(() => {
-    if (activeJobId && historyData?.data && !results) {
+    if (activeJobId && historyData?.data && !results && !hasClearedActiveJob) {
       const jobReports = historyData.data.filter((r: any) => r.job_id === activeJobId);
       if (jobReports.length > 0) {
         const latestReport = jobReports[0];
@@ -277,7 +308,7 @@ export function AIScreeningPanel({
         }
       }
     }
-  }, [historyData, activeJobId, results, onLoadHistoryReport]);
+  }, [historyData, activeJobId, results, onLoadHistoryReport, hasClearedActiveJob]);
 
 
   const toggleExpand = (id: string) => {
@@ -342,6 +373,15 @@ export function AIScreeningPanel({
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
+            {/* New screening / New chat Button */}
+            <button
+              onClick={handleNewChat}
+              className="p-1 hover:bg-muted rounded-[3px] transition-colors shrink-0 border border-border shadow-sm flex items-center justify-center text-foreground/50 hover:text-foreground hover:bg-purple-600/10 hover:text-purple-600"
+              title="New screening"
+            >
+              <Plus className="w-3.5 h-3.5" />
+            </button>
+
             {/* Results Tab Button */}
             <button
               onClick={() => setActiveTab('results')}
@@ -384,15 +424,15 @@ export function AIScreeningPanel({
               <div className="flex flex-col items-center justify-center h-full space-y-6 px-12 text-center">
                 {historyError ? (
                   <>
-                    <div className="w-12 h-12 bg-rose-500/10 rounded-sm flex items-center justify-center">
+                    <div className="w-12 h-12 bg-rose-500/10 rounded-[4px] flex items-center justify-center">
                       <AlertCircle className="w-6 h-6 text-rose-500" />
                     </div>
                     <div className="space-y-2">
-                      <p className="text-sm font-black text-slate-900 dark:text-white tracking-tight">Connection interrupted</p>
+                      <p className="text-sm font-semibold text-slate-900 dark:text-white tracking-tight">Connection interrupted</p>
                       <p className="text-xs text-slate-500 font-medium">The server is unreachable. Please check your connection.</p>
                       <button
                         onClick={() => refetchHistory()}
-                        className="mt-4 px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-sm text-[10px] font-black tracking-widest hover:bg-slate-200 transition-colors"
+                        className="mt-4 px-4 py-1.5 bg-slate-100 dark:bg-slate-800 border border-border rounded-[4px] text-[11px] font-semibold tracking-normal hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
                       >
                         Retry connection
                       </button>
@@ -401,19 +441,19 @@ export function AIScreeningPanel({
                 ) : (
                   <>
                     <div className="relative">
-                      <div className="w-16 h-16 border-4 border-indigo-500/10 border-t-indigo-500 rounded-sm animate-spin" />
+                      <div className="w-16 h-16 border-4 border-indigo-500/10 border-t-indigo-500 rounded-[4px] animate-spin" />
                       <Bot className="w-6 h-6 text-indigo-500 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 animate-pulse" />
                     </div>
                     <div className="space-y-2">
-                      <p className="text-sm font-black text-slate-900 dark:text-white tracking-tight">Ai engine processing</p>
+                      <p className="text-sm font-semibold text-slate-900 dark:text-white tracking-tight">Ai engine processing</p>
                       <p className="text-xs text-slate-500 font-medium leading-relaxed">
                         We are analyzing the resumes using <strong className="text-purple-600 dark:text-purple-400 font-extrabold">{getModelLabel(selectedModel)}</strong> in the background.
                         This usually takes 15-30 seconds per resume.
                       </p>
                       <div className="pt-4 space-y-3 w-full">
                         <div className="flex flex-wrap items-center justify-center gap-2">
-                          <span className="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-500/10 text-indigo-500 text-[10px] font-black tracking-widest rounded-sm select-none">
-                            <span className="w-1.5 h-1.5 rounded-sm bg-indigo-500 animate-ping" />
+                          <span className="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-500/5 text-indigo-600 dark:text-indigo-400 text-[11px] font-semibold tracking-normal rounded-[4px] border border-indigo-500/15 select-none">
+                            <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-ping" />
                             Auto-refreshing ({processingTime}s)
                           </span>
 
@@ -421,11 +461,11 @@ export function AIScreeningPanel({
                             <button
                               onClick={() => deleteMutation.mutate(results.report_id || results.id)}
                               disabled={deleteMutation.isPending}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 text-[10px] font-black tracking-widest rounded-sm border border-rose-500/20 transition-all active:scale-95 transform cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-500/5 hover:bg-rose-500/10 text-rose-600 dark:text-rose-455 text-[11px] font-semibold tracking-normal rounded-[4px] border border-rose-500/20 transition-all active:scale-95 cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
                               title="Cancel screening"
                             >
                               {deleteMutation.isPending ? (
-                                <Loader2 className="w-3 h-3 animate-spin" />
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
                               ) : (
                                 <X className="w-3.5 h-3.5" />
                               )}
@@ -438,7 +478,7 @@ export function AIScreeningPanel({
                           <div className="pt-2 animate-in fade-in slide-in-from-bottom-2 duration-500">
                             <button
                               onClick={onRestartAnalysis}
-                              className="px-6 py-2 bg-indigo-600 text-white text-[10px] font-black tracking-widest rounded-sm shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 transition-all transform active:scale-95"
+                              className="px-5 py-1.5 bg-indigo-600 text-white text-[11px] font-semibold tracking-normal rounded-[4px] shadow-sm hover:bg-indigo-700 transition-all active:scale-95 cursor-pointer"
                             >
                               Restart ai engine
                             </button>
@@ -452,11 +492,11 @@ export function AIScreeningPanel({
               </div>
             ) : results && (results.status === 'failed' || results.status === 'error' || !results.top_candidates) ? (
               <div className="flex flex-col items-center justify-center h-full space-y-6 px-12 text-center py-12">
-                <div className="w-12 h-12 bg-rose-500/10 rounded-sm flex items-center justify-center">
+                <div className="w-12 h-12 bg-rose-500/10 rounded-[4px] flex items-center justify-center">
                   <AlertCircle className="w-6 h-6 text-rose-500" />
                 </div>
                 <div className="space-y-2">
-                  <p className="text-sm font-black text-slate-900 dark:text-white tracking-tight">Screening failed</p>
+                  <p className="text-sm font-semibold text-slate-900 dark:text-white tracking-tight">Screening failed</p>
                   <p className="text-xs text-rose-500 font-medium">
                     {results.error || 'An error occurred during resume screening.'}
                   </p>
@@ -577,14 +617,14 @@ export function AIScreeningPanel({
 
                             {/* Knockout Warning Banner */}
                             {cand.knockout_applied && (
-                              <div className="bg-rose-500/10 border border-rose-500/20 rounded-sm p-3.5 flex items-start gap-2.5 animate-in fade-in slide-in-from-top-1 duration-200">
+                              <div className="bg-rose-500/10 border border-rose-500/20 rounded-[4px] p-3.5 flex items-start gap-2.5 animate-in fade-in slide-in-from-top-1 duration-200">
                                 <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
                                 <div className="space-y-1">
-                                  <p className="text-[10px] font-black text-rose-500 tracking-wider uppercase">
+                                  <p className="text-[10px] font-semibold text-rose-500 tracking-wide uppercase">
                                     AI Knockout Rule Triggered
                                   </p>
-                                  <p className="text-xs text-rose-700 dark:text-rose-300 font-semibold leading-relaxed">
-                                    This candidate's fit score was capped at <span className="font-extrabold">{cand.score}%</span> due to: <span className="italic font-bold">"{cand.knockout_reason || ai.knockout_reason || 'Knockout criteria met'}"</span>.
+                                  <p className="text-xs text-rose-700 dark:text-rose-300 font-medium leading-relaxed">
+                                    This candidate's fit score was capped at <span className="font-semibold">{cand.score}%</span> due to: <span className="italic font-semibold">"{cand.knockout_reason || ai.knockout_reason || 'Knockout criteria met'}"</span>.
                                   </p>
                                 </div>
                               </div>
@@ -593,15 +633,15 @@ export function AIScreeningPanel({
                             {/* Skills Alignment */}
                             {cand.analysis?.intelligence?.skills_assessment && (
                               <div className="relative">
-                                <div className={cn("space-y-2 border border-slate-100 dark:border-slate-800 rounded-sm p-3.5 bg-slate-50/50 dark:bg-slate-900/30", isMetricsLocked && "blur-[6px] select-none pointer-events-none")}>
-                                  <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 tracking-widest uppercase flex items-center gap-1.5 mb-2">
+                                <div className={cn("space-y-2 border border-slate-100 dark:border-slate-800 rounded-[4px] p-3.5 bg-slate-50/50 dark:bg-slate-900/30", isMetricsLocked && "blur-[6px] select-none pointer-events-none")}>
+                                  <p className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 tracking-wide uppercase flex items-center gap-1.5 mb-2">
                                     <Target className="w-3.5 h-3.5 text-[#7C3AED]" /> Skills Alignment
                                   </p>
 
                                   {/* Matched Required Skills */}
                                   {cand.analysis.intelligence.skills_assessment.matched_required?.length > 0 ? (
                                     <div className="space-y-1.5">
-                                      <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 tracking-wide">
+                                      <p className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 tracking-wide">
                                         Matched Skills ({cand.analysis.intelligence.skills_assessment.matched_required.length})
                                       </p>
                                       <div className="flex flex-col gap-1">
@@ -633,7 +673,7 @@ export function AIScreeningPanel({
                                   {/* Missing Required Skills */}
                                   {cand.analysis.intelligence.skills_assessment.missing_required?.length > 0 && (
                                     <div className="space-y-1.5">
-                                      <p className="text-[10px] font-bold text-rose-600 dark:text-rose-400 tracking-wide">
+                                      <p className="text-[10px] font-semibold text-rose-600 dark:text-rose-400 tracking-wide">
                                         Missing Required Skills ({cand.analysis.intelligence.skills_assessment.missing_required.length})
                                       </p>
                                       <div className="flex flex-col gap-1">
@@ -644,7 +684,7 @@ export function AIScreeningPanel({
                                               <span className="font-semibold text-slate-800 dark:text-slate-200">{m.skill}</span>
                                               {m.impact && (
                                                 <span className={cn(
-                                                  "text-[9px] font-bold px-1.5 py-0.2 rounded-sm uppercase tracking-wide",
+                                                  "text-[9px] font-semibold px-1.5 py-0.2 rounded-[4px] uppercase tracking-wide",
                                                   m.impact.toLowerCase() === 'critical' ? "bg-rose-500/10 text-rose-500 border border-rose-500/20" :
                                                     m.impact.toLowerCase() === 'moderate' ? "bg-amber-500/10 text-amber-500 border border-amber-500/20" :
                                                       "bg-slate-500/10 text-slate-500 border border-slate-500/20"
@@ -667,12 +707,12 @@ export function AIScreeningPanel({
                               <div className={cn("grid grid-cols-1 gap-4", isMetricsLocked && "blur-[6px] select-none pointer-events-none")}>
                                 {ai.strengths?.length > 0 && (
                                   <div className="space-y-2">
-                                    <p className="text-[10px] font-black text-emerald-500 tracking-widest flex items-center gap-1.5">
+                                    <p className="text-[10px] font-semibold text-emerald-500 tracking-wide flex items-center gap-1.5">
                                       <CheckCircle2 className="w-3 h-3" /> Key strengths
                                     </p>
                                     <div className="flex flex-wrap gap-1.5">
                                       {ai.strengths.map((s: string, i: number) => (
-                                        <span key={i} className="bg-emerald-500/5 text-emerald-600 dark:text-emerald-400 text-[11px] font-bold px-2 py-1 rounded-sm border border-emerald-500/10">
+                                        <span key={i} className="bg-emerald-500/5 text-emerald-600 dark:text-emerald-400 text-[11px] font-semibold px-2 py-1 rounded-[4px] border border-emerald-500/10">
                                           {toTitleCase(s)}
                                         </span>
                                       ))}
@@ -682,12 +722,12 @@ export function AIScreeningPanel({
 
                                 {ai.concerns?.length > 0 && (
                                   <div className="space-y-2">
-                                    <p className="text-[10px] font-black text-rose-500 tracking-widest flex items-center gap-1.5">
+                                    <p className="text-[10px] font-semibold text-rose-500 tracking-wide flex items-center gap-1.5">
                                       <AlertCircle className="w-3 h-3" /> Potential concerns
                                     </p>
                                     <div className="flex flex-wrap gap-1.5">
                                       {ai.concerns.map((c: string, i: number) => (
-                                        <span key={i} className="bg-rose-500/5 text-rose-600 dark:text-rose-400 text-[11px] font-bold px-2 py-1 rounded-sm border border-rose-500/10">
+                                        <span key={i} className="bg-rose-500/5 text-rose-600 dark:text-rose-400 text-[11px] font-semibold px-2 py-1 rounded-[4px] border border-rose-500/10">
                                           {toTitleCase(c)}
                                         </span>
                                       ))}
@@ -698,11 +738,11 @@ export function AIScreeningPanel({
                               {/* Premium overlay for Free/Basic users */}
                               {isMetricsLocked && (
                                 <div className="absolute inset-0 flex items-center justify-center z-10">
-                                  <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border border-indigo-500/20 rounded-sm px-4 py-3 flex flex-col items-center gap-2 shadow-lg">
+                                  <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border border-indigo-500/20 rounded-[4px] px-4 py-3 flex flex-col items-center gap-2 shadow-lg">
                                     <div className="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center">
                                       <Lock className="w-4 h-4 text-indigo-500" />
                                     </div>
-                                    <p className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 tracking-widest">GROWTH PLAN</p>
+                                    <p className="text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 tracking-wide">GROWTH PLAN</p>
                                     <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium text-center leading-relaxed max-w-[200px]">
                                       Candidate insights unlock with the Growth Plan.
                                     </p>
@@ -713,14 +753,14 @@ export function AIScreeningPanel({
 
                             {/* Red Flags */}
                             {ai.red_flags?.length > 0 && (
-                              <div className="bg-rose-500/10 border border-rose-500/20 rounded-sm p-3">
-                                <p className="text-[10px] font-black text-rose-500 tracking-widest flex items-center gap-1.5 mb-2">
+                              <div className="bg-rose-500/10 border border-rose-500/20 rounded-[4px] p-3">
+                                <p className="text-[10px] font-semibold text-rose-500 tracking-wide flex items-center gap-1.5 mb-2">
                                   <AlertCircle className="w-3 h-3" /> Ai red flags
                                 </p>
                                 <ul className="space-y-1">
                                   {ai.red_flags.map((rf: string, i: number) => (
-                                    <li key={i} className="text-[11px] font-bold text-rose-700 dark:text-rose-300 flex items-start gap-2">
-                                      <span className="mt-1 w-1 h-1 rounded-sm bg-rose-500 shrink-0" />
+                                    <li key={i} className="text-[11px] font-semibold text-rose-700 dark:text-rose-300 flex items-start gap-2">
+                                      <span className="mt-1 w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0" />
                                       {toTitleCase(rf)}
                                     </li>
                                   ))}
@@ -730,8 +770,8 @@ export function AIScreeningPanel({
 
                             {/* Interview Questions */}
                             {(ai.tailored_interview_questions?.length > 0 || ai.interview_questions?.length > 0) && (
-                              <div className="bg-indigo-500/5 border border-indigo-500/10 rounded-sm p-3">
-                                <p className="text-[10px] font-black text-indigo-500 tracking-widest flex items-center gap-1.5 mb-2">
+                              <div className="bg-indigo-500/5 border border-indigo-500/10 rounded-[4px] p-3">
+                                <p className="text-[10px] font-semibold text-indigo-500 tracking-wide flex items-center gap-1.5 mb-2">
                                   <MessageSquare className="w-3 h-3" /> Suggested interview questions
                                 </p>
                                 <div className="space-y-3">
@@ -739,7 +779,7 @@ export function AIScreeningPanel({
                                     const questionText = typeof q === 'string' ? q : q?.question || '';
                                     return (
                                       <div key={i} className="flex gap-3">
-                                        <div className="w-5 h-5 rounded-sm bg-indigo-500/10 flex items-center justify-center text-[10px] font-black text-indigo-500 shrink-0">
+                                        <div className="w-5 h-5 rounded-[4px] bg-indigo-500/10 flex items-center justify-center text-[10px] font-semibold text-indigo-500 shrink-0">
                                           {i + 1}
                                         </div>
                                         <p className="text-[12px] font-medium text-slate-700 dark:text-slate-300 italic">"{questionText}"</p>
@@ -752,44 +792,41 @@ export function AIScreeningPanel({
 
                             {/* Stats Row */}
                             <div className="grid grid-cols-2 gap-3 pt-2">
-                              <div className="bg-slate-50 dark:bg-slate-900/50 p-2.5 rounded-sm border border-slate-100 dark:border-slate-800 relative">
-                                <p className="text-[9px] font-bold text-slate-400 tracking-widest mb-1">Trust score</p>
+                              <div className="bg-slate-50 dark:bg-slate-900/50 p-2.5 rounded-[4px] border border-slate-100 dark:border-slate-800 relative">
+                                <p className="text-[9px] font-semibold text-slate-400 tracking-wide mb-1">Trust score</p>
                                 {isMetricsLocked ? (
                                   <>
                                     <div className="flex items-center justify-between blur-[5px] select-none pointer-events-none">
-                                      <span className="text-sm font-black text-slate-700 dark:text-slate-300">{ai.trust_score}%</span>
-                                      <div className="w-12 h-1 bg-slate-200 dark:bg-slate-700 rounded-sm overflow-hidden">
+                                      <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">{ai.trust_score}%</span>
+                                      <div className="w-12 h-1 bg-slate-200 dark:bg-slate-700 rounded-[4px] overflow-hidden">
                                         <div className="h-full bg-indigo-500" style={{ width: `${ai.trust_score}%` }} />
                                       </div>
                                     </div>
-                                    <div className="absolute bottom-1.5 right-2 flex items-center gap-1 bg-indigo-500/10 border border-indigo-500/20 rounded-sm px-1 py-0.5">
+                                    <div className="absolute bottom-1.5 right-2 flex items-center gap-1 bg-indigo-500/10 border border-indigo-500/20 rounded-[4px] px-1 py-0.5">
                                       <Lock className="w-2 h-2 text-indigo-500" />
-                                      <span className="text-[7px] font-black text-indigo-600 dark:text-indigo-400">Growth</span>
+                                      <span className="text-[7px] font-semibold text-indigo-600 dark:text-indigo-400">Growth</span>
                                     </div>
                                   </>
                                 ) : (
                                   <div className="flex items-center justify-between">
-                                    <span className="text-sm font-black text-slate-700 dark:text-slate-300">{ai.trust_score}%</span>
-                                    <div className="w-12 h-1 bg-slate-200 dark:bg-slate-700 rounded-sm overflow-hidden">
+                                    <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">{ai.trust_score}%</span>
+                                    <div className="w-12 h-1 bg-slate-200 dark:bg-slate-700 rounded-[4px] overflow-hidden">
                                       <div className="h-full bg-indigo-500" style={{ width: `${ai.trust_score}%` }} />
                                     </div>
                                   </div>
                                 )}
                               </div>
-                              <div className="bg-slate-50 dark:bg-slate-900/50 p-2.5 rounded-sm border border-slate-100 dark:border-slate-800">
-                                <p className="text-[9px] font-bold text-slate-400 tracking-widest mb-1">Recommended</p>
-                                <p className="text-xs font-bold text-indigo-600 dark:text-indigo-400 truncate">
+                              <div className="bg-slate-50 dark:bg-slate-900/50 p-2.5 rounded-[4px] border border-slate-100 dark:border-slate-800">
+                                <p className="text-[9px] font-semibold text-slate-400 tracking-wide mb-1">Recommended</p>
+                                <p className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 truncate">
                                   {toTitleCase(ai.recommended_action || ai.pipeline_disposition || "Yes")}
                                 </p>
                               </div>
                             </div>
-
-
-
                             {/* Recruiter Action Memo (new field) */}
                             {ai.recruiter_action_memo && (
-                              <div className="bg-violet-500/5 border border-violet-500/10 rounded-sm p-3">
-                                <p className="text-[10px] font-black text-violet-500 tracking-widest mb-1">Recruiter memo</p>
+                              <div className="bg-violet-500/5 border border-violet-500/10 rounded-[4px] p-3">
+                                <p className="text-[10px] font-semibold text-violet-500 tracking-wide mb-1">Recruiter memo</p>
                                 <p className="text-[12px] text-slate-600 dark:text-slate-400 font-medium leading-relaxed">
                                   {ai.recruiter_action_memo}
                                 </p>
@@ -934,95 +971,121 @@ export function AIScreeningPanel({
                   disabled={isProcessing}
                   className="flex items-center gap-1.5 px-3 py-1.5 bg-muted/85 dark:bg-slate-800 hover:bg-muted dark:hover:bg-slate-700 border border-border rounded-[3px] text-[10px] font-bold text-black dark:text-white transition-all shadow-sm disabled:opacity-50"
                 >
-                  <span>{getModelLabel(selectedModel)}</span>
+                  <span>{selectedModel === 'kimi' ? 'Kimi' : 'Google'} • {getModelLabel(selectedModel)}</span>
                   <svg xmlns="http://www.w3.org/2000/svg" width="6" height="6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" className={cn("transition-transform duration-200", isModelMenuOpen ? "rotate-180" : "")}><polyline points="18 15 12 9 6 15" /></svg>
                 </button>
 
-                {/* Model Choice Menu Popover */}
+                {/* Dual-Column Hierarchical Popover */}
                 {isModelMenuOpen && (
                   <>
                     <div
                       className="fixed inset-0 z-40"
                       onClick={() => setIsModelMenuOpen(false)}
                     />
-                    <div className="absolute bottom-full left-0 mb-1.5 w-52 bg-popover border border-border rounded-[4px] shadow-xl p-1 z-50 flex flex-col animate-in fade-in slide-in-from-bottom-1 duration-200">
-                      {/* Provider Selector Tabs */}
-                      <div className="flex border-b border-border mb-1.5 p-0.5 gap-0.5 bg-muted/50 rounded-sm">
+                    <div className="absolute bottom-full left-0 mb-1.5 w-[270px] bg-popover border border-border rounded-[4px] shadow-xl p-1 z-50 flex animate-in fade-in slide-in-from-bottom-1 duration-200 divide-x divide-border/60">
+                      {/* Left Column: Providers */}
+                      <div className="w-[70px] pr-1 flex flex-col gap-0.5 shrink-0">
+                        <div className="px-1.5 py-1 text-[8px] font-black text-muted-foreground uppercase tracking-wider">
+                          Provider
+                        </div>
                         <button
                           type="button"
-                          onClick={() => setSelectedProvider('gemini')}
+                          onMouseEnter={() => setHoveredProvider('gemini')}
+                          onClick={() => setHoveredProvider('gemini')}
                           className={cn(
-                            "flex-1 py-1 text-[9px] font-black rounded-sm uppercase tracking-wider text-center transition-all",
-                            selectedProvider === 'gemini'
-                              ? "bg-white dark:bg-slate-800 text-purple-600 shadow-sm border border-border/20"
-                              : "text-muted-foreground hover:bg-muted"
+                            "w-full text-left px-2 py-1.5 rounded-[3px] text-[10px] font-bold transition-colors flex items-center justify-between",
+                            hoveredProvider === 'gemini' ? "bg-purple-600/10 text-purple-600 font-extrabold" : "text-black dark:text-white hover:bg-muted"
                           )}
                         >
-                          Gemini
+                          <span>Google</span>
+                          <ChevronRight className="w-2.5 h-2.5 opacity-60" />
                         </button>
                         <button
                           type="button"
-                          onClick={() => setSelectedProvider('kimi')}
+                          onMouseEnter={() => setHoveredProvider('kimi')}
+                          onClick={() => setHoveredProvider('kimi')}
                           className={cn(
-                            "flex-1 py-1 text-[9px] font-black rounded-sm uppercase tracking-wider text-center transition-all",
-                            selectedProvider === 'kimi'
-                              ? "bg-white dark:bg-slate-800 text-purple-600 shadow-sm border border-border/20"
-                              : "text-muted-foreground hover:bg-muted"
+                            "w-full text-left px-2 py-1.5 rounded-[3px] text-[10px] font-bold transition-colors flex items-center justify-between",
+                            hoveredProvider === 'kimi' ? "bg-purple-600/10 text-purple-600 font-extrabold" : "text-black dark:text-white hover:bg-muted"
                           )}
                         >
-                          Kimi
+                          <span>Kimi</span>
+                          <ChevronRight className="w-2.5 h-2.5 opacity-60" />
                         </button>
                       </div>
 
-                      {/* Scrollable Model List */}
-                      <div className="max-h-48 overflow-y-auto space-y-0.5 scrollbar-thin">
-                        {[
-                          { value: 'kimi', label: 'Kimi Model' },
-                          { value: 'gemini-3.5-flash', label: 'Gemini 3.5 Flash' },
-                          { value: 'gemini-3.5-flash-live', label: 'Gemini 3.5 Flash Live' },
-                          { value: 'gemini-3.0-flash-live', label: 'Gemini 3.0 Flash Live' },
-                          { value: 'gemini-3.1-pro-preview', label: 'Gemini 3.1 Pro (Preview)' },
-                          { value: 'gemini-3.1-flash-lite', label: 'Gemini 3.1 Flash Lite' },
-                          { value: 'gemini-3-pro-preview', label: 'Gemini 3 Pro (Preview)' },
-                          { value: 'gemini-3-flash-preview', label: 'Gemini 3 Flash (Preview)' },
-                          { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
-                          { value: 'gemini-2.5-flash-lite', label: 'Gemini 2.5 Flash Lite' },
-                          { value: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro' },
-                          { value: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash' },
-                          { value: 'gemini-2.0-flash-thinking-exp', label: 'Gemini 2.0 Thinking' },
-                          { value: 'gemini-2.0-pro-exp', label: 'Gemini 2.0 Pro (Exp)' },
-                          { value: 'text-multilingual-embedding-002', label: 'Gemini Multilingual Embedding 2' }
-                        ]
-                        .filter(m => {
-                          const isKimi = m.value === 'kimi' || m.value === 'Kimi-K2.6';
-                          return selectedProvider === 'kimi' ? isKimi : !isKimi;
-                        })
-                        .map((m) => {
-                          const isModelLocked = m.value.startsWith('gemini-3') && planPrice < 18000;
-                          return (
-                            <button
-                              key={m.value}
-                              onClick={() => {
-                                if (isModelLocked) {
-                                  toast.error('Gemini 3.x models are locked', {
-                                    description: 'These models are only available on the Enterprise AI OS plan. Please upgrade your subscription to unlock.'
-                                  });
-                                  return;
-                                }
-                                setSelectedModel(m.value);
-                                setIsModelMenuOpen(false);
-                              }}
-                              className={cn(
-                                "w-full text-left px-2 py-1.5 rounded-[3px] text-[10px] font-bold flex items-center justify-between gap-1.5 transition-colors text-black dark:text-white",
-                                selectedModel === m.value ? "bg-purple-600/10 text-purple-600 hover:text-purple-600" : "hover:bg-muted",
-                                isModelLocked && "opacity-50 hover:bg-transparent"
-                              )}
-                            >
-                              <span>{m.label}</span>
-                              {isModelLocked && <Lock className="w-3 h-3 text-amber-500" />}
-                            </button>
-                          );
-                        })}
+                      {/* Right Column: Models List */}
+                      <div className="flex-1 pl-1.5 flex flex-col min-w-0">
+                        <div className="px-1.5 py-1 text-[8px] font-black text-muted-foreground uppercase tracking-wider">
+                          Models ({hoveredProvider === 'gemini' ? 'Google' : 'Kimi'})
+                        </div>
+                        <div className="h-[220px] overflow-y-auto space-y-0.5 scrollbar-thin pr-0.5">
+                          {hoveredProvider === 'gemini' ? (
+                            // Google/Gemini Models
+                            [
+                              { value: 'gemini-3.5-flash', label: 'Gemini 3.5 Flash' },
+                              { value: 'gemini-3.5-flash-live', label: 'Gemini 3.5 Flash Live' },
+                              { value: 'gemini-3.0-flash-live', label: 'Gemini 3.0 Flash Live' },
+                              { value: 'gemini-3.1-pro-preview', label: 'Gemini 3.1 Pro (Preview)' },
+                              { value: 'gemini-3.1-flash-lite', label: 'Gemini 3.1 Flash Lite' },
+                              { value: 'gemini-3-pro-preview', label: 'Gemini 3 Pro (Preview)' },
+                              { value: 'gemini-3-flash-preview', label: 'Gemini 3 Flash (Preview)' },
+                              { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
+                              { value: 'gemini-2.5-flash-lite', label: 'Gemini 2.5 Flash Lite' },
+                              { value: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro' },
+                              { value: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash' },
+                              { value: 'gemini-2.0-flash-thinking-exp', label: 'Gemini 2.0 Thinking' },
+                              { value: 'gemini-2.0-pro-exp', label: 'Gemini 2.0 Pro (Exp)' },
+                              { value: 'text-multilingual-embedding-002', label: 'Gemini Multilingual Embedding 2' }
+                            ].map((m) => {
+                              const isModelLocked = m.value.startsWith('gemini-3') && planPrice < 18000;
+                              return (
+                                <button
+                                  key={m.value}
+                                  onClick={() => {
+                                    if (isModelLocked) {
+                                      toast.error('Gemini 3.x models are locked', {
+                                        description: 'These models are only available on the Enterprise AI OS plan. Please upgrade your subscription to unlock.'
+                                      });
+                                      return;
+                                    }
+                                    setSelectedModel(m.value);
+                                    setIsModelMenuOpen(false);
+                                  }}
+                                  className={cn(
+                                    "w-full text-left px-2 py-1.5 rounded-[3px] text-[10px] font-bold flex items-center justify-between gap-1.5 transition-colors text-black dark:text-white",
+                                    selectedModel === m.value ? "bg-purple-600/10 text-purple-600 hover:text-purple-600" : "hover:bg-muted",
+                                    isModelLocked && "opacity-50 hover:bg-transparent"
+                                  )}
+                                >
+                                  <span>{m.label}</span>
+                                  {isModelLocked && <Lock className="w-3 h-3 text-amber-500" />}
+                                </button>
+                              );
+                            })
+                          ) : (
+                            // Kimi Models
+                            [
+                              { value: 'kimi', label: 'Kimi Model' }
+                            ].map((m) => {
+                              return (
+                                <button
+                                  key={m.value}
+                                  onClick={() => {
+                                    setSelectedModel(m.value);
+                                    setIsModelMenuOpen(false);
+                                  }}
+                                  className={cn(
+                                    "w-full text-left px-2 py-1.5 rounded-[3px] text-[10px] font-bold flex items-center justify-between gap-1.5 transition-colors text-black dark:text-white",
+                                    selectedModel === m.value ? "bg-purple-600/10 text-purple-600 hover:text-purple-600" : "hover:bg-muted"
+                                  )}
+                                >
+                                  <span>{m.label}</span>
+                                </button>
+                              );
+                            })
+                          )}
+                        </div>
                       </div>
                     </div>
                   </>

@@ -175,7 +175,12 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
     }
 
     return filteredSessions.map((session) => (
-      <tr key={session.id} className="border-b border-border/50 last:border-0 group hover:bg-muted/5 transition-colors">
+      <tr 
+        key={session.id} 
+        data-agent="interview-row"
+        data-candidate-name={session.candidate_name}
+        className="border-b border-border/50 last:border-0 group hover:bg-muted/5 transition-colors"
+      >
         {/* Candidate */}
         <td className="pl-6 pr-4 py-3">
           <p className="text-[13px] font-bold truncate max-w-[200px]" data-agent="candidate-name">{session.candidate_name}</p>
@@ -191,20 +196,26 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
         </td>
         {/* Status */}
         <td className="px-4 py-3">
-          <span className={cn(
-            "inline-flex px-2 py-0.5 rounded-[4px] text-[10px] font-bold capitalize border whitespace-nowrap",
-            getStatusStyle(session.status)
-          )}>
+          <span 
+            data-agent="config-status"
+            className={cn(
+              "inline-flex px-2 py-0.5 rounded-[4px] text-[10px] font-bold capitalize border whitespace-nowrap",
+              getStatusStyle(session.status)
+            )}
+          >
             {session.status.toLowerCase().replace(/_/g, ' ')}
           </span>
         </td>
         {/* App Status */}
         <td className="px-4 py-3">
           {session.application_status ? (
-            <span className={cn(
-              "inline-flex px-2 py-0.5 rounded-[4px] text-[10px] font-bold uppercase border whitespace-nowrap",
-              getAppStatusStyle(session.application_status)
-            )}>
+            <span 
+              data-agent="app-status"
+              className={cn(
+                "inline-flex px-2 py-0.5 rounded-[4px] text-[10px] font-bold uppercase border whitespace-nowrap",
+                getAppStatusStyle(session.application_status)
+              )}
+            >
               {session.application_status}
             </span>
           ) : (
@@ -218,10 +229,13 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
         {/* Exam Status */}
         <td className="px-4 py-3">
           {session.exam_status ? (
-            <span className={cn(
-              "inline-flex px-2 py-0.5 rounded-[4px] text-[10px] font-bold border whitespace-nowrap",
-              getExamStatusStyle(session.exam_status)
-            )}>
+            <span 
+              data-agent="exam-status"
+              className={cn(
+                "inline-flex px-2 py-0.5 rounded-[4px] text-[10px] font-bold border whitespace-nowrap",
+                getExamStatusStyle(session.exam_status)
+              )}
+            >
               {getExamStatusLabel(session.exam_status)}
             </span>
           ) : (
@@ -241,6 +255,7 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
                     navigator.clipboard.writeText(session.exam_credentials!.username);
                     toast.success('Username copied');
                   }}
+                  data-agent="copy-username-button"
                   className="p-0.5 rounded-sm text-muted-foreground/40 hover:text-[#0a66c2] hover:bg-[#0a66c2]/10 transition-all hover:scale-105 active:scale-95 shrink-0"
                   title="Copy Username"
                 >
@@ -256,6 +271,7 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
                     navigator.clipboard.writeText(session.exam_credentials!.password);
                     toast.success('Password copied');
                   }}
+                  data-agent="copy-password-button"
                   className="p-0.5 rounded-sm text-muted-foreground/40 hover:text-[#0a66c2] hover:bg-[#0a66c2]/10 transition-all hover:scale-105 active:scale-95 shrink-0"
                   title="Copy Password"
                 >
@@ -291,6 +307,7 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
               <button
                 onClick={() => resendInviteMutation.mutate(session.id)}
                 disabled={resendInviteMutation.isPending}
+                data-agent="resend-invite-button"
                 className="w-8 h-8 flex items-center justify-center rounded-sm bg-[#0a66c2]/5 text-[#0a66c2] hover:bg-[#0a66c2] hover:text-white transition-all active:scale-95 border border-[#0a66c2]/10 disabled:opacity-50 shrink-0"
                 title="Resend Invitation Email"
               >
@@ -303,6 +320,7 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
                 <button
                   onClick={() => rescheduleMutation.mutate(session.application_id)}
                   disabled={rescheduleMutation.isPending}
+                  data-agent="reschedule-interview-button"
                   className="w-8 h-8 flex items-center justify-center rounded-sm bg-[#0a66c2]/5 text-[#0a66c2] hover:bg-[#0a66c2] hover:text-white transition-all active:scale-95 border border-[#0a66c2]/10 disabled:opacity-50"
                   title="Reschedule Interview"
                 >
@@ -310,6 +328,7 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
                 </button>
                 <button
                   onClick={() => onSectionChange('evaluation')}
+                  data-agent="view-evaluation-button"
                   className="w-8 h-8 flex items-center justify-center rounded-sm bg-emerald-600/10 text-emerald-600 hover:bg-emerald-600 hover:text-white transition-all active:scale-95 shadow-sm"
                   title="View Evaluation"
                 >
@@ -317,7 +336,7 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
                 </button>
               </>
             )}
-
+ 
             {/* Permanent Delete Button */}
             <button
               onClick={() => {
@@ -334,6 +353,7 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
                 });
               }}
               disabled={deleteSessionMutation.isPending}
+              data-agent="delete-session-button"
               className="w-8 h-8 flex items-center justify-center rounded-sm bg-red-600/5 text-red-600 hover:bg-red-600 hover:text-white transition-all active:scale-95 border border-red-600/10 disabled:opacity-50"
               title="Delete Session Permanently"
             >
@@ -344,7 +364,7 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
       </tr>
     ));
   };
-
+ 
   const handleSync = async () => {
     const toastId = toast.loading('Syncing pipeline with latest applications...');
     try {
@@ -354,7 +374,7 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
       toast.error('Sync failed', { id: toastId });
     }
   };
-
+ 
   return (
     <div className="p-6 lg:p-8 space-y-8 animate-in fade-in duration-500">
       {/* Header with Search & Filter */}
@@ -362,7 +382,7 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Interview Pipeline</h2>
         </div>
-
+ 
         <div className="flex flex-wrap items-center gap-4">
           <button 
             onClick={handleSync}
@@ -373,7 +393,7 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
             <RefreshCw className={cn("w-3.5 h-3.5", isRefetching && "animate-spin")} />
             Sync Pipeline
           </button>
-
+ 
           <div className="relative w-full sm:w-72">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#0a66c2]" />
             <input 
@@ -385,12 +405,13 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
               className="w-full bg-background border border-border rounded-sm py-2 pl-9 pr-3 text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0a66c2]/50 shadow-sm transition-all"
             />
           </div>
-
+ 
           <div className="flex items-center bg-muted/50 rounded-sm p-1 border border-border">
             {(['all', 'pending', 'completed'] as const).map((t) => (
               <button
                 key={t}
                 onClick={() => setFilter(t)}
+                data-agent={`filter-${t}-button`}
                 className={cn(
                   "px-4 py-1.5 rounded-sm text-[13px] font-semibold capitalize transition-all",
                   filter === t ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"

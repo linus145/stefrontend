@@ -10,6 +10,7 @@ export interface RoundConfig {
 export interface InterviewConfig {
   job_application_id: string;
   rounds: RoundConfig[];
+  force?: boolean;
 }
 
 export const aiInterviewsService = {
@@ -33,14 +34,14 @@ export const aiInterviewsService = {
     return api.post<any>(`/AIrounds/session/${sessionId}/report/`);
   },
 
-  generateQuestions: async (data: { 
-    application_id: string; 
-    type: string; 
-    designation: string; 
-    difficulty: string; 
+  generateQuestions: async (data: {
+    application_id: string;
+    type: string;
+    designation: string;
+    difficulty: string;
     round_category: string;
-    question_format: string; 
-    programming_language: string; 
+    question_format: string;
+    programming_language: string;
     count: number;
     coding_topics?: string[];
     coding_frameworks?: string[];
@@ -82,7 +83,7 @@ export const aiInterviewsService = {
   regenerateRoundQuestions: async (roundId: string, count?: number) => {
     return api.post<any>(`/AIrounds/round/${roundId}/regenerate/`, { count });
   },
-  
+
   // Trigger AI evaluation for a session (aggregates scores only, no AI calls)
   evaluateSession: async (sessionId: string, force: boolean = false) => {
     return api.post<any>(`/AIrounds/session/${sessionId}/evaluate/`, { force });

@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import { aiInterviewsService } from '@/services/ai-interviews.service';
 import { jobsService } from '@/services/jobs.service';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Sparkles, BrainCircuit, Copy } from 'lucide-react';
+import { Sparkles, BrainCircuit, Copy, AlertTriangle } from 'lucide-react';
 
 type RoundType = 'TECHNICAL' | 'CODING' | 'HR' | 'BEHAVIORAL' | 'SYSTEM_DESIGN';
 
@@ -67,6 +67,7 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
   const [selectedApplicationIds, setSelectedApplicationIds] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [loadedSessionStatus, setLoadedSessionStatus] = useState<string | null>(null);
   const [rounds, setRounds] = useState<RoundConfig[]>([
     { id: '1', title: 'TECHNICAL_SCREENING', type: 'TECHNICAL', difficulty: 'MID', round_category: 'NON_CODING', question_format: 'TEXT', programming_language: '', max_questions: 5, timer_seconds: 600, questions: [], selected_topics: [], selected_frameworks: [] }
   ]);
@@ -155,6 +156,8 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
         const res = await aiInterviewsService.getSessionDetail(initialSessionId);
         if (res.status === 'success' && res.data) {
           const detail = res.data;
+          // Track session status for UI warnings
+          setLoadedSessionStatus(detail.status || null);
           // Pre-fill rounds from existing session
           if (detail.rounds && detail.rounds.length > 0) {
             setRounds(detail.rounds.map((rnd: any, idx: number) => ({
@@ -320,55 +323,96 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
 
   const [orchestrationResults, setOrchestrationResults] = useState<any[]>([]);
 
+  const buildRoundsPayload = () => rounds.map(({ title, type, difficulty, round_category, question_format, programming_language, max_questions, timer_seconds, questions, selected_topics, selected_frameworks }) => ({
+    title,
+    type,
+    difficulty,
+    round_category,
+    question_format,
+    programming_language,
+    max_questions,
+    timer_seconds,
+    settings: {
+      coding_topics: selected_topics || [],
+      coding_frameworks: selected_frameworks || []
+    },
+    questions: questions?.map(q => ({
+      text: q.text,
+      marks: q.marks,
+      ideal_answer: q.ideal_answer,
+      mcq_options: q.mcq_options || null,
+      question_type: q.question_type || round_category
+    })) || []
+  }));
+
+  const dispatchInterviews = async (force: boolean = false) => {
+    const results = [];
+    for (const appId of selectedApplicationIds) {
+      const response = await aiInterviewsService.configureInterview({
+        job_application_id: appId,
+        rounds: buildRoundsPayload(),
+        ...(force ? { force: true } : {})
+      });
+
+      if (response.status === 'success') {
+        const app = applications.find((a: any) => a.id === appId);
+        results.push({
+          appId,
+          candidateName: app ? `${app.applicant.first_name} ${app.applicant.last_name}` : 'Candidate',
+          inviteLink: `${window.location.origin}/interview/start/${response.data.invite_token}`,
+          examUrl: response.data.exam_url || '',
+          examToken: response.data.exam_token || '',
+          examCredentials: response.data.exam_credentials || null,
+        });
+      }
+    }
+    return results;
+  };
+
   const handleConfigure = async () => {
     if (selectedApplicationIds.length === 0) return;
 
     setIsSubmitting(true);
     try {
-      const results = [];
-      for (const appId of selectedApplicationIds) {
-        const response = await aiInterviewsService.configureInterview({
-          job_application_id: appId,
-          rounds: rounds.map(({ title, type, difficulty, round_category, question_format, programming_language, max_questions, timer_seconds, questions, selected_topics, selected_frameworks }) => ({
-            title,
-            type,
-            difficulty,
-            round_category,
-            question_format,
-            programming_language,
-            max_questions,
-            timer_seconds,
-            settings: {
-              coding_topics: selected_topics || [],
-              coding_frameworks: selected_frameworks || []
-            },
-            questions: questions?.map(q => ({
-              text: q.text,
-              marks: q.marks,
-              ideal_answer: q.ideal_answer,
-              mcq_options: q.mcq_options || null,
-              question_type: q.question_type || round_category
-            })) || []
-          }))
-        });
-
-        if (response.status === 'success') {
-          const app = applications.find((a: any) => a.id === appId);
-          results.push({
-            appId,
-            candidateName: app ? `${app.applicant.first_name} ${app.applicant.last_name}` : 'Candidate',
-            inviteLink: `${window.location.origin}/interview/start/${response.data.invite_token}`,
-            examUrl: response.data.exam_url || '',
-            examToken: response.data.exam_token || '',
-            examCredentials: response.data.exam_credentials || null,
-          });
-        }
-      }
+      const results = await dispatchInterviews(false);
 
       setOrchestrationResults(results);
       toast.success(`Interviews orchestrated for ${results.length} candidate(s)!`);
       setStep(3);
     } catch (error: any) {
+      // Handle SESSION_IN_USE conflict
+      const errData = error?.data?.data || error?.data || {};
+      if (errData.code === 'SESSION_IN_USE') {
+        const existingStatus = (errData.existing_status || 'ACTIVE').toLowerCase().replace(/_/g, ' ');
+        toast(
+          `Candidate already has an ${existingStatus} exam session. Expire and replace it?`,
+          {
+            description: 'The previous session, answers, and credentials will be permanently deleted.',
+            duration: 15000,
+            action: {
+              label: 'Replace & Re-dispatch',
+              onClick: async () => {
+                setIsSubmitting(true);
+                try {
+                  const results = await dispatchInterviews(true);
+                  setOrchestrationResults(results);
+                  toast.success('Old session replaced. New interview dispatched!');
+                  setStep(3);
+                } catch (forceErr: any) {
+                  toast.error(forceErr?.data?.message || forceErr?.message || 'Failed to force re-dispatch.');
+                } finally {
+                  setIsSubmitting(false);
+                }
+              }
+            },
+            cancel: {
+              label: 'Cancel',
+              onClick: () => {}
+            }
+          }
+        );
+        return;
+      }
       toast.error(error?.data?.message || error?.message || 'Failed to orchestrate interviews.');
     } finally {
       setIsSubmitting(false);
@@ -593,6 +637,21 @@ export function InterviewConfigView({ initialApplicationId, initialSessionId, on
           >
             {/* Left: Configuration Form */}
             <div className="flex-1 min-w-0 space-y-8">
+              {/* Session status warning banner */}
+              {loadedSessionStatus && ['ACTIVE', 'EVALUATING', 'COMPLETED'].includes(loadedSessionStatus) && (
+                <div className="flex items-start gap-3 p-4 rounded-sm bg-amber-500/10 border border-amber-500/20">
+                  <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-[12px] font-bold text-amber-600">
+                      Candidate has {loadedSessionStatus === 'ACTIVE' ? 'started' : loadedSessionStatus === 'EVALUATING' ? 'completed (awaiting evaluation)' : 'completed'} this exam
+                    </p>
+                    <p className="text-[10px] text-muted-foreground mt-1 leading-relaxed">
+                      Re-dispatching will permanently delete the previous session, all answers, and credentials. Generate new questions if needed before dispatching.
+                    </p>
+                  </div>
+                </div>
+              )}
+
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-sm font-bold text-muted-foreground opacity-70">Architecture</h3>
                 <button

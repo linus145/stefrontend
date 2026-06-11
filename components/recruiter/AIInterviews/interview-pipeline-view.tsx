@@ -37,6 +37,7 @@ interface InterviewSession {
     username: string;
     password: string;
   } | null;
+  exam_status?: string | null;
   application_status?: string | null;
 }
 
@@ -116,6 +117,28 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
     }
   };
 
+  const getExamStatusStyle = (status: string) => {
+    switch (status.toUpperCase()) {
+      case 'COMPLETED': return 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20';
+      case 'STARTED': return 'bg-[#0a66c2]/10 text-[#0a66c2] border-[#0a66c2]/20';
+      case 'ACTIVE': return 'bg-amber-500/10 text-amber-600 border-amber-500/20';
+      case 'EXPIRED': return 'bg-red-500/10 text-red-500 border-red-500/20';
+      case 'NOT_STARTED': return 'bg-slate-500/10 text-slate-500 border-slate-500/20';
+      default: return 'bg-slate-500/10 text-slate-500 border-slate-500/20';
+    }
+  };
+
+  const getExamStatusLabel = (status: string) => {
+    switch (status.toUpperCase()) {
+      case 'COMPLETED': return 'Exam Completed';
+      case 'STARTED': return 'In Progress';
+      case 'ACTIVE': return 'Not Attempted';
+      case 'EXPIRED': return 'Expired';
+      case 'NOT_STARTED': return 'Awaiting Config';
+      default: return status.toLowerCase().replace(/_/g, ' ');
+    }
+  };
+
   const getAppStatusStyle = (status: string) => {
     switch (status.toUpperCase()) {
       case 'PENDING': return 'bg-amber-500/10 text-amber-600 border-amber-500/20';
@@ -132,7 +155,7 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
     if (isLoading) {
       return Array.from({ length: 4 }).map((_, i) => (
         <tr key={i} className="border-b border-border/50 last:border-0 animate-pulse">
-          {Array.from({ length: 8 }).map((__, j) => (
+          {Array.from({ length: 9 }).map((__, j) => (
             <td key={j} className="px-4 py-5">
               <div className="h-3.5 bg-muted rounded w-full opacity-40" />
             </td>
@@ -144,7 +167,7 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
     if (filteredSessions.length === 0) {
       return (
         <tr>
-          <td colSpan={8} className="px-6 py-20 text-center">
+          <td colSpan={9} className="px-6 py-20 text-center">
             <p className="text-sm font-medium opacity-40">No matching interview sessions found.</p>
           </td>
         </tr>
@@ -192,6 +215,19 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
         <td className="px-4 py-3 text-center">
           <span className="text-[13px] font-bold">{session.rounds_count}</span>
         </td>
+        {/* Exam Status */}
+        <td className="px-4 py-3">
+          {session.exam_status ? (
+            <span className={cn(
+              "inline-flex px-2 py-0.5 rounded-[4px] text-[10px] font-bold border whitespace-nowrap",
+              getExamStatusStyle(session.exam_status)
+            )}>
+              {getExamStatusLabel(session.exam_status)}
+            </span>
+          ) : (
+            <span className="text-[11px] text-muted-foreground/40 italic">—</span>
+          )}
+        </td>
         {/* Exam Access */}
         <td className="px-4 py-3">
           {session.exam_credentials ? (
@@ -234,19 +270,22 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
         {/* Action */}
         <td className="pl-4 pr-6 py-3 text-right">
           <div className="flex items-center justify-end gap-2">
-            <button
-              onClick={() => onConfigure(session.application_id, session.is_orchestrated ? session.id : undefined)}
-              data-agent="configure-interview-button"
-              className={cn(
-                "px-3 py-1.5 rounded-sm text-[11px] font-bold transition-all active:scale-95 whitespace-nowrap",
-                !session.is_orchestrated
-                  ? "bg-[#0a66c2] text-white hover:bg-[#004182] shadow-sm"
-                  : "border border-border hover:bg-[#0a66c2] hover:text-white hover:border-[#0a66c2]"
-              )}
-              title={!session.is_orchestrated ? 'Configure Interview' : 'Reconfigure Interview'}
-            >
-              {!session.is_orchestrated ? 'Configure' : 'Reconfigure'}
-            </button>
+            {/* Show Reconfigure only if exam is NOT completed */}
+            {session.exam_status?.toUpperCase() !== 'COMPLETED' && (
+              <button
+                onClick={() => onConfigure(session.application_id, session.is_orchestrated ? session.id : undefined)}
+                data-agent="configure-interview-button"
+                className={cn(
+                  "px-3 py-1.5 rounded-sm text-[11px] font-bold transition-all active:scale-95 whitespace-nowrap",
+                  !session.is_orchestrated
+                    ? "bg-[#0a66c2] text-white hover:bg-[#004182] shadow-sm"
+                    : "border border-border hover:bg-[#0a66c2] hover:text-white hover:border-[#0a66c2]"
+                )}
+                title={!session.is_orchestrated ? 'Configure Interview' : 'Reconfigure Interview'}
+              >
+                {!session.is_orchestrated ? 'Configure' : 'Reconfigure'}
+              </button>
+            )}
             
             {session.is_orchestrated && (
               <button
@@ -410,12 +449,13 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-muted/30 border-b border-border">
-                <th className="pl-6 pr-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[18%]">Candidate</th>
-                <th className="px-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[17%]">Email</th>
-                <th className="px-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[13%]">Role</th>
-                <th className="px-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[10%]">Config Status</th>
-                <th className="px-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[10%]">Applicant Status</th>
-                <th className="px-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[7%] text-center">Rounds</th>
+                <th className="pl-6 pr-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[16%]">Candidate</th>
+                <th className="px-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[15%]">Email</th>
+                <th className="px-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[11%]">Role</th>
+                <th className="px-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[9%]">Config Status</th>
+                <th className="px-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[9%]">Applicant Status</th>
+                <th className="px-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[5%] text-center">Rounds</th>
+                <th className="px-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[9%]">Exam Status</th>
                 <th className="px-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[15%]">Exam Access</th>
                 <th className="pl-4 pr-6 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[10%] text-right">Action</th>
               </tr>

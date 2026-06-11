@@ -107,6 +107,9 @@ export function AgentSettingsTab() {
                   >
                     <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
                     <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash Lite</option>
+                    <option value="kimi">Kimi Reasoning</option>
+                    <option value="grok-4-20-non-reasoning">Grok 4.20 Non-Reasoning</option>
+                    <option value="grok-4.1-non-reasoning">Grok 4.1 Non-Reasoning</option>
                   </select>
                 </div>
 

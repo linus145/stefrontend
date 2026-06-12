@@ -4,11 +4,14 @@ import React, { useState } from 'react';
 import {
   LayoutDashboard, Briefcase, Users, Building2, ChevronLeft,
   Menu, X, ArrowLeftRight, LogOut, MessageSquare, Search, User,
-  BrainCircuit
+  BrainCircuit, Coins, Sun, Moon
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import { useDashboardTheme } from '@/context/DashboardThemeContext';
+import { useQuery } from '@tanstack/react-query';
+import { creditsService } from '@/services/credits.service';
 
 export type RecruiterSection = 'overview' | 'my-jobs' | 'applications' | 'candidates' | 'company' | 'messages';
 
@@ -36,13 +39,21 @@ export function RecruiterSidebar({
   isMobileOpen, onMobileClose, companyName, companyLogo
 }: RecruiterSidebarProps) {
   const { logout, user } = useAuth();
+  const { isDark, toggleTheme } = useDashboardTheme();
+
+  const { data: creditsData } = useQuery({
+    queryKey: ['userCredits'],
+    queryFn: () => creditsService.getBalance(),
+    refetchInterval: 30000,
+  });
+  const creditBalance = creditsData?.data?.balance ?? 0;
 
   return (
     <aside
       className={cn(
         "fixed left-0 top-16 bottom-0 bg-card border-r border-border flex flex-col justify-between py-6 z-30 transition-all duration-300 ease-in-out",
         "hidden lg:flex",
-        isCollapsed ? "lg:w-20" : "lg:w-64",
+        isCollapsed ? "lg:w-20" : "lg:w-60",
         isMobileOpen && "!flex w-72 shadow-2xl bg-card"
       )}
     >
@@ -151,7 +162,45 @@ export function RecruiterSidebar({
       </div>
 
       {/* Bottom Section */}
-      <div className={cn("px-4 space-y-3 transition-all mt-auto", (isCollapsed && !isMobileOpen) ? "px-4" : "px-4")}>
+      <div className={cn("px-3 space-y-2 transition-all mt-auto", (isCollapsed && !isMobileOpen) ? "px-2" : "px-3")}>
+
+        {/* Credits */}
+        {(!isCollapsed || isMobileOpen) ? (
+          <div
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-[4px] bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-[11px] font-bold w-full"
+            title="AI Credits Balance"
+          >
+            <Coins className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+            <span>{creditBalance} Credits</span>
+          </div>
+        ) : (
+          <div className="flex justify-center" title={`${creditBalance} Credits`}>
+            <div className="w-8 h-8 rounded-[4px] bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+              <Coins className="w-3.5 h-3.5 text-amber-500" />
+            </div>
+          </div>
+        )}
+
+        {/* Theme Toggle — text when expanded, icon when collapsed */}
+        <button
+          onClick={toggleTheme}
+          className={cn(
+            "flex items-center gap-2 w-full transition-all rounded-[4px] text-muted-foreground hover:text-foreground text-xs font-semibold active:scale-95 py-1.5",
+            (isCollapsed && !isMobileOpen) ? "justify-center px-0" : "px-2"
+          )}
+          title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+        >
+          {isDark
+            ? <Sun className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+            : <Moon className="h-3.5 w-3.5 text-primary shrink-0" />
+          }
+          {(!isCollapsed || isMobileOpen) && (
+            <span className="animate-in fade-in duration-300">
+              {isDark ? 'Light Mode' : 'Dark Mode'}
+            </span>
+          )}
+        </button>
+
         {/* Switch to user dashboard */}
         <Link
           href="/dashboard"

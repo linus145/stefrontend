@@ -183,18 +183,8 @@ export function RecruiterHeader({
 
       {/* Right: Actions */}
       <div className="flex items-center gap-3 sm:gap-5">
-        <ThemeToggle />
 
         <div className="flex items-center gap-2 sm:gap-4">
-          <div
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-bold shadow-sm shrink-0"
-            title="AI Credits Balance"
-          >
-            <Coins className="w-4 h-4 text-amber-500 shrink-0" />
-            <span>{creditBalance} Credits</span>
-          </div>
-
-
           <NotificationPopover currentDashboard="RECRUITER" />
         </div>
 
@@ -239,12 +229,7 @@ export function RecruiterHeader({
           </svg>
         </button>
 
-        <Link
-          href="/dashboard"
-          className="hidden xl:flex items-center gap-2 px-4 py-2 rounded-sm bg-muted/50 border border-border text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
-        >
-          ← User Dashboard
-        </Link>
+
       </div>
     </header>
   );

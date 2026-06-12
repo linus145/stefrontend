@@ -177,7 +177,7 @@ export function RecruiterShell() {
         companyLogo={company.logo_url}
       />
 
-      <div className={`flex-1 flex flex-col min-w-0 pt-16 pb-16 lg:pb-0 transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'} ${activeTab === 'messages' ? 'h-screen overflow-hidden' : 'min-h-0'}`}>
+      <div className={`flex-1 flex flex-col min-w-0 pt-16 pb-16 lg:pb-0 transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-20' : 'lg:pl-60'} ${activeTab === 'messages' ? 'h-screen overflow-hidden' : 'min-h-0'}`}>
         {renderContent()}
       </div>
     </div>

@@ -14,12 +14,15 @@ import {
   ChevronLeft,
   ChevronDown,
   Menu,
-  ArrowLeftRight,
+
   LogOut,
   User,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import Link from 'next/link';
+import { useDashboardTheme } from '@/context/DashboardThemeContext';
 
 
 export type PortalSection =
@@ -91,6 +94,7 @@ export function PortalSidebar({
   isManager = false,
 }: PortalSidebarProps) {
   const { logout, user } = useAuth();
+  const { isDark, toggleTheme } = useDashboardTheme();
   const navItems = isManager ? [...EMPLOYEE_NAV, ...MANAGER_EXTRA_NAV] : EMPLOYEE_NAV;
 
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
@@ -116,7 +120,7 @@ export function PortalSidebar({
     <aside
       className={cn(
         "fixed left-0 top-16 bottom-0 bg-card border-r border-border flex flex-col justify-between py-6 z-30 transition-all duration-300 ease-in-out",
-        isCollapsed ? "w-20" : "w-64"
+        isCollapsed ? "w-20" : "w-60"
       )}
     >
       {/* Desktop Collapse Toggle */}
@@ -264,18 +268,27 @@ export function PortalSidebar({
       </div>
 
       {/* Bottom Section */}
-      <div className={cn("px-4 space-y-3 transition-all mt-auto", isCollapsed ? "px-2" : "px-4")}>
-        {/* Switch to user dashboard */}
-        <Link
-          href="/dashboard"
+      <div className={cn("px-3 space-y-2 transition-all mt-auto", isCollapsed ? "px-2" : "px-3")}>
+
+        {/* Theme Toggle — text when expanded, icon when collapsed */}
+        <button
+          onClick={toggleTheme}
           className={cn(
-            "flex items-center justify-center gap-2 w-full transition-all rounded-[4px] bg-muted/50 border border-border text-muted-foreground py-2 text-xs font-semibold hover:bg-muted hover:text-foreground active:scale-95",
-            isCollapsed ? "px-0" : "px-2"
+            "flex items-center gap-2 w-full transition-all rounded-[4px] text-muted-foreground hover:text-foreground text-xs font-semibold active:scale-95 py-1.5",
+            isCollapsed ? "justify-center px-0" : "px-2"
           )}
+          title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
         >
-          <ArrowLeftRight className="h-3.5 w-3.5" />
-          {!isCollapsed && <span className="animate-in fade-in duration-300">Switch to User</span>}
-        </Link>
+          {isDark
+            ? <Sun className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+            : <Moon className="h-3.5 w-3.5 text-primary shrink-0" />
+          }
+          {!isCollapsed && (
+            <span className="animate-in fade-in duration-300">
+              {isDark ? 'Light Mode' : 'Dark Mode'}
+            </span>
+          )}
+        </button>
 
         {!isCollapsed && (
           <div className="flex flex-col gap-1 pt-2 border-t border-border">

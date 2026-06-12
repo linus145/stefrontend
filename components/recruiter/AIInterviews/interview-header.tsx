@@ -104,15 +104,6 @@ export function AIInterviewsHeader({ companyName, activeSection, onSectionChange
 
       {/* Right: Actions */}
       <div className="flex items-center gap-3 sm:gap-5">
-        <ThemeToggle />
-        <div
-          className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-bold shadow-sm shrink-0"
-          title="AI Credits Balance"
-        >
-          <Coins className="w-4 h-4 text-amber-500 shrink-0" />
-          <span>{creditBalance} Credits</span>
-        </div>
-
           <NotificationPopover currentDashboard="INTERVIEW" />
 
         {/* AI Agent Header Button */}
@@ -155,10 +146,6 @@ export function AIInterviewsHeader({ companyName, activeSection, onSectionChange
             <path d="M9 13v2" />
           </svg>
         </button>
-
-        <div className="w-8 h-8 rounded-full bg-muted border border-border flex items-center justify-center overflow-hidden">
-          <Users2 className="w-4 h-4 text-muted-foreground opacity-50" />
-        </div>
       </div>
     </header>
   );

@@ -143,7 +143,7 @@ export function AIInterviewsShell() {
         companyName={company.company_name}
       />
 
-      <main className={`flex-1 flex flex-col min-w-0 pt-16 transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'}`}>
+      <main className={`flex-1 flex flex-col min-w-0 pt-16 transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-20' : 'lg:pl-60'}`}>
         <div className="flex-1 custom-scrollbar">
           {renderContent()}
         </div>

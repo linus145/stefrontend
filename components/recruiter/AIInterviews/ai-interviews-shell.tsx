@@ -9,6 +9,7 @@ import { AIInterviewsSidebar } from './interview-sidebar';
 import { InterviewPipelineView } from './interview-pipeline-view';
 import { InterviewConfigView } from './configuration/interview-config-view';
 import { EvaluationView } from './evaluation/evaluation-view';
+import { SchedulingView } from './scheduling/scheduling-view';
 import { GlobalLoader } from '@/components/ui/global-loader';
 import { useQuery } from '@tanstack/react-query';
 import { jobsService } from '@/services/jobs.service';
@@ -115,6 +116,8 @@ export function AIInterviewsShell() {
         );
       case 'evaluation':
         return <EvaluationView />;
+      case 'scheduling':
+        return <SchedulingView onConfigure={handleConfigureCandidate} onSectionChange={setActiveSection} />;
       default:
         return (
           <div className="flex flex-col items-center justify-center h-full opacity-50 space-y-4">

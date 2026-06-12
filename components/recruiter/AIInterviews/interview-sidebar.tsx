@@ -22,8 +22,8 @@ interface AIInterviewsSidebarProps {
 const NAVIGATION_ITEMS = [
   { id: 'pipeline', label: 'Pipeline', icon: Users2 },
   { id: 'configuration', label: 'Configuration', icon: BrainCircuit },
-  { id: 'evaluation', label: 'Evaluation', icon: ClipboardCheck },
   { id: 'scheduling', label: 'Scheduling', icon: Calendar },
+  { id: 'evaluation', label: 'Evaluation', icon: ClipboardCheck },
   { id: 'analytics', label: 'Insights', icon: PieChart },
   { id: 'settings', label: 'Settings', icon: Settings2 },
 ];

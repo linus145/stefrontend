@@ -384,7 +384,7 @@ export function ManagerDashboard() {
 
                 <main
                     className={`flex-1 min-w-0 transition-all duration-300 ${
-                        isSidebarCollapsed ? 'pl-[60px]' : 'pl-[220px]'
+                        isSidebarCollapsed ? 'pl-20' : 'pl-64'
                     }`}
                 >
                     <div className="p-8 md:p-10 max-w-7xl mx-auto w-full">

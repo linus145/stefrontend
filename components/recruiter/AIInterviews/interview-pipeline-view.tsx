@@ -4,10 +4,10 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { aiInterviewsService } from '@/services/ai-interviews.service';
 import { jobsService } from '@/services/jobs.service';
-import { 
-  Search, 
-  Users2, 
-  Clock, 
+import {
+  Search,
+  Users2,
+  Clock,
   BrainCircuit,
   ClipboardCheck,
   ChevronRight,
@@ -58,7 +58,7 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
   });
 
   const rescheduleMutation = useMutation({
-    mutationFn: (applicationId: string) => 
+    mutationFn: (applicationId: string) =>
       jobsService.updateApplicationStatus(applicationId, 'INTERVIEW'),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ai-interview-sessions'] });
@@ -94,8 +94,8 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
   const sessions: InterviewSession[] = Array.isArray(sessionsResponse?.data) ? sessionsResponse.data : [];
 
   const filteredSessions = sessions.filter(s => {
-    const matchesSearch = s.candidate_name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                         s.job_title.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = s.candidate_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      s.job_title.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesFilter = filter === 'all' || s.status.toLowerCase() === filter;
     return matchesSearch && matchesFilter;
   });
@@ -156,7 +156,7 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
       return Array.from({ length: 4 }).map((_, i) => (
         <tr key={i} className="border-b border-border/50 last:border-0 animate-pulse">
           {Array.from({ length: 9 }).map((__, j) => (
-            <td key={j} className="px-4 py-5">
+            <td key={j} className="px-3 py-3">
               <div className="h-3.5 bg-muted rounded w-full opacity-40" />
             </td>
           ))}
@@ -167,39 +167,39 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
     if (filteredSessions.length === 0) {
       return (
         <tr>
-          <td colSpan={9} className="px-6 py-20 text-center">
-            <p className="text-sm font-medium opacity-40">No matching interview sessions found.</p>
+          <td colSpan={9} className="px-6 py-12 text-center">
+            <p className="text-xs font-medium opacity-40">No matching interview sessions found.</p>
           </td>
         </tr>
       );
     }
 
     return filteredSessions.map((session) => (
-      <tr 
-        key={session.id} 
+      <tr
+        key={session.id}
         data-agent="interview-row"
         data-candidate-name={session.candidate_name}
-        className="border-b border-border/50 last:border-0 group hover:bg-muted/5 transition-colors"
+        className="border-b border-border/40 last:border-0 group hover:bg-muted/5 transition-colors text-[12px]"
       >
         {/* Candidate */}
-        <td className="pl-6 pr-4 py-3">
-          <p className="text-[13px] font-bold truncate max-w-[200px]" data-agent="candidate-name">{session.candidate_name}</p>
-          <p className="text-[11px] text-muted-foreground mt-0.5">{new Date(session.created_at).toLocaleDateString()}</p>
+        <td className="pl-6 pr-3 py-1.5">
+          <p className="text-[12px] font-bold truncate max-w-[200px]" data-agent="candidate-name">{session.candidate_name}</p>
+          <p className="text-[10px] text-muted-foreground mt-0.5">{new Date(session.created_at).toLocaleDateString()}</p>
         </td>
         {/* Email */}
-        <td className="px-4 py-3">
-          <p className="text-[13px] font-medium text-muted-foreground truncate max-w-[220px]">{session.candidate_email}</p>
+        <td className="px-3 py-1.5">
+          <p className="text-[12px] font-medium text-muted-foreground truncate max-w-[220px]">{session.candidate_email}</p>
         </td>
         {/* Role */}
-        <td className="px-4 py-3">
-          <p className="text-[13px] font-semibold truncate max-w-[160px]">{session.job_title}</p>
+        <td className="px-3 py-1.5">
+          <p className="text-[12px] font-semibold truncate max-w-[160px]">{session.job_title}</p>
         </td>
         {/* Status */}
-        <td className="px-4 py-3">
-          <span 
+        <td className="px-3 py-1.5">
+          <span
             data-agent="config-status"
             className={cn(
-              "inline-flex px-2 py-0.5 rounded-[4px] text-[10px] font-bold capitalize border whitespace-nowrap",
+              "inline-flex px-1.5 py-0.5 rounded-[3px] text-[9px] font-bold capitalize border whitespace-nowrap",
               getStatusStyle(session.status)
             )}
           >
@@ -207,47 +207,47 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
           </span>
         </td>
         {/* App Status */}
-        <td className="px-4 py-3">
+        <td className="px-3 py-1.5">
           {session.application_status ? (
-            <span 
+            <span
               data-agent="app-status"
               className={cn(
-                "inline-flex px-2 py-0.5 rounded-[4px] text-[10px] font-bold uppercase border whitespace-nowrap",
+                "inline-flex px-1.5 py-0.5 rounded-[3px] text-[9px] font-bold uppercase border whitespace-nowrap",
                 getAppStatusStyle(session.application_status)
               )}
             >
               {session.application_status}
             </span>
           ) : (
-            <span className="text-[11px] text-muted-foreground/40 italic">-</span>
+            <span className="text-[10px] text-muted-foreground/40 italic">-</span>
           )}
         </td>
         {/* Rounds */}
-        <td className="px-4 py-3 text-center">
-          <span className="text-[13px] font-bold">{session.rounds_count}</span>
+        <td className="px-3 py-1.5 text-center">
+          <span className="text-[12px] font-bold">{session.rounds_count}</span>
         </td>
         {/* Exam Status */}
-        <td className="px-4 py-3">
+        <td className="px-3 py-1.5">
           {session.exam_status ? (
-            <span 
+            <span
               data-agent="exam-status"
               className={cn(
-                "inline-flex px-2 py-0.5 rounded-[4px] text-[10px] font-bold border whitespace-nowrap",
+                "inline-flex px-1.5 py-0.5 rounded-[3px] text-[9px] font-bold border whitespace-nowrap",
                 getExamStatusStyle(session.exam_status)
               )}
             >
               {getExamStatusLabel(session.exam_status)}
             </span>
           ) : (
-            <span className="text-[11px] text-muted-foreground/40 italic">—</span>
+            <span className="text-[10px] text-muted-foreground/40 italic">—</span>
           )}
         </td>
         {/* Exam Access */}
-        <td className="px-4 py-3">
+        <td className="px-3 py-1.5">
           {session.exam_credentials ? (
-            <div className="flex flex-col gap-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <span className="font-mono text-[11px] font-bold text-foreground leading-relaxed">
+            <div className="flex flex-col gap-0.5 min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className="font-mono text-[10px] font-bold text-foreground leading-relaxed">
                   {session.exam_credentials.username}
                 </span>
                 <button
@@ -259,11 +259,11 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
                   className="p-0.5 rounded-sm text-muted-foreground/40 hover:text-[#0a66c2] hover:bg-[#0a66c2]/10 transition-all hover:scale-105 active:scale-95 shrink-0"
                   title="Copy Username"
                 >
-                  <Copy className="w-3 h-3" />
+                  <Copy className="w-2.5 h-2.5" />
                 </button>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="font-mono text-[11px] font-bold text-foreground leading-relaxed">
+              <div className="flex items-center gap-1.5">
+                <span className="font-mono text-[10px] font-bold text-foreground leading-relaxed">
                   {session.exam_credentials.password}
                 </span>
                 <button
@@ -275,24 +275,24 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
                   className="p-0.5 rounded-sm text-muted-foreground/40 hover:text-[#0a66c2] hover:bg-[#0a66c2]/10 transition-all hover:scale-105 active:scale-95 shrink-0"
                   title="Copy Password"
                 >
-                  <Copy className="w-3 h-3" />
+                  <Copy className="w-2.5 h-2.5" />
                 </button>
               </div>
             </div>
           ) : (
-            <span className="text-[11px] text-muted-foreground/40 italic">Not generated</span>
+            <span className="text-[10px] text-muted-foreground/40 italic">Not generated</span>
           )}
         </td>
         {/* Action */}
-        <td className="pl-4 pr-6 py-3 text-right">
-          <div className="flex items-center justify-end gap-2">
+        <td className="pl-3 pr-6 py-1.5 text-right">
+          <div className="flex items-center justify-end gap-1.5">
             {/* Show Reconfigure only if exam is NOT completed */}
             {session.exam_status?.toUpperCase() !== 'COMPLETED' && (
               <button
                 onClick={() => onConfigure(session.application_id, session.is_orchestrated ? session.id : undefined)}
                 data-agent="configure-interview-button"
                 className={cn(
-                  "px-3 py-1.5 rounded-sm text-[11px] font-bold transition-all active:scale-95 whitespace-nowrap",
+                  "px-2.5 py-1 rounded-sm text-[10px] font-bold transition-all active:scale-95 whitespace-nowrap",
                   !session.is_orchestrated
                     ? "bg-[#0a66c2] text-white hover:bg-[#004182] shadow-sm"
                     : "border border-border hover:bg-[#0a66c2] hover:text-white hover:border-[#0a66c2]"
@@ -302,41 +302,41 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
                 {!session.is_orchestrated ? 'Configure' : 'Reconfigure'}
               </button>
             )}
-            
+
             {session.is_orchestrated && (
               <button
                 onClick={() => resendInviteMutation.mutate(session.id)}
                 disabled={resendInviteMutation.isPending}
                 data-agent="resend-invite-button"
-                className="w-8 h-8 flex items-center justify-center rounded-sm bg-[#0a66c2]/5 text-[#0a66c2] hover:bg-[#0a66c2] hover:text-white transition-all active:scale-95 border border-[#0a66c2]/10 disabled:opacity-50 shrink-0"
+                className="w-7 h-7 flex items-center justify-center rounded-sm bg-[#0a66c2]/5 text-[#0a66c2] hover:bg-[#0a66c2] hover:text-white transition-all active:scale-95 border border-[#0a66c2]/10 disabled:opacity-50 shrink-0"
                 title="Resend Invitation Email"
               >
-                <Mail className="w-3.5 h-3.5" />
+                <Mail className="w-3 h-3" />
               </button>
             )}
-            
+
             {session.is_orchestrated && (
               <>
                 <button
                   onClick={() => rescheduleMutation.mutate(session.application_id)}
                   disabled={rescheduleMutation.isPending}
                   data-agent="reschedule-interview-button"
-                  className="w-8 h-8 flex items-center justify-center rounded-sm bg-[#0a66c2]/5 text-[#0a66c2] hover:bg-[#0a66c2] hover:text-white transition-all active:scale-95 border border-[#0a66c2]/10 disabled:opacity-50"
+                  className="w-7 h-7 flex items-center justify-center rounded-sm bg-[#0a66c2]/5 text-[#0a66c2] hover:bg-[#0a66c2] hover:text-white transition-all active:scale-95 border border-[#0a66c2]/10 disabled:opacity-50"
                   title="Reschedule Interview"
                 >
-                  <RefreshCw className={cn("w-3.5 h-3.5", rescheduleMutation.isPending && "animate-spin")} />
+                  <RefreshCw className={cn("w-3 h-3", rescheduleMutation.isPending && "animate-spin")} />
                 </button>
                 <button
                   onClick={() => onSectionChange('evaluation')}
                   data-agent="view-evaluation-button"
-                  className="w-8 h-8 flex items-center justify-center rounded-sm bg-emerald-600/10 text-emerald-600 hover:bg-emerald-600 hover:text-white transition-all active:scale-95 shadow-sm"
+                  className="w-7 h-7 flex items-center justify-center rounded-sm bg-emerald-600/10 text-emerald-600 hover:bg-emerald-600 hover:text-white transition-all active:scale-95 shadow-sm"
                   title="View Evaluation"
                 >
-                  <ClipboardCheck className="w-4 h-4" />
+                  <ClipboardCheck className="w-3.5 h-3.5" />
                 </button>
               </>
             )}
- 
+
             {/* Permanent Delete Button */}
             <button
               onClick={() => {
@@ -348,13 +348,13 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
                   },
                   cancel: {
                     label: 'Cancel',
-                    onClick: () => {},
+                    onClick: () => { },
                   },
                 });
               }}
               disabled={deleteSessionMutation.isPending}
               data-agent="delete-session-button"
-              className="w-8 h-8 flex items-center justify-center rounded-sm bg-red-600/5 text-red-600 hover:bg-red-600 hover:text-white transition-all active:scale-95 border border-red-600/10 disabled:opacity-50"
+              className="w-7 h-7 flex items-center justify-center rounded-sm bg-red-600/5 text-red-600 hover:bg-red-600 hover:text-white transition-all active:scale-95 border border-red-600/10 disabled:opacity-50"
               title="Delete Session Permanently"
             >
               <Trash2 className={cn("w-3.5 h-3.5", deleteSessionMutation.isPending && "animate-spin")} />
@@ -364,7 +364,7 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
       </tr>
     ));
   };
- 
+
   const handleSync = async () => {
     const toastId = toast.loading('Syncing pipeline with latest applications...');
     try {
@@ -374,7 +374,7 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
       toast.error('Sync failed', { id: toastId });
     }
   };
- 
+
   return (
     <div className="p-6 lg:p-8 space-y-8 animate-in fade-in duration-500">
       {/* Header with Search & Filter */}
@@ -382,9 +382,9 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Interview Pipeline</h2>
         </div>
- 
+
         <div className="flex flex-wrap items-center gap-4">
-          <button 
+          <button
             onClick={handleSync}
             disabled={isRefetching}
             data-agent="sync-pipeline-button"
@@ -393,11 +393,11 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
             <RefreshCw className={cn("w-3.5 h-3.5", isRefetching && "animate-spin")} />
             Sync Pipeline
           </button>
- 
+
           <div className="relative w-full sm:w-72">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#0a66c2]" />
-            <input 
-              type="text" 
+            <input
+              type="text"
               placeholder="Search candidate or role..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -405,7 +405,7 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
               className="w-full bg-background border border-border rounded-sm py-2 pl-9 pr-3 text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-[#0a66c2]/50 shadow-sm transition-all"
             />
           </div>
- 
+
           <div className="flex items-center bg-muted/50 rounded-sm p-1 border border-border">
             {(['all', 'pending', 'completed'] as const).map((t) => (
               <button
@@ -470,15 +470,15 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-muted/30 border-b border-border">
-                <th className="pl-6 pr-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[16%]">Candidate</th>
-                <th className="px-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[15%]">Email</th>
-                <th className="px-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[11%]">Role</th>
-                <th className="px-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[9%]">Config Status</th>
-                <th className="px-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[9%]">Applicant Status</th>
-                <th className="px-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[5%] text-center">Rounds</th>
-                <th className="px-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[9%]">Exam Status</th>
-                <th className="px-4 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[15%]">Exam Access</th>
-                <th className="pl-4 pr-6 py-3.5 text-left text-[11px] font-bold text-muted-foreground uppercase tracking-wider w-[10%] text-right">Action</th>
+                <th className="pl-6 pr-3 py-2 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-wider w-[16%]">Candidate</th>
+                <th className="px-3 py-2 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-wider w-[15%]">Email</th>
+                <th className="px-3 py-2 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-wider w-[11%]">Role</th>
+                <th className="px-3 py-2 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-wider w-[9%]">Config Status</th>
+                <th className="px-3 py-2 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-wider w-[9%]">Applicant Status</th>
+                <th className="px-3 py-2 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-wider w-[5%] text-center">Rounds</th>
+                <th className="px-3 py-2 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-wider w-[9%]">Exam Status</th>
+                <th className="px-3 py-2 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-wider w-[15%]">Exam Access</th>
+                <th className="pl-3 pr-6 py-2 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-wider w-[10%] text-right">Action</th>
               </tr>
             </thead>
             <tbody>

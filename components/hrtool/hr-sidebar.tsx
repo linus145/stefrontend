@@ -259,7 +259,7 @@ export function HRSidebar({
 
       <div className="flex-1 py-4 overflow-y-auto no-scrollbar">
         {/* Quick Search Element */}
-        {!isCollapsed && (
+        {/* {!isCollapsed && (
           <div className="px-3 mb-4">
             <div className="flex items-center gap-2 px-3 py-1.5 bg-muted/40 border border-border rounded-[4px] text-xs text-muted-foreground hover:bg-muted/60 transition-all cursor-pointer">
               <Search className="w-3.5 h-3.5 shrink-0 opacity-60" />
@@ -267,7 +267,7 @@ export function HRSidebar({
               <span className="ml-auto text-[9px] font-mono opacity-50 px-1 py-0.5 bg-background border border-border rounded-[2px]">Ctrl K</span>
             </div>
           </div>
-        )}
+        )} */}
 
         <nav className="px-3 space-y-1">
           {NAVIGATION_SECTIONS.map((section, sectionIdx) => (

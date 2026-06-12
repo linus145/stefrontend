@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Menu, Bell, Building2, MessageSquare, ChevronDown, ExternalLink, LayoutGrid, Coins } from 'lucide-react';
+import { Menu, Bell, Building2, MessageSquare, ChevronDown, ExternalLink, LayoutGrid, Coins, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ThemeToggle } from '@/components/dashboard/theme-toggle';
 import Link from 'next/link';
@@ -191,42 +191,11 @@ export function RecruiterHeader({
         {/* AI Agent Header Button */}
         <button
           onClick={handleAgentClick}
-          className="p-2 hover:bg-muted text-muted-foreground hover:text-blue-500 rounded-sm transition-all hover:scale-110 active:scale-95 border border-border shadow-sm flex items-center justify-center shrink-0 group relative"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-muted rounded-sm border border-border/80 shadow-sm transition-all active:scale-95 group shrink-0 cursor-pointer"
           title="AI Recruiting Agent"
         >
-          <style>{`
-            @keyframes highGlowPulse {
-              0%, 100% {
-                filter: drop-shadow(0 0 3px rgba(59, 130, 246, 0.7)) drop-shadow(0 0 8px rgba(59, 130, 246, 0.4));
-              }
-              50% {
-                filter: drop-shadow(0 0 6px rgba(59, 130, 246, 1)) drop-shadow(0 0 16px rgba(59, 130, 246, 0.8));
-              }
-            }
-            .high-glow-pulse {
-              animation: highGlowPulse 1.5s infinite ease-in-out;
-            }
-          `}</style>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className={cn(
-              "w-5 h-5 group-hover:rotate-12 transition-transform text-blue-500 dark:text-blue-400",
-              hasPremium && "high-glow-pulse"
-            )}
-          >
-            <path d="M12 8V4H8" />
-            <rect width="16" height="12" x="4" y="8" rx="2" />
-            <path d="M2 14h2" />
-            <path d="M20 14h2" />
-            <path d="M15 13v2" />
-            <path d="M9 13v2" />
-          </svg>
+          <Sparkles className="w-3.5 h-3.5 text-muted-foreground group-hover:text-[#0a66c2] transition-colors" />
+          <span className="text-[#0a66c2] font-bold">AI Agent</span>
         </button>
 
 

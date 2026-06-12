@@ -58,7 +58,7 @@ export function GlobalSearch({ onSectionChange }: GlobalSearchProps) {
   }, []);
 
   return (
-    <div ref={searchRef} className="hidden lg:flex items-center relative group/search h-9 w-64 xl:w-80 min-w-0 flex-shrink lg:ml-6">
+    <div ref={searchRef} className="hidden lg:flex items-center relative group/search h-9 w-44 xl:w-52 min-w-0 flex-shrink lg:ml-6">
       <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground/60 group-focus-within/search:text-primary transition-colors" />
       <input
         type="text"

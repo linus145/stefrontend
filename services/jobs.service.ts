@@ -74,6 +74,27 @@ export const jobsService = {
     return api.get<BaseAPIResponse<JobPost>>(`/jobs/posts/${jobId}/`);
   },
 
+  // ─── Saved Jobs ───────────────────────────────────────────────
+
+  getSavedJobs: (): Promise<BaseAPIResponse<JobPost[]>> => {
+    return api.get<any>('/jobs/saved/').then(res => {
+      const items = res.results || res.data || [];
+      const jobs = items.map((item: any) => item.job).filter(Boolean);
+      return { status: 'success', message: '', data: jobs };
+    });
+  },
+
+  getSavedJobIds: (): Promise<BaseAPIResponse<string[]>> => {
+    return api.get<any>('/jobs/saved/ids/').then(res => {
+      const ids = res.data?.saved_job_ids || res.saved_job_ids || [];
+      return { status: 'success', message: '', data: ids };
+    });
+  },
+
+  toggleSaveJob: (jobId: string): Promise<BaseAPIResponse<{ saved: boolean; job_id: string }>> => {
+    return api.post<BaseAPIResponse<{ saved: boolean; job_id: string }>>(`/jobs/posts/${jobId}/save/`);
+  },
+
   // ─── Recruiter Job Management ─────────────────────────────────
 
   getMyJobs: (status?: string): Promise<BaseAPIResponse<JobPost[]>> => {

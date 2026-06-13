@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { Search, ChevronDown, X, MapPin } from 'lucide-react';
+import { Search, ChevronDown, X, MapPin, Bookmark } from 'lucide-react';
 import { dateOptions, modeOptions, expOptions, typeOptions, getKeywordSuggestions } from './search-constants';
 
 interface SearchFilterBarProps {
@@ -19,6 +19,8 @@ interface SearchFilterBarProps {
   setWorkModes: (v: string[]) => void;
   easyApplyOnly: boolean;
   setEasyApplyOnly: (v: boolean) => void;
+  savedOnly: boolean;
+  setSavedOnly: (v: boolean) => void;
   experienceLevels: string[];
   setExperienceLevels: (v: string[]) => void;
   jobTypes: string[];
@@ -39,6 +41,7 @@ export function SearchFilterBar(props: SearchFilterBarProps) {
     postedDate, setPostedDate,
     workModes, setWorkModes,
     easyApplyOnly, setEasyApplyOnly,
+    savedOnly, setSavedOnly,
     experienceLevels, setExperienceLevels,
     jobTypes, setJobTypes,
     locationFilter, setLocationFilter,
@@ -120,6 +123,18 @@ export function SearchFilterBar(props: SearchFilterBarProps) {
               className={cn("h-7 px-2.5 rounded-sm border text-[11px] font-medium transition-all shrink-0 cursor-pointer", easyApplyOnly ? "bg-[#0a66c2] border-[#0a66c2] text-white" : "bg-card border-border text-foreground hover:bg-muted")}
             >
               Easy Apply
+            </button>
+
+            {/* Saved Toggle */}
+            <button
+              onClick={() => setSavedOnly(!savedOnly)}
+              className={cn(
+                "h-7 px-2.5 rounded-sm border text-[11px] font-medium transition-all shrink-0 cursor-pointer flex items-center gap-1",
+                savedOnly ? "bg-[#0a66c2] border-[#0a66c2] text-white" : "bg-card border-border text-foreground hover:bg-muted"
+              )}
+            >
+              <Bookmark className="w-3 h-3 shrink-0" />
+              Saved Only
             </button>
 
             {/* Experience Level */}

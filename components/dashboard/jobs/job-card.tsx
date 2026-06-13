@@ -9,9 +9,10 @@ interface JobCardProps {
   job: JobPost;
   isSelected: boolean;
   onClick: () => void;
+  onUnsave?: () => void;
 }
 
-export function JobCard({ job, isSelected, onClick }: JobCardProps) {
+export function JobCard({ job, isSelected, onClick, onUnsave }: JobCardProps) {
   return (
     <div
       onClick={onClick}
@@ -20,12 +21,18 @@ export function JobCard({ job, isSelected, onClick }: JobCardProps) {
         isSelected && "bg-primary/5 border-l-4 border-l-primary"
       )}
     >
-      <button 
-        onClick={(e) => e.stopPropagation()}
-        className="absolute top-4 right-4 p-1 rounded-sm text-muted-foreground hover:bg-muted opacity-0 group-hover:opacity-100 transition-opacity"
-      >
-        <X className="w-4 h-4" />
-      </button>
+      {onUnsave && (
+        <button 
+          onClick={(e) => {
+            e.stopPropagation();
+            onUnsave();
+          }}
+          className="absolute top-4 right-4 p-1 rounded-sm text-muted-foreground hover:bg-destructive/10 hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity z-10 cursor-pointer"
+          title="Unsave Job"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      )}
 
       <div className="flex gap-3">
         <div className="w-12 h-12 rounded-sm bg-card flex items-center justify-center shrink-0 overflow-hidden border border-border/50">

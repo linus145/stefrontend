@@ -13,7 +13,8 @@ import {
   Search,
   Zap,
   Loader2,
-  MoreHorizontal
+  MoreHorizontal,
+  Bookmark
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
@@ -23,6 +24,8 @@ import { JobCard } from './job-card';
 import { ApplicationCard } from './application-card';
 import { JobDetails } from './job-details';
 import { ApplyModal } from './apply-modal';
+import { JobFiltersHeader } from './job-filters-header';
+import { RecentSearches } from './recent-searches';
 
 interface JobsViewProps {
   isCollapsed?: boolean;
@@ -32,27 +35,9 @@ interface JobsViewProps {
   onSectionChange?: (section: any, id?: string | null) => void;
 }
 
-const desktopFilters = [
-  'IT',
-  'Non-IT',
-  'Remote',
-  'Hybrid',
-  'Full-time',
-  'Part-time',
-  'Contract',
-  'Internship',
-  'Freelance',
-  'Entry Level',
-  'Mid Level',
-  'Senior Level'
-];
-
-const mobilePrimaryFilters = ['IT', 'Freelance', 'Remote'];
-const mobileSecondaryFilters = ['Full-time', 'Contract', 'Internship', 'Non-IT', 'Hybrid', 'Part-time', 'Entry Level', 'Mid Level', 'Senior Level'];
-
 export function JobsView({ isCollapsed, onNavigateToMessages, initialSearch, initialJobId, onSectionChange }: JobsViewProps) {
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<'browse' | 'applications'>('browse');
+  const [activeTab, setActiveTab] = useState<'browse' | 'applications' | 'saved'>('browse');
   const [searchQuery, setSearchQuery] = useState(initialSearch || '');
   const [activeSearchQuery, setActiveSearchQuery] = useState(initialSearch || '');
   const [selectedJob, setSelectedJob] = useState<JobPost | null>(null);
@@ -65,6 +50,39 @@ export function JobsView({ isCollapsed, onNavigateToMessages, initialSearch, ini
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   const [showMobileMore, setShowMobileMore] = useState(false);
+
+  // Saved Jobs queries and mutations
+  const { data: savedJobIdsResponse, refetch: refetchSavedIds } = useQuery({
+    queryKey: ['saved-job-ids'],
+    queryFn: () => jobsService.getSavedJobIds(),
+  });
+  const savedJobIds = savedJobIdsResponse?.data || [];
+
+  const { data: savedJobsResponse, isLoading: isSavedJobsLoading, refetch: refetchSavedJobs } = useQuery({
+    queryKey: ['saved-jobs'],
+    queryFn: () => jobsService.getSavedJobs(),
+    enabled: activeTab === 'saved',
+  });
+  const savedJobs = savedJobsResponse?.data || [];
+
+  const toggleSaveJobMutation = useMutation({
+    mutationFn: (jobId: string) => jobsService.toggleSaveJob(jobId),
+    onSuccess: (res) => {
+      const isSaved = res.data?.saved;
+      toast.success(isSaved ? 'Job saved!' : 'Job unsaved.');
+      refetchSavedIds();
+      refetchSavedJobs();
+      queryClient.invalidateQueries({ queryKey: ['saved-job-ids'] });
+      queryClient.invalidateQueries({ queryKey: ['saved-jobs'] });
+    },
+    onError: () => {
+      toast.error('Failed to update saved job.');
+    }
+  });
+
+  const toggleSaveJob = (jobId: string) => {
+    toggleSaveJobMutation.mutate(jobId);
+  };
 
   // Queries
   const { data: jobsResponse, isLoading: isJobsLoading } = useQuery({
@@ -102,7 +120,7 @@ export function JobsView({ isCollapsed, onNavigateToMessages, initialSearch, ini
     }
   }, [initialJobId, jobsResponse?.data]);
 
-  const isLoading = activeTab === 'browse' ? isJobsLoading : isAppsLoading;
+  const isLoading = activeTab === 'browse' ? isJobsLoading : (activeTab === 'applications' ? isAppsLoading : isSavedJobsLoading);
   const jobs = Array.isArray(jobsResponse?.data) ? jobsResponse.data : [];
   const applications = Array.isArray(appsResponse?.data) ? appsResponse.data : [];
 
@@ -198,102 +216,68 @@ export function JobsView({ isCollapsed, onNavigateToMessages, initialSearch, ini
         '--radius': '10px',
       } as React.CSSProperties}
     >
-      {/* Search and Filters Header */}
-      <div className="mb-6 flex flex-col gap-4">
-        <div className="relative w-full group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground transition-colors group-focus-within:text-primary" />
-          <input
-            type="text"
-            placeholder="Search jobs, posts, companies..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                if (onSectionChange && searchQuery.trim()) {
-                  onSectionChange('search', searchQuery.trim());
-                } else {
-                  setActiveSearchQuery(searchQuery);
-                }
-              }
-            }}
-            className="w-full pl-12 pr-4 py-3 bg-card border border-border rounded-sm text-[13px] font-medium focus:ring-1 focus:ring-primary/20 focus:border-primary/30 outline-none transition-all shadow-sm"
-          />
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-            <button
-              onClick={() => setSelectedCategory(prev => prev === 'B2_APPLY' ? null : 'B2_APPLY')}
-              className={cn(
-                "flex items-center gap-2 px-3 md:px-4 py-2 rounded-sm text-[10px] font-bold uppercase tracking-wider whitespace-nowrap shadow-sm transition-all duration-300 border shrink-0",
-                selectedCategory === 'B2_APPLY'
-                  ? "bg-[#0a66c2] text-white border-[#0a66c2] shadow-md shadow-[#0a66c2]/20"
-                  : "bg-card border-border text-[#0a66c2] hover:bg-[#0a66c2]/5"
-              )}
-            >
-              <Zap className="w-3 h-3 fill-current" />
-              B2 Apply
-            </button>
-
-            {/* Desktop Filters (visible only on md and up) */}
-            {desktopFilters.map((filter) => (
-              <button
-                key={`desktop-${filter}`}
-                onClick={() => setSelectedCategory(prev => prev === filter ? null : filter)}
-                className={cn(
-                  "hidden md:inline-flex px-3 md:px-4 py-2 text-[10px] font-bold uppercase tracking-wider rounded-sm transition-all duration-300 whitespace-nowrap shadow-sm border shrink-0",
-                  selectedCategory === filter
-                    ? "bg-[#0a66c2] text-white border-[#0a66c2] shadow-md shadow-[#0a66c2]/20"
-                    : "bg-card border-border text-muted-foreground hover:text-foreground hover:bg-muted/50 hover:border-[#0a66c2]/30"
-                )}
-              >
-                {filter}
-              </button>
-            ))}
-
-            {/* Mobile Primary Filters (visible only on mobile) */}
-            {mobilePrimaryFilters.map((filter) => (
-              <button
-                key={`mobile-primary-${filter}`}
-                onClick={() => setSelectedCategory(prev => prev === filter ? null : filter)}
-                className={cn(
-                  "md:hidden px-3 py-2 text-[10px] font-bold uppercase tracking-wider rounded-sm transition-all duration-300 whitespace-nowrap shadow-sm border shrink-0",
-                  selectedCategory === filter
-                    ? "bg-[#0a66c2] text-white border-[#0a66c2] shadow-md shadow-[#0a66c2]/20"
-                    : "bg-card border-border text-muted-foreground hover:text-foreground hover:bg-muted/50 hover:border-[#0a66c2]/30"
-                )}
-              >
-                {filter}
-              </button>
-            ))}
-
-            <button
-              onClick={() => setShowMobileMore(!showMobileMore)}
-              className="md:hidden p-2 bg-card border border-border text-muted-foreground rounded-sm hover:text-foreground hover:bg-muted/50 transition-all shadow-sm flex items-center justify-center outline-none shrink-0"
-            >
-              <MoreHorizontal className="w-4 h-4" />
-            </button>
-          </div>
-          {showMobileMore && (
-            <div className="md:hidden flex items-center gap-2 overflow-x-auto pb-1 animate-in slide-in-from-top-1 duration-200 scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-              {mobileSecondaryFilters.map((filter) => (
-                <button
-                  key={`mobile-extra-${filter}`}
-                  onClick={() => setSelectedCategory(prev => prev === filter ? null : filter)}
-                  className={cn(
-                    "px-3 py-2 text-[10px] font-bold uppercase tracking-wider rounded-sm transition-all duration-300 whitespace-nowrap shadow-sm border shrink-0",
-                    selectedCategory === filter
-                      ? "bg-[#0a66c2] text-white border-[#0a66c2] shadow-md shadow-[#0a66c2]/20"
-                      : "bg-card border-border text-muted-foreground hover:text-foreground hover:bg-muted/50 hover:border-[#0a66c2]/30"
-                  )}
-                >
-                  {filter}
-                </button>
-              ))}
-            </div>
+      {/* Tabs Switcher */}
+      <div className="flex border-b border-border/50 mb-6 select-none">
+        <button
+          onClick={() => {
+            setActiveTab('browse');
+            setSelectedJob(null);
+          }}
+          className={cn(
+            "px-5 py-3 text-xs font-bold uppercase tracking-wider border-b-2 transition-all cursor-pointer flex items-center gap-2",
+            activeTab === 'browse'
+              ? "border-[#0a66c2] text-[#0a66c2]"
+              : "border-transparent text-muted-foreground hover:text-foreground"
           )}
-        </div>
+        >
+          <Briefcase className="w-3.5 h-3.5" />
+          Browse Jobs
+        </button>
+        <button
+          onClick={() => {
+            setActiveTab('saved');
+            setSelectedJob(null);
+          }}
+          className={cn(
+            "px-5 py-3 text-xs font-bold uppercase tracking-wider border-b-2 transition-all cursor-pointer flex items-center gap-2",
+            activeTab === 'saved'
+              ? "border-[#0a66c2] text-[#0a66c2]"
+              : "border-transparent text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <Bookmark className="w-3.5 h-3.5 animate-in fade-in" />
+          Saved Jobs
+        </button>
+        <button
+          onClick={() => {
+            setActiveTab('applications');
+            setSelectedJob(null);
+          }}
+          className={cn(
+            "px-5 py-3 text-xs font-bold uppercase tracking-wider border-b-2 transition-all cursor-pointer flex items-center gap-2",
+            activeTab === 'applications'
+              ? "border-[#0a66c2] text-[#0a66c2]"
+              : "border-transparent text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <Briefcase className="w-3.5 h-3.5" />
+          Applied Jobs
+        </button>
       </div>
+
+      {/* Search and Filters Header */}
+      {activeTab === 'browse' && (
+        <JobFiltersHeader
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          selectedCategory={selectedCategory}
+          setSelectedCategory={setSelectedCategory}
+          showMobileMore={showMobileMore}
+          setShowMobileMore={setShowMobileMore}
+          setActiveSearchQuery={setActiveSearchQuery}
+          onSectionChange={onSectionChange}
+        />
+      )}
 
       <div className="flex gap-6 items-start">
         <div className={cn(
@@ -304,18 +288,20 @@ export function JobsView({ isCollapsed, onNavigateToMessages, initialSearch, ini
             <div className="flex items-center justify-center py-20">
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
-          ) : (activeTab === 'browse' ? jobs : applications).length === 0 ? (
+          ) : (activeTab === 'browse' ? jobs : activeTab === 'applications' ? applications : savedJobs).length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <div className="w-20 h-20 rounded-sm bg-muted/20 flex items-center justify-center mb-6">
                 <Briefcase className="w-8 h-8 text-muted-foreground opacity-20" />
               </div>
               <h3 className="text-xl font-semibold text-foreground mb-2">
-                {activeTab === 'browse' ? 'No jobs found' : 'No applications yet'}
+                {activeTab === 'browse' ? 'No jobs found' : activeTab === 'applications' ? 'No applications yet' : 'No saved jobs yet'}
               </h3>
               <p className="text-muted-foreground text-sm max-w-xs">
                 {activeTab === 'browse'
                   ? "We couldn't find any active job listings matching your criteria."
-                  : "You haven't applied to any jobs yet. Start exploring the latest opportunities!"}
+                  : activeTab === 'applications'
+                  ? "You haven't applied to any jobs yet. Start exploring the latest opportunities!"
+                  : "You haven't saved any jobs yet. Save jobs to keep track of them here."}
               </p>
             </div>
           ) : (
@@ -329,9 +315,9 @@ export function JobsView({ isCollapsed, onNavigateToMessages, initialSearch, ini
 
               <div>
                 <div className="grid grid-cols-1">
-                  {activeTab === 'browse' ? (
+                  {activeTab === 'browse' || activeTab === 'saved' ? (
                     <div className="flex flex-col">
-                      {jobs.map((job, index) => (
+                      {(activeTab === 'browse' ? jobs : savedJobs).map((job, index) => (
                         <React.Fragment key={job.id}>
                           <JobCard
                             job={job}
@@ -342,25 +328,20 @@ export function JobsView({ isCollapsed, onNavigateToMessages, initialSearch, ini
                                 if (res.status === 'success' && res.data) setSelectedJob(res.data);
                               });
                             }}
+                            onUnsave={activeTab === 'saved' ? () => {
+                              toggleSaveJob(job.id);
+                              if (selectedJob?.id === job.id) {
+                                setSelectedJob(null);
+                              }
+                            } : undefined}
                           />
-                          {index === 4 && (
-                            <div className="p-6 bg-muted/10 border-y border-border/50 my-2">
-                              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-4">Recent Searches</p>
-                              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
-                                {['Architect', 'Structural', 'UI Designer', 'PM'].map((query) => (
-                                  <button
-                                    key={query}
-                                    onClick={() => {
-                                      setSearchQuery(query);
-                                      setActiveSearchQuery(query);
-                                    }}
-                                    className="px-4 py-2 rounded-sm bg-card border border-border text-[11px] font-bold text-muted-foreground hover:text-foreground transition-all whitespace-nowrap shadow-sm"
-                                  >
-                                    {query}
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
+                          {activeTab === 'browse' && index === 4 && (
+                            <RecentSearches
+                              onSearchClick={(query) => {
+                                setSearchQuery(query);
+                                setActiveSearchQuery(query);
+                              }}
+                            />
                           )}
                         </React.Fragment>
                       ))}
@@ -402,6 +383,8 @@ export function JobsView({ isCollapsed, onNavigateToMessages, initialSearch, ini
               onEasyApply={handleEasyApply}
               isApplying={applyMutation.isPending}
               onMessageRecruiter={handleMessageRecruiter}
+              savedJobIds={savedJobIds}
+              onToggleSave={toggleSaveJob}
             />
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-center p-10 opacity-40">

@@ -39,6 +39,7 @@ export function SearchResultsPage({ searchQuery, onSectionChange }: SearchResult
   const [industryFilter, setIndustryFilter] = useState('');
   const [minMatchScore, setMinMatchScore] = useState<number>(0);
   const [easyApplyOnly, setEasyApplyOnly] = useState(false);
+  const [savedOnly, setSavedOnly] = useState(false);
 
   // Layout & UI States
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
@@ -51,8 +52,14 @@ export function SearchResultsPage({ searchQuery, onSectionChange }: SearchResult
   const [dismissedIds, setDismissedIds] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Local Storage states
-  const [savedJobIds, setSavedJobIds] = useState<string[]>([]);
+  // Saved Jobs queries & mutations
+  const { data: savedJobIdsResponse, refetch: refetchSavedIds } = useQuery({
+    queryKey: ['saved-job-ids'],
+    queryFn: () => jobsService.getSavedJobIds(),
+  });
+  const savedJobIds = savedJobIdsResponse?.data || [];
+
+  // Local Storage states (Recently viewed, recent searches)
   const [recentlyViewedIds, setRecentlyViewedIds] = useState<string[]>([]);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
 
@@ -63,7 +70,6 @@ export function SearchResultsPage({ searchQuery, onSectionChange }: SearchResult
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('b2linq_saved_jobs'); if (saved) setSavedJobIds(JSON.parse(saved));
       const viewed = localStorage.getItem('b2linq_recently_viewed_jobs'); if (viewed) setRecentlyViewedIds(JSON.parse(viewed));
       const searches = localStorage.getItem('b2linq_recent_searches'); if (searches) setRecentSearches(JSON.parse(searches));
     }
@@ -91,11 +97,22 @@ export function SearchResultsPage({ searchQuery, onSectionChange }: SearchResult
     }
   };
 
+  const toggleSaveJobMutation = useMutation({
+    mutationFn: (jobId: string) => jobsService.toggleSaveJob(jobId),
+    onSuccess: (res) => {
+      const isSaved = res.data?.saved;
+      toast.success(isSaved ? 'Job saved!' : 'Job unsaved.');
+      refetchSavedIds();
+      queryClient.invalidateQueries({ queryKey: ['saved-job-ids'] });
+      queryClient.invalidateQueries({ queryKey: ['saved-jobs'] });
+    },
+    onError: () => {
+      toast.error('Failed to update saved job.');
+    }
+  });
+
   const toggleSaveJob = (jobId: string) => {
-    const updated = savedJobIds.includes(jobId) ? savedJobIds.filter(id => id !== jobId) : [...savedJobIds, jobId];
-    setSavedJobIds(updated);
-    if (typeof window !== 'undefined') localStorage.setItem('b2linq_saved_jobs', JSON.stringify(updated));
-    toast.success(savedJobIds.includes(jobId) ? 'Job unsaved.' : 'Job saved!');
+    toggleSaveJobMutation.mutate(jobId);
   };
 
   const addToRecentlyViewed = (jobId: string) => {
@@ -129,13 +146,24 @@ export function SearchResultsPage({ searchQuery, onSectionChange }: SearchResult
       page: currentPage, page_size: PAGE_SIZE
     }),
     placeholderData: (prev) => prev,
+    enabled: !savedOnly,
   });
 
-  const jobsList = Array.isArray(rawJobsResponse?.results) ? rawJobsResponse.results : (Array.isArray(rawJobsResponse?.data) ? rawJobsResponse.data : []);
-  const totalCount = rawJobsResponse?.count ?? jobsList.length;
-  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
-  const hasNextPage = !!rawJobsResponse?.next;
-  const hasPrevPage = !!rawJobsResponse?.previous || currentPage > 1;
+  const { data: savedJobsResponse } = useQuery({
+    queryKey: ['saved-jobs'],
+    queryFn: () => jobsService.getSavedJobs(),
+    enabled: savedOnly,
+  });
+  const savedJobsList = savedJobsResponse?.data || [];
+
+  const jobsList = savedOnly
+    ? savedJobsList
+    : (Array.isArray(rawJobsResponse?.results) ? rawJobsResponse.results : (Array.isArray(rawJobsResponse?.data) ? rawJobsResponse.data : []));
+
+  const totalCount = savedOnly ? jobsList.length : (rawJobsResponse?.count ?? jobsList.length);
+  const totalPages = savedOnly ? 1 : Math.ceil(totalCount / PAGE_SIZE);
+  const hasNextPage = savedOnly ? false : !!rawJobsResponse?.next;
+  const hasPrevPage = savedOnly ? false : (!!rawJobsResponse?.previous || currentPage > 1);
 
   const { data: jobDetailResponse, isLoading: isDetailLoading } = useQuery({
     queryKey: ['job-detail-search-page', selectedJobId],
@@ -148,7 +176,15 @@ export function SearchResultsPage({ searchQuery, onSectionChange }: SearchResult
   const applicationsList = Array.isArray(appsResponse?.data) ? appsResponse.data : [];
   const hasApplied = selectedJob ? applicationsList.some((app: any) => app.job === selectedJob.id) : false;
 
-  useEffect(() => { if (jobsList.length > 0 && !selectedJobId) setSelectedJobId(jobsList[0].id); }, [jobsList, selectedJobId]);
+  useEffect(() => {
+    if (jobsList.length > 0) {
+      if (!selectedJobId || !jobsList.some((j: any) => j.id === selectedJobId)) {
+        setSelectedJobId(jobsList[0].id);
+      }
+    } else {
+      setSelectedJobId(null);
+    }
+  }, [jobsList, selectedJobId]);
 
   const filteredJobs = filterJobs(jobsList, { locationFilter, workModes, experienceLevels, jobTypes, salaryMin, salaryMax, postedDate, industryFilter, minMatchScore, easyApplyOnly, dismissedIds }, user);
 
@@ -180,6 +216,7 @@ export function SearchResultsPage({ searchQuery, onSectionChange }: SearchResult
         activeDropdown={activeDropdown} setActiveDropdown={setActiveDropdown}
         postedDate={postedDate} setPostedDate={setPostedDate} workModes={workModes} setWorkModes={setWorkModes}
         easyApplyOnly={easyApplyOnly} setEasyApplyOnly={setEasyApplyOnly}
+        savedOnly={savedOnly} setSavedOnly={setSavedOnly}
         experienceLevels={experienceLevels} setExperienceLevels={setExperienceLevels}
         jobTypes={jobTypes} setJobTypes={setJobTypes} locationFilter={locationFilter} setLocationFilter={setLocationFilter}
         salaryMin={salaryMin} setSalaryMin={setSalaryMin} salaryMax={salaryMax} setSalaryMax={setSalaryMax} setIndustryFilter={setIndustryFilter}

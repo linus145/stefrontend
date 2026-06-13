@@ -5,7 +5,8 @@ import { JobPost, JobApplication } from '@/types/jobs.types';
 import { cn } from '@/lib/utils';
 import { 
   Briefcase, MapPin, Clock, DollarSign, CheckCircle2, X, Users,
-  ExternalLink, Plus, ChevronRight, FileText, Copy, Check, Loader2, Zap
+  ExternalLink, Plus, ChevronRight, FileText, Copy, Check, Loader2, Zap,
+  Bookmark, BookmarkCheck
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -17,9 +18,21 @@ interface JobDetailsProps {
   onEasyApply: () => void;
   isApplying?: boolean;
   onMessageRecruiter?: (userId: string) => void;
+  savedJobIds: string[];
+  onToggleSave: (jobId: string) => void;
 }
 
-export function JobDetails({ job, applications, onClose, onApply, onEasyApply, isApplying = false, onMessageRecruiter }: JobDetailsProps) {
+export function JobDetails({ 
+  job, 
+  applications, 
+  onClose, 
+  onApply, 
+  onEasyApply, 
+  isApplying = false, 
+  onMessageRecruiter,
+  savedJobIds,
+  onToggleSave
+}: JobDetailsProps) {
   const hasApplied = applications.some(app => app.job === job.id);
 
   return (
@@ -104,8 +117,26 @@ export function JobDetails({ job, applications, onClose, onApply, onEasyApply, i
               </button>
             </>
           )}
-          <button className="hidden sm:block px-4 py-1.5 border border-muted-foreground text-muted-foreground rounded-sm text-xs font-bold hover:bg-muted transition-all cursor-pointer">
-            Save
+          <button
+            onClick={() => onToggleSave(job.id)}
+            className={cn(
+              "px-4 py-1.5 border rounded-sm text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shadow-sm",
+              savedJobIds.includes(job.id)
+                ? "border-emerald-600 text-emerald-600 bg-emerald-500/5 hover:bg-emerald-500/10"
+                : "border-muted-foreground text-muted-foreground hover:bg-muted"
+            )}
+          >
+            {savedJobIds.includes(job.id) ? (
+              <>
+                <BookmarkCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                <span>Saved</span>
+              </>
+            ) : (
+              <>
+                <Bookmark className="w-3.5 h-3.5 shrink-0" />
+                <span>Save</span>
+              </>
+            )}
           </button>
         </div>
       </div>

@@ -10,6 +10,7 @@ import { OperatingSystem } from '@/components/Public/home/operating-system';
 import { ComparisonSection } from '@/components/Public/home/comparison-section';
 import { FlagshipWorkspaces } from '@/components/Public/home/flagship-workspaces';
 import { CtaSection } from '@/components/Public/home/cta-section';
+import { BenchmarkMetrics } from '@/components/Public/home/benchmark-metrics';
 
 export async function generateMetadata(): Promise<Metadata> {
   return getPageMetadata('/', {
@@ -47,6 +48,7 @@ export default function Home() {
         <HeroSection />
         <ShowcaseSection />
         <FeaturesSection />
+        <BenchmarkMetrics />
         <ExecutionEngine />
         <OperatingSystem />
         <ComparisonSection />

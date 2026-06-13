@@ -107,7 +107,7 @@ export function ApplicationCard({
             ) : (
               <span className="text-[11px] text-muted-foreground/50 italic">No resume</span>
             )}
-            
+
             {app.cover_letter && (
               <span className="relative group/tooltip inline-block">
                 <button

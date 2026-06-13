@@ -124,7 +124,7 @@ export function Feed({ isCollapsed, isRightCollapsed, onNavigateToProfile }: Fee
         </div>
       </div> */}
 
-      <div className="max-w-3xl mx-auto space-y-4 transition-transform">
+      <div className="max-w-[52rem] mx-auto space-y-4 transition-transform">
 
         {/* Composer (Open Modal Trigger) */}
         <div

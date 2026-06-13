@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { RightSidebar } from '@/components/dashboard/right-sidebar';
+import { LeftSidebar } from './left-sidebar';
 import { Feed } from '@/components/dashboard/feed';
 import { EcosystemContent } from '@/components/dashboard/ecosystem-content';
 import { MessagesView } from '@/components/dashboard/messages/messages-view';
@@ -33,6 +34,19 @@ export function DashboardViewShell() {
   const [chatIntent, setChatIntent] = useState<'connection' | 'direct' | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isRightSidebarCollapsed, setIsRightSidebarCollapsed] = useState(false);
+  const [isLeftSidebarCollapsed, setIsLeftSidebarCollapsed] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('dashboard-sidebar-collapsed') === 'true';
+    }
+    return false;
+  });
+
+  const handleLeftSidebarCollapse = (collapsed: boolean) => {
+    setIsLeftSidebarCollapsed(collapsed);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('dashboard-sidebar-collapsed', String(collapsed));
+    }
+  };
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -244,8 +258,17 @@ export function DashboardViewShell() {
           onSectionChange={handleSectionChange}
         />
 
+        <LeftSidebar
+          isCollapsed={isLeftSidebarCollapsed}
+          onToggle={() => handleLeftSidebarCollapse(!isLeftSidebarCollapsed)}
+          activeSection={activeSection}
+          onSectionChange={handleSectionChange}
+        />
+
         <div className={cn(
-          "flex-1 flex flex-col min-w-0 pt-16 pb-16 lg:pb-0",
+          "flex-1 flex flex-col min-w-0 pt-16 pb-16 lg:pb-0 transition-all duration-300",
+          isLeftSidebarCollapsed ? "lg:pl-20" : "lg:pl-60",
+          activeSection === 'dashboard' && "xl:pr-[290px] 2xl:pr-[340px]",
           activeSection === 'messages' ? "h-screen overflow-hidden" : "min-h-0",
           activeSection === 'settings' ? "md:h-screen md:overflow-hidden" : ""
         )}>
@@ -257,6 +280,7 @@ export function DashboardViewShell() {
             isCollapsed={isRightSidebarCollapsed}
             onToggle={() => setIsRightSidebarCollapsed(!isRightSidebarCollapsed)}
             onNavigateNews={(newsId) => handleSectionChange('news', newsId)}
+            isLeftSidebarCollapsed={isLeftSidebarCollapsed}
           />
         )}
 
@@ -267,7 +291,7 @@ export function DashboardViewShell() {
         />
 
         {/* LinkedIn-style Floating Messenger */}
-        {activeSection !== 'messages' && (
+        {activeSection === 'dashboard' && (
           <div className="hidden md:block">
             <LinkedInMessenger />
           </div>

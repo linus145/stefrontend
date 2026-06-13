@@ -8,9 +8,10 @@ interface RightSidebarProps {
   isCollapsed: boolean;
   onToggle: () => void;
   onNavigateNews?: (newsId: string) => void;
+  isLeftSidebarCollapsed?: boolean;
 }
 
-export function RightSidebar({ isCollapsed, onToggle, onNavigateNews }: RightSidebarProps) {
+export function RightSidebar({ isCollapsed, onToggle, onNavigateNews, isLeftSidebarCollapsed }: RightSidebarProps) {
   const { user } = useAuth();
   const [trendingNews, setTrendingNews] = useState<News[]>([]);
   const [loading, setLoading] = useState(true);
@@ -34,7 +35,8 @@ export function RightSidebar({ isCollapsed, onToggle, onNavigateNews }: RightSid
 
   return (
     <aside className={cn(
-      "fixed right-16 2xl:right-28 top-24 h-max max-h-[calc(100vh-120px)] bg-card/80 backdrop-blur-md border border-border rounded-sm shadow-2xl flex flex-col pt-6 pb-6 z-20 hidden xl:flex w-[260px] 2xl:w-72 px-5 overflow-y-auto scrollbar-hide"
+      "fixed top-24 h-max max-h-[calc(100vh-120px)] bg-card/80 backdrop-blur-md border border-border rounded-sm shadow-2xl flex flex-col pt-6 pb-6 z-20 hidden xl:flex w-[260px] 2xl:w-72 px-5 overflow-y-auto scrollbar-hide transition-all duration-300",
+      isLeftSidebarCollapsed ? "right-24 2xl:right-28" : "right-4 2xl:right-8"
     )}>
       <div className="flex flex-col h-full w-full">
         {/* Trending Ecosystem News */}

@@ -230,65 +230,37 @@ export function DashboardHeader({
       <>
          {/* ═══ Mobile Profile Sidebar Overlay ═══ */}
          {showMobileProfileSidebar && (
-            <div className="fixed inset-0 z-[60] lg:hidden" onClick={() => setShowMobileProfileSidebar(false)}>
+            <div className="fixed inset-0 top-20 z-[100] lg:hidden" onClick={() => setShowMobileProfileSidebar(false)}>
                <div className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200" />
                <div
-                  className="absolute left-0 top-0 h-full w-72 bg-background border-r border-border shadow-2xl animate-in slide-in-from-left duration-300 flex flex-col"
+                  className="absolute left-0 top-0 h-full w-60 bg-background border-r border-border shadow-2xl animate-in slide-in-from-left duration-300 flex flex-col"
                   onClick={(e) => e.stopPropagation()}
                >
-                  {/* Profile Header */}
-                  <div className="p-6 border-b border-border">
-                     <div className="flex items-start gap-3 mb-3 pt-1">
-                        <div className={cn(
-                           "w-12 h-12 rounded-full shrink-0 flex items-center justify-center p-[2px] transition-all",
-                           isPremium
-                              ? "bg-[conic-gradient(from_0deg,#4285F4,#EA4335,#FBBC05,#34A853,#4285F4)] animate-[spin_5s_linear_infinite]"
-                              : "border-2 border-primary"
-                        )}>
-                           <div className="w-full h-full rounded-full bg-background overflow-hidden flex items-center justify-center">
-                              {user?.profile?.profile_image_url ? (
-                                 <img
-                                    src={`${getOptimizedImage(user.profile.profile_image_url)}&v=${user.updated_at ? new Date(user.updated_at).getTime() : Date.now()}`}
-                                    alt="Profile"
-                                    className="w-full h-full object-cover rounded-full"
-                                 />
-                              ) : (
-                                 <div className="w-full h-full bg-primary flex items-center justify-center text-sm font-bold text-white uppercase rounded-full">
-                                    {user?.first_name?.[0] || 'U'}
-                                 </div>
-                              )}
-                           </div>
-                        </div>
-                        <div className="min-w-0 flex-1">
-                           <p className="text-sm font-bold text-foreground truncate">{user?.first_name} {user?.last_name}</p>
-                           <p className="text-[10px] text-muted-foreground truncate font-medium">{user?.email}</p>
-                           <div className="mt-2.5 pt-2 border-t border-border/30 space-y-1">
-                              <div className="flex items-center justify-between text-[9px] font-bold text-muted-foreground uppercase tracking-wider">
-                                 <span>Plan Status</span>
-                                 {isPremium ? (
-                                    <span className="text-[10px] font-extrabold bg-gradient-to-r from-[#4285F4] via-[#EA4335] to-[#FBBC05] bg-clip-text text-transparent uppercase tracking-normal">
-                                       {userSubscription?.plan_details?.name || 'Premium'}
-                                    </span>
-                                 ) : userSubscription?.status === 'pending' && userSubscription?.plan_details ? (
-                                    <span className="text-[10px] font-extrabold text-amber-500 animate-pulse uppercase tracking-normal">
-                                       {userSubscription?.plan_details?.name} (Pending)
-                                    </span>
-                                 ) : (
-                                    <span className="text-[9px] font-bold text-muted-foreground/60 uppercase">
-                                       Free Tier
-                                    </span>
-                                 )}
-                              </div>
-                              <div className="flex items-center justify-between text-[9px] font-bold text-muted-foreground uppercase tracking-wider">
-                                 <span>AI Credits</span>
-                                 <span className="text-[10px] font-extrabold text-amber-600 dark:text-amber-450 uppercase">
-                                    {creditBalance}
-                                 </span>
-                              </div>
-                              <div className="h-[2px] w-full rounded-full bg-gradient-to-r from-[#4285F4] via-[#EA4335] via-[#FBBC05] to-[#34A853]" />
-                           </div>
-                        </div>
+                  {/* Plan & Credits Info */}
+                  <div className="px-5 py-3.5 border-b border-border/60">
+                     <div className="flex items-center justify-between text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                        <span>Plan Status</span>
+                        {isPremium ? (
+                           <span className="text-[11px] font-extrabold bg-gradient-to-r from-[#4285F4] via-[#EA4335] to-[#FBBC05] bg-clip-text text-transparent uppercase tracking-normal">
+                              {userSubscription?.plan_details?.name || 'Premium'}
+                           </span>
+                        ) : userSubscription?.status === 'pending' && userSubscription?.plan_details ? (
+                           <span className="text-[11px] font-extrabold text-amber-500 animate-pulse uppercase tracking-normal">
+                              {userSubscription?.plan_details?.name} (Pending)
+                           </span>
+                        ) : (
+                           <span className="text-[10px] font-bold text-muted-foreground/60 uppercase">
+                              Free Tier
+                           </span>
+                        )}
                      </div>
+                     <div className="flex items-center justify-between text-[10px] font-bold text-muted-foreground uppercase tracking-wider mt-1">
+                        <span>AI Credits</span>
+                        <span className="text-[11px] font-extrabold text-amber-600 dark:text-amber-400 uppercase">
+                           {creditBalance}
+                        </span>
+                     </div>
+                     <div className="h-[2px] w-full rounded-full bg-gradient-to-r from-[#4285F4] via-[#EA4335] via-[#FBBC05] to-[#34A853] mt-2.5" />
                   </div>
 
                   {/* Menu Items */}
@@ -310,17 +282,12 @@ export function DashboardHeader({
                            window.dispatchEvent(new Event('settings-tab-change'));
                            setShowMobileProfileSidebar(false);
                         }}
-                        className={cn(
-                           "w-[calc(100%-32px)] mx-4 my-2 flex items-center gap-3.5 px-4 py-3 text-[13px] font-bold rounded transition-all shadow-sm border",
-                           isPremium
-                              ? "text-violet-600 dark:text-violet-400 bg-violet-50/50 dark:bg-violet-500/5 hover:bg-violet-500/10 dark:hover:bg-violet-500/20 border border-violet-600/30 dark:border-violet-400/30"
-                              : "text-amber-600 dark:text-amber-400 bg-amber-50/50 dark:bg-amber-500/5 hover:bg-amber-500/10 dark:hover:bg-amber-500/20 border border-amber-600/30 dark:border-amber-400/30"
-                        )}
+                        className="w-full flex items-center gap-3.5 px-6 py-3.5 text-[13px] font-medium text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all"
                      >
                         {isPremium ? (
-                           <Sparkles className="w-5 h-5 text-violet-600 dark:text-violet-400 shrink-0" />
+                           <Sparkles className="w-5 h-5" />
                         ) : (
-                           <Crown className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0" />
+                           <Crown className="w-5 h-5" />
                         )}
                         {isPremium ? "Manage / Upgrade Plan" : "Try Premium"}
                      </button>
@@ -408,14 +375,7 @@ export function DashboardHeader({
 
                {/* Right: Message Icon & Credits */}
                <div className="flex items-center gap-1.5 shrink-0">
-                  <button
-                     onClick={(e) => handleGoToCredits(e)}
-                     className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-[11px] font-bold transition-all active:scale-95 shrink-0 shadow-sm"
-                     title="View Credits Dashboard"
-                  >
-                     <Coins className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                     <span>{creditBalance}</span>
-                  </button>
+
                   {activeSection !== 'premium' ? (
                      <button
                         onClick={() => onSectionChange('messages')}
@@ -452,160 +412,150 @@ export function DashboardHeader({
                </div>
 
                {/* Center Section: Navigation Tabs — truly centered */}
-               {activeSection === 'premium' ? (
-                  <div className="flex-1" />
-               ) : (
-                  <div className="flex-1 flex items-center justify-center h-full min-w-0">
-                     <nav className="hidden lg:flex items-center gap-0 xl:gap-1 h-full min-w-0 xl:-translate-x-12 transition-transform">
-                        <button
-                           onClick={() => onSectionChange('dashboard')}
-                           className="relative h-full flex flex-col items-center justify-center px-2 xl:px-3 group/tab min-w-[52px]"
-                        >
-                           <Home className={cn(
-                              "w-[20px] h-[20px] mb-1 transition-all group-hover/tab:scale-110",
-                              activeSection === 'dashboard' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
-                           )} />
-                           <span className={cn(
-                              "text-[10px] font-bold uppercase tracking-tight transition-colors",
-                              activeSection === 'dashboard' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
-                           )}>Home</span>
-                           {activeSection === 'dashboard' && <div className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
-                        </button>
-
-                        <button
-                           onClick={() => onSectionChange('network')}
-                           className="relative h-full flex flex-col items-center justify-center px-2 xl:px-3 group/tab min-w-[52px]"
-                        >
-                           <NetworkIcon className={cn(
-                              "w-[20px] h-[20px] mb-1 transition-all group-hover/tab:scale-110",
-                              activeSection === 'network' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
-                           )} />
-                           <span className={cn(
-                              "text-[10px] font-bold uppercase tracking-tight transition-colors",
-                              activeSection === 'network' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
-                           )}>Network</span>
-                           {activeSection === 'network' && <div className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
-                        </button>
-
-                        <button
-                           onClick={() => onSectionChange('messages')}
-                           className="relative h-full flex flex-col items-center justify-center px-2 xl:px-3 group/tab min-w-[52px]"
-                        >
-                           <MessageSquare className={cn(
-                              "w-[20px] h-[20px] mb-1 transition-all group-hover/tab:scale-110",
-                              activeSection === 'messages' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
-                           )} />
-                           <span className={cn(
-                              "text-[10px] font-bold uppercase tracking-tight transition-colors",
-                              activeSection === 'messages' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
-                           )}>Messages</span>
-                           {activeSection === 'messages' && <div className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
-                        </button>
-
-                        <button
-                           onClick={() => onSectionChange('jobs')}
-                           className="relative h-full flex flex-col items-center justify-center px-2 xl:px-3 group/tab min-w-[52px]"
-                        >
-                           <Briefcase className={cn(
-                              "w-[20px] h-[20px] mb-1 transition-all group-hover/tab:scale-110",
-                              activeSection === 'jobs' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
-                           )} />
-                           <span className={cn(
-                              "text-[10px] font-bold uppercase tracking-tight transition-colors",
-                              activeSection === 'jobs' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
-                           )}>Jobs</span>
-                           {activeSection === 'jobs' && <div className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
-                        </button>
-
-                        <button
-                           onClick={() => onSectionChange('news')}
-                           className="relative h-full flex flex-col items-center justify-center px-2 xl:px-3 group/tab min-w-[52px]"
-                        >
-                           <div className="relative">
-                              <Newspaper className={cn(
+               <div className="flex-1" />
+               <div className="hidden">
+                  {activeSection === 'premium' ? (
+                     <div className="flex-1" />
+                  ) : (
+                     <div className="flex-1 flex items-center justify-center h-full min-w-0">
+                        <nav className="hidden lg:flex items-center gap-0 xl:gap-1 h-full min-w-0 xl:-translate-x-12 transition-transform">
+                           <button
+                              onClick={() => onSectionChange('dashboard')}
+                              className="relative h-full flex flex-col items-center justify-center px-2 xl:px-3 group/tab min-w-[52px]"
+                           >
+                              <Home className={cn(
                                  "w-[20px] h-[20px] mb-1 transition-all group-hover/tab:scale-110",
-                                 activeSection === 'news' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
+                                 activeSection === 'dashboard' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
                               )} />
-                              <div className="absolute -top-1 -right-3 px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-500 text-[7px] font-black uppercase tracking-tighter scale-75">New</div>
-                           </div>
-                           <span className={cn(
-                              "text-[10px] font-bold uppercase tracking-tight transition-colors",
-                              activeSection === 'news' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
-                           )}>News</span>
-                           {activeSection === 'news' && <div className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
-                        </button>
+                              <span className={cn(
+                                 "text-[10px] font-bold uppercase tracking-tight transition-colors",
+                                 activeSection === 'dashboard' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
+                              )}>Home</span>
+                              {activeSection === 'dashboard' && <div className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
+                           </button>
 
-                        <button
-                           onClick={() => onSectionChange('notifications')}
-                           className="relative h-full flex flex-col items-center justify-center px-2 xl:px-3 group/tab min-w-[52px]"
-                        >
-                           <div className="relative">
-                              <Bell className={cn(
+                           <button
+                              onClick={() => onSectionChange('network')}
+                              className="relative h-full flex flex-col items-center justify-center px-2 xl:px-3 group/tab min-w-[52px]"
+                           >
+                              <NetworkIcon className={cn(
                                  "w-[20px] h-[20px] mb-1 transition-all group-hover/tab:scale-110",
-                                 activeSection === 'notifications' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
+                                 activeSection === 'network' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
                               )} />
-                              {unreadCount > 0 && (
-                                 <span className="absolute -top-1 -right-1 min-w-[14px] h-[14px] rounded-full bg-rose-500 flex items-center justify-center text-[7px] font-black text-white border border-background">
-                                    {unreadCount}
-                                 </span>
-                              )}
-                           </div>
-                           <span className={cn(
-                              "text-[10px] font-bold uppercase tracking-tight transition-colors",
-                              activeSection === 'notifications' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
-                           )}>Notifications</span>
-                           {activeSection === 'notifications' && <div className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
-                        </button>
+                              <span className={cn(
+                                 "text-[10px] font-bold uppercase tracking-tight transition-colors",
+                                 activeSection === 'network' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
+                              )}>Network</span>
+                              {activeSection === 'network' && <div className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
+                           </button>
 
-                        <a
-                           href="/recruiter"
-                           target="_blank"
-                           rel="noopener noreferrer"
-                           onClick={(e) => {
-                              if (!isPremium) {
-                                 e.preventDefault();
-                                 toast.error("Upgrade to Premium", {
-                                    description: "You need an active premium subscription to access the recruiter platform and AI hiring features."
-                                 });
-                              }
-                           }}
-                           className="relative h-full flex flex-col items-center justify-center px-2 xl:px-3 group/tab min-w-[52px]"
-                        >
-                           <div className="relative">
-                              <Users className={cn(
+                           <button
+                              onClick={() => onSectionChange('messages')}
+                              className="relative h-full flex flex-col items-center justify-center px-2 xl:px-3 group/tab min-w-[52px]"
+                           >
+                              <MessageSquare className={cn(
                                  "w-[20px] h-[20px] mb-1 transition-all group-hover/tab:scale-110",
-                                 activeSection === 'hire' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
+                                 activeSection === 'messages' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
                               )} />
-                              <div className="absolute -top-1.5 -right-4 px-1.5 py-0.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-[4px] text-[7px] font-black uppercase tracking-wider scale-75 shadow-[0_0_10px_rgba(16,185,129,0.5)] border border-emerald-400/20">
-                                 New
+                              <span className={cn(
+                                 "text-[10px] font-bold uppercase tracking-tight transition-colors",
+                                 activeSection === 'messages' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
+                              )}>Messages</span>
+                              {activeSection === 'messages' && <div className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
+                           </button>
+
+                           <button
+                              onClick={() => onSectionChange('jobs')}
+                              className="relative h-full flex flex-col items-center justify-center px-2 xl:px-3 group/tab min-w-[52px]"
+                           >
+                              <Briefcase className={cn(
+                                 "w-[20px] h-[20px] mb-1 transition-all group-hover/tab:scale-110",
+                                 activeSection === 'jobs' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
+                              )} />
+                              <span className={cn(
+                                 "text-[10px] font-bold uppercase tracking-tight transition-colors",
+                                 activeSection === 'jobs' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
+                              )}>Jobs</span>
+                              {activeSection === 'jobs' && <div className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
+                           </button>
+
+                           <button
+                              onClick={() => onSectionChange('news')}
+                              className="relative h-full flex flex-col items-center justify-center px-2 xl:px-3 group/tab min-w-[52px]"
+                           >
+                              <div className="relative">
+                                 <Newspaper className={cn(
+                                    "w-[20px] h-[20px] mb-1 transition-all group-hover/tab:scale-110",
+                                    activeSection === 'news' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
+                                 )} />
+                                 <div className="absolute -top-1 -right-3 px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-500 text-[7px] font-black uppercase tracking-tighter scale-75">New</div>
                               </div>
-                           </div>
-                           <span className={cn(
-                              "text-[10px] font-bold uppercase tracking-tight transition-colors whitespace-nowrap",
-                              activeSection === 'hire' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
-                           )}>Hire with AI</span>
-                           {activeSection === 'hire' && <div className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
-                        </a>
-                     </nav>
+                              <span className={cn(
+                                 "text-[10px] font-bold uppercase tracking-tight transition-colors",
+                                 activeSection === 'news' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
+                              )}>News</span>
+                              {activeSection === 'news' && <div className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
+                           </button>
 
-                  </div>
-               )}
+                           <button
+                              onClick={() => onSectionChange('notifications')}
+                              className="relative h-full flex flex-col items-center justify-center px-2 xl:px-3 group/tab min-w-[52px]"
+                           >
+                              <div className="relative">
+                                 <Bell className={cn(
+                                    "w-[20px] h-[20px] mb-1 transition-all group-hover/tab:scale-110",
+                                    activeSection === 'notifications' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
+                                 )} />
+                                 {unreadCount > 0 && (
+                                    <span className="absolute -top-1 -right-1 min-w-[14px] h-[14px] rounded-full bg-rose-500 flex items-center justify-center text-[7px] font-black text-white border border-background">
+                                       {unreadCount}
+                                    </span>
+                                 )}
+                              </div>
+                              <span className={cn(
+                                 "text-[10px] font-bold uppercase tracking-tight transition-colors",
+                                 activeSection === 'notifications' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
+                              )}>Notifications</span>
+                              {activeSection === 'notifications' && <div className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
+                           </button>
+
+                           <a
+                              href="/recruiter"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => {
+                                 if (!isPremium) {
+                                    e.preventDefault();
+                                    toast.error("Upgrade to Premium", {
+                                       description: "You need an active premium subscription to access the recruiter platform and AI hiring features."
+                                    });
+                                 }
+                              }}
+                              className="relative h-full flex flex-col items-center justify-center px-2 xl:px-3 group/tab min-w-[52px]"
+                           >
+                              <div className="relative">
+                                 <Users className={cn(
+                                    "w-[20px] h-[20px] mb-1 transition-all group-hover/tab:scale-110",
+                                    activeSection === 'hire' ? "text-primary" : "text-muted-foreground group-hover/tab:text-foreground"
+                                 )} />
+                                 <div className="absolute -top-1.5 -right-4 px-1.5 py-0.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-[4px] text-[7px] font-black uppercase tracking-wider scale-75 shadow-[0_0_10px_rgba(16,185,129,0.5)] border border-emerald-400/20">
+                                    New
+                                 </div>
+                              </div>
+                              <span className={cn(
+                                 "text-[10px] font-bold uppercase tracking-tight transition-colors whitespace-nowrap",
+                                 activeSection === 'hire' ? "text-foreground" : "text-muted-foreground group-hover/tab:text-foreground"
+                              )}>Hire with AI</span>
+                              {activeSection === 'hire' && <div className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-primary rounded-t-full shadow-[0_-2px_10px_rgba(180,156,248,0.5)]" />}
+                           </a>
+                        </nav>
+                     </div>
+                  )}
+               </div>
 
                {/* Right Section: Actions / Profile */}
                <div className="flex items-center gap-2 sm:gap-3 shrink-0 h-full">
-                  <div className="flex items-center gap-2 sm:gap-3 sm:pr-4 sm:border-r sm:border-border h-8">
-                     <div className="hidden lg:block">
-                        <ThemeToggle />
-                     </div>
-                     <button
-                        onClick={(e) => handleGoToCredits(e)}
-                        className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-bold hover:bg-amber-500/20 transition-all shadow-sm shrink-0 active:scale-[0.98]"
-                        title="View Credits Dashboard"
-                     >
-                        <Coins className="w-4 h-4 text-amber-500 shrink-0" />
-                        <span>{creditBalance} Credits</span>
-                     </button>
-                  </div>
+
 
                   {/* <button className="hidden lg:flex items-center gap-2 px-3 xl:px-4 py-2 rounded-xl bg-primary/5 border border-primary/20 text-foreground text-[10px] font-bold hover:bg-primary/10 transition-all shadow-sm group whitespace-nowrap">
                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 group-hover:animate-pulse" />

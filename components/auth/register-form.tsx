@@ -42,6 +42,48 @@ export function RegisterForm() {
     return null;
   }
 
+  const validateFirstName = (val: string) => {
+    if (!val.trim()) return 'First name is required';
+    const nameRegex = /^[A-Za-z\s'-]+$/;
+    if (!nameRegex.test(val.trim())) return 'First name should only contain letters, spaces, hyphens, or apostrophes';
+    return null;
+  };
+
+  const validateLastName = (val: string) => {
+    if (!val.trim()) return 'Last name is required';
+    const nameRegex = /^[A-Za-z\s'-]+$/;
+    if (!nameRegex.test(val.trim())) return 'Last name should only contain letters, spaces, hyphens, or apostrophes';
+    return null;
+  };
+
+  const validateEmail = (val: string) => {
+    if (!val.trim()) return 'Email is required';
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(val.trim())) return 'Invalid email format';
+    return null;
+  };
+
+  const validatePhone = (val: string) => {
+    if (!val.trim()) return 'Mobile number is required';
+    const phoneRegex = /^\+?1?\d{9,15}$/;
+    if (!phoneRegex.test(val.trim())) return 'Invalid phone number format';
+    return null;
+  };
+
+  const validatePassword = (val: string) => {
+    if (!val.trim()) return 'Password is required';
+    if (val.length < 8) return 'Password must be at least 8 characters long';
+    if (!/[A-Z]/.test(val) || !/[a-z]/.test(val) || !/[0-9]/.test(val)) {
+      return 'Password must contain at least one uppercase letter, one lowercase letter, and one number';
+    }
+    return null;
+  };
+
+  const validateConfirmPassword = (val: string, pass: string) => {
+    if (val !== pass) return 'Passwords do not match';
+    return null;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
@@ -67,42 +109,23 @@ export function RegisterForm() {
 
     // Basic frontend validation with custom field errors (no toasts)
     const newErrors: Record<string, string[]> = {};
-    if (!formData.first_name.trim()) {
-      newErrors.first_name = ['First name is required'];
-    }
-    if (!formData.last_name.trim()) {
-      newErrors.last_name = ['Last name is required'];
-    }
+    const firstErr = validateFirstName(formData.first_name);
+    if (firstErr) newErrors.first_name = [firstErr];
 
-    const emailTrimmed = formData.email.trim();
-    if (!emailTrimmed) {
-      newErrors.email = ['Email is required'];
-    } else {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(emailTrimmed)) {
-        newErrors.email = ['Invalid email format'];
-      }
-    }
+    const lastErr = validateLastName(formData.last_name);
+    if (lastErr) newErrors.last_name = [lastErr];
 
-    const phoneTrimmed = formData.phone_number.trim();
-    if (!phoneTrimmed) {
-      newErrors.phone_number = ['Mobile number is required'];
-    } else {
-      const phoneRegex = /^\+?1?\d{9,15}$/;
-      if (!phoneRegex.test(phoneTrimmed)) {
-        newErrors.phone_number = ['Invalid phone number format'];
-      }
-    }
+    const emailErr = validateEmail(formData.email);
+    if (emailErr) newErrors.email = [emailErr];
 
-    if (!formData.password.trim()) {
-      newErrors.password = ['Password is required'];
-    } else if (formData.password.length < 8) {
-      newErrors.password = ['Password must be at least 8 characters long'];
-    }
+    const phoneErr = validatePhone(formData.phone_number);
+    if (phoneErr) newErrors.phone_number = [phoneErr];
 
-    if (formData.password !== confirmPassword) {
-      newErrors.confirm_password = ['Passwords do not match'];
-    }
+    const passErr = validatePassword(formData.password);
+    if (passErr) newErrors.password = [passErr];
+
+    const confErr = validateConfirmPassword(confirmPassword, formData.password);
+    if (confErr) newErrors.confirm_password = [confErr];
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -140,7 +163,27 @@ export function RegisterForm() {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.id]: e.target.value });
+    const { id, value } = e.target;
+    setFormData(prev => ({ ...prev, [id]: value }));
+
+    let err: string | null = null;
+    if (id === 'first_name') err = validateFirstName(value);
+    else if (id === 'last_name') err = validateLastName(value);
+    else if (id === 'email') err = validateEmail(value);
+    else if (id === 'phone_number') err = validatePhone(value);
+    else if (id === 'password') err = validatePassword(value);
+
+    setErrors(prev => {
+      const next = { ...prev };
+      if (err) next[id] = [err];
+      else delete next[id];
+
+      // If password or confirmPassword changes, validate confirmPassword
+      const confErr = validateConfirmPassword(confirmPassword, id === 'password' ? value : formData.password);
+      if (confErr) next.confirm_password = [confErr];
+      else delete next.confirm_password;
+      return next;
+    });
   };
 
   return (
@@ -354,7 +397,17 @@ export function RegisterForm() {
                         placeholder="••••••••"
                         disabled={isSubmitting}
                         value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setConfirmPassword(val);
+                          const err = validateConfirmPassword(val, formData.password);
+                          setErrors(prev => {
+                            const next = { ...prev };
+                            if (err) next.confirm_password = [err];
+                            else delete next.confirm_password;
+                            return next;
+                          });
+                        }}
                         className={cn(
                           "w-full rounded-sm bg-[#f8fafc] dark:bg-[#151624] border text-slate-900 dark:text-white pl-10 pr-10 py-2.5 text-sm transition-all focus:ring-1 focus:ring-[#5e3be1] focus:border-[#5e3be1] outline-none",
                           errors.confirm_password ? 'border-red-400 dark:border-red-500/50' : 'border-slate-200 dark:border-slate-800'

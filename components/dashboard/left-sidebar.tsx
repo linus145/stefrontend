@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   Home, Network as NetworkIcon, MessageSquare, Briefcase, Newspaper, Bell, Settings,
-  ChevronLeft, Menu, X, ArrowLeftRight, LogOut, User, Coins, Sun, Moon, Sparkles, Building2
+  ChevronLeft, Menu, X, ArrowLeftRight, LogOut, User, Coins, Sun, Moon, Sparkles, Building2,
+  BookOpen
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
@@ -15,7 +16,7 @@ import { creditsService } from '@/services/credits.service';
 import { notificationService } from '@/services/notification.service';
 import { toast } from 'sonner';
 
-export type DashboardSection = 'dashboard' | 'Profile' | 'messages' | 'network' | 'settings' | 'jobs' | 'news' | 'hire' | 'create-post' | 'notifications' | 'premium' | 'credits';
+export type DashboardSection = 'dashboard' | 'Profile' | 'messages' | 'network' | 'settings' | 'jobs' | 'news' | 'hire' | 'create-post' | 'notifications' | 'premium' | 'credits' | 'userblogs';
 
 interface LeftSidebarProps {
   isCollapsed: boolean;
@@ -28,10 +29,11 @@ interface LeftSidebarProps {
 
 const NAVIGATION_ITEMS: { id: DashboardSection; label: string; icon: any }[] = [
   { id: 'dashboard', label: 'Home', icon: Home },
-  { id: 'network', label: 'Network', icon: NetworkIcon },
-  { id: 'messages', label: 'Messages', icon: MessageSquare },
   { id: 'jobs', label: 'Jobs', icon: Briefcase },
   { id: 'news', label: 'News', icon: Newspaper },
+  { id: 'network', label: 'Network', icon: NetworkIcon },
+  // { id: 'userblogs', label: 'Blogs', icon: BookOpen },
+  { id: 'messages', label: 'Messages', icon: MessageSquare },
   { id: 'notifications', label: 'Notifications', icon: Bell },
   { id: 'settings', label: 'Settings', icon: Settings },
 ];

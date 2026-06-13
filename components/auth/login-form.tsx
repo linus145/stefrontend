@@ -34,6 +34,23 @@ export function LoginForm() {
     return null;
   }
 
+  const validateEmail = (val: string) => {
+    const trimmed = val.trim();
+    if (!trimmed) return 'Email is required';
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmed)) return 'Invalid email format';
+    return null;
+  };
+
+  const validatePassword = (val: string) => {
+    if (!val.trim()) return 'Password is required';
+    if (val.length < 8) return 'Password must be at least 8 characters long';
+    if (!/[A-Z]/.test(val) || !/[a-z]/.test(val) || !/[0-9]/.test(val)) {
+      return 'Password must contain at least one uppercase letter, one lowercase letter, and one number';
+    }
+    return null;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
@@ -43,19 +60,12 @@ export function LoginForm() {
 
     // 1. Client-Side Field Validation
     const clientErrors: Record<string, string[]> = {};
-    if (!trimmedEmail) {
-      clientErrors.email = ['Email is required'];
-    } else {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(trimmedEmail)) {
-        clientErrors.email = ['Invalid email format'];
-      }
-    }
+    const emailErr = validateEmail(email);
+    if (emailErr) clientErrors.email = [emailErr];
 
     if (loginMode === 'password') {
-      if (!password.trim()) {
-        clientErrors.password = ['Password is required'];
-      }
+      const passErr = validatePassword(password);
+      if (passErr) clientErrors.password = [passErr];
     } else {
       if (isOtpSent && !otp.trim()) {
         clientErrors.otp = ['Verification code is required'];
@@ -175,7 +185,17 @@ export function LoginForm() {
                   placeholder="name@company.com"
                   disabled={isSubmitting || (loginMode === 'otp' && isOtpSent)}
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                   onChange={(e) => {
+                    const val = e.target.value;
+                    setEmail(val);
+                    const err = validateEmail(val);
+                    setErrors(prev => {
+                      const next = { ...prev };
+                      if (err) next.email = [err];
+                      else delete next.email;
+                      return next;
+                    });
+                  }}
                   className={cn(
                     "w-full rounded-sm bg-[#f8fafc] dark:bg-[#151624] border text-slate-900 dark:text-white pl-10 pr-4 py-2.5 text-sm transition-all focus:ring-1 focus:ring-[#5e3be1] focus:border-[#5e3be1] outline-none placeholder:text-slate-455",
                     errors.email ? 'border-red-400 dark:border-red-500/50' : 'border-slate-200/80 dark:border-slate-800/80'
@@ -210,7 +230,17 @@ export function LoginForm() {
                     placeholder="••••••••"
                     disabled={isSubmitting}
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                     onChange={(e) => {
+                      const val = e.target.value;
+                      setPassword(val);
+                      const err = validatePassword(val);
+                      setErrors(prev => {
+                        const next = { ...prev };
+                        if (err) next.password = [err];
+                        else delete next.password;
+                        return next;
+                      });
+                    }}
                     className={cn(
                       "w-full rounded-sm bg-[#f8fafc] dark:bg-[#151624] border text-slate-900 dark:text-white pl-10 pr-10 py-2.5 text-sm transition-all focus:ring-1 focus:ring-[#5e3be1] focus:border-[#5e3be1] outline-none placeholder:text-slate-455",
                       errors.password ? 'border-red-400 dark:border-red-500/50' : 'border-slate-200/80 dark:border-slate-800/80'
@@ -224,6 +254,11 @@ export function LoginForm() {
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
+                {errors.password && (
+                  <p className="text-[10px] font-medium text-red-500 mt-1">
+                    {errors.password[0]}
+                  </p>
+                )}
               </div>
             ) : isOtpSent && (
               <div className="space-y-1.5 animate-in fade-in slide-in-from-top-2 duration-300">

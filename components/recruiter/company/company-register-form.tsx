@@ -40,22 +40,71 @@ export function CompanyRegisterForm() {
     company_email: '',
     company_password: '',
     confirmPassword: '',
-    phone: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [showPassword, setShowPassword] = useState(false);
 
+  const validateCompanyName = (val: string) => {
+    if (!val.trim()) return 'Company name is required';
+    return null;
+  };
+
+  const validateIndustry = (val: string) => {
+    if (!val.trim()) return 'Industry is required';
+    return null;
+  };
+
+  const validateCompanyEmail = (val: string) => {
+    if (!val.trim()) return 'Company email is required';
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(val.trim())) return 'Invalid email format';
+    const domain = val.trim().split('@')[1]?.toLowerCase();
+    const publicDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'aol.com', 'icloud.com', 'mail.com', 'zoho.com', 'protonmail.com', 'yandex.com', 'gmx.com', 'live.com', 'mail.ru'];
+    if (publicDomains.includes(domain)) {
+      return 'Please use a professional company email address (e.g. name@yourcompany.com). Free email domains are not allowed.';
+    }
+    return null;
+  };
+
+
+
+  const validateCompanyPassword = (val: string) => {
+    if (!val) return 'Password is required';
+    if (val.length < 8) return 'Password must be at least 8 characters long';
+    if (!/[A-Z]/.test(val) || !/[a-z]/.test(val) || !/[0-9]/.test(val)) {
+      return 'Password must contain at least one uppercase letter, one lowercase letter, and one number';
+    }
+    return null;
+  };
+
+  const validateConfirmPassword = (val: string, pass: string) => {
+    if (val !== pass) return 'Passwords do not match';
+    return null;
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
     setFormData(prev => ({ ...prev, [id]: value }));
-    if (errors[id]) {
-      setErrors(prev => {
-        const next = { ...prev };
-        delete next[id];
-        return next;
-      });
-    }
+
+    let err: string | null = null;
+    if (id === 'company_name') err = validateCompanyName(value);
+    else if (id === 'industry') err = validateIndustry(value);
+    else if (id === 'company_email') err = validateCompanyEmail(value);
+    else if (id === 'company_password') err = validateCompanyPassword(value);
+    else if (id === 'confirmPassword') err = validateConfirmPassword(value, formData.company_password);
+
+    setErrors(prev => {
+      const next = { ...prev };
+      if (err) next[id] = [err];
+      else delete next[id];
+
+      // If password or confirmPassword changes, validate confirmPassword
+      const confErr = validateConfirmPassword(formData.confirmPassword, id === 'company_password' ? value : formData.company_password);
+      if (confErr) next.confirmPassword = [confErr];
+      else delete next.confirmPassword;
+      return next;
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -64,25 +113,24 @@ export function CompanyRegisterForm() {
 
     // Validate
     const newErrors: Record<string, string[]> = {};
-    if (!formData.company_name.trim()) newErrors.company_name = ['Company name is required'];
-    if (!formData.industry.trim()) newErrors.industry = ['Industry is required'];
-    
-    if (!formData.company_email.trim()) newErrors.company_email = ['Company email is required'];
-    if (!formData.company_password) newErrors.company_password = ['Password is required'];
-    if (formData.company_password !== formData.confirmPassword) {
-      newErrors.confirmPassword = ['Passwords do not match'];
-    }
-    
-    if (formData.phone.trim()) {
-      const phoneRegex = /^\+?1?\d{9,15}$/;
-      if (!phoneRegex.test(formData.phone.trim())) {
-        newErrors.phone = ['Invalid phone number format'];
-      }
-    }
+    const nameErr = validateCompanyName(formData.company_name);
+    if (nameErr) newErrors.company_name = [nameErr];
+
+    const indErr = validateIndustry(formData.industry);
+    if (indErr) newErrors.industry = [indErr];
+
+    const emailErr = validateCompanyEmail(formData.company_email);
+    if (emailErr) newErrors.company_email = [emailErr];
+
+    const passErr = validateCompanyPassword(formData.company_password);
+    if (passErr) newErrors.company_password = [passErr];
+
+    const confErr = validateConfirmPassword(formData.confirmPassword, formData.company_password);
+    if (confErr) newErrors.confirmPassword = [confErr];
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      toast.error('Please fill in all required fields.');
+      toast.error('Please check the fields and try again.');
       return;
     }
 
@@ -154,15 +202,7 @@ export function CompanyRegisterForm() {
                   </div>
                   {errors.company_email && <p className="text-[10px] text-red-500">{errors.company_email[0]}</p>}
                 </div>
-                
-                <div className="space-y-2">
-                  <label className="text-[11px] font-semibold text-muted-foreground uppercase" htmlFor="phone">Mobile Number</label>
-                  <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/70" />
-                    <input id="phone" type="tel" value={formData.phone} onChange={handleChange} placeholder="+1234567890" className={`w-full rounded-sm bg-muted/50 border ${errors.phone ? 'border-red-400' : 'border-border'} text-foreground pl-10 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-blue-500 outline-none`} />
-                  </div>
-                  {errors.phone && <p className="text-[10px] text-red-500">{errors.phone[0]}</p>}
-                </div>
+
 
                 <div className="space-y-4">
                   <div className="space-y-2">

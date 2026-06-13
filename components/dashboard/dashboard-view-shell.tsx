@@ -25,11 +25,16 @@ import { MobilePostView } from '@/components/dashboard/post/mobile-post-view';
 import { useQueryClient } from '@tanstack/react-query';
 import { DashboardSection } from './dashboard-header';
 import { PricingTable } from '@/components/Public/pricing/pricing-table';
+import { UserBlogsView } from '@/components/dashboard/userblogs/userblogs-view';
 
-export function DashboardViewShell() {
+interface DashboardViewShellProps {
+  initialSection?: DashboardSection;
+}
+
+export function DashboardViewShell({ initialSection = 'dashboard' }: DashboardViewShellProps) {
   const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
-  const [activeSection, setActiveSection] = useState<DashboardSection>('dashboard');
+  const [activeSection, setActiveSection] = useState<DashboardSection>(initialSection);
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
   const [chatIntent, setChatIntent] = useState<'connection' | 'direct' | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -75,7 +80,7 @@ export function DashboardViewShell() {
     if (!isLoading && isAuthenticated && typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       const section = params.get('section');
-      if (section && ['dashboard', 'Profile', 'jobs', 'news', 'messages', 'network', 'settings', 'hire', 'notifications', 'premium', 'credits'].includes(section)) {
+      if (section && ['dashboard', 'Profile', 'jobs', 'news', 'messages', 'network', 'settings', 'hire', 'notifications', 'premium', 'credits', 'userblogs'].includes(section)) {
         setActiveSection(section as DashboardSection);
         // Strip the query param to keep the URL clean
         const newUrl = window.location.pathname;
@@ -172,6 +177,8 @@ export function DashboardViewShell() {
         );
       case 'news':
         return <NewsView selectedNewsId={selectedProfileId} />;
+      case 'userblogs':
+        return <UserBlogsView />;
       case 'messages':
         return <MessagesView targetUserId={selectedProfileId} roomType="personal" chatIntent={chatIntent} />;
       case 'network':

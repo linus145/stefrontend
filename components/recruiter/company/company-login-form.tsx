@@ -16,6 +16,18 @@ export function CompanyLoginForm() {
     const [errors, setErrors] = useState<Record<string, string[]>>({});
     const [generalError, setGeneralError] = useState<string | null>(null);
 
+    const validateEmail = (val: string) => {
+        if (!val.trim()) return 'Email is required';
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(val.trim())) return 'Invalid email format';
+        return null;
+    };
+
+    const validatePassword = (val: string) => {
+        if (!val) return 'Password is required';
+        return null;
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setErrors({});
@@ -24,14 +36,16 @@ export function CompanyLoginForm() {
         const trimmedEmail = email.trim();
         const trimmedPassword = password.trim();
 
-        if (!trimmedEmail || !trimmedPassword) {
-            const newErrors: Record<string, string[]> = {};
-            if (!trimmedEmail) newErrors.email = ['Email is required'];
-            if (!trimmedPassword) newErrors.password = ['Password is required'];
+        const newErrors: Record<string, string[]> = {};
+        const emailErr = validateEmail(trimmedEmail);
+        if (emailErr) newErrors.email = [emailErr];
+
+        const passErr = validatePassword(trimmedPassword);
+        if (passErr) newErrors.password = [passErr];
+
+        if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
-            toast.error('Required fields are missing', {
-                description: 'Please enter both your email and password to sign in.'
-            });
+            toast.error('Please check the fields and try again.');
             return;
         }
 
@@ -41,14 +55,23 @@ export function CompanyLoginForm() {
             toast.success('Company login successful!');
             window.location.href = '/recruiter';
         } catch (error: any) {
-            if (error.data && typeof error.data === 'object') {
-                setErrors(error.data);
-                if (error.data.detail || error.data.non_field_errors) {
-                    setGeneralError(error.data.detail || error.data.non_field_errors[0]);
+            let errorMsg = 'Invalid email or password.';
+            if (error.data) {
+                if (typeof error.data === 'string') {
+                    errorMsg = error.data;
+                } else if (error.data.detail) {
+                    errorMsg = error.data.detail;
+                } else if (error.data.non_field_errors) {
+                    errorMsg = error.data.non_field_errors[0];
+                } else if (error.data.message) {
+                    errorMsg = error.data.message;
                 }
-            } else {
-                setGeneralError(error.message || 'Invalid credentials.');
+                setErrors(error.data);
+            } else if (error.message) {
+                errorMsg = error.message;
             }
+            setGeneralError(errorMsg);
+            toast.error(errorMsg);
         } finally {
             setIsSubmitting(false);
         }
@@ -91,7 +114,16 @@ export function CompanyLoginForm() {
                                     placeholder="founder@ste.io"
                                     disabled={isSubmitting}
                                     value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
+                                    onChange={(e) => {
+                                        setEmail(e.target.value);
+                                        if (errors.email) {
+                                            setErrors(prev => {
+                                                const next = { ...prev };
+                                                delete next.email;
+                                                return next;
+                                            });
+                                        }
+                                    }}
                                     className={`w-full rounded-sm bg-muted/50 border ${errors.email ? 'border-red-400 ring-1 ring-red-400' : 'border-border'} text-foreground pl-10 pr-4 py-2.5 text-sm transition-colors focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground/70`}
                                 />
                             </div>
@@ -121,7 +153,16 @@ export function CompanyLoginForm() {
                                     placeholder="••••••••"
                                     disabled={isSubmitting}
                                     value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
+                                    onChange={(e) => {
+                                        setPassword(e.target.value);
+                                        if (errors.password) {
+                                            setErrors(prev => {
+                                                const next = { ...prev };
+                                                delete next.password;
+                                                return next;
+                                            });
+                                        }
+                                    }}
                                     className={`w-full rounded-sm bg-muted/50 border ${errors.password ? 'border-red-400 ring-1 ring-red-400' : 'border-border'} text-foreground pl-10 pr-10 py-2.5 text-sm transition-colors focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-muted-foreground/70`}
                                 />
                                 <button

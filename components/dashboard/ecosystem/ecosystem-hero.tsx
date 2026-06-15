@@ -125,6 +125,18 @@ export function EcosystemHero({ user, onUpdate, isOwner = false, activeTab, onTa
                   </div>
                 )}
 
+                {user.is_open_to_work && (
+                  <div className="absolute bottom-0 left-0 right-0 bg-emerald-600/90 text-white font-black uppercase tracking-wider text-[7px] sm:text-[9px] md:text-[10px] py-1 flex items-center justify-center select-none z-10 border-t border-emerald-400/20 shadow-md">
+                    Open To Work
+                  </div>
+                )}
+                {!user.is_open_to_work && user.is_hiring && (
+                  <div className="absolute bottom-0 left-0 right-0 bg-[#0a66c2]/90 text-white font-black uppercase tracking-wider text-[7px] sm:text-[9px] md:text-[10px] py-1 flex items-center justify-center select-none z-10 border-t border-blue-400/20 shadow-md">
+                    Hiring
+                  </div>
+                )}
+
+
                 {isOwner && (
                   <label
                     onClick={() => avatarInputRef.current?.click()}
@@ -163,9 +175,20 @@ export function EcosystemHero({ user, onUpdate, isOwner = false, activeTab, onTa
 
         {/* Text Content */}
         <div className="mt-4">
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex flex-wrap items-center gap-2 mb-1">
             <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground tracking-tight">{user.first_name} {user.last_name}</h1>
+            {user.is_open_to_work && (
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 uppercase tracking-wider">
+                #OpenToWork
+              </span>
+            )}
+            {user.is_hiring && (
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 uppercase tracking-wider">
+                #Hiring
+              </span>
+            )}
           </div>
+
           <p className="text-sm sm:text-[17px] text-foreground font-medium mb-2 opacity-90">{title}</p>
 
           <div className="flex flex-wrap items-center gap-x-3 sm:gap-x-4 gap-y-1 sm:gap-y-2">

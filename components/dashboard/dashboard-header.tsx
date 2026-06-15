@@ -292,25 +292,11 @@ export function DashboardHeader({
                         {isPremium ? "Manage / Upgrade Plan" : "Try Premium"}
                      </button>
                      <button
-                        onClick={() => { onSectionChange('settings'); setShowMobileProfileSidebar(false); }}
-                        className="w-full flex items-center gap-3.5 px-6 py-3.5 text-[13px] font-medium text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all"
-                     >
-                        <Settings className="w-5 h-5" />
-                        Settings
-                     </button>
-                     <button
                         onClick={() => setShowMobileProfileSidebar(false)}
                         className="w-full flex items-center gap-3.5 px-6 py-3.5 text-[13px] font-medium text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all"
                      >
                         <ArrowUpCircle className="w-5 h-5" />
                         Raise Capital
-                     </button>
-                     <button
-                        onClick={() => setShowMobileProfileSidebar(false)}
-                        className="w-full flex items-center gap-3.5 px-6 py-3.5 text-[13px] font-medium text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all"
-                     >
-                        <HelpCircle className="w-5 h-5" />
-                        Support
                      </button>
                      <div className="flex items-center gap-3.5 px-6 py-3.5">
                         <ThemeToggle />
@@ -696,27 +682,7 @@ export function DashboardHeader({
                               Raise Capital
                            </button>
 
-                           <button
-                              onClick={() => {
-                                 setShowProfileMenu(false);
-                              }}
-                              className="w-full flex items-center gap-3 px-4 py-2.5 text-[12px] font-medium text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all group/item"
-                           >
-                              <HelpCircle className="w-4 h-4 transition-colors group-hover/item:text-primary" />
-                              Support
-                           </button>
 
-                           <button
-                              onClick={() => {
-                                 onSectionChange('settings');
-                                 setShowProfileMenu(false);
-                                 setIsMenuLocked(false);
-                              }}
-                              className="w-full flex items-center gap-3 px-4 py-2.5 text-[12px] font-medium text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all group/item"
-                           >
-                              <Settings className="w-4 h-4 transition-colors group-hover/item:text-primary" />
-                              Settings
-                           </button>
 
                            <div className="mt-1 pt-1 border-t border-border/50">
                               <button

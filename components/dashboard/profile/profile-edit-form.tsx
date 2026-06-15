@@ -1,13 +1,16 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { userService } from '@/services/user.service';
+import { jobsService } from '@/services/jobs.service';
+import { Skill } from '@/types/jobs.types';
 import { toast } from 'sonner';
-import { 
-  Loader2, Save, ArrowLeft, User as UserIcon, MapPin, 
-  Globe, Shield, ImageIcon, Plus, Trash2, Briefcase, 
-  GraduationCap, FileText 
+
+import {
+  Loader2, Save, ArrowLeft, User as UserIcon, MapPin,
+  Globe, Shield, ImageIcon, Plus, Trash2, Briefcase,
+  GraduationCap, FileText
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -40,7 +43,112 @@ export function ProfileEditForm({ initialUser, isSettingsTab = false }: ProfileE
     resume_url: (initialUser.profile as any)?.resume_url || '',
     education: (initialUser.profile as any)?.education || [],
     experience: (initialUser.profile as any)?.experience || [],
+    skills: initialUser.skills || [],
+    is_open_to_work: initialUser.is_open_to_work || false,
+    is_hiring: initialUser.is_hiring || false,
   });
+
+  const [availableSkills, setAvailableSkills] = useState<Skill[]>([]);
+  const [skillInput, setSkillInput] = useState('');
+  const [filteredSkills, setFilteredSkills] = useState<Skill[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isCreatingSkill, setIsCreatingSkill] = useState(false);
+  const suggestionsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const fetchSkills = async () => {
+      try {
+        const response = await jobsService.getSkills();
+        if (response.data) {
+          setAvailableSkills(response.data);
+        }
+      } catch (err) {
+        console.error('Error fetching skills:', err);
+      }
+    };
+    fetchSkills();
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (suggestionsRef.current && !suggestionsRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    if (!skillInput.trim()) {
+      setFilteredSkills([]);
+      return;
+    }
+    const query = skillInput.toLowerCase();
+    const filtered = availableSkills.filter(
+      skill =>
+        skill.name.toLowerCase().includes(query) &&
+        !formData.skills.includes(skill.name)
+    );
+    setFilteredSkills(filtered);
+  }, [skillInput, availableSkills, formData.skills]);
+
+  const handleSelectSkill = (skillName: string) => {
+    if (formData.skills.includes(skillName)) return;
+    setFormData(prev => ({
+      ...prev,
+      skills: [...prev.skills, skillName]
+    }));
+    setSkillInput('');
+    setShowSuggestions(false);
+  };
+
+  const handleRemoveSkill = (skillName: string) => {
+    setFormData(prev => ({
+      ...prev,
+      skills: prev.skills.filter(s => s !== skillName)
+    }));
+  };
+
+  const handleCreateCustomSkill = async () => {
+    const trimmed = skillInput.trim();
+    if (!trimmed) return;
+    if (formData.skills.includes(trimmed)) {
+      toast.error('Skill already added');
+      return;
+    }
+    const existing = availableSkills.find(s => s.name.toLowerCase() === trimmed.toLowerCase());
+    if (existing) {
+      handleSelectSkill(existing.name);
+      return;
+    }
+
+    setIsCreatingSkill(true);
+    try {
+      const response = await jobsService.createSkill({ name: trimmed, category: 'IT' });
+      if (response.data) {
+        const newSkillObj = response.data;
+        setAvailableSkills(prev => [...prev, newSkillObj]);
+        setFormData(prev => ({
+          ...prev,
+          skills: [...prev.skills, newSkillObj.name]
+        }));
+        toast.success(`Custom skill "${newSkillObj.name}" created and added`);
+      }
+    } catch (err: any) {
+      console.error('Error creating custom skill:', err);
+      setFormData(prev => ({
+        ...prev,
+        skills: [...prev.skills, trimmed]
+      }));
+      toast.success(`Skill "${trimmed}" added`);
+    } finally {
+      setIsCreatingSkill(false);
+      setSkillInput('');
+      setShowSuggestions(false);
+    }
+  };
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -64,10 +172,10 @@ export function ProfileEditForm({ initialUser, isSettingsTab = false }: ProfileE
   };
 
   const addArrayItem = (type: 'education' | 'experience') => {
-    const newItem = type === 'education' 
+    const newItem = type === 'education'
       ? { school: '', degree: '', field_of_study: '', start_date: '', end_date: '', cgpa: '' }
       : { company: '', position: '', start_date: '', end_date: '', description: '' };
-    
+
     setFormData(prev => ({
       ...prev,
       [type]: [...(prev[type] as any[]), newItem]
@@ -137,14 +245,19 @@ export function ProfileEditForm({ initialUser, isSettingsTab = false }: ProfileE
         </Button>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-8">
+      <form onSubmit={handleSubmit} className="space-y-0">
         {/* Section 1: Identity */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 px-1">
-            <UserIcon className={cn("w-4 h-4", isSettingsTab ? "text-[#0a66c2]" : "text-primary")} />
-            <h2 className="text-xs font-bold uppercase tracking-widest text-foreground opacity-80">Identity</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-8 border-b border-border/80">
+          <div>
+            <div className="flex items-center gap-2 px-1 mb-2">
+              <UserIcon className={cn("w-4 h-4 shrink-0", isSettingsTab ? "text-[#0a66c2]" : "text-primary")} />
+              <h2 className="text-xs font-bold uppercase tracking-widest text-foreground opacity-80">Identity</h2>
+            </div>
+            <p className="text-xs text-muted-foreground px-1 max-w-xs leading-relaxed">
+              Your basic personal details, public profile headline, and contact information.
+            </p>
           </div>
-          <div className="bg-card border border-border rounded-sm p-4 sm:p-6 shadow-sm space-y-6">
+          <div className="md:col-span-2 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide ml-1">First Name</label>
@@ -206,12 +319,17 @@ export function ProfileEditForm({ initialUser, isSettingsTab = false }: ProfileE
         </div>
 
         {/* Section 2: Narrative */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 px-1">
-            <Shield className={cn("w-4 h-4 opacity-70", isSettingsTab ? "text-[#0a66c2]" : "text-primary")} />
-            <h2 className="text-xs font-bold uppercase tracking-widest text-foreground opacity-80">Professional Narrative</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-8 border-b border-border/80">
+          <div>
+            <div className="flex items-center gap-2 px-1 mb-2">
+              <Shield className={cn("w-4 h-4 opacity-70 shrink-0", isSettingsTab ? "text-[#0a66c2]" : "text-primary")} />
+              <h2 className="text-xs font-bold uppercase tracking-widest text-foreground opacity-80">Professional Narrative</h2>
+            </div>
+            <p className="text-xs text-muted-foreground px-1 max-w-xs leading-relaxed">
+              A brief bio describing your professional journey, experience highlights, and key achievements.
+            </p>
           </div>
-          <div className="bg-card border border-border rounded-sm p-4 sm:p-6 shadow-sm">
+          <div className="md:col-span-2">
             <div className="space-y-2">
               <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide ml-1">About</label>
               <Textarea
@@ -226,33 +344,42 @@ export function ProfileEditForm({ initialUser, isSettingsTab = false }: ProfileE
         </div>
 
         {/* Section 3: Experience */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between px-1">
-            <div className="flex items-center gap-2">
-              <Briefcase className={cn("w-4 h-4 opacity-70", isSettingsTab ? "text-[#0a66c2]" : "text-primary")} />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-8 border-b border-border/80">
+          <div>
+            <div className="flex items-center gap-2 px-1 mb-2">
+              <Briefcase className={cn("w-4 h-4 opacity-70 shrink-0", isSettingsTab ? "text-[#0a66c2]" : "text-primary")} />
               <h2 className="text-xs font-bold uppercase tracking-widest text-foreground opacity-80">Experience</h2>
             </div>
+            <p className="text-xs text-muted-foreground px-1 max-w-xs mb-4 leading-relaxed">
+              Your professional employment history, past roles, and work achievements.
+            </p>
             <Button
               type="button"
               variant="outline"
               size="sm"
               onClick={() => addArrayItem('experience')}
-              className="h-8 gap-2 text-[10px] font-bold uppercase tracking-wider"
+              className="h-8 gap-2 text-[10px] font-bold uppercase tracking-wider px-3"
             >
               <Plus className="w-3.5 h-3.5" />
               Add Experience
             </Button>
           </div>
-          <div className="space-y-4">
+          <div className="md:col-span-2 space-y-8">
             {formData.experience.map((exp: any, idx: number) => (
-              <div key={idx} className="bg-card border border-border rounded-sm p-4 sm:p-6 shadow-sm relative group">
-                <button
-                  type="button"
-                  onClick={() => removeArrayItem('experience', idx)}
-                  className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+              <div key={idx} className="border-b border-border/40 pb-8 last:border-b-0 last:pb-0">
+                <div className="flex justify-between items-center mb-4 pt-2">
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                    Position #{idx + 1}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => removeArrayItem('experience', idx)}
+                    className="flex items-center gap-1.5 text-red-500 hover:text-red-600 hover:bg-red-500/10 font-bold text-[10px] uppercase tracking-wider transition-all py-1 px-2 rounded-sm"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    Remove
+                  </button>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide ml-1">Company</label>
@@ -303,41 +430,50 @@ export function ProfileEditForm({ initialUser, isSettingsTab = false }: ProfileE
               </div>
             ))}
             {formData.experience.length === 0 && (
-              <div className="bg-card/50 border border-border border-dashed rounded-sm p-5 sm:p-8 text-center">
-                <p className="text-sm text-muted-foreground">No experience listed yet. Share your professional journey.</p>
+              <div className="border border-border border-dashed rounded-sm p-6 text-center bg-muted/10">
+                <p className="text-xs text-muted-foreground">No experience listed yet. Share your professional journey.</p>
               </div>
             )}
           </div>
         </div>
 
         {/* Section 4: Education */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between px-1">
-            <div className="flex items-center gap-2">
-              <GraduationCap className={cn("w-4 h-4 opacity-70", isSettingsTab ? "text-[#0a66c2]" : "text-primary")} />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-8 border-b border-border/80">
+          <div>
+            <div className="flex items-center gap-2 px-1 mb-2">
+              <GraduationCap className={cn("w-4 h-4 opacity-70 shrink-0", isSettingsTab ? "text-[#0a66c2]" : "text-primary")} />
               <h2 className="text-xs font-bold uppercase tracking-widest text-foreground opacity-80">Education</h2>
             </div>
+            <p className="text-xs text-muted-foreground px-1 max-w-xs mb-4 leading-relaxed">
+              Your academic background, institutions, degrees, and grades.
+            </p>
             <Button
               type="button"
               variant="outline"
               size="sm"
               onClick={() => addArrayItem('education')}
-              className="h-8 gap-2 text-[10px] font-bold uppercase tracking-wider"
+              className="h-8 gap-2 text-[10px] font-bold uppercase tracking-wider px-3"
             >
               <Plus className="w-3.5 h-3.5" />
               Add Education
             </Button>
           </div>
-          <div className="space-y-4">
+          <div className="md:col-span-2 space-y-8">
             {formData.education.map((edu: any, idx: number) => (
-              <div key={idx} className="bg-card border border-border rounded-sm p-4 sm:p-6 shadow-sm relative group">
-                <button
-                  type="button"
-                  onClick={() => removeArrayItem('education', idx)}
-                  className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+              <div key={idx} className="border-b border-border/40 pb-8 last:border-b-0 last:pb-0">
+                <div className="flex justify-between items-center mb-4 pt-2">
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                    Education #{idx + 1}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => removeArrayItem('education', idx)}
+                    className="flex items-center gap-1.5 text-red-500 hover:text-red-600 hover:bg-red-500/10 font-bold text-[10px] uppercase tracking-wider transition-all py-1 px-2 rounded-sm"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    Remove
+                  </button>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide ml-1">School/University</label>
@@ -397,20 +533,196 @@ export function ProfileEditForm({ initialUser, isSettingsTab = false }: ProfileE
               </div>
             ))}
             {formData.education.length === 0 && (
-              <div className="bg-card/50 border border-border border-dashed rounded-sm p-5 sm:p-8 text-center">
-                <p className="text-sm text-muted-foreground">No education listed yet. Share your academic background.</p>
+              <div className="border border-border border-dashed rounded-sm p-6 text-center bg-muted/10">
+                <p className="text-xs text-muted-foreground">No education listed yet. Share your academic background.</p>
               </div>
             )}
           </div>
         </div>
 
-        {/* Section 5: Metadata */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 px-1">
-            <Globe className={cn("w-4 h-4 opacity-50", isSettingsTab ? "text-[#0a66c2]" : "text-primary")} />
-            <h2 className="text-xs font-bold uppercase tracking-widest text-foreground opacity-80">Additional Information</h2>
+        {/* Section: Skills & Career Preferences */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-8 border-b border-border/80">
+          <div>
+            <div className="flex items-center gap-2 px-1 mb-2">
+              <Briefcase className={cn("w-4 h-4 opacity-70 shrink-0", isSettingsTab ? "text-[#0a66c2]" : "text-primary")} />
+              <h2 className="text-xs font-bold uppercase tracking-widest text-foreground opacity-80">Skills & Career Status</h2>
+            </div>
+            <p className="text-xs text-muted-foreground px-1 max-w-xs leading-relaxed">
+              Highlight your professional skills and signal your current employment preferences (such as Open to Work or Hiring).
+            </p>
           </div>
-          <div className="bg-card border border-border rounded-sm p-4 sm:p-6 shadow-sm space-y-6">
+          <div className="md:col-span-2 space-y-8">
+            {/* Preferences */}
+            <div className="space-y-3">
+              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide ml-1">Career Status Preferences</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Open to Work Card */}
+                <button
+                  type="button"
+                  onClick={() => setFormData(prev => ({ ...prev, is_open_to_work: !prev.is_open_to_work }))}
+                  className={cn(
+                    "flex flex-col items-start text-left p-4 rounded-sm border transition-all hover:bg-muted/10 relative group",
+                    formData.is_open_to_work
+                      ? "border-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10"
+                      : "border-border bg-card/45"
+                  )}
+                >
+                  <div className="flex items-center justify-between w-full mb-1">
+                    <span className={cn(
+                      "w-4 h-4 rounded-full border flex items-center justify-center transition-all",
+                      formData.is_open_to_work
+                        ? "border-emerald-500 bg-emerald-500 text-white"
+                        : "border-muted-foreground"
+                    )}>
+                      {formData.is_open_to_work && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+                    </span>
+                    <span className={cn(
+                      "px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider",
+                      formData.is_open_to_work
+                        ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400"
+                        : "bg-muted text-muted-foreground"
+                    )}>
+                      #OpenToWork
+                    </span>
+                  </div>
+                  <h4 className={cn("text-xs font-bold transition-colors", formData.is_open_to_work ? "text-emerald-600 dark:text-emerald-450" : "text-foreground")}>
+                    Open to Work
+                  </h4>
+                  <p className="text-[10px] text-muted-foreground mt-1 leading-normal">
+                    Let recruiters know you are actively looking for new job opportunities.
+                  </p>
+                </button>
+
+                {/* Hiring Card */}
+                <button
+                  type="button"
+                  onClick={() => setFormData(prev => ({ ...prev, is_hiring: !prev.is_hiring }))}
+                  className={cn(
+                    "flex flex-col items-start text-left p-4 rounded-sm border transition-all hover:bg-muted/10 relative group",
+                    formData.is_hiring
+                      ? "border-blue-500 bg-blue-500/5 dark:bg-blue-500/10"
+                      : "border-border bg-card/45"
+                  )}
+                >
+                  <div className="flex items-center justify-between w-full mb-1">
+                    <span className={cn(
+                      "w-4 h-4 rounded-full border flex items-center justify-center transition-all",
+                      formData.is_hiring
+                        ? "border-blue-500 bg-blue-500 text-white"
+                        : "border-muted-foreground"
+                    )}>
+                      {formData.is_hiring && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+                    </span>
+                    <span className={cn(
+                      "px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider",
+                      formData.is_hiring
+                        ? "bg-blue-500/20 text-blue-600 dark:text-blue-400"
+                        : "bg-muted text-muted-foreground"
+                    )}>
+                      #Hiring
+                    </span>
+                  </div>
+                  <h4 className={cn("text-xs font-bold transition-colors", formData.is_hiring ? "text-blue-600 dark:text-blue-450" : "text-foreground")}>
+                    Actively Hiring
+                  </h4>
+                  <p className="text-[10px] text-muted-foreground mt-1 leading-normal">
+                    Signal that you or your organization are looking for new talent to join.
+                  </p>
+                </button>
+              </div>
+            </div>
+
+            {/* Skills */}
+            <div className="space-y-4">
+              <div className="space-y-2 relative">
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide ml-1">Professional Skills</label>
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <Input
+                      value={skillInput}
+                      onChange={(e) => {
+                        setSkillInput(e.target.value);
+                        setShowSuggestions(true);
+                      }}
+                      onFocus={() => setShowSuggestions(true)}
+                      placeholder="Search and add skills (e.g. React, Python, Django...)"
+                      className="h-11 bg-muted/30 border-border rounded-sm px-4 text-xs transition-all"
+                    />
+                    {showSuggestions && skillInput.trim() && (
+                      <div
+                        ref={suggestionsRef}
+                        className="absolute z-50 left-0 right-0 mt-1.5 bg-popover border border-border rounded-sm shadow-xl max-h-60 overflow-y-auto divide-y divide-border/50 animate-in fade-in slide-in-from-top-1 duration-100"
+                      >
+                        {filteredSkills.map((skill) => (
+                          <button
+                            key={skill.id}
+                            type="button"
+                            onClick={() => handleSelectSkill(skill.name)}
+                            className="w-full text-left px-4 py-2.5 text-xs text-foreground hover:bg-muted/65 transition-colors flex items-center justify-between"
+                          >
+                            <span>{skill.name}</span>
+                            <span className="text-[9px] font-bold uppercase tracking-wider bg-muted text-muted-foreground px-1.5 py-0.5 rounded">
+                              {skill.category}
+                            </span>
+                          </button>
+                        ))}
+                        {filteredSkills.length === 0 && (
+                          <div className="p-3 text-center">
+                            <button
+                              key="create-custom-skill-btn"
+                              type="button"
+                              onClick={handleCreateCustomSkill}
+                              disabled={isCreatingSkill}
+                              className="text-[11px] font-bold text-primary hover:underline"
+                            >
+                              {isCreatingSkill ? 'Creating...' : `Create custom skill "${skillInput.trim()}"`}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Tag Badges */}
+              <div className="flex flex-wrap gap-2 pt-2">
+                {formData.skills.map((skill: string, idx: number) => (
+                  <span
+                    key={idx}
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-sm bg-primary/10 border border-primary/20 text-primary text-xs font-semibold tracking-tight animate-in zoom-in duration-200"
+                  >
+
+                    {skill}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveSkill(skill)}
+                      className="w-4 h-4 rounded-full flex items-center justify-center hover:bg-primary/25 transition-colors"
+                    >
+                      &times;
+                    </button>
+                  </span>
+                ))}
+                {formData.skills.length === 0 && (
+                  <p className="text-xs text-muted-foreground italic pl-1">No skills added yet.</p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Section 5: Metadata */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-8 border-b border-border/80 last:border-b-0">
+          <div>
+            <div className="flex items-center gap-2 px-1 mb-2">
+              <Globe className={cn("w-4 h-4 opacity-50 shrink-0", isSettingsTab ? "text-[#0a66c2]" : "text-primary")} />
+              <h2 className="text-xs font-bold uppercase tracking-widest text-foreground opacity-80">Additional Details</h2>
+            </div>
+            <p className="text-xs text-muted-foreground px-1 max-w-xs leading-relaxed">
+              Your professional location and online resources like your resume link.
+            </p>
+          </div>
+          <div className="md:col-span-2 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide ml-1">Location</label>
@@ -438,7 +750,7 @@ export function ProfileEditForm({ initialUser, isSettingsTab = false }: ProfileE
                   />
                 </div>
               </div>
-              <div className="space-y-4">
+              <div className="md:col-span-2 space-y-4">
                 <div className={cn("p-4 sm:p-6 border rounded-sm", isSettingsTab ? "bg-[#0a66c2]/5 border-[#0a66c2]/20" : "bg-primary/5 border border-primary/20")}>
                   <div className="flex items-start gap-4">
                     <div className="mt-1">
@@ -459,7 +771,7 @@ export function ProfileEditForm({ initialUser, isSettingsTab = false }: ProfileE
         </div>
 
         {/* Bottom Actions */}
-        <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 sm:gap-4 pt-4 border-t border-border">
+        <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 sm:gap-4 pt-8 border-t border-border mt-8">
           <Button
             type="button"
             variant="ghost"
@@ -478,7 +790,11 @@ export function ProfileEditForm({ initialUser, isSettingsTab = false }: ProfileE
                   resume_url: (initialUser.profile as any)?.resume_url || '',
                   education: (initialUser.profile as any)?.education || [],
                   experience: (initialUser.profile as any)?.experience || [],
+                  skills: initialUser.skills || [],
+                  is_open_to_work: initialUser.is_open_to_work || false,
+                  is_hiring: initialUser.is_hiring || false,
                 });
+
                 toast.success('Changes discarded');
               } else {
                 router.back();

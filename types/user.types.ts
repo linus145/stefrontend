@@ -17,4 +17,8 @@ export interface User {
   is_2fa_enabled?: boolean;
   secondary_email?: string | null;
   third_email?: string | null;
+  is_open_to_work?: boolean;
+  is_hiring?: boolean;
+  skills?: string[];
 }
+

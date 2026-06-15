@@ -25,7 +25,7 @@ export function PlanOverview({
   setShowPlans,
 }: PlanOverviewProps) {
   return (
-    <div className="bg-card border border-border rounded-sm p-6 shadow-sm relative overflow-hidden">
+    <div className="relative pb-8 border-b border-border/80">
       {/* Ambient Background Glow for active premium */}
       {isActive && (
         <div className="absolute -right-20 -top-20 h-40 w-40 rounded-full blur-[80px] bg-emerald-500/10 dark:bg-emerald-500/5 -z-10" />

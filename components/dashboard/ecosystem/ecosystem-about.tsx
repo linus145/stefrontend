@@ -60,8 +60,9 @@ export function EcosystemAbout({ user, isOwner = false }: EcosystemAboutProps) {
           {tags.length > 0 ? tags.map((tag, idx) => (
             <span
               key={idx}
-              className="px-3 py-1 rounded-lg bg-muted/50 border border-border text-primary text-[10px] font-semibold tracking-tight"
+              className="px-3 py-1 rounded-sm bg-muted/50 border border-border text-primary text-[10px] font-semibold tracking-tight"
             >
+
               {tag}
             </span>
           )) : (

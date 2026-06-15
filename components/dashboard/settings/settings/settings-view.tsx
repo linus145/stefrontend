@@ -182,9 +182,7 @@ export function SettingsView({ isCollapsed, onSectionChange }: SettingsViewProps
               <BillingTab />
             </TabsContent>
             <TabsContent value="Credits">
-              <div className="bg-white dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/80 rounded-sm p-6 sm:p-8 shadow-sm backdrop-blur-sm">
-                <CreditView />
-              </div>
+              <CreditView />
             </TabsContent>
             <TabsContent value="Help">
               <HelpTab />
@@ -243,9 +241,7 @@ export function SettingsView({ isCollapsed, onSectionChange }: SettingsViewProps
               <BillingTab />
             </TabsContent>
             <TabsContent value="Credits">
-              <div className="bg-white dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/80 rounded-sm p-6 sm:p-8 shadow-sm backdrop-blur-sm">
-                <CreditView />
-              </div>
+              <CreditView />
             </TabsContent>
             <TabsContent value="Help">
               <HelpTab />

@@ -65,7 +65,7 @@ export function HRShell() {
 
   React.useEffect(() => {
     if (!authLoading && !isAuthenticated) {
-      router.replace('/login');
+      router.replace('/recruiter/login?redirect=/Hrtools');
     }
   }, [authLoading, isAuthenticated, router]);
 
@@ -105,17 +105,17 @@ export function HRShell() {
         {activeTab === 'employees' && <EmployeesTab defaultRole="EMPLOYEE" />}
         {activeTab === 'employees-managers' && <EmployeesTab defaultRole="MANAGER" />}
         {activeTab.startsWith('attendance') && (
-          <AttendanceTab 
-            subTab={activeTab} 
+          <AttendanceTab
+            subTab={activeTab}
           />
         )}
         {activeTab.startsWith('leave') && (
-          <LeaveTab 
+          <LeaveTab
             subTab={activeTab}
             filterStatus={
               activeTab === 'leave-pending' ? 'pending' :
-              activeTab === 'leave-approved' ? 'approved' :
-              undefined
+                activeTab === 'leave-approved' ? 'approved' :
+                  undefined
             }
           />
         )}
@@ -166,10 +166,10 @@ export function HRShell() {
         activeTab={activeTab}
         onTabChange={setActiveTab}
       />
-      
-      <HRSidebar 
-        activeTab={activeTab} 
-        onTabChange={setActiveTab} 
+
+      <HRSidebar
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
         isCollapsed={isSidebarCollapsed}
         setIsCollapsed={handleSidebarCollapse}
       />

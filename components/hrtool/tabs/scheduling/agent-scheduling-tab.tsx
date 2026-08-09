@@ -89,7 +89,7 @@ export function AgentSchedulingTab() {
         <form onSubmit={handleSave} className="space-y-6">
           <div className="grid grid-cols-1 gap-6">
             {/* Scheduling Configuration */}
-            <Card className="bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800 shadow-sm rounded-sm overflow-hidden">
+            <Card className="bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800 shadow-sm rounded-[3px] overflow-hidden">
               <CardHeader className="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-row items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Clock className="h-4.5 w-4.5 text-[#0a66c2]" />
@@ -101,24 +101,24 @@ export function AgentSchedulingTab() {
                   <Button
                     type="button"
                     onClick={() => setShowPolicyModal(true)}
-                    className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-350 border border-slate-200 dark:border-slate-700 font-extrabold text-[10px] px-2.5 py-1.5 h-auto rounded-sm flex items-center gap-1.5 cursor-pointer transition-colors"
+                    className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-350 border border-slate-200 dark:border-slate-700 font-extrabold text-[10px] px-2.5 py-1.5 h-auto rounded-[3px] flex items-center gap-1.5 cursor-pointer transition-colors"
                   >
                     <ShieldCheck className="h-3.5 w-3.5 text-[#0a66c2]" />
                     Schedules Policy
                   </Button>
-                  <Badge className={scheduling.enabled ? "bg-emerald-500/10 text-emerald-600 border-none font-bold text-[9px] px-2 py-0.5 rounded-sm" : "bg-slate-500/10 text-slate-500 border-none font-bold text-[9px] px-2 py-0.5 rounded-sm"}>
+                  <Badge className={scheduling.enabled ? "bg-emerald-500/10 text-emerald-600 border-none font-bold text-[9px] px-2 py-0.5 rounded-[3px]" : "bg-slate-500/10 text-slate-500 border-none font-bold text-[9px] px-2 py-0.5 rounded-[3px]"}>
                     {scheduling.enabled ? 'ACTIVE RUNTIME' : 'INACTIVE'}
                   </Badge>
                 </div>
               </CardHeader>
               <CardContent className="p-5 space-y-4">
-                <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-[#1c1d30] border border-slate-200 dark:border-slate-800 rounded-sm">
+                <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-[#1c1d30] border border-slate-200 dark:border-slate-800 rounded-[3px]">
                   <input
                     id="enabled-toggle"
                     type="checkbox"
                     checked={scheduling.enabled}
                     onChange={(e) => setScheduling({ ...scheduling, enabled: e.target.checked })}
-                    className="w-4 h-4 rounded-sm text-[#0a66c2] focus:ring-[#0a66c2] border-slate-300 dark:border-slate-700 bg-background cursor-pointer"
+                    className="w-4 h-4 rounded-[3px] text-[#0a66c2] focus:ring-[#0a66c2] border-slate-300 dark:border-slate-700 bg-background cursor-pointer"
                   />
                   <label htmlFor="enabled-toggle" className="text-xs font-bold text-slate-700 dark:text-slate-350 cursor-pointer selection:bg-transparent">
                     Enable autonomous scheduled background runs for this tenant
@@ -157,7 +157,7 @@ export function AgentSchedulingTab() {
                         value={scheduling.notification_email}
                         onChange={(e) => setScheduling({ ...scheduling, notification_email: e.target.value })}
                         placeholder="alerts@yourcompany.com"
-                        className="w-full h-9 px-3 text-xs bg-slate-50 dark:bg-[#1c1d30] border border-slate-200 dark:border-slate-850 rounded-sm font-bold focus:outline-none focus:border-[#0a66c2]"
+                        className="w-full h-9 px-3 text-xs bg-slate-50 dark:bg-[#1c1d30] border border-slate-200 dark:border-slate-850 rounded-[3px] font-bold focus:outline-none focus:border-[#0a66c2]"
                       />
                     </div>
                   </div>
@@ -171,7 +171,7 @@ export function AgentSchedulingTab() {
               type="button"
               disabled={isTriggeringSample}
               onClick={handleSampleRun}
-              className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-350 border border-slate-200 dark:border-slate-700 font-extrabold text-xs px-4 h-9 rounded-sm flex items-center gap-2 cursor-pointer transition-all"
+              className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-350 border border-slate-200 dark:border-slate-700 font-extrabold text-xs px-4 h-9 rounded-[3px] flex items-center gap-2 cursor-pointer transition-all"
             >
               {isTriggeringSample ? 'Triggering...' : (
                 <>
@@ -184,7 +184,7 @@ export function AgentSchedulingTab() {
             <Button
               type="submit"
               disabled={isSaving}
-              className="bg-[#0a66c2] hover:bg-[#084e96] text-white font-extrabold text-xs px-4 h-9 rounded-sm shadow-sm flex items-center gap-2 cursor-pointer"
+              className="bg-[#0a66c2] hover:bg-[#084e96] text-white font-extrabold text-xs px-4 h-9 rounded-[3px] shadow-sm flex items-center gap-2 cursor-pointer"
             >
               {isSaving ? 'Updating schedule...' : (
                 <>

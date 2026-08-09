@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Menu, Bell, Building2, MessageSquare, ChevronDown, LayoutGrid, Users, Calendar, FileText, BarChart3, Settings, Coins, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ThemeToggle } from '@/components/dashboard/theme-toggle';
-import Link from 'next/link';
+
 import { NotificationPopover } from '@/components/dashboard/notifications/notification-popover';
 import { AgentUIController } from '@/agent/ui/AgentUIController';
 import { useAuth } from '@/hooks/useAuth';
@@ -124,13 +124,7 @@ export function HRHeader({
           <Sparkles className="w-3.5 h-3.5 text-muted-foreground group-hover:text-[#0a66c2] transition-colors" />
           <span className="text-[#0a66c2] font-bold">AI Agent</span>
         </button>
-        <Link
-          href="/recruiter"
-          className="hidden xl:flex items-center gap-1.5 px-2.5 h-7 rounded-sm bg-muted/50 border border-border text-[10px] font-bold text-muted-foreground hover:text-foreground hover:bg-muted transition-all cursor-pointer"
-          title="Go to Recruiter Panel"
-        >
-          Recruiter Panel →
-        </Link>
+
       </div>
     </header>
   );

@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
   Users,
   Calendar,
@@ -21,7 +22,8 @@ import {
   Settings,
   Lock,
   Search,
-  User
+  User,
+  LogOut
 } from 'lucide-react';
 import { HRSection } from './hr-header';
 import { useAuth } from '@/hooks/useAuth';
@@ -369,6 +371,20 @@ export function HRSidebar({
             </div>
           ))}
         </nav>
+      </div>
+
+      {/* Bottom Section */}
+      <div className={cn("px-3 py-4 space-y-2 mt-auto border-t border-border shrink-0", isCollapsed ? "px-2" : "px-3")}>
+        <Link
+          href="/recruiter/login?redirect=/Hrtools"
+          className={cn(
+            "flex items-center justify-center gap-2 w-full transition-all rounded-[4px] bg-muted/50 border border-border text-rose-500 py-2 text-xs font-bold hover:bg-rose-500/10 active:scale-95 cursor-pointer",
+            isCollapsed ? "px-0" : "px-2"
+          )}
+        >
+          <LogOut className="h-3.5 w-3.5 text-rose-500" />
+          {!isCollapsed && <span className="animate-in fade-in duration-300">Exit App</span>}
+        </Link>
       </div>
     </aside>
   );

@@ -3,11 +3,13 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import dynamic from 'next/dynamic';
-import { ShieldAlertIcon, TerminalIcon, Sun, Moon } from 'lucide-react';
+import { ShieldAlertIcon, TerminalIcon, Sun, Moon, Clock } from 'lucide-react';
+import { toast } from 'sonner';
 import { useDashboardTheme } from '@/context/DashboardThemeContext';
 import { ExamData } from '@/types/exam-types';
 import { SurveillanceOverlay } from '../proctoring/surveillance-overlay';
 import { ExamVoiceVideoPhase } from './exam-voice-video-phase';
+import { cn } from '@/lib/utils';
 
 // Import CodeEditor with SSR disabled to prevent hydration issues with Monaco
 const CodeEditor = dynamic(() => import('./code-editor').then(mod => mod.CodeEditor), {
@@ -18,6 +20,32 @@ const CodeEditor = dynamic(() => import('./code-editor').then(mod => mod.CodeEdi
     </div>
   )
 });
+
+function formatDuration(seconds: number): string {
+  if (!seconds || seconds <= 0) return '0 Min';
+  const hrs = Math.floor(seconds / 3600);
+  const mins = Math.floor((seconds % 3600) / 60);
+  if (hrs > 0 && mins > 0) {
+    return `${hrs} Hr ${mins} Min`;
+  }
+  if (hrs > 0) {
+    return `${hrs} Hour${hrs > 1 ? 's' : ''}`;
+  }
+  return `${mins} Min${mins > 1 ? 's' : ''}`;
+}
+
+function formatCountdown(seconds: number): string {
+  if (seconds <= 0) return '00:00';
+  const hrs = Math.floor(seconds / 3600);
+  const mins = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+  const pad = (n: number) => String(n).padStart(2, '0');
+
+  if (hrs > 0) {
+    return `${pad(hrs)}:${pad(mins)}:${pad(secs)}`;
+  }
+  return `${pad(mins)}:${pad(secs)}`;
+}
 
 interface ExamActivePhaseProps {
   examData: ExamData | null;
@@ -34,19 +62,97 @@ interface ExamActivePhaseProps {
   answeredQuestions: number;
   totalQuestions: number;
   logViolation: (type: string, metadata: any, severity: 'LOW' | 'MEDIUM' | 'HIGH') => void;
+  isInterviewer?: boolean;
 }
 
 export function ExamActivePhase({
   examData, answers, setAnswers, activeRoundIndex, setActiveRoundIndex,
   activeQuestionIndex, setActiveQuestionIndex, submitting, isCompleting,
   handleSubmitAnswer, handleCompleteExam, answeredQuestions, totalQuestions,
-  logViolation
+  logViolation, isInterviewer
 }: ExamActivePhaseProps) {
   const [showConfirmModal, setShowConfirmModal] = React.useState(false);
   const { theme, toggleTheme, isDark } = useDashboardTheme();
 
   const currentRound = examData?.rounds[activeRoundIndex];
   const currentQuestion = currentRound?.questions[activeQuestionIndex];
+
+  // Track remaining countdown seconds per round ID
+  const [roundTimesLeft, setRoundTimesLeft] = React.useState<Record<string, number>>({});
+
+  // Initialize roundTimesLeft for any timed rounds when examData changes
+  React.useEffect(() => {
+    if (examData?.rounds) {
+      setRoundTimesLeft(prev => {
+        const nextState = { ...prev };
+        let updated = false;
+        examData.rounds.forEach(r => {
+          if (nextState[r.id] === undefined && r.timer_seconds && r.timer_seconds > 0) {
+            nextState[r.id] = r.timer_seconds;
+            updated = true;
+          }
+        });
+        return updated ? nextState : prev;
+      });
+    }
+  }, [examData]);
+
+  const handledTimeUpRoundsRef = React.useRef<Set<string>>(new Set());
+
+  // Handle automatic transition/submission when round timer expires
+  const handleRoundTimeUp = React.useCallback((expiredRoundIdx: number) => {
+    if (!examData) return;
+    const round = examData.rounds[expiredRoundIdx];
+    if (round && handledTimeUpRoundsRef.current.has(round.id)) {
+      return;
+    }
+    if (round) {
+      handledTimeUpRoundsRef.current.add(round.id);
+    }
+
+    const isLastRound = expiredRoundIdx >= examData.rounds.length - 1;
+
+    if (isLastRound) {
+      toast.warning("Time's up for the final round! Automatically submitting your exam...", { duration: 5000 });
+      handleCompleteExam();
+    } else {
+      toast.warning(`Time's up for Round ${expiredRoundIdx + 1}! Moving to Round ${expiredRoundIdx + 2}...`, { duration: 5000 });
+      setActiveRoundIndex(expiredRoundIdx + 1);
+      setActiveQuestionIndex(0);
+    }
+  }, [examData, handleCompleteExam, setActiveRoundIndex, setActiveQuestionIndex]);
+
+  // Ticking countdown interval for active round
+  React.useEffect(() => {
+    if (!currentRound || !currentRound.timer_seconds || currentRound.timer_seconds <= 0 || isCompleting) {
+      return;
+    }
+
+    const roundId = currentRound.id;
+
+    const interval = setInterval(() => {
+      setRoundTimesLeft(prev => {
+        const currentSeconds = prev[roundId] ?? currentRound.timer_seconds;
+        if (currentSeconds <= 1) {
+          clearInterval(interval);
+          return { ...prev, [roundId]: 0 };
+        }
+        return { ...prev, [roundId]: currentSeconds - 1 };
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [currentRound?.id, currentRound?.timer_seconds, isCompleting]);
+
+  const currentRoundTimeLeft = currentRound?.id ? (roundTimesLeft[currentRound.id] ?? currentRound.timer_seconds ?? 0) : 0;
+  const isRoundExpired = currentRound?.timer_seconds ? currentRoundTimeLeft <= 0 : false;
+
+  // Trigger time up transition asynchronously when time reaches 0
+  React.useEffect(() => {
+    if (currentRound?.timer_seconds && currentRoundTimeLeft === 0 && !isCompleting) {
+      handleRoundTimeUp(activeRoundIndex);
+    }
+  }, [currentRoundTimeLeft, currentRound?.timer_seconds, isCompleting, activeRoundIndex, handleRoundTimeUp]);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -64,6 +170,23 @@ export function ExamActivePhase({
             </div>
           </div>
           <div className="flex items-center gap-6">
+            {currentRound?.timer_seconds ? (
+              <div className={cn(
+                "text-right border-r border-border pr-6 flex items-center gap-2.5",
+                currentRoundTimeLeft <= 60 && "text-rose-500 font-bold"
+              )}>
+                <Clock className={cn("w-4 h-4 text-muted-foreground", currentRoundTimeLeft <= 60 && "text-rose-500 animate-pulse")} />
+                <div>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Time Remaining</p>
+                  <p className={cn(
+                    "text-sm font-bold font-mono tracking-wider",
+                    currentRoundTimeLeft <= 60 ? "text-rose-500 animate-pulse" : "text-foreground"
+                  )}>
+                    {formatCountdown(currentRoundTimeLeft)}
+                  </p>
+                </div>
+              </div>
+            ) : null}
             <div className="text-right">
               <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Progress</p>
               <p className="text-sm font-bold">
@@ -95,50 +218,71 @@ export function ExamActivePhase({
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8 flex gap-6">
+      <div className={cn(
+        "transition-all duration-300 mx-auto",
+        (currentRound?.question_format === 'VIDEO' || currentRound?.question_format === 'ONLINE_INTERVIEW')
+          ? "w-full max-w-full px-0 py-0 flex flex-col h-[calc(100vh-64px)]"
+          : "max-w-7xl px-6 py-8 flex gap-6"
+      )}>
         {/* Sidebar — Rounds Navigation */}
-        <div className="w-72 shrink-0">
-          <div className="sticky top-20 space-y-2">
-            <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mb-4 px-1">Rounds</p>
-            {examData?.rounds.map((rnd, rIdx) => {
-              const answeredInRound = rnd.questions.filter(q => q.candidate_answer || answers[q.id]).length;
-              const isActive = rIdx === activeRoundIndex;
+        {!(currentRound?.question_format === 'VIDEO' || currentRound?.question_format === 'ONLINE_INTERVIEW') && (
+          <div className="w-72 shrink-0">
+            <div className="sticky top-20 space-y-2">
+              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mb-4 px-1">Rounds</p>
+              {examData?.rounds.map((rnd, rIdx) => {
+                const answeredInRound = rnd.questions.filter(q => q.candidate_answer || answers[q.id]).length;
+                const isActive = rIdx === activeRoundIndex;
+                const rndTimeLeft = roundTimesLeft[rnd.id] ?? rnd.timer_seconds;
 
-              return (
-                <button
-                  key={rnd.id}
-                  onClick={() => { setActiveRoundIndex(rIdx); setActiveQuestionIndex(0); }}
-                  className={`w-full text-left px-4 py-3 rounded-sm border transition-all ${isActive
-                    ? 'bg-primary/10 border-primary/30 text-foreground shadow-sm'
-                    : 'bg-card/40 border-border text-muted-foreground hover:border-border/80'
-                    }`}
-                >
-                  <p className="text-xs font-bold">{rnd.designation_display}</p>
-                  <div className="flex items-center justify-between mt-1.5">
-                    <p className="text-[10px] opacity-80">{rnd.difficulty} • {rnd.question_format}</p>
-                    <p className={`text-[10px] font-bold ${answeredInRound === rnd.questions.length ? 'text-primary' : 'opacity-60'}`}>
-                      {answeredInRound}/{rnd.questions.length}
-                    </p>
-                  </div>
-                </button>
-              );
-            })}
+                return (
+                  <button
+                    key={rnd.id}
+                    onClick={() => { setActiveRoundIndex(rIdx); setActiveQuestionIndex(0); }}
+                    className={`w-full text-left px-4 py-3 rounded-sm border transition-all ${isActive
+                      ? 'bg-primary/10 border-primary/30 text-foreground shadow-sm'
+                      : 'bg-card/40 border-border text-muted-foreground hover:border-border/80'
+                      }`}
+                  >
+                    <p className="text-xs font-bold">{rnd.designation_display}</p>
+                    <div className="flex items-center justify-between mt-1.5">
+                      <p className="text-[10px] opacity-80">
+                        {rnd.difficulty} • {rnd.question_format}
+                        {rnd.timer_seconds ? ` • ⏳ ${formatCountdown(rndTimeLeft)}` : ''}
+                      </p>
+                      <p className={`text-[10px] font-bold ${answeredInRound === rnd.questions.length ? 'text-primary' : 'opacity-60'}`}>
+                        {answeredInRound}/{rnd.questions.length}
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Main Content */}
-        <div className="flex-1 min-w-0">
+        <div className={cn(
+          "min-w-0",
+          (currentRound?.question_format === 'VIDEO' || currentRound?.question_format === 'ONLINE_INTERVIEW')
+            ? "w-full h-full flex flex-col"
+            : "flex-1"
+        )}>
           {currentRound && (
-            <div>
+            <div className={cn(
+              (currentRound?.question_format === 'VIDEO' || currentRound?.question_format === 'ONLINE_INTERVIEW') && "h-full flex flex-col"
+            )}>
               {/* Round Header */}
-              <div className="mb-6">
-                <h2 className="text-xl font-bold">{currentRound.designation_display}</h2>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {currentRound.difficulty} Level • {currentRound.question_format === 'CODE' ? `${currentRound.programming_language || 'Any Language'} Coding` : currentRound.question_format} Questions
-                </p>
-              </div>
+              {!(currentRound?.question_format === 'VIDEO' || currentRound?.question_format === 'ONLINE_INTERVIEW') && (
+                <div className="mb-6">
+                  <h2 className="text-xl font-bold">{currentRound.designation_display}</h2>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {currentRound.difficulty} Level • {currentRound.question_format === 'CODE' ? `${currentRound.programming_language || 'Any Language'} Coding` : currentRound.question_format} Questions
+                    {currentRound.timer_seconds ? ` • Time Remaining: ${formatCountdown(currentRoundTimeLeft)}` : ''}
+                  </p>
+                </div>
+              )}
 
-              {currentRound.question_format === 'VIDEO' ? (
+              {currentRound.question_format === 'VIDEO' || currentRound.question_format === 'ONLINE_INTERVIEW' ? (
                 <ExamVoiceVideoPhase
                   currentRound={currentRound}
                   activeQuestionIndex={activeQuestionIndex}
@@ -149,6 +293,8 @@ export function ExamActivePhase({
                   submitting={submitting}
                   examData={examData}
                   logViolation={logViolation}
+                  mode={currentRound.question_format === 'ONLINE_INTERVIEW' ? 'normal' : 'ai'}
+                  isInterviewer={isInterviewer}
                 />
               ) : (
                 <>
@@ -174,6 +320,19 @@ export function ExamActivePhase({
                     })}
                   </div>
 
+                  {/* Expired Round Warning Banner */}
+                  {isRoundExpired && (
+                    <div className="mb-4 p-4 rounded-sm bg-rose-500/10 border border-rose-500/30 flex items-center justify-between">
+                      <div className="flex items-center gap-2.5 text-rose-500 font-bold text-xs">
+                        <Clock className="w-4 h-4" />
+                        <span>Time's up for this round — Answers are locked in Read-Only Mode.</span>
+                      </div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-rose-500/20 text-rose-500">
+                        Read Only
+                      </span>
+                    </div>
+                  )}
+
                   {/* Question Card */}
                   <AnimatePresence mode="wait">
                     {currentQuestion && (
@@ -198,7 +357,7 @@ export function ExamActivePhase({
                                   {currentQuestion.mcq_options.map((opt: any, i: number) => (
                                     <label
                                       key={i}
-                                      className={`flex items-center gap-3 p-3 rounded-sm border cursor-pointer transition-all ${answers[currentQuestion.id] === opt.label
+                                      className={`flex items-center gap-3 p-3 rounded-sm border transition-all ${isRoundExpired ? 'cursor-not-allowed opacity-80' : 'cursor-pointer'} ${answers[currentQuestion.id] === opt.label
                                         ? 'bg-primary/10 border-primary/40 text-foreground shadow-sm'
                                         : 'bg-secondary/40 border-border text-muted-foreground hover:border-border/80'
                                         }`}
@@ -206,13 +365,14 @@ export function ExamActivePhase({
                                       <input
                                         type="radio"
                                         name={`q_${currentQuestion.id}`}
-                                        checked={answers[currentQuestion.id] === opt.label}
-                                        onChange={() => setAnswers(prev => ({ ...prev, [currentQuestion.id]: opt.label }))}
+                                        disabled={isRoundExpired}
+                                        checked={answers[currentQuestion.id] === opt.label || currentQuestion.candidate_answer === opt.label}
+                                        onChange={() => !isRoundExpired && setAnswers(prev => ({ ...prev, [currentQuestion.id]: opt.label }))}
                                         className="sr-only"
                                       />
-                                      <span className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 ${answers[currentQuestion.id] === opt.label ? 'border-primary' : 'border-muted-foreground/30'
+                                      <span className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 ${(answers[currentQuestion.id] === opt.label || currentQuestion.candidate_answer === opt.label) ? 'border-primary' : 'border-muted-foreground/30'
                                         }`}>
-                                        {answers[currentQuestion.id] === opt.label && (
+                                        {(answers[currentQuestion.id] === opt.label || currentQuestion.candidate_answer === opt.label) && (
                                           <span className="w-3 h-3 rounded-full bg-primary" />
                                         )}
                                       </span>
@@ -226,49 +386,52 @@ export function ExamActivePhase({
                         </div>
 
                         {/* Answer Area */}
-                        {(currentQuestion.question_type === 'TEXT' || currentRound.question_format === 'TEXT' || currentQuestion.question_type === 'NON_CODING') && 
-                         currentRound.question_format !== 'MCQ' &&
-                         currentRound.question_format !== 'CODE' && 
-                         !currentRound.designation_display.toLowerCase().includes('coding') && (
-                          <div className="p-8">
-                            <label className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold block mb-3">
-                              Your Answer
-                            </label>
-                            <textarea
-                              value={answers[currentQuestion.id] ?? currentQuestion.candidate_answer ?? ''}
-                              onChange={(e) => setAnswers(prev => ({ ...prev, [currentQuestion.id]: e.target.value }))}
-                              placeholder="Type your answer here..."
-                              className="w-full bg-background border border-input rounded-sm py-4 px-5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring transition-all resize-none shadow-sm min-h-[150px]"
-                            />
-                          </div>
-                        )}
+                        {(currentQuestion.question_type === 'TEXT' || currentRound.question_format === 'TEXT' || currentQuestion.question_type === 'NON_CODING') &&
+                          currentRound.question_format !== 'MCQ' &&
+                          currentRound.question_format !== 'CODE' &&
+                          !currentRound.designation_display.toLowerCase().includes('coding') && (
+                            <div className="p-8">
+                              <label className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold block mb-3">
+                                Your Answer
+                              </label>
+                              <textarea
+                                value={answers[currentQuestion.id] ?? currentQuestion.candidate_answer ?? ''}
+                                onChange={(e) => !isRoundExpired && setAnswers(prev => ({ ...prev, [currentQuestion.id]: e.target.value }))}
+                                readOnly={isRoundExpired}
+                                disabled={isRoundExpired}
+                                placeholder={isRoundExpired ? "Round expired. No answer submitted." : "Type your answer here..."}
+                                className={cn(
+                                  "w-full bg-background border border-input rounded-sm py-4 px-5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring transition-all resize-none shadow-sm min-h-[150px]",
+                                  isRoundExpired && "opacity-80 bg-muted/20 cursor-not-allowed"
+                                )}
+                              />
+                            </div>
+                          )}
 
-                        {(currentQuestion.question_type === 'CODE' || 
-                          currentRound.question_format === 'CODE' || 
+                        {(currentQuestion.question_type === 'CODE' ||
+                          currentRound.question_format === 'CODE' ||
                           currentRound.designation_display.toLowerCase().includes('coding')) && (
-                          <div className="p-8">
-                            <label className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold block mb-3">
-                              Coding Environment ({currentRound.programming_language || 'Python'})
-                            </label>
-                            {/* 
-                            <CodeEditor 
-                              initialValue={answers[currentQuestion.id] ?? currentQuestion.candidate_answer ?? ''}
-                              language={currentRound.programming_language || 'python'}
-                              onChange={(val) => setAnswers(prev => ({ ...prev, [currentQuestion.id]: val || '' }))}
-                            />
-                            */}
-                            <textarea
-                              value={answers[currentQuestion.id] ?? currentQuestion.candidate_answer ?? ''}
-                              onChange={(e) => setAnswers(prev => ({ ...prev, [currentQuestion.id]: e.target.value }))}
-                              placeholder="Write your code solution here..."
-                              className="w-full bg-slate-950 border border-slate-800 rounded-sm py-4 px-5 text-sm font-mono text-slate-100 placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all resize-y shadow-sm min-h-[300px]"
-                            />
-                            <p className="mt-4 text-[10px] text-muted-foreground italic flex items-center gap-2">
-                              <TerminalIcon size={10} />
-                              Note: Standard coding text editor active. Write your code here.
-                            </p>
-                          </div>
-                        )}
+                            <div className="p-8">
+                              <label className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold block mb-3">
+                                Coding Environment ({currentRound.programming_language || 'Python'})
+                              </label>
+                              <textarea
+                                value={answers[currentQuestion.id] ?? currentQuestion.candidate_answer ?? ''}
+                                onChange={(e) => !isRoundExpired && setAnswers(prev => ({ ...prev, [currentQuestion.id]: e.target.value }))}
+                                readOnly={isRoundExpired}
+                                disabled={isRoundExpired}
+                                placeholder={isRoundExpired ? "Round expired. No answer submitted." : "Write your code solution here..."}
+                                className={cn(
+                                  "w-full bg-slate-950 border border-slate-800 rounded-sm py-4 px-5 text-sm font-mono text-slate-100 placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all resize-y shadow-sm min-h-[300px]",
+                                  isRoundExpired && "opacity-80 cursor-not-allowed"
+                                )}
+                              />
+                              <p className="mt-4 text-[10px] text-muted-foreground italic flex items-center gap-2">
+                                <TerminalIcon size={10} />
+                                Note: Standard coding text editor active. Write your code here.
+                              </p>
+                            </div>
+                          )}
 
                         {/* Actions */}
                         <div className="px-8 py-5 bg-muted/30 border-t border-border flex items-center justify-between">
@@ -296,10 +459,10 @@ export function ExamActivePhase({
                           </div>
                           <button
                             onClick={() => handleSubmitAnswer(currentQuestion.id)}
-                            disabled={submitting === currentQuestion.id || (!answers[currentQuestion.id]?.trim() && !currentQuestion.candidate_answer)}
+                            disabled={isRoundExpired || submitting === currentQuestion.id || (!answers[currentQuestion.id]?.trim() && !currentQuestion.candidate_answer)}
                             className="px-8 py-2.5 rounded-sm bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/90 transition-all active:scale-95 disabled:opacity-40 shadow-sm"
                           >
-                            {submitting === currentQuestion.id ? 'Saving...' : currentQuestion.candidate_answer ? 'Update Answer' : 'Save Answer'}
+                            {isRoundExpired ? 'Round Expired (Read Only)' : submitting === currentQuestion.id ? 'Saving...' : currentQuestion.candidate_answer ? 'Update Answer' : 'Save Answer'}
                           </button>
                         </div>
                       </motion.div>
@@ -349,9 +512,9 @@ export function ExamActivePhase({
 
       {/* AI Surveillance Overlay */}
       <SurveillanceOverlay
-        isActive={true}
+        isActive={currentRound?.question_format !== 'ONLINE_INTERVIEW'}
         onViolation={logViolation}
-        hideFloatingFeed={currentRound?.question_format === 'VIDEO'}
+        hideFloatingFeed={currentRound?.question_format === 'VIDEO' || currentRound?.question_format === 'ONLINE_INTERVIEW'}
       />
 
       {/* CSS Security & Privacy Shield */}

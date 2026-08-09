@@ -55,7 +55,7 @@ export function RecruiterShell() {
   // Redirect if not authenticated
   React.useEffect(() => {
     if (!authLoading && !isAuthenticated) {
-      router.replace('/recruiter/login');
+      router.replace('/recruiter/login?redirect=/recruiter');
     }
   }, [authLoading, isAuthenticated, router]);
 

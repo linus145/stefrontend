@@ -31,3 +31,17 @@ export interface ExamData {
   deepgram_api_key?: string;
   gemini_api_key?: string;
 }
+
+export interface ExamVoiceVideoPhaseProps {
+  currentRound: Round;
+  activeQuestionIndex: number;
+  setActiveQuestionIndex: (idx: number) => void;
+  answers: Record<string, string>;
+  setAnswers: React.Dispatch<React.SetStateAction<Record<string, string>>>;
+  handleSubmitAnswer: (questionId: string, directAnswer?: string) => void;
+  submitting: string | null;
+  examData: any;
+  logViolation: (type: string, metadata: any, severity: 'LOW' | 'MEDIUM' | 'HIGH') => void;
+  mode?: 'ai' | 'normal';
+  isInterviewer?: boolean;
+}

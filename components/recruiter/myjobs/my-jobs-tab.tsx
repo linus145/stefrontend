@@ -110,9 +110,9 @@ export function MyJobsTab({ isApproved, onViewApplications }: MyJobsTabProps) {
   }
 
   return (
-    <div className="flex relative w-full h-full overflow-hidden">
+    <div className="flex relative w-full h-full overflow-hidden min-w-0">
       <div className={cn(
-        "flex-1 p-4 lg:p-6 animate-in fade-in transition-all duration-500 lg:ml-0"
+        "flex-1 p-4 lg:p-6 animate-in fade-in transition-all duration-500 lg:ml-0 min-w-0"
       )}>
         {!isApproved && (
           <div className="mb-6 p-4 rounded-[4px] bg-amber-500/10 border border-amber-500/20 flex items-start gap-3">
@@ -200,9 +200,9 @@ export function MyJobsTab({ isApproved, onViewApplications }: MyJobsTabProps) {
             </button>
           </div>
         ) : (
-          <div className="bg-card border border-border rounded-[4px] overflow-hidden shadow-sm">
+          <div className="bg-card border border-border rounded-[4px] overflow-hidden shadow-sm min-w-0">
             <div className="overflow-x-auto no-scrollbar">
-              <table className="w-full border-collapse text-left">
+              <table className="w-full min-w-[950px] border-collapse text-left">
                 <thead>
                   <tr className="bg-muted/30 border-b border-border">
                     <th className="pl-6 pr-4 py-2.5 text-xs font-bold text-muted-foreground uppercase tracking-wider w-[20%]">Job Info</th>

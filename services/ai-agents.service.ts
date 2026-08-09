@@ -30,7 +30,7 @@ export const aiAgentService = {
   clearChatHistory: (): Promise<any> => {
     return api.delete<any>('/autonomousagent1/chat/clear/');
   },
-  
+
   // New Enterprise memory architecture methods
   getActiveExecution: (): Promise<any> => {
     return api.get<any>('/autonomousagent1/executions/active/');

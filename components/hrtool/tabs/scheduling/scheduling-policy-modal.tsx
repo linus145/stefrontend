@@ -15,7 +15,7 @@ export function SchedulingPolicyModal({ open, onClose }: SchedulingPolicyModalPr
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
       <div 
-        className="bg-white dark:bg-[#121320] border border-slate-200 dark:border-slate-800 rounded-sm shadow-xl max-w-md w-full p-5 space-y-4 animate-in zoom-in-95 duration-200"
+        className="bg-white dark:bg-[#121320] border border-slate-200 dark:border-slate-800 rounded-[3px] shadow-xl max-w-md w-full p-5 space-y-4 animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-slate-150 dark:border-slate-800 pb-3">
@@ -53,7 +53,7 @@ export function SchedulingPolicyModal({ open, onClose }: SchedulingPolicyModalPr
           </div>
           
           {/* AI Warning point */}
-          <div className="flex gap-2 p-2.5 bg-amber-500/10 border border-amber-500/30 rounded-sm text-amber-600 dark:text-amber-500 text-[11px] font-bold">
+          <div className="flex gap-2 p-2.5 bg-amber-500/10 border border-amber-500/30 rounded-[3px] text-amber-600 dark:text-amber-500 text-[11px] font-bold">
             <span className="shrink-0 mt-0.5">⚠️</span>
             <p>
               AI agents can make mistakes. Please verify generated payroll figures, onboarding salary sheets, and critical configurations before executing high autonomy cycles.
@@ -64,12 +64,12 @@ export function SchedulingPolicyModal({ open, onClose }: SchedulingPolicyModalPr
         <div className="pt-3 border-t border-slate-150 dark:border-slate-800 flex items-center justify-between text-[11px]">
           <div className="flex items-center gap-1.5">
             <span className="text-slate-500 font-bold uppercase">Engine Version:</span>
-            <span className="text-[10px] font-black text-[#0a66c2] bg-[#0a66c2]/10 px-1.5 py-0.5 rounded-sm">V2.5-CRON</span>
+            <span className="text-[10px] font-black text-[#0a66c2] bg-[#0a66c2]/10 px-1.5 py-0.5 rounded-[3px]">V2.5-CRON</span>
           </div>
           <Button
             type="button"
             onClick={onClose}
-            className="bg-[#0a66c2] hover:bg-[#084e96] text-white font-extrabold text-xs h-8 px-3.5 rounded-sm cursor-pointer"
+            className="bg-[#0a66c2] hover:bg-[#084e96] text-white font-extrabold text-xs h-8 px-3.5 rounded-[3px] cursor-pointer"
           >
             Acknowledge
           </Button>

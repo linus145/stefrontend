@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { toast, Toaster } from 'sonner';
 import axios from 'axios';
 import { ExamData } from '@/types/exam-types';
@@ -27,12 +27,51 @@ export function CandidateExamWrapper() {
   const [submitting, setSubmitting] = useState<string | null>(null);
   const [isCompleting, setIsCompleting] = useState(false);
 
+  const currentRound = examData?.rounds[activeRoundIndex];
+  const isOnlineInterview = currentRound?.question_format === 'ONLINE_INTERVIEW';
+  const isInterviewer = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('role') === 'interviewer';
+
+  // Auto-login if credentials are provided in URL query params
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const userParam = params.get('username');
+      const passParam = params.get('password');
+      if (userParam && passParam && phase === 'login') {
+        setUsername(userParam);
+        setPassword(passParam);
+        const triggerLogin = async () => {
+          setIsLoggingIn(true);
+          try {
+            const response = await examApi.post('/AIrounds/exam-login/', {
+              username: userParam.trim(),
+              password: passParam.trim(),
+            });
+
+            if (response.data.status === 'success') {
+              setExamData(response.data.data);
+              setPhase('exam');
+              toast.success('Joined meeting as Interviewer Host.');
+            } else {
+              toast.error(response.data.message || 'Login failed.');
+            }
+          } catch (error: any) {
+            toast.error(error.response?.data?.message || 'Invalid credentials.');
+          } finally {
+            setIsLoggingIn(false);
+          }
+        };
+        triggerLogin();
+      }
+    }
+  }, [phase]);
+
   // Activate AI Surveillance when in the exam phase
   const { logViolation } = useProctoring({
     sessionId: examData?.session_id || '',
-    enableTabLock: phase === 'exam',
-    enableFullscreen: phase === 'exam',
-    enableCamera: phase === 'exam'
+    enableTabLock: phase === 'exam' && !isOnlineInterview,
+    enableFullscreen: phase === 'exam' && !isOnlineInterview,
+    enableCamera: phase === 'exam' && !isOnlineInterview
   });
 
   const handleLogin = async () => {
@@ -185,6 +224,7 @@ export function CandidateExamWrapper() {
       answeredQuestions={answeredQuestions}
       totalQuestions={totalQuestions}
       logViolation={logViolation}
+      isInterviewer={isInterviewer}
     />
   );
 }

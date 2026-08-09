@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { 
-  X, Plus, Trash2, BrainCircuit, Timer, 
-  Settings2, ChevronRight, CheckCircle2, 
+import {
+  X, Plus, Trash2, BrainCircuit, Timer,
+  Settings2, ChevronRight, CheckCircle2,
   Code2, Users2, Briefcase
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -78,11 +78,11 @@ export function InterviewConfigModal({ isOpen, onClose, onSuccess }: ConfigModal
 
   const handleConfigure = async () => {
     if (selectedApplicationIds.length === 0) return;
-    
+
     setIsSubmitting(true);
     try {
       // Orchestrate for each selected candidate
-      const promises = selectedApplicationIds.map(appId => 
+      const promises = selectedApplicationIds.map(appId =>
         aiInterviewsService.configureInterview({
           job_application_id: appId,
           rounds: rounds.map(({ type, difficulty, max_questions, timer_seconds }) => ({
@@ -106,15 +106,15 @@ export function InterviewConfigModal({ isOpen, onClose, onSuccess }: ConfigModal
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      <motion.div 
-        initial={{ opacity: 0 }} 
-        animate={{ opacity: 1 }} 
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm" 
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
       />
-      
-      <motion.div 
+
+      <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -140,7 +140,7 @@ export function InterviewConfigModal({ isOpen, onClose, onSuccess }: ConfigModal
         <div className="flex-1 overflow-y-auto p-6 lg:p-8 custom-scrollbar">
           <AnimatePresence mode="wait">
             {step === 1 ? (
-              <motion.div 
+              <motion.div
                 key="step1"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -169,8 +169,8 @@ export function InterviewConfigModal({ isOpen, onClose, onSuccess }: ConfigModal
                             }}
                             className={cn(
                               "w-full p-4 rounded-sm border text-left transition-all flex items-center justify-between group",
-                              selectedJobId === job.id 
-                                ? "bg-[#0a66c2]/5 border-[#0a66c2] text-[#0a66c2]" 
+                              selectedJobId === job.id
+                                ? "bg-[#0a66c2]/5 border-[#0a66c2] text-[#0a66c2]"
                                 : "bg-background border-border hover:border-[#0a66c2]/30"
                             )}
                           >
@@ -192,10 +192,10 @@ export function InterviewConfigModal({ isOpen, onClose, onSuccess }: ConfigModal
                     </div>
                     <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                       {!selectedJobId ? (
-                         <div className="flex flex-col items-center justify-center h-40 border border-dashed border-border rounded-sm opacity-50">
-                            <Users2 className="w-8 h-8 mb-2" />
-                            <p className="text-xs font-medium">Select a job first</p>
-                         </div>
+                        <div className="flex flex-col items-center justify-center h-40 border border-dashed border-border rounded-sm opacity-50">
+                          <Users2 className="w-8 h-8 mb-2" />
+                          <p className="text-xs font-medium">Select a job first</p>
+                        </div>
                       ) : appsLoading ? (
                         Array.from({ length: 3 }).map((_, i) => (
                           <div key={i} className="h-14 bg-muted animate-pulse rounded-sm" />
@@ -211,8 +211,8 @@ export function InterviewConfigModal({ isOpen, onClose, onSuccess }: ConfigModal
                                 : "bg-background border-border hover:border-emerald-500/30"
                             )}
                           >
-                            <input 
-                              type="checkbox" 
+                            <input
+                              type="checkbox"
                               className="hidden"
                               checked={selectedApplicationIds.includes(app.id)}
                               onChange={(e) => {
@@ -227,8 +227,8 @@ export function InterviewConfigModal({ isOpen, onClose, onSuccess }: ConfigModal
                               {selectedApplicationIds.includes(app.id) && <CheckCircle2 className="w-3 h-3 text-white" />}
                             </div>
                             <div className="flex-1">
-                               <p className="text-sm font-semibold">{app.user_name}</p>
-                               <p className="text-[10px] opacity-70">Applied {new Date(app.created_at).toLocaleDateString()}</p>
+                              <p className="text-sm font-semibold">{app.user_name}</p>
+                              <p className="text-[10px] opacity-70">Applied {new Date(app.created_at).toLocaleDateString()}</p>
                             </div>
                           </label>
                         ))
@@ -240,7 +240,7 @@ export function InterviewConfigModal({ isOpen, onClose, onSuccess }: ConfigModal
                 </div>
               </motion.div>
             ) : (
-              <motion.div 
+              <motion.div
                 key="step2"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -252,7 +252,7 @@ export function InterviewConfigModal({ isOpen, onClose, onSuccess }: ConfigModal
                     <BrainCircuit className="w-4 h-4" />
                     Interview Rounds Configuration
                   </div>
-                  <button 
+                  <button
                     onClick={addRound}
                     className="flex items-center gap-1 text-xs font-bold text-[#0a66c2] hover:text-[#004182] uppercase tracking-wider"
                   >
@@ -263,7 +263,7 @@ export function InterviewConfigModal({ isOpen, onClose, onSuccess }: ConfigModal
 
                 <div className="space-y-4">
                   {rounds.map((round, index) => (
-                    <motion.div 
+                    <motion.div
                       key={round.id}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -272,36 +272,36 @@ export function InterviewConfigModal({ isOpen, onClose, onSuccess }: ConfigModal
                       <div className="flex flex-col md:flex-row md:items-center gap-4">
                         <div className="flex-1 space-y-1.5">
                           <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Round Type</label>
-                          <select 
+                          <select
                             value={round.type}
                             onChange={(e) => updateRound(round.id, { type: e.target.value as RoundType })}
                             className="w-full bg-background border border-border rounded-sm py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#0a66c2]"
                           >
-                            <option value="TECHNICAL">Technical Interview</option>
-                            <option value="CODING">Live Coding Session</option>
-                            <option value="HR">HR / Cultural Round</option>
-                            <option value="SYSTEM_DESIGN">System Design</option>
-                            <option value="BEHAVIORAL">Behavioral / EQ</option>
+                            <option value="TECHNICAL" className="bg-popover text-popover-foreground">Technical Interview</option>
+                            <option value="CODING" className="bg-popover text-popover-foreground">Live Coding Session</option>
+                            <option value="HR" className="bg-popover text-popover-foreground">HR / Cultural Round</option>
+                            <option value="SYSTEM_DESIGN" className="bg-popover text-popover-foreground">System Design</option>
+                            <option value="BEHAVIORAL" className="bg-popover text-popover-foreground">Behavioral / EQ</option>
                           </select>
                         </div>
 
                         <div className="flex-1 space-y-1.5">
                           <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Difficulty</label>
-                          <select 
+                          <select
                             value={round.difficulty}
                             onChange={(e) => updateRound(round.id, { difficulty: e.target.value as any })}
                             className="w-full bg-background border border-border rounded-sm py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#0a66c2]"
                           >
-                            <option value="ENTRY">Entry Level</option>
-                            <option value="MID">Mid Level</option>
-                            <option value="SENIOR">Senior Level</option>
-                            <option value="LEAD">Lead / Architect</option>
+                            <option value="ENTRY" className="bg-popover text-popover-foreground">Entry Level</option>
+                            <option value="MID" className="bg-popover text-popover-foreground">Mid Level</option>
+                            <option value="SENIOR" className="bg-popover text-popover-foreground">Senior Level</option>
+                            <option value="LEAD" className="bg-popover text-popover-foreground">Lead / Architect</option>
                           </select>
                         </div>
 
                         <div className="w-32 space-y-1.5">
                           <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Questions</label>
-                          <input 
+                          <input
                             type="number"
                             value={round.max_questions}
                             onChange={(e) => updateRound(round.id, { max_questions: parseInt(e.target.value) })}
@@ -309,18 +309,49 @@ export function InterviewConfigModal({ isOpen, onClose, onSuccess }: ConfigModal
                           />
                         </div>
 
-                        <div className="w-32 space-y-1.5">
-                          <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Timer (Sec)</label>
-                          <input 
-                            type="number"
-                            value={round.timer_seconds}
-                            onChange={(e) => updateRound(round.id, { timer_seconds: parseInt(e.target.value) })}
-                            className="w-full bg-background border border-border rounded-sm py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#0a66c2]"
-                          />
+                        <div className="w-56 space-y-1.5">
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Duration</label>
+                          <div className="flex gap-2">
+                            <div className="relative flex-1 flex items-center">
+                              <input 
+                                type="number"
+                                min="0"
+                                value={Math.floor(round.timer_seconds / 3600) || ''}
+                                onChange={(e) => {
+                                  const h = Math.max(0, parseInt(e.target.value) || 0);
+                                  const m = Math.floor((round.timer_seconds % 3600) / 60);
+                                  updateRound(round.id, { timer_seconds: (h * 3600) + (m * 60) });
+                                }}
+                                placeholder="0"
+                                className="w-full bg-background border border-border rounded-sm py-2 px-2.5 pr-10 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-[#0a66c2]"
+                              />
+                              <span className="absolute right-2.5 text-[10px] font-semibold text-muted-foreground pointer-events-none">
+                                Hrs
+                              </span>
+                            </div>
+                            <div className="relative flex-1 flex items-center">
+                              <input 
+                                type="number"
+                                min="0"
+                                max="59"
+                                value={Math.floor((round.timer_seconds % 3600) / 60) || ''}
+                                onChange={(e) => {
+                                  const h = Math.floor(round.timer_seconds / 3600);
+                                  const m = Math.max(0, parseInt(e.target.value) || 0);
+                                  updateRound(round.id, { timer_seconds: (h * 3600) + (m * 60) });
+                                }}
+                                placeholder="0"
+                                className="w-full bg-background border border-border rounded-sm py-2 px-2.5 pr-12 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-[#0a66c2]"
+                              />
+                              <span className="absolute right-2.5 text-[10px] font-semibold text-muted-foreground pointer-events-none">
+                                Mins
+                              </span>
+                            </div>
+                          </div>
                         </div>
 
                         {rounds.length > 1 && (
-                          <button 
+                          <button
                             onClick={() => removeRound(round.id)}
                             className="mt-6 p-2 rounded-sm text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all"
                           >
@@ -338,14 +369,14 @@ export function InterviewConfigModal({ isOpen, onClose, onSuccess }: ConfigModal
 
         {/* Modal Footer */}
         <div className="p-6 border-t border-border bg-muted/30 flex items-center justify-between">
-          <button 
+          <button
             onClick={() => step === 1 ? onClose() : setStep(1)}
             className="px-6 py-2.5 rounded-sm border border-border text-sm font-semibold hover:bg-muted transition-all active:scale-95"
           >
             {step === 1 ? 'Cancel' : 'Back'}
           </button>
-          
-          <button 
+
+          <button
             onClick={() => step === 1 ? setStep(2) : handleConfigure()}
             disabled={(step === 1 && (!selectedJobId || selectedApplicationIds.length === 0)) || isSubmitting}
             className="flex items-center gap-2 px-8 py-2.5 rounded-sm bg-[#0a66c2] text-white text-sm font-semibold hover:bg-[#004182] transition-all active:scale-95 shadow-lg shadow-[#0a66c2]/20 disabled:opacity-50 disabled:cursor-not-allowed"

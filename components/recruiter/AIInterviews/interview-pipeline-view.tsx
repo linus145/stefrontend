@@ -303,6 +303,18 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
               </button>
             )}
 
+            {session.is_orchestrated && session.exam_credentials && session.exam_status?.toUpperCase() !== 'COMPLETED' && (
+              <a
+                href={`/interview/exam?username=${session.exam_credentials.username}&password=${session.exam_credentials.password}&role=interviewer`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-2.5 py-1 rounded-sm bg-emerald-600 text-white text-[10px] font-bold hover:bg-emerald-700 transition-all active:scale-95 whitespace-nowrap"
+                title="Join Call as Interviewer Host"
+              >
+                Join as Host
+              </a>
+            )}
+
             {session.is_orchestrated && (
               <button
                 onClick={() => resendInviteMutation.mutate(session.id)}

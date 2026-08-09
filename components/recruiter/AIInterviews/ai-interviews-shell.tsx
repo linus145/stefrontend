@@ -48,7 +48,7 @@ export function AIInterviewsShell() {
   // Redirect if not authenticated
   React.useEffect(() => {
     if (!authLoading && !isAuthenticated) {
-      router.replace('/recruiter/login');
+      router.replace('/recruiter/login?redirect=/recruiter/AIInterviews');
     }
   }, [authLoading, isAuthenticated, router]);
 
@@ -97,8 +97,8 @@ export function AIInterviewsShell() {
       case 'pipeline':
         return (
           <div className="w-full max-w-7xl mx-auto flex flex-col">
-            <InterviewPipelineView 
-              onConfigure={handleConfigureCandidate} 
+            <InterviewPipelineView
+              onConfigure={handleConfigureCandidate}
               onSectionChange={setActiveSection}
             />
           </div>
@@ -108,9 +108,9 @@ export function AIInterviewsShell() {
           <InterviewConfigView
             initialApplicationId={configInitialAppId}
             initialSessionId={configInitialSessionId}
-            onBack={() => { 
-              setActiveSection('pipeline'); 
-              setConfigInitialSessionId(undefined); 
+            onBack={() => {
+              setActiveSection('pipeline');
+              setConfigInitialSessionId(undefined);
             }}
           />
         );

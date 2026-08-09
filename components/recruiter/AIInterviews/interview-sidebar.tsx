@@ -3,8 +3,9 @@
 import React from 'react';
 import {
   BrainCircuit, Users2, ClipboardCheck, Calendar, PieChart,
-  Settings2, ChevronLeft, Menu, User, Coins, Sun, Moon
+  Settings2, ChevronLeft, Menu, User, Coins, Sun, Moon, LogOut
 } from 'lucide-react';
+import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 import { useDashboardTheme } from '@/context/DashboardThemeContext';
@@ -146,6 +147,18 @@ export function AIInterviewsSidebar({
             </span>
           )}
         </button>
+
+        {/* Exit App button */}
+        <Link
+          href="/recruiter/login?redirect=/recruiter/AIInterviews"
+          className={cn(
+            "flex items-center justify-center gap-2 w-full transition-all rounded-[4px] bg-muted/50 border border-border text-rose-500 py-1.5 text-xs font-bold hover:bg-rose-500/10 active:scale-95 cursor-pointer mt-1",
+            isCollapsed ? "justify-center px-0" : "px-2"
+          )}
+        >
+          <LogOut className="h-3.5 w-3.5 text-rose-500" />
+          {!isCollapsed && <span className="animate-in fade-in duration-300">Exit App</span>}
+        </Link>
       </div>
     </aside>
   );

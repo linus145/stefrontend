@@ -8,7 +8,8 @@ import { toast } from 'sonner';
 import Link from 'next/link';
 import {
   Building2, ArrowRight, Globe, MapPin, Users, Calendar,
-  Briefcase, ChevronLeft, Loader2, AlertCircle,Mail,Lock,EyeOff,Eye,Phone} from 'lucide-react';
+  Briefcase, Loader2, AlertCircle, Mail, Lock, EyeOff, Eye, Phone
+} from 'lucide-react';
 
 const INDUSTRY_OPTIONS = [
   'Technology', 'Healthcare', 'Finance', 'Education', 'E-commerce',
@@ -140,7 +141,7 @@ export function CompanyRegisterForm() {
         ...formData,
         founded_year: formData.founded_year ? parseInt(formData.founded_year, 10) : null,
       };
-      
+
       if (!isAuthenticated) {
         await jobsService.registerCompany(payload);
         toast.success('Company account registered successfully!');
@@ -165,16 +166,9 @@ export function CompanyRegisterForm() {
 
   return (
     <div className="w-full max-w-lg mx-auto pb-12">
-      <Link
-        href="/"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-8 transition-colors group"
-      >
-        <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-        Back to Home
-      </Link>
 
-      <div className="relative w-full rounded-sm bg-card shadow-sm hover:shadow-md transition-shadow border border-border overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-blue-500 via-cyan-500 to-blue-500 opacity-90" />
+
+      <div className="relative w-full rounded-sm bg-white dark:bg-[#121320] shadow-[0_20px_40px_rgba(0,0,0,0.08)] dark:shadow-[0_20px_40px_rgba(0,0,0,0.3)] border border-slate-200 dark:border-slate-800 overflow-hidden transition-all duration-500">
 
         <div className="p-8">
           <div className="flex items-center gap-3 mb-2">
@@ -193,42 +187,42 @@ export function CompanyRegisterForm() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-4 pt-2 pb-4 border-b border-border">
-                <span className="text-xs font-bold text-foreground tracking-wide uppercase">Company Login Credentials</span>
-                <div className="space-y-2">
-                  <label className="text-[11px] font-semibold text-muted-foreground uppercase" htmlFor="company_email">Company Email *</label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/70" />
-                    <input id="company_email" type="email" value={formData.company_email} onChange={handleChange} placeholder="recruiter@company.com" className={`w-full rounded-sm bg-muted/50 border ${errors.company_email ? 'border-red-400' : 'border-border'} text-foreground pl-10 pr-4 py-2 text-sm focus:ring-1 focus:ring-blue-500 outline-none`} />
-                  </div>
-                  {errors.company_email && <p className="text-[10px] text-red-500">{errors.company_email[0]}</p>}
+              <span className="text-xs font-bold text-foreground tracking-wide uppercase">Company Login Credentials</span>
+              <div className="space-y-2">
+                <label className="text-[11px] font-semibold text-muted-foreground uppercase" htmlFor="company_email">Company Email *</label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/70" />
+                  <input id="company_email" type="email" value={formData.company_email} onChange={handleChange} placeholder="recruiter@company.com" className={`w-full rounded-sm bg-muted/50 border ${errors.company_email ? 'border-red-400' : 'border-border'} text-foreground pl-10 pr-4 py-2 text-sm focus:ring-1 focus:ring-blue-500 outline-none`} />
                 </div>
+                {errors.company_email && <p className="text-[10px] text-red-500">{errors.company_email[0]}</p>}
+              </div>
 
 
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <label className="text-[11px] font-semibold text-muted-foreground uppercase" htmlFor="company_password">Password *</label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/70" />
-                      <input id="company_password" type={showPassword ? 'text' : 'password'} value={formData.company_password} onChange={handleChange} placeholder="••••••••" className={`w-full rounded-sm bg-muted/50 border ${errors.company_password ? 'border-red-400' : 'border-border'} text-foreground pl-10 pr-10 py-2 text-sm focus:ring-1 focus:ring-blue-500 outline-none`} />
-                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/70 hover:text-foreground">
-                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                    </div>
-                    {errors.company_password && <p className="text-[10px] text-red-500">{errors.company_password[0]}</p>}
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-[11px] font-semibold text-muted-foreground uppercase" htmlFor="company_password">Password *</label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/70" />
+                    <input id="company_password" type={showPassword ? 'text' : 'password'} value={formData.company_password} onChange={handleChange} placeholder="••••••••" className={`w-full rounded-sm bg-muted/50 border ${errors.company_password ? 'border-red-400' : 'border-border'} text-foreground pl-10 pr-10 py-2 text-sm focus:ring-1 focus:ring-blue-500 outline-none`} />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/70 hover:text-foreground">
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-[11px] font-semibold text-muted-foreground uppercase" htmlFor="confirmPassword">Confirm Password *</label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/70" />
-                      <input id="confirmPassword" type={showPassword ? 'text' : 'password'} value={formData.confirmPassword} onChange={handleChange} placeholder="••••••••" className={`w-full rounded-sm bg-muted/50 border ${errors.confirmPassword ? 'border-red-400' : 'border-border'} text-foreground pl-10 pr-10 py-2 text-sm focus:ring-1 focus:ring-blue-500 outline-none`} />
-                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/70 hover:text-foreground">
-                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                    </div>
-                    {errors.confirmPassword && <p className="text-[10px] text-red-500">{errors.confirmPassword[0]}</p>}
+                  {errors.company_password && <p className="text-[10px] text-red-500">{errors.company_password[0]}</p>}
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[11px] font-semibold text-muted-foreground uppercase" htmlFor="confirmPassword">Confirm Password *</label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/70" />
+                    <input id="confirmPassword" type={showPassword ? 'text' : 'password'} value={formData.confirmPassword} onChange={handleChange} placeholder="••••••••" className={`w-full rounded-sm bg-muted/50 border ${errors.confirmPassword ? 'border-red-400' : 'border-border'} text-foreground pl-10 pr-10 py-2 text-sm focus:ring-1 focus:ring-blue-500 outline-none`} />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/70 hover:text-foreground">
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
                   </div>
+                  {errors.confirmPassword && <p className="text-[10px] text-red-500">{errors.confirmPassword[0]}</p>}
                 </div>
               </div>
+            </div>
 
             <div className="space-y-2">
               <label className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase" htmlFor="company_name">

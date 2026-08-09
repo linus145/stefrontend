@@ -44,7 +44,7 @@ export function AgentLogsDateAccordion({ history, isHistoryLoading }: AgentLogsD
 
   if (history.length === 0) {
     return (
-      <Card className="bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800/40 rounded-sm overflow-hidden shadow-sm">
+      <Card className="bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800/40 rounded-[3px] overflow-hidden shadow-sm">
         <CardContent className="py-10 text-center">
           <p className="text-xs text-slate-400 font-semibold tracking-wide">No executions logged yet. Scheduled agent tasks will report runs here.</p>
         </CardContent>
@@ -64,7 +64,7 @@ export function AgentLogsDateAccordion({ history, isHistoryLoading }: AgentLogsD
         return (
           <div
             key={dateKey}
-            className="border border-slate-200 dark:border-slate-800 rounded-sm overflow-hidden bg-white dark:bg-[#121320] shadow-xs"
+            className="border border-slate-200 dark:border-slate-800 rounded-[3px] overflow-hidden bg-white dark:bg-[#121320] shadow-xs"
           >
             {/* Date header / toggle */}
             <button
@@ -81,17 +81,17 @@ export function AgentLogsDateAccordion({ history, isHistoryLoading }: AgentLogsD
               </div>
               <div className="flex items-center gap-1.5">
                 {successCount > 0 && (
-                  <Badge className="bg-emerald-500/10 text-emerald-600 border-none font-bold text-[9px] px-1.5 py-0.5 rounded-sm">
+                  <Badge className="bg-emerald-500/10 text-emerald-600 border-none font-bold text-[9px] px-1.5 py-0.5 rounded-[3px]">
                     {successCount} success
                   </Badge>
                 )}
                 {runningCount > 0 && (
-                  <Badge className="bg-blue-500/10 text-blue-600 border-none font-bold text-[9px] px-1.5 py-0.5 rounded-sm animate-pulse">
+                  <Badge className="bg-blue-500/10 text-blue-600 border-none font-bold text-[9px] px-1.5 py-0.5 rounded-[3px] animate-pulse">
                     {runningCount} running
                   </Badge>
                 )}
                 {failCount > 0 && (
-                  <Badge className="bg-red-500/10 text-red-600 border-none font-bold text-[9px] px-1.5 py-0.5 rounded-sm">
+                  <Badge className="bg-red-500/10 text-red-600 border-none font-bold text-[9px] px-1.5 py-0.5 rounded-[3px]">
                     {failCount} failed
                   </Badge>
                 )}
@@ -111,7 +111,7 @@ export function AgentLogsDateAccordion({ history, isHistoryLoading }: AgentLogsD
                     <div key={run.id} className="flex flex-col sm:flex-row sm:items-start gap-3 px-4 py-3 hover:bg-slate-50/40 dark:hover:bg-slate-800/10 transition-colors">
                       {/* Status + Time column */}
                       <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto sm:min-w-[140px]">
-                        <Badge className={`font-bold text-[9px] px-2 py-0.5 rounded-sm border shadow-none ${
+                        <Badge className={`font-bold text-[9px] px-2 py-0.5 rounded-[3px] border shadow-none ${
                           run.status === 'success' ? 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400' :
                           run.status === 'running' ? 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 animate-pulse' :
                           'bg-red-100 text-red-800 border-red-200 dark:bg-red-500/10 dark:text-red-400'

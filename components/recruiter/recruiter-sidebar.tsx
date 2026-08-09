@@ -38,7 +38,7 @@ export function RecruiterSidebar({
   isCollapsed, onToggle, activeTab, onTabChange,
   isMobileOpen, onMobileClose, companyName, companyLogo
 }: RecruiterSidebarProps) {
-  const { logout, user } = useAuth();
+  const { user } = useAuth();
   const { isDark, toggleTheme } = useDashboardTheme();
 
   const { data: creditsData } = useQuery({
@@ -201,29 +201,19 @@ export function RecruiterSidebar({
           )}
         </button>
 
-        {/* Switch to user dashboard */}
+        {/* Exit App */}
         <Link
-          href="/dashboard"
+          href="/recruiter/login?redirect=/recruiter"
           className={cn(
-            "flex items-center justify-center gap-2 w-full transition-all rounded-[4px] bg-muted/50 border border-border text-muted-foreground py-2 text-xs font-semibold hover:bg-muted hover:text-foreground active:scale-95",
+            "flex items-center justify-center gap-2 w-full transition-all rounded-[4px] bg-muted/50 border border-border text-rose-500 py-2 text-xs font-bold hover:bg-rose-500/10 active:scale-95",
             (isCollapsed && !isMobileOpen) ? "px-0" : "px-2"
           )}
         >
-          <ArrowLeftRight className="h-3.5 w-3.5" />
-          {(!isCollapsed || isMobileOpen) && <span className="animate-in fade-in duration-300">Switch to User</span>}
+          <LogOut className="h-3.5 w-3.5 text-rose-500" />
+          {(!isCollapsed || isMobileOpen) && <span className="animate-in fade-in duration-300">Exit App</span>}
         </Link>
 
-        {(!isCollapsed || isMobileOpen) && (
-          <div className="flex flex-col gap-1 pt-2 border-t border-border">
-            <button
-              onClick={() => logout()}
-              className="flex items-center gap-2.5 px-2 py-1.5 text-muted-foreground hover:text-destructive transition-all text-xs font-medium group cursor-pointer"
-            >
-              <LogOut className="h-3.5 w-3.5 opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
-              <span className="animate-in fade-in duration-300">Logout</span>
-            </button>
-          </div>
-        )}
+
       </div>
     </aside>
   );

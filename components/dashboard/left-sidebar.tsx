@@ -2,10 +2,10 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+
 import {
   Home, Network as NetworkIcon, MessageSquare, Briefcase, Newspaper, Bell, Settings,
-  ChevronLeft, Menu, X, ArrowLeftRight, LogOut, User, Coins, Sun, Moon, Sparkles, Building2,
+  ChevronLeft, Menu, X, LogOut, User, Coins, Sun, Moon, Sparkles, Building2,
   BookOpen
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
@@ -48,7 +48,7 @@ export function LeftSidebar({
 }: LeftSidebarProps) {
   const { logout, user, userSubscription } = useAuth();
   const { isDark, toggleTheme } = useDashboardTheme();
-  const router = useRouter();
+
 
   const isPremium = !!(userSubscription &&
     userSubscription.status === 'active' &&
@@ -231,25 +231,7 @@ export function LeftSidebar({
           )}
         </button>
 
-        {/* Switch to Recruiter */}
-        <button
-          onClick={() => {
-            if (!isPremium) {
-              toast.error("Upgrade to Premium", {
-                description: "You need an active premium subscription to access the recruiter platform."
-              });
-            } else {
-              router.push('/recruiter');
-            }
-          }}
-          className={cn(
-            "flex items-center justify-center gap-2 w-full transition-all rounded-[4px] bg-muted/50 border border-border text-muted-foreground py-2 text-xs font-semibold hover:bg-muted hover:text-foreground active:scale-95 cursor-pointer",
-            (isCollapsed && !isMobileOpen) ? "px-0" : "px-2"
-          )}
-        >
-          <ArrowLeftRight className="h-3.5 w-3.5" />
-          {(!isCollapsed || isMobileOpen) && <span className="animate-in fade-in duration-300">Switch to Recruiter</span>}
-        </button>
+
 
         {(!isCollapsed || isMobileOpen) && (
           <div className="flex flex-col gap-1 pt-2 border-t border-border">

@@ -53,7 +53,9 @@ export function CompanyLoginForm() {
         try {
             await jobsService.companyLogin({ email: trimmedEmail, password: trimmedPassword });
             toast.success('Company login successful!');
-            window.location.href = '/recruiter';
+            const searchParams = new URLSearchParams(window.location.search);
+            const redirect = searchParams.get('redirect') || '/recruiter';
+            window.location.href = redirect;
         } catch (error: any) {
             let errorMsg = 'Invalid email or password.';
             if (error.data) {
@@ -79,10 +81,7 @@ export function CompanyLoginForm() {
 
     return (
         <div className="w-full max-w-md mx-auto pb-12">
-            <div className="relative w-full rounded-sm bg-card shadow-sm hover:shadow-md transition-shadow border border-border overflow-hidden">
-
-                {/* Top gradient — teal accent for recruiter branding */}
-                <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-blue-500 via-cyan-500 to-blue-500 opacity-90" />
+            <div className="relative w-full rounded-sm bg-white dark:bg-[#121320] shadow-[0_20px_40px_rgba(0,0,0,0.08)] dark:shadow-[0_20px_40px_rgba(0,0,0,0.3)] border border-slate-200 dark:border-slate-800 overflow-hidden transition-all duration-500">
 
                 <div className="p-8">
                     <div className="flex items-center justify-center gap-3 mb-6">

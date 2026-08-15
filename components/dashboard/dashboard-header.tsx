@@ -360,8 +360,17 @@ export function DashboardHeader({
                   </div>
                </div>
 
-               {/* Right: Message Icon & Credits */}
+               {/* Right: Credits, Message Icon */}
                <div className="flex items-center gap-1.5 shrink-0">
+
+                  {/* Buy Credits Button — Mobile */}
+                  <button
+                     onClick={handleGoToCredits}
+                     className="flex items-center gap-1 px-2.5 py-1.5 rounded-sm bg-[#0a66c2] text-white hover:bg-[#084e96] active:scale-95 transition-all shrink-0 shadow-sm"
+                  >
+                     <Coins className="w-3.5 h-3.5" />
+                     <span className="text-[10px] font-bold">Buy Credits</span>
+                  </button>
 
                   {activeSection !== 'premium' ? (
                      <button
@@ -543,13 +552,14 @@ export function DashboardHeader({
                {/* Right Section: Actions / Profile */}
                <div className="flex items-center gap-2 sm:gap-3 shrink-0 h-full">
 
-
-                  {/* <button className="hidden lg:flex items-center gap-2 px-3 xl:px-4 py-2 rounded-xl bg-primary/5 border border-primary/20 text-foreground text-[10px] font-bold hover:bg-primary/10 transition-all shadow-sm group whitespace-nowrap">
-                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 group-hover:animate-pulse" />
-                     <span className="transition-all duration-300">
-                        {isRightCollapsed ? 'Connect Wallet' : 'Wallet'}
-                     </span>
-                  </button> */}
+                  {/* Buy Credits Button — Desktop */}
+                  <button
+                     onClick={handleGoToCredits}
+                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm bg-[#0a66c2] text-white hover:bg-[#084e96] hover:shadow-md transition-all group/credits whitespace-nowrap shadow-sm"
+                  >
+                     <Coins className="w-3.5 h-3.5 group-hover/credits:scale-110 transition-transform" />
+                     <span className="text-[11px] font-bold">Buy Credits</span>
+                  </button>
 
                   {/* LinkedIn-style "Me" Section on the right */}
                   <div

@@ -10,7 +10,7 @@ import { CreditBalanceCard } from './credit-balance-card';
 import { CreditTransactionLogs } from './credit-transaction-logs';
 import { CreditCostRates } from './credit-cost-rates';
 import { CreditUpgradePrompt } from './credit-upgrade-prompt';
-import { PurchaseCreditPage } from './purchase-credit-page';
+import { PurchaseCreditPage } from './creditpurchase/purchase-credit-page';
 
 export function CreditView() {
   const [credit, setCredit] = useState<UserCredit | null>(null);

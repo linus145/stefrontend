@@ -46,6 +46,11 @@ export const networkService = {
     api.get<PaginatedResponse<NetworkPerson>>('/interactions/network/invitations/')
       .then(res => res.results || []),
     
+  getPendingSent: () => 
+    api.get<PaginatedResponse<NetworkPerson>>('/interactions/network/pending-sent/')
+      .then(res => res.results || [])
+      .catch(() => []),
+    
   connect: (receiverId: string) => 
     api.post('/interactions/network/connect/', { receiver_id: receiverId }),
     

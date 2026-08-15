@@ -5,7 +5,7 @@ import {
   User, Lock, Bell, Eye, EyeOff, Shield, Camera,
   Mail, Phone, Save, Trash2, Smartphone,
   MapPin, Globe, CreditCard, LogOut, ChevronDown, CheckCircle2,
-  HelpCircle, Coins
+  HelpCircle, Coins, FileText
 } from 'lucide-react';
 import { HelpTab } from '../help/help-tab';
 import { useAuth } from '@/hooks/useAuth';
@@ -17,10 +17,11 @@ import { PrivacyTab } from '../privacy/privacy-tab';
 import { NotificationsTab } from '../notification/notifications-tab';
 import { SecurityTab } from '../security/security-tab';
 import { BillingTab } from '../billing/billing-tab';
+import { TransactionLogsTab } from '../billing/transaction-logs-tab';
 import { ProfileEditForm } from '../../profile/profile-edit-form';
 import { CreditView } from '@/components/creditsystem/credit-view';
 
-type SettingsTab = 'Account' | 'Privacy' | 'Notifications' | 'Security' | 'Billing' | 'Help' | 'Credits';
+type SettingsTab = 'Account' | 'Privacy' | 'Notifications' | 'Security' | 'Billing' | 'Transactions' | 'Credits' | 'Help';
 
 interface SettingsViewProps {
   isCollapsed?: boolean;
@@ -37,7 +38,7 @@ export function SettingsView({ isCollapsed, onSectionChange }: SettingsViewProps
       const checkTab = () => {
         const params = new URLSearchParams(window.location.search);
         const tab = params.get('tab');
-        if (tab && ['Account', 'Privacy', 'Notifications', 'Security', 'Billing', 'Credits'].includes(tab)) {
+        if (tab && ['Account', 'Privacy', 'Notifications', 'Security', 'Billing', 'Transactions', 'Credits'].includes(tab)) {
           setActiveTab(tab as SettingsTab);
           // If on mobile, expand the tab detail view directly
           setShowMobileDetail(true);
@@ -80,6 +81,12 @@ export function SettingsView({ isCollapsed, onSectionChange }: SettingsViewProps
       icon: <CreditCard className="w-4 h-4" />,
       label: 'Billing & Plans',
       description: 'View pricing, features and manage your subscriptions'
+    },
+    {
+      id: 'Transactions',
+      icon: <FileText className="w-4 h-4" />,
+      label: 'Transaction Logs',
+      description: 'View combined payment history for plans and credit purchases'
     },
     {
       id: 'Credits',
@@ -181,6 +188,9 @@ export function SettingsView({ isCollapsed, onSectionChange }: SettingsViewProps
             <TabsContent value="Billing">
               <BillingTab />
             </TabsContent>
+            <TabsContent value="Transactions">
+              <TransactionLogsTab />
+            </TabsContent>
             <TabsContent value="Credits">
               <CreditView />
             </TabsContent>
@@ -222,7 +232,7 @@ export function SettingsView({ isCollapsed, onSectionChange }: SettingsViewProps
       <div className="hidden md:flex flex-1 p-4 sm:p-6 lg:p-10 overflow-y-auto">
         <div className={cn(
           "mx-auto space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500 w-full transition-all duration-300",
-          (activeTab === 'Billing' || activeTab === 'Credits') ? "max-w-6xl" : activeTab === 'Account' ? "max-w-4xl" : "max-w-3xl"
+          (activeTab === 'Billing' || activeTab === 'Transactions' || activeTab === 'Credits') ? "max-w-6xl" : activeTab === 'Account' ? "max-w-4xl" : "max-w-3xl"
         )}>
           <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as SettingsTab)} className="w-full">
             <TabsContent value="Account">
@@ -239,6 +249,9 @@ export function SettingsView({ isCollapsed, onSectionChange }: SettingsViewProps
             </TabsContent>
             <TabsContent value="Billing">
               <BillingTab />
+            </TabsContent>
+            <TabsContent value="Transactions">
+              <TransactionLogsTab />
             </TabsContent>
             <TabsContent value="Credits">
               <CreditView />

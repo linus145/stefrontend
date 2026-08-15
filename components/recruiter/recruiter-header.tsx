@@ -45,7 +45,8 @@ export function RecruiterHeader({
   const { data: creditsData } = useQuery({
     queryKey: ['userCredits'],
     queryFn: () => creditsService.getBalance(),
-    refetchInterval: 30000,
+    staleTime: 0,
+    refetchInterval: 5000,
   });
   const creditBalance = creditsData?.data?.balance ?? 0;
 

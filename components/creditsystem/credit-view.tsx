@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, PlusCircle } from 'lucide-react';
 import { creditsService } from '@/services/credits.service';
 import { UserCredit, CreditTransaction } from '@/types/credits.types';
 import { toast } from 'sonner';
@@ -10,12 +10,14 @@ import { CreditBalanceCard } from './credit-balance-card';
 import { CreditTransactionLogs } from './credit-transaction-logs';
 import { CreditCostRates } from './credit-cost-rates';
 import { CreditUpgradePrompt } from './credit-upgrade-prompt';
+import { PurchaseCreditPage } from './purchase-credit-page';
 
 export function CreditView() {
   const [credit, setCredit] = useState<UserCredit | null>(null);
   const [history, setHistory] = useState<CreditTransaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [viewMode, setViewMode] = useState<'overview' | 'purchase'>('overview');
 
   const fetchData = async (showToast = false) => {
     try {
@@ -121,6 +123,15 @@ export function CreditView() {
     );
   }
 
+  if (viewMode === 'purchase') {
+    return (
+      <PurchaseCreditPage
+        onBack={() => setViewMode('overview')}
+        onSuccess={() => fetchData(false)}
+      />
+    );
+  }
+
   return (
     <div className="space-y-8">
       {/* Header Info */}
@@ -129,14 +140,23 @@ export function CreditView() {
           <h2 className="text-xl font-bold text-foreground">AI Credits Control</h2>
           <p className="text-xs text-muted-foreground mt-1">Track and manage credit usage for your autonomous tasks and AI operations</p>
         </div>
-        <button
-          onClick={handleRefresh}
-          disabled={refreshing}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm border border-border bg-card hover:bg-slate-50 dark:hover:bg-slate-800 text-muted-foreground hover:text-foreground text-xs font-semibold transition-all cursor-pointer disabled:opacity-50"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
-          Refresh Balance
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setViewMode('purchase')}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm bg-[#0a66c2] hover:bg-[#004182] text-white text-xs font-bold transition-all cursor-pointer border-none shadow-xs"
+          >
+            <PlusCircle className="w-3.5 h-3.5" />
+            Buy Credits
+          </button>
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm border border-border bg-card hover:bg-slate-50 dark:hover:bg-slate-800 text-muted-foreground hover:text-foreground text-xs font-semibold transition-all cursor-pointer disabled:opacity-50"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
+            Refresh Balance
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -146,6 +166,7 @@ export function CreditView() {
             credit={credit}
             getPlanBadgeClass={getPlanBadgeClass}
             getPercentage={getPercentage}
+            onOpenPurchaseModal={() => setViewMode('purchase')}
           />
           <CreditTransactionLogs
             groupedHistory={groupedHistory}
@@ -156,7 +177,7 @@ export function CreditView() {
         {/* Sidebar: Cost Rates + Upgrade */}
         <div className="space-y-6">
           <CreditCostRates />
-          <CreditUpgradePrompt />
+          <CreditUpgradePrompt onOpenPurchaseModal={() => setViewMode('purchase')} />
         </div>
       </div>
     </div>

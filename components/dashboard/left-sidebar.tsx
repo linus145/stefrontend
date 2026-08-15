@@ -58,8 +58,8 @@ export function LeftSidebar({
   const { data: creditsData } = useQuery({
     queryKey: ['userCredits'],
     queryFn: () => creditsService.getBalance(),
-    staleTime: 60000,
-    refetchInterval: 60000,
+    staleTime: 0,
+    refetchInterval: 5000,
   });
   const creditBalance = creditsData?.data?.balance ?? 0;
 

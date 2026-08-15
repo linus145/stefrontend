@@ -11,4 +11,5 @@ export interface CreditTransaction {
   activity_type: 'allocation' | 'burn' | 'purchase' | 'refund';
   description: string;
   created_at: string;
+  metadata?: Record<string, any>;
 }

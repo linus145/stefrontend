@@ -159,6 +159,28 @@ export function LeftSidebar({
             );
           })}
 
+          {/* Buy Credits Button */}
+          <button
+            onClick={() => {
+              onSectionChange('settings');
+              const url = new URL(window.location.href);
+              url.searchParams.set('tab', 'Credits');
+              window.history.replaceState(null, '', url.pathname + url.search);
+              window.dispatchEvent(new Event('settings-tab-change'));
+              if (onMobileClose) onMobileClose();
+            }}
+            className={cn(
+              "w-full flex items-center gap-2.5 px-3 py-1.5 text-[13px] font-medium transition-all group relative rounded-[4px] cursor-pointer",
+              "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+            )}
+          >
+            <div className="relative shrink-0">
+              <Coins className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+              <div className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#0a66c2] border border-background" />
+            </div>
+            {(!isCollapsed || isMobileOpen) && <span className="truncate">Buy Credits</span>}
+          </button>
+
           {/* Workspace Tools Divider */}
           <div className="h-[1px] bg-border/60 my-3 mx-2" />
 

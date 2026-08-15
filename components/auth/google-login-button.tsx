@@ -4,13 +4,20 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
+import { cn } from '@/lib/utils';
+
 let googleInitialized = false;
 
-export function GoogleLoginButton() {
+interface GoogleLoginButtonProps {
+  disabled?: boolean;
+}
+
+export function GoogleLoginButton({ disabled = false }: GoogleLoginButtonProps) {
   const { googleLogin } = useAuth();
   const [isInitializing, setIsInitializing] = useState(false);
 
   const handleGoogleClick = () => {
+    if (disabled) return;
     if (typeof window !== 'undefined' && (window as any).google) {
       try {
         const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
@@ -45,8 +52,12 @@ export function GoogleLoginButton() {
     <div className="w-full transition-all duration-300">
       <button
         type="button"
+        disabled={disabled}
         onClick={handleGoogleClick}
-        className="flex items-center justify-center gap-2.5 border border-slate-200/80 dark:border-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-800/40 h-[44px] rounded-sm text-xs font-bold text-slate-700 dark:text-slate-300 bg-white dark:bg-[#121320] transition-all duration-300 w-full cursor-pointer"
+        className={cn(
+          "flex items-center justify-center gap-2.5 border border-slate-200/80 dark:border-slate-800/80 h-[44px] rounded-sm text-xs font-bold text-slate-700 dark:text-slate-300 bg-white dark:bg-[#121320] transition-all duration-300 w-full",
+          disabled ? "opacity-50 cursor-not-allowed" : "hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer"
+        )}
       >
         {/* High-fidelity Google G Vector */}
         <svg className="w-4 h-4" viewBox="0 0 24 24">

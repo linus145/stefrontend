@@ -3,11 +3,15 @@
 import React from 'react';
 import {
   Building, ArrowLeft, Share2, Bookmark, BookmarkCheck,
-  Zap, CheckCircle2, Sparkles, Plus, MessageSquare,
+  Zap, CheckCircle2, Sparkles, Plus, MessageSquare, Check, Loader2,
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { formatExpLevel, formatJobType } from './search-constants';
 import { calculateAiMatch } from './search-utils';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { followService } from '@/services/follow.service';
+import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 interface SearchMobileDetailProps {
   selectedJob: any;
@@ -28,6 +32,44 @@ export function SearchMobileDetail(props: SearchMobileDetailProps) {
     handleEasyApply, onOpenApplyModal,
     toggleSaveJob, shareJob, handleMessageRecruiter, onClose,
   } = props;
+
+  const queryClient = useQueryClient();
+  const companyId = selectedJob?.company?.id || selectedJob?.company_id;
+
+  const { data: followData } = useQuery({
+    queryKey: ['companyFollow', companyId],
+    queryFn: () => (companyId ? followService.getCompanyFollowCounts(companyId) : null),
+    enabled: !!companyId,
+    staleTime: 1000 * 30,
+  });
+
+  const isFollowing = followData?.is_following ?? false;
+  const followersCount = followData?.followers_count ?? 0;
+
+  const followMutation = useMutation({
+    mutationFn: (id: string) => followService.toggleCompanyFollow(id),
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: ['companyFollow', companyId] });
+      queryClient.invalidateQueries({ queryKey: ['myFollowedCompanies'] });
+      toast.success(
+        res.status === 'following'
+          ? `You are now following ${selectedJob?.company?.company_name || selectedJob?.company_name || 'this company'}.`
+          : `Unfollowed ${selectedJob?.company?.company_name || selectedJob?.company_name || 'this company'}.`
+      );
+    },
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.error || 'Failed to update follow status');
+    },
+  });
+
+  const handleToggleFollow = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!companyId) {
+      toast.info('Company profile not linked to this post.');
+      return;
+    }
+    followMutation.mutate(companyId);
+  };
 
   if (!selectedJob) return null;
 
@@ -159,10 +201,35 @@ export function SearchMobileDetail(props: SearchMobileDetailProps) {
             </div>
             <div className="flex-1 min-w-0">
               <h4 className="text-xs font-bold text-foreground truncate">{selectedJob.company?.company_name || selectedJob.company_name}</h4>
-              <p className="text-[11px] text-muted-foreground">{selectedJob.company?.industry || 'Technology & Services'}</p>
+              <p className="text-[11px] text-muted-foreground">
+                {followersCount > 0 
+                  ? `${followersCount.toLocaleString()} ${followersCount === 1 ? 'follower' : 'followers'}`
+                  : (selectedJob.company?.industry || 'Technology & Services')}
+              </p>
             </div>
-            <button className="flex items-center gap-1 px-3 py-1.5 border border-[#0a66c2] text-[#0a66c2] rounded-sm text-xs font-bold hover:bg-[#0a66c2]/5 transition-all shrink-0 cursor-pointer">
-              <Plus className="w-3.5 h-3.5" /> Follow
+            <button 
+              onClick={handleToggleFollow}
+              disabled={followMutation.isPending}
+              className={cn(
+                "flex items-center gap-1 px-3 py-1.5 rounded-sm text-xs font-bold transition-all shrink-0 cursor-pointer disabled:opacity-50",
+                isFollowing 
+                  ? "bg-muted text-foreground border border-border hover:bg-muted/80 hover:border-red-400 hover:text-red-500" 
+                  : "border border-[#0a66c2] text-[#0a66c2] hover:bg-[#0a66c2]/5"
+              )}
+            >
+              {followMutation.isPending ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : isFollowing ? (
+                <>
+                  <Check className="w-3.5 h-3.5 text-emerald-500" />
+                  <span>Following</span>
+                </>
+              ) : (
+                <>
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Follow</span>
+                </>
+              )}
             </button>
           </div>
           <p className="text-xs text-muted-foreground leading-relaxed font-medium">

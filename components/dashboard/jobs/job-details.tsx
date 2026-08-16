@@ -9,6 +9,8 @@ import {
   Bookmark, BookmarkCheck
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { followService } from '@/services/follow.service';
 
 interface JobDetailsProps {
   job: JobPost;
@@ -34,6 +36,43 @@ export function JobDetails({
   onToggleSave
 }: JobDetailsProps) {
   const hasApplied = applications.some(app => app.job === job.id);
+  const queryClient = useQueryClient();
+  const companyId = job.company?.id || job.company_id;
+
+  const { data: followData } = useQuery({
+    queryKey: ['companyFollow', companyId],
+    queryFn: () => (companyId ? followService.getCompanyFollowCounts(companyId) : null),
+    enabled: !!companyId,
+    staleTime: 1000 * 30,
+  });
+
+  const isFollowing = followData?.is_following ?? false;
+  const followersCount = followData?.followers_count ?? 0;
+
+  const followMutation = useMutation({
+    mutationFn: (id: string) => followService.toggleCompanyFollow(id),
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: ['companyFollow', companyId] });
+      queryClient.invalidateQueries({ queryKey: ['myFollowedCompanies'] });
+      toast.success(
+        res.status === 'following'
+          ? `You are now following ${job.company?.company_name || job.company_name || 'this company'}.`
+          : `Unfollowed ${job.company?.company_name || job.company_name || 'this company'}.`
+      );
+    },
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.error || 'Failed to update follow status');
+    },
+  });
+
+  const handleToggleFollow = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!companyId) {
+      toast.info('Company profile not linked to this post.');
+      return;
+    }
+    followMutation.mutate(companyId);
+  };
 
   return (
     <div 
@@ -234,11 +273,35 @@ export function JobDetails({
             </div>
             <div className="flex-1 min-w-0">
               <h4 className="text-xs font-bold text-foreground hover:underline cursor-pointer truncate">{job.company?.company_name || job.company_name}</h4>
-              <p className="text-[10px] text-muted-foreground">530,783 followers</p>
+              <p className="text-[10px] text-muted-foreground">
+                {followersCount > 0 
+                  ? `${followersCount.toLocaleString()} ${followersCount === 1 ? 'follower' : 'followers'}`
+                  : 'Be the first to follow'}
+              </p>
             </div>
-            <button className="flex items-center gap-1 px-3 py-1 border border-[#0a66c2] text-[#0a66c2] rounded-sm text-[10px] font-bold hover:bg-[#0a66c2]/5 transition-all shrink-0 cursor-pointer">
-              <Plus className="w-3 h-3" />
-              Follow
+            <button 
+              onClick={handleToggleFollow}
+              disabled={followMutation.isPending}
+              className={cn(
+                "flex items-center gap-1 px-3 py-1 rounded-sm text-[10px] font-bold transition-all shrink-0 cursor-pointer disabled:opacity-50",
+                isFollowing 
+                  ? "bg-muted text-foreground border border-border hover:bg-muted/80 hover:border-red-400 hover:text-red-500" 
+                  : "border border-[#0a66c2] text-[#0a66c2] hover:bg-[#0a66c2]/5"
+              )}
+            >
+              {followMutation.isPending ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : isFollowing ? (
+                <>
+                  <Check className="w-3 h-3 text-emerald-500" />
+                  <span>Following</span>
+                </>
+              ) : (
+                <>
+                  <Plus className="w-3 h-3" />
+                  <span>Follow</span>
+                </>
+              )}
             </button>
           </div>
           <p className="text-[11px] text-muted-foreground leading-relaxed font-medium">

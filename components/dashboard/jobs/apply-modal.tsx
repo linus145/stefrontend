@@ -21,6 +21,7 @@ import {
 import { userService } from '@/services/user.service';
 import { User } from '@/types/user.types';
 import { FounderProfile } from '@/types/founder.types';
+import { followService } from '@/services/follow.service';
 
 interface ApplyModalProps {
   job: JobPost;
@@ -48,6 +49,7 @@ export function ApplyModal({
   setExpectedSalary
 }: ApplyModalProps) {
   const [step, setStep] = React.useState<1 | 2>(1);
+  const [followCompany, setFollowCompany] = React.useState<boolean>(true);
   const [userProfile, setUserProfile] = React.useState<User | null>(null);
   const [isLoadingProfile, setIsLoadingProfile] = React.useState(false);
 
@@ -319,6 +321,19 @@ export function ApplyModal({
                   </div>
                 </div>
               )}
+
+              {/* Follow Company Checkbox */}
+              <label className="flex items-center gap-2 pt-1 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={followCompany}
+                  onChange={(e) => setFollowCompany(e.target.checked)}
+                  className="w-3.5 h-3.5 rounded-sm border-border text-[#0a66c2] focus:ring-1 focus:ring-[#0a66c2]"
+                />
+                <span className="text-[11px] text-muted-foreground font-medium">
+                  Follow <span className="font-bold text-foreground">{job.company?.company_name || job.company_name}</span> to stay up to date on latest jobs and announcements
+                </span>
+              </label>
             </div>
 
             <div className="flex items-center gap-2 pt-1">
@@ -332,7 +347,17 @@ export function ApplyModal({
                 Back
               </button>
               <button
-                onClick={onSubmit}
+                onClick={(e) => {
+                  const companyId = job.company?.id || job.company_id;
+                  if (followCompany && companyId) {
+                    followService.getCompanyFollowCounts(companyId).then((data) => {
+                      if (!data.is_following) {
+                        followService.toggleCompanyFollow(companyId).catch(() => {});
+                      }
+                    }).catch(() => {});
+                  }
+                  onSubmit(e);
+                }}
                 disabled={isPending}
                 className="flex-1 px-3 py-2 bg-primary text-primary-foreground rounded-sm text-[10px] font-bold uppercase tracking-wider shadow-sm hover:opacity-90 disabled:opacity-50 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
               >

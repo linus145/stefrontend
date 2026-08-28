@@ -61,8 +61,7 @@ export function Header() {
           <Link href="/careers" className="hover:text-slate-900 dark:hover:text-slate-50 transition-colors">Careers</Link>
           <Link href="/book-demo" className="hover:text-slate-900 dark:hover:text-slate-50 transition-colors">Contact</Link>
           <Link href="/seedemo" className="hover:text-slate-900 dark:hover:text-slate-50 transition-colors">See Demo</Link>
-
-
+      
         </nav>
 
         {/* Auth CTA & Theme Toggle */}
@@ -80,7 +79,7 @@ export function Header() {
             Sign In
           </Link>
           <Link href="/register" className="hidden sm:block">
-            <Button className="rounded-full bg-[#0a66c2] text-white hover:bg-[#084e96] shadow-sm transition-all font-semibold">
+            <Button className="rounded-[2px] bg-[#0a66c2] text-white hover:bg-[#084e96] shadow-sm transition-all font-semibold">
               Get Started
             </Button>
           </Link>
@@ -118,8 +117,11 @@ export function Header() {
             <Link href="/seedemo" onClick={() => setIsMobileMenuOpen(false)} className="py-3 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-50 transition-colors border-b border-slate-100 dark:border-slate-850">
               See Demo
             </Link>
-            <Link href="/book-demo" onClick={() => setIsMobileMenuOpen(false)} className="py-3 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-50 transition-colors">
+            <Link href="/book-demo" onClick={() => setIsMobileMenuOpen(false)} className="py-3 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-50 transition-colors border-b border-slate-100 dark:border-slate-850">
               Contact
+            </Link>
+            <Link href="/dashboard/company/create" onClick={() => setIsMobileMenuOpen(false)} className="py-3 text-sm font-semibold text-[#0a66c2] dark:text-[#70b5f9] hover:text-[#084e96] transition-colors">
+              Create a Page
             </Link>
           </nav>
           <div className="flex flex-col gap-3 px-6 pb-6 pt-2">
@@ -129,7 +131,7 @@ export function Header() {
               </Button>
             </Link>
             <Link href="/register" onClick={() => setIsMobileMenuOpen(false)}>
-              <Button className="w-full h-11 rounded-lg bg-[#0a66c2] text-white hover:bg-[#084e96] shadow-sm transition-all font-semibold">
+              <Button className="w-full h-11 rounded-[2px] bg-[#0a66c2] text-white hover:bg-[#084e96] shadow-sm transition-all font-semibold">
                 Get Started
               </Button>
             </Link>

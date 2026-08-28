@@ -265,8 +265,8 @@ export function MobilePostView({ onClose, onPostSuccess }: MobilePostViewProps) 
 
           {/* Media Preview */}
           {mediaUrl && (
-            <div className="relative rounded-md overflow-hidden border border-border group shadow-md animate-in zoom-in duration-300">
-              <img src={getOptimizedImage(mediaUrl)} alt="Preview" className="w-full h-auto max-h-[400px] object-cover" />
+            <div className="relative rounded-md overflow-hidden border border-border group shadow-md animate-in zoom-in duration-300 bg-black/5 dark:bg-black/20 flex items-center justify-center">
+              <img src={getOptimizedImage(mediaUrl)} alt="Preview" className="w-full h-auto max-h-[450px] object-contain" />
               <button 
                 onClick={() => setMediaUrl('')}
                 className="absolute top-3 right-3 p-2 bg-black/60 backdrop-blur-md rounded-full text-white hover:bg-black transition-all active:scale-90"

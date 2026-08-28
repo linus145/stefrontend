@@ -7,6 +7,10 @@ export interface Post {
   author_headline: string;
   author_image_url?: string;
   author_linkedin_url?: string;
+  company_slug?: string;
+  is_company_post?: boolean;
+  company_name?: string;
+  is_promoted?: boolean;
   content: string;
   media_url?: string;
   visibility: 'PUBLIC' | 'PRIVATE';

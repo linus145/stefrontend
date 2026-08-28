@@ -89,34 +89,56 @@ export function PayrollPayslipsClient() {
   };
 
   const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`Are you sure you want to delete the payslip for ${name}? This action cannot be undone.`)) return;
-    try {
-      setIsDeleting(id);
-      await hrPayrollService.deletePayslip(id);
-      toast.success(`Payslip for ${name} deleted successfully`);
-      queryClient.invalidateQueries({ queryKey: ['payslips'] });
-    } catch (err: any) {
-      toast.error(err?.message || "Failed to delete payslip");
-    } finally {
-      setIsDeleting(null);
-    }
+    toast(`Delete payslip for ${name}?`, {
+      description: 'This action cannot be undone.',
+      action: {
+        label: 'Delete',
+        onClick: async () => {
+          try {
+            setIsDeleting(id);
+            await hrPayrollService.deletePayslip(id);
+            toast.success(`Payslip for ${name} deleted successfully`);
+            queryClient.invalidateQueries({ queryKey: ['payslips'] });
+          } catch (err: any) {
+            toast.error(err?.message || "Failed to delete payslip");
+          } finally {
+            setIsDeleting(null);
+          }
+        },
+      },
+      cancel: {
+        label: 'Cancel',
+        onClick: () => {},
+      },
+    });
   };
 
   const handleDeleteAll = async (payslips: any[]) => {
     const count = payslips.length;
-    if (!confirm(`Are you sure you want to delete all ${count} payslip${count !== 1 ? 's' : ''} in this period? This action cannot be undone.`)) return;
-    try {
-      setIsDeleting('bulk');
-      for (const item of payslips) {
-        await hrPayrollService.deletePayslip(item.id);
-      }
-      toast.success(`${count} payslip${count !== 1 ? 's' : ''} deleted successfully`);
-      queryClient.invalidateQueries({ queryKey: ['payslips'] });
-    } catch (err: any) {
-      toast.error(err?.message || "Failed to delete payslips");
-    } finally {
-      setIsDeleting(null);
-    }
+    toast(`Delete all ${count} payslip${count !== 1 ? 's' : ''} in this period?`, {
+      description: 'This action cannot be undone.',
+      action: {
+        label: 'Delete All',
+        onClick: async () => {
+          try {
+            setIsDeleting('bulk');
+            for (const item of payslips) {
+              await hrPayrollService.deletePayslip(item.id);
+            }
+            toast.success(`${count} payslip${count !== 1 ? 's' : ''} deleted successfully`);
+            queryClient.invalidateQueries({ queryKey: ['payslips'] });
+          } catch (err: any) {
+            toast.error(err?.message || "Failed to delete payslips");
+          } finally {
+            setIsDeleting(null);
+          }
+        },
+      },
+      cancel: {
+        label: 'Cancel',
+        onClick: () => {},
+      },
+    });
   };
 
   // Build query params for the API

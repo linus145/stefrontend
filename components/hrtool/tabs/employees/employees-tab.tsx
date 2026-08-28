@@ -256,13 +256,21 @@ export function EmployeesTab({ defaultRole = 'EMPLOYEE' }: EmployeesTabProps) {
           </h2>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            onClick={() => setIsAddModalOpen(true)}
-            data-agent="add-employee-button"
-            className="bg-[#0a66c2] text-white hover:bg-[#004182] shadow-sm rounded-sm text-[11px] font-semibold px-4 h-10 transition-all whitespace-nowrap"
-          >
-            <UserPlus className="mr-2 h-3.5 w-3.5" /> {defaultRole === 'MANAGER' ? 'Add Manager' : 'Add Employee'}
-          </Button>
+          <div className="relative group">
+            <Button
+              onClick={() => setIsAddModalOpen(true)}
+              data-agent="add-employee-button"
+              aria-label={defaultRole === 'MANAGER' ? 'Add Manager' : 'Add Employee'}
+              className="bg-[#0a66c2] text-white hover:bg-[#004182] shadow-sm rounded-sm h-10 w-10 p-0 transition-all flex items-center justify-center cursor-pointer"
+            >
+              <UserPlus className="h-4 w-4" />
+            </Button>
+            <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 hidden group-hover:flex items-center justify-center z-30 pointer-events-none">
+              <div className="bg-popover text-popover-foreground border border-border text-[11px] font-semibold px-2 py-1 rounded shadow-md whitespace-nowrap animate-in fade-in zoom-in-95 duration-150">
+                {defaultRole === 'MANAGER' ? 'Add Manager' : 'Add Employee'}
+              </div>
+            </div>
+          </div>
           <Button
             type="button"
             onClick={handleResetFilters}

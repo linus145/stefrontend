@@ -286,8 +286,8 @@ export function PostModal({ isOpen, onClose, onPostSuccess }: PostModalProps) {
 
           {/* Media Preview */}
           {mediaUrl && (
-            <div className="relative rounded-md overflow-hidden border border-border group shadow-lg animate-in zoom-in-95 duration-300">
-              <img src={getOptimizedImage(mediaUrl)} alt="Preview" className="w-full object-cover max-h-[400px]" />
+            <div className="relative rounded-md overflow-hidden border border-border group shadow-lg animate-in zoom-in-95 duration-300 bg-black/5 dark:bg-black/20 flex items-center justify-center">
+              <img src={getOptimizedImage(mediaUrl)} alt="Preview" className="w-full h-auto object-contain max-h-[450px]" />
               <button
                 onClick={() => { setMediaUrl(''); setMediaType(null); }}
                 className="absolute top-3 right-3 bg-background/80 backdrop-blur-md text-foreground p-2 rounded-full hover:bg-destructive hover:text-white transition-all shadow-md active:scale-90"

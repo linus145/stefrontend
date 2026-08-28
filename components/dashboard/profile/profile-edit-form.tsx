@@ -30,6 +30,21 @@ export function ProfileEditForm({ initialUser, isSettingsTab = false }: ProfileE
   const router = useRouter();
   const { fetchProfile } = useAuth();
   const [isUpdating, setIsUpdating] = useState(false);
+  const initialWebsites: string[] = (() => {
+    const profile = initialUser.profile as any;
+    if (Array.isArray(profile?.websites) && profile.websites.length > 0) {
+      return profile.websites.filter(Boolean);
+    }
+    const rawUrl = profile?.portfolio_url || profile?.website || '';
+    if (rawUrl) {
+      if (rawUrl.includes(',')) {
+        return rawUrl.split(',').map((s: string) => s.trim()).filter(Boolean);
+      }
+      return [rawUrl.trim()];
+    }
+    return [''];
+  })();
+
   const [formData, setFormData] = useState({
     first_name: initialUser.first_name || '',
     last_name: initialUser.last_name || '',
@@ -38,6 +53,9 @@ export function ProfileEditForm({ initialUser, isSettingsTab = false }: ProfileE
     headline: initialUser.profile?.headline || '',
     bio: initialUser.profile?.bio || '',
     location: initialUser.profile?.location || '',
+    websites: initialWebsites,
+    portfolio_url: initialWebsites[0] || '',
+    linkedin_url: (initialUser.profile as any)?.linkedin_url || '',
     profile_image_url: initialUser.profile?.profile_image_url || '',
     banner_image_url: initialUser.profile?.banner_image_url || '',
     resume_url: (initialUser.profile as any)?.resume_url || '',
@@ -149,6 +167,36 @@ export function ProfileEditForm({ initialUser, isSettingsTab = false }: ProfileE
     }
   };
 
+  const handleWebsiteChange = (index: number, value: string) => {
+    setFormData(prev => {
+      const newWebsites = [...prev.websites];
+      newWebsites[index] = value;
+      return {
+        ...prev,
+        websites: newWebsites,
+        portfolio_url: newWebsites.find(w => w.trim() !== '') || ''
+      };
+    });
+  };
+
+  const handleAddWebsite = () => {
+    setFormData(prev => ({
+      ...prev,
+      websites: [...prev.websites, '']
+    }));
+  };
+
+  const handleRemoveWebsite = (index: number) => {
+    setFormData(prev => {
+      const newWebsites = prev.websites.filter((_, i) => i !== index);
+      const finalWebsites = newWebsites.length === 0 ? [''] : newWebsites;
+      return {
+        ...prev,
+        websites: finalWebsites,
+        portfolio_url: finalWebsites.find(w => w.trim() !== '') || ''
+      };
+    });
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -193,8 +241,10 @@ export function ProfileEditForm({ initialUser, isSettingsTab = false }: ProfileE
     e.preventDefault();
     setIsUpdating(true);
     try {
+      const cleanedWebsites = formData.websites.map(w => w.trim()).filter(Boolean);
       const payload = {
         ...formData,
+        portfolio_url: cleanedWebsites.join(', '),
         phone_number: formData.phone_number ? `+91${formData.phone_number}` : null
       };
       await userService.updateProfile(payload);
@@ -315,10 +365,71 @@ export function ProfileEditForm({ initialUser, isSettingsTab = false }: ProfileE
                 </div>
               </div>
             </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide ml-1">Location</label>
+              <Input
+                name="location"
+                value={formData.location}
+                onChange={handleChange}
+                placeholder="e.g. Hyderabad, India or Remote"
+                className="h-11 bg-muted/30 border-border focus:ring-2 focus:ring-primary/20 focus:border-primary/40 rounded-sm px-4 text-xs transition-all"
+              />
+            </div>
           </div>
         </div>
 
-        {/* Section 2: Narrative */}
+        {/* Section 2: Websites & Portfolio */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-8 border-b border-border/80">
+          <div>
+            <div className="flex items-center gap-2 px-1 mb-2">
+              <Globe className={cn("w-4 h-4 opacity-70 shrink-0", isSettingsTab ? "text-[#0a66c2]" : "text-primary")} />
+              <h2 className="text-xs font-bold uppercase tracking-widest text-foreground opacity-80">Websites & Links</h2>
+            </div>
+            <p className="text-xs text-muted-foreground px-1 max-w-xs mb-4 leading-relaxed">
+              Add your personal portfolio, company site, blogs, or other public web presence.
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleAddWebsite}
+              className="h-8 gap-2 text-[10px] font-bold uppercase tracking-wider px-3"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              Add Another Website
+            </Button>
+          </div>
+          <div className="md:col-span-2 space-y-4">
+            {formData.websites.map((website: string, idx: number) => (
+              <div key={idx} className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide ml-1">
+                    {idx === 0 ? 'Primary Website / Portfolio' : `Website #${idx + 1}`}
+                  </label>
+                  {formData.websites.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveWebsite(idx)}
+                      className="flex items-center gap-1 text-red-500 hover:text-red-600 hover:bg-red-500/10 font-bold text-[10px] uppercase tracking-wider transition-all py-0.5 px-1.5 rounded-sm"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                      Remove
+                    </button>
+                  )}
+                </div>
+                <Input
+                  value={website}
+                  onChange={(e) => handleWebsiteChange(idx, e.target.value)}
+                  placeholder="https://yourwebsite.com"
+                  className="h-11 bg-muted/30 border-border focus:ring-2 focus:ring-primary/20 focus:border-primary/40 rounded-sm px-4 text-xs transition-all"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Section 3: Narrative */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-8 border-b border-border/80">
           <div>
             <div className="flex items-center gap-2 px-1 mb-2">
@@ -785,6 +896,9 @@ export function ProfileEditForm({ initialUser, isSettingsTab = false }: ProfileE
                   headline: initialUser.profile?.headline || '',
                   bio: initialUser.profile?.bio || '',
                   location: initialUser.profile?.location || '',
+                  websites: initialWebsites,
+                  portfolio_url: initialWebsites[0] || '',
+                  linkedin_url: (initialUser.profile as any)?.linkedin_url || '',
                   profile_image_url: initialUser.profile?.profile_image_url || '',
                   banner_image_url: initialUser.profile?.banner_image_url || '',
                   resume_url: (initialUser.profile as any)?.resume_url || '',

@@ -1,4 +1,4 @@
- 'use client';
+'use client';
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -6,11 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Edit2, X, Trash2 } from 'lucide-react';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { hrPayrollService, hrEmployeeService } from '@/services/hr';
 import { toast } from 'sonner';
 
 export function SalaryStructures() {
+  const router = useRouter();
   const queryClient = useQueryClient();
   const [selectedStructure, setSelectedStructure] = useState<any>(null);
   const [isStructureModalOpen, setIsStructureModalOpen] = useState(false);
@@ -22,6 +24,7 @@ export function SalaryStructures() {
     tax_percentage: '',
     pf_percentage: '',
     esi_percentage: '',
+    deduct_absent_leaves: true,
     status: 'ACTIVE'
   });
 
@@ -70,7 +73,7 @@ export function SalaryStructures() {
 
   const onStructureSubmit = (data: any) => structureMutation.mutate(data);
   const structurePending = structureMutation.isPending;
-  
+
   const { data: settingsRes } = useQuery({
     queryKey: ['payroll-settings'],
     queryFn: () => hrPayrollService.getSettingsConfigs(),
@@ -100,7 +103,7 @@ export function SalaryStructures() {
           <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-200 font-medium">Employee compensation profiles</h3>
           <p className="text-xs text-slate-500 font-medium">Configure base salary ratios, tax percentages, overtime hourly rates, and statures.</p>
         </div>
-        <Button 
+        <Button
           onClick={() => {
             setSelectedStructure(null);
             setStructureForm({
@@ -108,9 +111,10 @@ export function SalaryStructures() {
               basic_salary: '',
               hra: '',
               overtime_rate: '0',
-              tax_percentage: '10',
-              pf_percentage: '12',
-              esi_percentage: '1.75',
+              tax_percentage: String(settingsRes?.data?.tax_percentage ?? settingsRes?.data?.statutory_tax_percentage ?? '10'),
+              pf_percentage: String(settingsRes?.data?.statutory_pf_percentage ?? '12'),
+              esi_percentage: String(settingsRes?.data?.statutory_esi_percentage ?? '1.75'),
+              deduct_absent_leaves: true,
               status: 'ACTIVE'
             });
             setIsStructureModalOpen(true);
@@ -132,10 +136,13 @@ export function SalaryStructures() {
                 <th className="py-2.5 px-4 text-[10px] font-bold tracking-wide text-slate-400">Designation</th>
                 <th className="py-2.5 px-4 text-[10px] font-bold tracking-wide text-slate-400">Basic monthly</th>
                 <th className="py-2.5 px-4 text-[10px] font-bold tracking-wide text-slate-400">HRA</th>
+                <th className="py-2.5 px-4 text-[10px] font-bold tracking-wide text-slate-400">Gross monthly</th>
                 <th className="py-2.5 px-4 text-[10px] font-bold tracking-wide text-slate-400">OT hourly rate</th>
                 <th className="py-2.5 px-4 text-[10px] font-bold tracking-wide text-slate-400">Tax deduct %</th>
                 <th className="py-2.5 px-4 text-[10px] font-bold tracking-wide text-slate-400">Statutory PF %</th>
                 <th className="py-2.5 px-4 text-[10px] font-bold tracking-wide text-slate-400">ESI %</th>
+                <th className="py-2.5 px-4 text-[10px] font-bold tracking-wide text-slate-400 text-emerald-600 dark:text-emerald-400">Total income after tax</th>
+                <th className="py-2.5 px-4 text-[10px] font-bold tracking-wide text-slate-400">Absence LOP</th>
                 <th className="py-2.5 px-4 text-[10px] font-bold tracking-wide text-slate-400">Status</th>
                 <th className="py-2.5 px-4 text-[10px] font-bold tracking-wide text-slate-400 text-right">Actions</th>
               </tr>
@@ -144,23 +151,35 @@ export function SalaryStructures() {
               {isLoadingStructures ? (
                 [1, 2].map(i => (
                   <tr key={i} className="border-b border-slate-100 dark:border-slate-800">
-                    <td colSpan={11} className="py-4 text-center"><div className="h-4 bg-slate-100 dark:bg-slate-800/40 animate-pulse rounded-sm w-3/4 mx-auto" /></td>
+                    <td colSpan={13} className="py-4 text-center"><div className="h-4 bg-slate-100 dark:bg-slate-800/40 animate-pulse rounded-sm w-3/4 mx-auto" /></td>
                   </tr>
                 ))
               ) : structures?.data?.results?.length === 0 ? (
                 <tr>
-                  <td colSpan={11} className="py-8 text-center text-xs text-slate-400 font-semibold tracking-wide">No salary structures configured yet.</td>
+                  <td colSpan={13} className="py-8 text-center text-xs text-slate-400 font-semibold tracking-wide">No salary structures configured yet.</td>
                 </tr>
               ) : (
-                structures?.data?.results?.map((str: any) => (
+                structures?.data?.results?.map((str: any) => {
+                  const basic = parseFloat(str.basic_salary || 0);
+                  const hra = parseFloat(str.hra || 0);
+                  const gross = basic + hra;
+                  const taxPct = parseFloat(str.tax_percentage || 0);
+                  const pfPct = parseFloat(str.pf_percentage || 0);
+                  const esiPct = parseFloat(str.esi_percentage || 0);
+                  const taxDeduction = gross * (taxPct / 100);
+                  const pfDeduction = basic * (pfPct / 100);
+                  const esiDeduction = basic * (esiPct / 100);
+                  const totalDeductions = taxDeduction + pfDeduction + esiDeduction;
+                  const netIncomeAfterTax = Math.max(0, gross - totalDeductions);
+
+                  return (
                   <tr key={str.id} className="border-b border-slate-100 dark:border-slate-800/60 hover:bg-slate-50/50 dark:hover:bg-slate-800/10 transition-colors">
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-full font-bold text-xs flex items-center justify-center shrink-0 ${
-                          str.is_employee_deleted 
-                            ? 'bg-rose-100 dark:bg-rose-500/10 text-rose-600 dark:text-rose-450 border border-rose-200/20' 
+                        <div className={`w-8 h-8 rounded-full font-bold text-xs flex items-center justify-center shrink-0 ${str.is_employee_deleted
+                            ? 'bg-rose-100 dark:bg-rose-500/10 text-rose-600 dark:text-rose-450 border border-rose-200/20'
                             : 'bg-[#0a66c2]/10 text-[#0a66c2]'
-                        }`}>
+                          }`}>
                           {str.is_employee_deleted ? '?' : (str.employee_name?.charAt(0) || 'E')}
                         </div>
                         <div>
@@ -187,12 +206,28 @@ export function SalaryStructures() {
                     <td className="py-3 px-4 text-xs font-semibold text-slate-650 dark:text-slate-400">
                       {str.employee_designation || 'Team Member'}
                     </td>
-                    <td className="py-3 px-4 text-xs text-slate-800 dark:text-slate-300 font-bold">{currencySymbol}{parseFloat(str.basic_salary || 0).toLocaleString()}</td>
-                    <td className="py-3 px-4 text-xs text-slate-850 dark:text-slate-400 font-semibold">{currencySymbol}{parseFloat(str.hra || 0).toLocaleString()}</td>
+                    <td className="py-3 px-4 text-xs text-slate-800 dark:text-slate-300 font-bold">{currencySymbol}{basic.toLocaleString()}</td>
+                    <td className="py-3 px-4 text-xs text-slate-850 dark:text-slate-400 font-semibold">{currencySymbol}{hra.toLocaleString()}</td>
+                    <td className="py-3 px-4 text-xs text-slate-900 dark:text-white font-bold">{currencySymbol}{gross.toLocaleString()}</td>
                     <td className="py-3 px-4 text-xs text-slate-850 dark:text-slate-400 font-semibold">{currencySymbol}{parseFloat(str.overtime_rate || 0).toLocaleString()} / hr</td>
-                    <td className="py-3 px-4 text-xs font-bold text-[#0a66c2]">{str.tax_percentage}%</td>
-                    <td className="py-3 px-4 text-xs text-slate-500 font-semibold">{str.pf_percentage}%</td>
-                    <td className="py-3 px-4 text-xs text-slate-500 font-semibold">{str.esi_percentage}%</td>
+                    <td className="py-3 px-4 text-xs font-bold text-[#0a66c2]">{taxPct}%</td>
+                    <td className="py-3 px-4 text-xs text-slate-500 font-semibold">{pfPct}%</td>
+                    <td className="py-3 px-4 text-xs text-slate-500 font-semibold">{esiPct}%</td>
+                    <td className="py-3 px-4 text-xs font-extrabold text-emerald-600 dark:text-emerald-400">
+                      {currencySymbol}{netIncomeAfterTax.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </td>
+                    <td className="py-3 px-4">
+                      <button
+                        type="button"
+                        onClick={() => router.push('/Hrtools/payroll/settings')}
+                        title="Governed globally in Payroll Settings. Click to configure."
+                        className="inline-flex items-center group cursor-pointer border-none bg-transparent p-0 outline-none"
+                      >
+                        <Badge className={`font-bold text-[9px] px-2 py-0.5 rounded-sm border shadow-none transition-all group-hover:scale-105 ${settingsRes?.data?.enable_leave_deductions !== false ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400' : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400'}`}>
+                          {settingsRes?.data?.enable_leave_deductions !== false ? 'Global: Deduct' : 'Global: Exempt'}
+                        </Badge>
+                      </button>
+                    </td>
                     <td className="py-3 px-4">
                       <Badge className={`font-bold text-[9px] px-2 py-0.5 rounded-sm border shadow-none ${str.status === 'ACTIVE' ? 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400' : 'bg-slate-100 text-slate-800'}`}>
                         {toSentenceCase(str.status)}
@@ -200,7 +235,7 @@ export function SalaryStructures() {
                     </td>
                     <td className="py-3 px-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <Button 
+                        <Button
                           onClick={() => {
                             setSelectedStructure(str);
                             setStructureForm({
@@ -211,6 +246,7 @@ export function SalaryStructures() {
                               tax_percentage: str.tax_percentage,
                               pf_percentage: str.pf_percentage,
                               esi_percentage: str.esi_percentage,
+                              deduct_absent_leaves: str.deduct_absent_leaves ?? true,
                               status: str.status
                             });
                             setIsStructureModalOpen(true);
@@ -222,7 +258,7 @@ export function SalaryStructures() {
                         >
                           <Edit2 className="h-3.5 w-3.5" />
                         </Button>
-                        <Button 
+                        <Button
                           onClick={() => {
                             toast('Permanently delete this salary structure?', {
                               description: 'This action cannot be undone.',
@@ -232,7 +268,7 @@ export function SalaryStructures() {
                               },
                               cancel: {
                                 label: 'Cancel',
-                                onClick: () => {},
+                                onClick: () => { },
                               },
                             });
                           }}
@@ -246,7 +282,8 @@ export function SalaryStructures() {
                       </div>
                     </td>
                   </tr>
-                ))
+                );
+              })
               )}
             </tbody>
           </table>
@@ -257,25 +294,25 @@ export function SalaryStructures() {
       {isStructureModalOpen && (
         <div className="fixed inset-0 bg-slate-900/15 dark:bg-black/40 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200 pointer-events-none">
           <div className="bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800/80 rounded-sm w-full max-w-lg shadow-2xl p-6 relative overflow-hidden animate-in zoom-in-95 duration-300 pointer-events-auto">
-            <button 
+            <button
               onClick={() => setIsStructureModalOpen(false)}
               className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer"
             >
               <X className="h-5 w-5" />
             </button>
-            
+
             <h3 className="text-sm font-extrabold text-slate-900 dark:text-white mb-2">
               {selectedStructure ? 'Update employee compensation profile' : 'Add employee compensation profile'}
             </h3>
             <p className="text-xs text-slate-500 mb-5">Set exact base salary multipliers, tax parameters, and statutory contributions.</p>
-            
+
             <div className="space-y-4">
-              
+
               <div className="space-y-1.5">
                 <label className="text-[11px] font-bold text-slate-500 tracking-wide">Employee</label>
                 {selectedStructure ? (
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     value={`${selectedStructure.employee_name || ''} ${selectedStructure.employee_last_name || ''} (${selectedStructure.employee_code || ''})`}
                     disabled
                     className="w-full bg-[#f8fafc]/80 dark:bg-[#151624]/80 border border-slate-200 dark:border-slate-800 rounded-sm px-3 py-2 text-xs text-slate-900 dark:text-white outline-none disabled:opacity-60 font-semibold"
@@ -283,7 +320,7 @@ export function SalaryStructures() {
                 ) : (
                   <select
                     value={structureForm.employee_id}
-                    onChange={(e) => setStructureForm({...structureForm, employee_id: e.target.value})}
+                    onChange={(e) => setStructureForm({ ...structureForm, employee_id: e.target.value })}
                     data-agent="payroll-salary-employee-id-input"
                     className="w-full h-9 bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-850 rounded-sm px-3 py-2 text-xs text-slate-900 dark:text-white outline-none cursor-pointer font-semibold"
                   >
@@ -300,10 +337,10 @@ export function SalaryStructures() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-[11px] font-bold text-slate-500 tracking-wide">Basic monthly salary ({currencySymbol})</label>
-                  <input 
-                    type="number" 
+                  <input
+                    type="number"
                     value={structureForm.basic_salary}
-                    onChange={(e) => setStructureForm({...structureForm, basic_salary: e.target.value})}
+                    onChange={(e) => setStructureForm({ ...structureForm, basic_salary: e.target.value })}
                     data-agent="payroll-salary-basic-salary-input"
                     placeholder="e.g. 5000"
                     className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-sm px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
@@ -312,10 +349,10 @@ export function SalaryStructures() {
 
                 <div className="space-y-1.5">
                   <label className="text-[11px] font-bold text-slate-500 tracking-wide">HRA allowance ({currencySymbol})</label>
-                  <input 
-                    type="number" 
+                  <input
+                    type="number"
                     value={structureForm.hra}
-                    onChange={(e) => setStructureForm({...structureForm, hra: e.target.value})}
+                    onChange={(e) => setStructureForm({ ...structureForm, hra: e.target.value })}
                     data-agent="payroll-salary-hra-input"
                     placeholder="e.g. 1500"
                     className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-850 rounded-sm px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
@@ -326,10 +363,10 @@ export function SalaryStructures() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-[11px] font-bold text-slate-500 tracking-wide">Overtime hourly rate ({currencySymbol})</label>
-                  <input 
-                    type="number" 
+                  <input
+                    type="number"
                     value={structureForm.overtime_rate}
-                    onChange={(e) => setStructureForm({...structureForm, overtime_rate: e.target.value})}
+                    onChange={(e) => setStructureForm({ ...structureForm, overtime_rate: e.target.value })}
                     data-agent="payroll-salary-ot-rate-input"
                     className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-sm px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
                   />
@@ -337,10 +374,10 @@ export function SalaryStructures() {
 
                 <div className="space-y-1.5">
                   <label className="text-[11px] font-bold text-slate-500 tracking-wide">Default tax %</label>
-                  <input 
-                    type="number" 
+                  <input
+                    type="number"
                     value={structureForm.tax_percentage}
-                    onChange={(e) => setStructureForm({...structureForm, tax_percentage: e.target.value})}
+                    onChange={(e) => setStructureForm({ ...structureForm, tax_percentage: e.target.value })}
                     data-agent="payroll-salary-tax-percentage-input"
                     className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-sm px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
                   />
@@ -350,10 +387,10 @@ export function SalaryStructures() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-[11px] font-bold text-slate-500 tracking-wide">Statutory PF %</label>
-                  <input 
-                    type="number" 
+                  <input
+                    type="number"
                     value={structureForm.pf_percentage}
-                    onChange={(e) => setStructureForm({...structureForm, pf_percentage: e.target.value})}
+                    onChange={(e) => setStructureForm({ ...structureForm, pf_percentage: e.target.value })}
                     data-agent="payroll-salary-pf-percentage-input"
                     className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-sm px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
                   />
@@ -361,24 +398,76 @@ export function SalaryStructures() {
 
                 <div className="space-y-1.5">
                   <label className="text-[11px] font-bold text-slate-500 tracking-wide">Statutory ESI %</label>
-                  <input 
-                    type="number" 
+                  <input
+                    type="number"
                     value={structureForm.esi_percentage}
-                    onChange={(e) => setStructureForm({...structureForm, esi_percentage: e.target.value})}
+                    onChange={(e) => setStructureForm({ ...structureForm, esi_percentage: e.target.value })}
                     data-agent="payroll-salary-esi-percentage-input"
                     className="w-full bg-[#f8fafc] dark:bg-[#151624] border border-slate-200 dark:border-slate-800 rounded-sm px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
                   />
                 </div>
               </div>
 
+              {/* Absence LOP Notice */}
+              <div className="p-3 bg-slate-50 dark:bg-[#151624]/60 border border-slate-200 dark:border-slate-800/80 rounded-sm flex items-center justify-between gap-3">
+                <div>
+                  <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block">Absence & Leave Penalty (LOP)</span>
+                  <span className="text-[10px] text-slate-400 font-medium">
+                    Governed globally by Payroll Settings ({settingsRes?.data?.enable_leave_deductions !== false ? 'Automatic Deductions Active' : 'Exempt / Manual Mode'}).
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsStructureModalOpen(false);
+                    router.push('/Hrtools/payroll/settings');
+                  }}
+                  className="text-[10px] font-bold text-[#0a66c2] hover:underline cursor-pointer bg-transparent border-none shrink-0"
+                >
+                  Configure in Settings →
+                </button>
+              </div>
+
+              {/* Live Calculation Preview */}
+              {(() => {
+                const modalBasic = parseFloat(structureForm.basic_salary || '0') || 0;
+                const modalHra = parseFloat(structureForm.hra || '0') || 0;
+                const modalGross = modalBasic + modalHra;
+                const modalTaxPct = parseFloat(structureForm.tax_percentage || '0') || 0;
+                const modalPfPct = parseFloat(structureForm.pf_percentage || '0') || 0;
+                const modalEsiPct = parseFloat(structureForm.esi_percentage || '0') || 0;
+                const modalTaxAmt = modalGross * (modalTaxPct / 100);
+                const modalPfAmt = modalBasic * (modalPfPct / 100);
+                const modalEsiAmt = modalBasic * (modalEsiPct / 100);
+                const modalTotalDed = modalTaxAmt + modalPfAmt + modalEsiAmt;
+                const modalNetAfterTax = Math.max(0, modalGross - modalTotalDed);
+
+                return (
+                  <div className="p-3 bg-slate-50 dark:bg-[#151624]/60 border border-slate-200 dark:border-slate-800/80 rounded-sm space-y-1.5 text-xs">
+                    <div className="flex justify-between items-center text-slate-600 dark:text-slate-400">
+                      <span className="font-semibold">Monthly Gross:</span>
+                      <span className="font-bold text-slate-900 dark:text-white">{currencySymbol}{modalGross.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-rose-600 dark:text-rose-400 text-[11px]">
+                      <span>Deductions (Tax {modalTaxPct}% + PF {modalPfPct}% + ESI {modalEsiPct}%):</span>
+                      <span className="font-bold">-{currencySymbol}{modalTotalDed.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    </div>
+                    <div className="pt-1.5 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center">
+                      <span className="font-black text-slate-800 dark:text-slate-200 uppercase tracking-wide text-[11px]">Total Income After Tax (Net):</span>
+                      <span className="font-black text-emerald-600 dark:text-emerald-400 text-xs">{currencySymbol}{modalNetAfterTax.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    </div>
+                  </div>
+                );
+              })()}
+
               <div className="pt-2 flex items-center justify-end gap-3">
-                <Button 
+                <Button
                   onClick={() => setIsStructureModalOpen(false)}
                   className="border border-slate-200 bg-transparent text-slate-600 rounded-sm text-xs font-bold py-2 px-4 cursor-pointer"
                 >
                   Cancel
                 </Button>
-                <Button 
+                <Button
                   onClick={() => {
                     const parsedData = {
                       basic_salary: parseFloat(structureForm.basic_salary),
@@ -387,6 +476,7 @@ export function SalaryStructures() {
                       tax_percentage: parseFloat(structureForm.tax_percentage),
                       pf_percentage: parseFloat(structureForm.pf_percentage),
                       esi_percentage: parseFloat(structureForm.esi_percentage),
+                      deduct_absent_leaves: Boolean(structureForm.deduct_absent_leaves),
                       status: structureForm.status,
                       employee: structureForm.employee_id
                     };

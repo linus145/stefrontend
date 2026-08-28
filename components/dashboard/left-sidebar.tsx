@@ -16,7 +16,7 @@ import { creditsService } from '@/services/credits.service';
 import { notificationService } from '@/services/notification.service';
 import { toast } from 'sonner';
 
-export type DashboardSection = 'dashboard' | 'Profile' | 'messages' | 'network' | 'settings' | 'jobs' | 'news' | 'hire' | 'create-post' | 'notifications' | 'premium' | 'credits' | 'userblogs';
+export type DashboardSection = 'dashboard' | 'Profile' | 'messages' | 'network' | 'settings' | 'jobs' | 'news' | 'hire' | 'create-post' | 'notifications' | 'premium' | 'credits' | 'userblogs' | 'company' | 'company Page';
 
 interface LeftSidebarProps {
   isCollapsed: boolean;
@@ -27,7 +27,7 @@ interface LeftSidebarProps {
   onMobileClose?: () => void;
 }
 
-const NAVIGATION_ITEMS: { id: DashboardSection; label: string; icon: any }[] = [
+const NAVIGATION_ITEMS: { id: DashboardSection; label: string; icon: any; href?: string }[] = [
   { id: 'dashboard', label: 'Home', icon: Home },
   { id: 'jobs', label: 'Jobs', icon: Briefcase },
   { id: 'news', label: 'News', icon: Newspaper },
@@ -120,20 +120,8 @@ export function LeftSidebar({
         <nav className="px-3 space-y-1">
           {NAVIGATION_ITEMS.map((item) => {
             const isActive = activeSection === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => {
-                  onSectionChange(item.id);
-                  if (onMobileClose) onMobileClose();
-                }}
-                className={cn(
-                  "w-full flex items-center gap-2.5 px-3 py-1.5 text-[13px] font-medium transition-all group relative rounded-[4px] cursor-pointer",
-                  isActive
-                    ? "bg-secondary text-foreground font-semibold"
-                    : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                )}
-              >
+            const content = (
+              <>
                 <item.icon className={cn(
                   "w-4 h-4 shrink-0 transition-colors",
                   isActive ? "text-foreground" : "text-muted-foreground group-hover:text-foreground"
@@ -155,6 +143,41 @@ export function LeftSidebar({
                 {isCollapsed && !isMobileOpen && isActive && (
                   <div className="absolute left-0 w-1 h-5 bg-foreground/80 rounded-[2px]" />
                 )}
+              </>
+            );
+
+            const className = cn(
+              "w-full flex items-center gap-2.5 px-3 py-1.5 text-[13px] font-medium transition-all group relative rounded-md cursor-pointer",
+              isActive
+                ? "bg-secondary text-foreground font-semibold"
+                : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+            );
+
+            if (item.href) {
+              return (
+                <Link
+                  key={item.id}
+                  href={item.href}
+                  onClick={() => {
+                    if (onMobileClose) onMobileClose();
+                  }}
+                  className={className}
+                >
+                  {content}
+                </Link>
+              );
+            }
+
+            return (
+              <button
+                key={item.id}
+                onClick={() => {
+                  onSectionChange(item.id);
+                  if (onMobileClose) onMobileClose();
+                }}
+                className={className}
+              >
+                {content}
               </button>
             );
           })}
@@ -170,7 +193,7 @@ export function LeftSidebar({
               if (onMobileClose) onMobileClose();
             }}
             className={cn(
-              "w-full flex items-center gap-2.5 px-3 py-1.5 text-[13px] font-medium transition-all group relative rounded-[4px] cursor-pointer",
+              "w-full flex items-center gap-2.5 px-3 py-1.5 text-[13px] font-medium transition-all group relative rounded-md cursor-pointer",
               "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
             )}
           >
@@ -180,6 +203,25 @@ export function LeftSidebar({
             </div>
             {(!isCollapsed || isMobileOpen) && <span className="truncate">Buy Credits</span>}
           </button>
+
+          {/* Company Page Link */}
+          <Link
+            href="/dashboard/company/create"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => {
+              if (onMobileClose) onMobileClose();
+            }}
+            className={cn(
+              "w-full flex items-center gap-2.5 px-3 py-1.5 text-[13px] font-medium transition-all group relative rounded-md cursor-pointer",
+              activeSection === 'company Page' || activeSection === 'company'
+                ? "bg-secondary text-foreground font-semibold"
+                : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+            )}
+          >
+            <Building2 className="w-4 h-4 shrink-0 text-muted-foreground group-hover:text-foreground transition-colors" />
+            {(!isCollapsed || isMobileOpen) && <span className="truncate">Company Page</span>}
+          </Link>
 
           {/* Workspace Tools Divider */}
           <div className="h-[1px] bg-border/60 my-3 mx-2" />
@@ -196,6 +238,7 @@ export function LeftSidebar({
             href="/recruiter"
             target="_blank"
             rel="noopener noreferrer"
+            title="Hire with AI"
             onClick={(e) => {
               if (!isPremium) {
                 e.preventDefault();
@@ -204,10 +247,21 @@ export function LeftSidebar({
                 });
               }
             }}
-            className="w-full flex items-center gap-2.5 px-3 py-1.5 text-[13px] font-medium transition-all group rounded-[4px] text-muted-foreground hover:bg-muted/50 hover:text-foreground cursor-pointer"
+            className="w-full flex items-center gap-2.5 px-3 py-1.5 text-[13px] font-medium transition-all group rounded-md text-muted-foreground hover:bg-muted/50 hover:text-foreground cursor-pointer"
           >
             <Sparkles className="w-4 h-4 shrink-0 text-muted-foreground group-hover:text-[#0a66c2] transition-colors" />
             {(!isCollapsed || isMobileOpen) && <span className="truncate">Hire with AI</span>}
+          </a>
+
+          <a
+            href="/Hrtools"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="HR Tool"
+            className="w-full flex items-center gap-2.5 px-3 py-1.5 text-[13px] font-medium transition-all group rounded-md text-muted-foreground hover:bg-muted/50 hover:text-foreground cursor-pointer"
+          >
+            <Building2 className="w-4 h-4 shrink-0 text-muted-foreground group-hover:text-[#0a66c2] transition-colors" />
+            {(!isCollapsed || isMobileOpen) && <span className="truncate">HR Tool</span>}
           </a>
 
 

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { postService } from '@/services/post.service';
+import Link from 'next/link';
 import {
   Loader2,
   Globe,
@@ -13,7 +14,10 @@ import {
   EyeOff,
   UserX,
   Flag,
-  Lock
+  Lock,
+  CheckCircle2,
+  Building2,
+  Sparkles
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -131,32 +135,72 @@ export function PostCard({ post, onLike, onNavigateToProfile }: PostCardProps) {
       <div className="p-3 sm:p-4 pb-2">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2">
-            <div
-              onClick={() => onNavigateToProfile(post.author_id)}
-              className="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-muted overflow-hidden border border-border/40 shrink-0 relative hover:ring-2 hover:ring-primary/20 transition-all block cursor-pointer group/avatar"
-            >
-              {post.author_image_url ? (
-                <img
-                  src={isOwner ? `${getOptimizedImage(post.author_image_url)}&v=${user?.updated_at ? new Date(user.updated_at).getTime() : Date.now()}` : getOptimizedImage(post.author_image_url)}
-                  alt={post.author_first_name}
-                  className="w-full h-full object-cover transition-transform group-hover/avatar:scale-110"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-primary/5 text-primary text-sm font-bold uppercase shadow-inner">
-                  {post.author_first_name?.charAt(0) || 'U'}
-                </div>
-              )}
-            </div>
+            {/* Avatar */}
+            {post.is_company_post && post.company_slug ? (
+              <Link
+                href={`/dashboard/company/${post.company_slug}`}
+                className="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-muted overflow-hidden border border-border/40 shrink-0 relative hover:ring-2 hover:ring-[#0a66c2]/30 transition-all block cursor-pointer group/avatar"
+              >
+                {post.author_image_url ? (
+                  <img
+                    src={getOptimizedImage(post.author_image_url)}
+                    alt={post.author_first_name}
+                    className="w-full h-full object-cover transition-transform group-hover/avatar:scale-110"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-[#0a66c2]/10 text-[#0a66c2] text-sm font-bold uppercase shadow-inner">
+                    <Building2 className="w-5 h-5" />
+                  </div>
+                )}
+              </Link>
+            ) : (
+              <div
+                onClick={() => onNavigateToProfile(post.author_id)}
+                className="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-muted overflow-hidden border border-border/40 shrink-0 relative hover:ring-2 hover:ring-primary/20 transition-all block cursor-pointer group/avatar"
+              >
+                {post.author_image_url ? (
+                  <img
+                    src={isOwner ? `${getOptimizedImage(post.author_image_url)}&v=${user?.updated_at ? new Date(user.updated_at).getTime() : Date.now()}` : getOptimizedImage(post.author_image_url)}
+                    alt={post.author_first_name}
+                    className="w-full h-full object-cover transition-transform group-hover/avatar:scale-110"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-primary/5 text-primary text-sm font-bold uppercase shadow-inner">
+                    {post.author_first_name?.charAt(0) || 'U'}
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="flex flex-col">
-              <div className="flex items-center gap-1.5">
-                <button
-                  onClick={() => onNavigateToProfile(post.author_id)}
-                  className="text-foreground font-bold text-[14px] hover:text-primary hover:underline cursor-pointer transition-colors leading-tight tracking-tight"
-                >
-                  {post.author_first_name}
-                </button>
-                <span className="text-[10px] text-muted-foreground/60 font-bold tracking-widest">• 1st</span>
-                {post.author_linkedin_url && (
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {post.is_company_post && post.company_slug ? (
+                  <Link
+                    href={`/dashboard/company/${post.company_slug}`}
+                    className="text-foreground font-bold text-[14px] hover:text-[#0a66c2] hover:underline cursor-pointer transition-colors leading-tight tracking-tight"
+                  >
+                    {post.author_first_name}
+                  </Link>
+                ) : (
+                  <button
+                    onClick={() => onNavigateToProfile(post.author_id)}
+                    className="text-foreground font-bold text-[14px] hover:text-primary hover:underline cursor-pointer transition-colors leading-tight tracking-tight"
+                  >
+                    {post.author_first_name}
+                  </button>
+                )}
+
+                {post.is_promoted && (
+                  <span className="text-[10px] font-semibold text-[#0a66c2] bg-[#0a66c2]/10 backdrop-blur-md border border-[#0a66c2]/30 px-1.5 py-0.5 rounded-[2px] leading-none tracking-wide shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]">
+                    Promoted
+                  </span>
+                )}
+
+                {!post.is_company_post && (
+                  <span className="text-[10px] text-muted-foreground/60 font-bold tracking-widest">• 1st</span>
+                )}
+
+                {post.author_linkedin_url && !post.is_company_post && (
                   <a href={post.author_linkedin_url} target="_blank" rel="noopener noreferrer" className="ml-0.5">
                     <div className="w-3.5 h-3.5 bg-[#0A66C2] rounded-[2px] flex items-center justify-center hover:brightness-110 transition-all">
                       <span className="text-[8px] text-white font-bold leading-none">in</span>
@@ -164,9 +208,16 @@ export function PostCard({ post, onLike, onNavigateToProfile }: PostCardProps) {
                   </a>
                 )}
               </div>
-              <p className="text-[11px] text-muted-foreground font-semibold leading-tight mt-0.5 max-w-[200px] sm:max-w-[280px] truncate opacity-80">
-                {post.author_headline}
-              </p>
+
+              {post.is_company_post ? (
+                <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground font-medium leading-tight mt-0.5">
+                  <span className="truncate max-w-[240px]">{post.author_headline}</span>
+                </div>
+              ) : (
+                <p className="text-[11px] text-muted-foreground font-semibold leading-tight mt-0.5 max-w-[200px] sm:max-w-[280px] truncate opacity-80">
+                  {post.author_headline}
+                </p>
+              )}
               <div className="flex items-center gap-1 text-[10px] text-muted-foreground font-medium mt-0.5 opacity-70">
                 <span>{timeAgo}</span>
                 <span>•</span>
@@ -252,11 +303,11 @@ export function PostCard({ post, onLike, onNavigateToProfile }: PostCardProps) {
       </div>
 
       {post.media_url && (
-        <div className="mt-2 bg-muted/20 border-y border-border/40 overflow-hidden cursor-pointer">
+        <div className="mt-2 bg-black/5 dark:bg-black/20 border-y border-border/40 overflow-hidden cursor-pointer flex items-center justify-center">
           <img
             src={getOptimizedImage(post.media_url)}
             alt="Post content"
-            className="w-full h-auto max-h-[500px] object-cover transition-all duration-700 hover:brightness-95"
+            className="w-full h-auto max-h-[550px] object-contain transition-all duration-700 hover:brightness-95"
           />
         </div>
       )}

@@ -8,6 +8,7 @@ import { LocalLoader } from '@/components/ui/local-loader';
 import { Landmark, Cpu, Save, RefreshCw, Workflow } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 export function PayrollSettingsClient() {
   const queryClient = useQueryClient();
@@ -26,10 +27,11 @@ export function PayrollSettingsClient() {
     mutationFn: (data: any) => hrPayrollService.updateSettingsConfigs(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['payroll-settings'] });
-      alert('Payroll settings updated successfully!');
+      queryClient.invalidateQueries({ queryKey: ['payroll-structures'] });
+      toast.success('Payroll settings updated and globally applied!');
     },
     onError: (error: any) => {
-      alert(error?.message || 'Failed to update settings');
+      toast.error(error?.response?.data?.error || error?.message || 'Failed to update settings');
     }
   });
 
@@ -37,6 +39,8 @@ export function PayrollSettingsClient() {
     currency: 'INR',
     statutory_pf_percentage: 12.00,
     statutory_esi_percentage: 1.75,
+    statutory_tax_percentage: 10.00,
+    enable_leave_deductions: true,
     automation_enabled: true,
     finance_approval_required: false,
     finance_manager: '',
@@ -49,8 +53,10 @@ export function PayrollSettingsClient() {
     if (settingsRes?.data) {
       setFormState({
         currency: settingsRes.data.currency || 'INR',
-        statutory_pf_percentage: settingsRes.data.statutory_pf_percentage || 12.00,
-        statutory_esi_percentage: settingsRes.data.statutory_esi_percentage || 1.75,
+        statutory_pf_percentage: Number(settingsRes.data.statutory_pf_percentage ?? settingsRes.data.pf_percentage ?? 12.00),
+        statutory_esi_percentage: Number(settingsRes.data.statutory_esi_percentage ?? settingsRes.data.esi_percentage ?? 1.75),
+        statutory_tax_percentage: Number(settingsRes.data.tax_percentage ?? settingsRes.data.statutory_tax_percentage ?? 10.00),
+        enable_leave_deductions: settingsRes.data.enable_leave_deductions ?? true,
         automation_enabled: settingsRes.data.automation_enabled ?? true,
         finance_approval_required: settingsRes.data.finance_approval_required ?? false,
         finance_manager: settingsRes.data.finance_manager || '',
@@ -108,9 +114,9 @@ export function PayrollSettingsClient() {
                 </select>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-3">
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-bold text-slate-500 uppercase">Statutory PF (%)</label>
+                  <label className="text-[10px] font-bold text-slate-500 uppercase">Statutory PF (%)</label>
                   <input
                     type="number"
                     step="0.01"
@@ -120,12 +126,22 @@ export function PayrollSettingsClient() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-bold text-slate-500 uppercase">Statutory ESI (%)</label>
+                  <label className="text-[10px] font-bold text-slate-500 uppercase">Statutory ESI (%)</label>
                   <input
                     type="number"
                     step="0.01"
                     value={formState.statutory_esi_percentage}
                     onChange={(e) => setFormState({ ...formState, statutory_esi_percentage: parseFloat(e.target.value) || 0 })}
+                    className="w-full h-9 px-3 text-xs bg-slate-50 dark:bg-[#1c1d30] border border-slate-200 dark:border-slate-800 rounded-sm font-bold focus:outline-none focus:border-[#0a66c2]"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase">Tax Deduct (%)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={formState.statutory_tax_percentage}
+                    onChange={(e) => setFormState({ ...formState, statutory_tax_percentage: parseFloat(e.target.value) || 0 })}
                     className="w-full h-9 px-3 text-xs bg-slate-50 dark:bg-[#1c1d30] border border-slate-200 dark:border-slate-800 rounded-sm font-bold focus:outline-none focus:border-[#0a66c2]"
                   />
                 </div>
@@ -149,8 +165,8 @@ export function PayrollSettingsClient() {
                     type="button"
                     onClick={() => setFormState({ ...formState, automation_enabled: true })}
                     className={`flex-1 h-9 rounded-sm font-extrabold text-xs transition-all border ${formState.automation_enabled
-                        ? 'bg-[#0a66c2] text-white border-[#0a66c2]'
-                        : 'bg-white dark:bg-[#1c1d30] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800'
+                      ? 'bg-[#0a66c2] text-white border-[#0a66c2]'
+                      : 'bg-white dark:bg-[#1c1d30] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800'
                       }`}
                   >
                     Enabled
@@ -159,8 +175,8 @@ export function PayrollSettingsClient() {
                     type="button"
                     onClick={() => setFormState({ ...formState, automation_enabled: false })}
                     className={`flex-1 h-9 rounded-sm font-extrabold text-xs transition-all border ${!formState.automation_enabled
-                        ? 'bg-[#0a66c2] text-white border-[#0a66c2]'
-                        : 'bg-white dark:bg-[#1c1d30] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800'
+                      ? 'bg-[#0a66c2] text-white border-[#0a66c2]'
+                      : 'bg-white dark:bg-[#1c1d30] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800'
                       }`}
                   >
                     Disabled
@@ -168,9 +184,40 @@ export function PayrollSettingsClient() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between text-xs pt-2">
-                <span className="text-slate-550 font-bold uppercase">Compliance status:</span>
-                <Badge className="bg-[#0a66c2]/10 text-[#0a66c2] border-none font-black text-[9px] px-2.5 py-1 rounded-sm">
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-bold text-slate-500 uppercase">Absence & Leave Penalty Deductions</label>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setFormState({ ...formState, enable_leave_deductions: true })}
+                    className={`flex-1 h-9 rounded-sm font-extrabold text-xs transition-all border ${formState.enable_leave_deductions
+                      ? 'bg-[#0a66c2] text-white border-[#0a66c2]'
+                      : 'bg-white dark:bg-[#1c1d30] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800'
+                      }`}
+                  >
+                    Automatic
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormState({ ...formState, enable_leave_deductions: false })}
+                    className={`flex-1 h-9 rounded-sm font-extrabold text-xs transition-all border ${!formState.enable_leave_deductions
+                      ? 'bg-[#0a66c2] text-white border-[#0a66c2]'
+                      : 'bg-white dark:bg-[#1c1d30] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800'
+                      }`}
+                  >
+                    Manual / Off
+                  </button>
+                </div>
+                <p className="text-[10px] text-slate-400 font-medium">
+                  {formState.enable_leave_deductions
+                    ? 'Automatically deducts daily salary for unexcused absences and unpaid leaves.'
+                    : 'Absence deductions disabled globally. HR manages leave penalties manually.'}
+                </p>
+              </div>
+
+              <div className="flex items-center justify-between text-xs pt-1">
+                <span className="text-slate-550 font-bold uppercase text-[10px]">Compliance status:</span>
+                <Badge className="bg-[#0a66c2]/10 text-[#0a66c2] border-none font-black text-[9px] px-2.5 py-0.5 rounded-sm">
                   COMPLIANT
                 </Badge>
               </div>

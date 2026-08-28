@@ -202,18 +202,18 @@ export function SearchMobileDetail(props: SearchMobileDetailProps) {
             <div className="flex-1 min-w-0">
               <h4 className="text-xs font-bold text-foreground truncate">{selectedJob.company?.company_name || selectedJob.company_name}</h4>
               <p className="text-[11px] text-muted-foreground">
-                {followersCount > 0 
+                {followersCount > 0
                   ? `${followersCount.toLocaleString()} ${followersCount === 1 ? 'follower' : 'followers'}`
                   : (selectedJob.company?.industry || 'Technology & Services')}
               </p>
             </div>
-            <button 
+            <button
               onClick={handleToggleFollow}
               disabled={followMutation.isPending}
               className={cn(
                 "flex items-center gap-1 px-3 py-1.5 rounded-sm text-xs font-bold transition-all shrink-0 cursor-pointer disabled:opacity-50",
-                isFollowing 
-                  ? "bg-muted text-foreground border border-border hover:bg-muted/80 hover:border-red-400 hover:text-red-500" 
+                isFollowing
+                  ? "bg-muted text-foreground border border-border hover:bg-muted/80 hover:border-red-400 hover:text-red-500"
                   : "border border-[#0a66c2] text-[#0a66c2] hover:bg-[#0a66c2]/5"
               )}
             >

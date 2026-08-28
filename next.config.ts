@@ -2,8 +2,20 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   async rewrites() {
+    const rules = [
+      {
+        source: '/hrtools/:path*',
+        destination: '/Hrtools/:path*',
+      },
+      {
+        source: '/hrtools',
+        destination: '/Hrtools',
+      },
+    ];
+
     if (process.env.NODE_ENV === 'development') {
       return [
+        ...rules,
         {
           source: '/api/:path*',
           // Using localhost instead of 127.0.0.1 ensures cookies map to the frontend domain.
@@ -12,7 +24,7 @@ const nextConfig: NextConfig = {
         },
       ];
     }
-    return [];
+    return rules;
   },
 };
 

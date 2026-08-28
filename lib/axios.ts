@@ -26,6 +26,13 @@ export const axiosInstance: AxiosInstance = axios.create({
   withCredentials: true,
 });
 
+axiosInstance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+  if (config.data instanceof FormData && config.headers) {
+    delete config.headers['Content-Type'];
+  }
+  return config;
+}); 
+
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {

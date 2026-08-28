@@ -1,5 +1,5 @@
 export * from './ecosystem-header';
-export * from './ecosystem-hero';
+export * from './ecosystem-hero/ecosystem-hero';
 export * from './ecosystem-about';
 export * from './ecosystem-team';
 export * from './ecosystem-metrics';

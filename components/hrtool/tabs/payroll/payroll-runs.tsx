@@ -116,12 +116,21 @@ export function PayrollRuns() {
 
   const rerunMutation = useMutation({
     mutationFn: (id: string) => hrPayrollService.rerunPayroll(id),
-    onSuccess: (res: any) => {
+    onSuccess: (res: any, variables: string) => {
       queryClient.invalidateQueries({ queryKey: ['payrolls'] });
       queryClient.invalidateQueries({ queryKey: ['payroll-analytics'] });
       queryClient.invalidateQueries({ queryKey: ['payroll-approvals'] });
-      setSelectedRun(null);
-      toast.success(res.message || 'Payroll recalculation started successfully.');
+      if (selectedRun && selectedRun.id === variables) {
+        setIsLoadingRecords(true);
+        hrPayrollService.getPayrollRecords(variables)
+          .then(recordRes => {
+            if (recordRes.data) setRunRecords(recordRes.data);
+          })
+          .finally(() => setIsLoadingRecords(false));
+      } else {
+        setSelectedRun(null);
+      }
+      toast.success(res.message || 'Payroll recalculation completed successfully.');
     },
     onError: (err: any) => {
       toast.error(err.response?.data?.error || 'Failed to rerun payroll.');
@@ -710,8 +719,16 @@ export function PayrollRuns() {
                     <td className="py-3 px-4 text-xs text-slate-800 dark:text-slate-300 font-bold">{currencySymbol}{parseFloat(rec.gross_salary || 0).toLocaleString()}</td>
                     <td className="py-3 px-4 text-xs text-slate-800 dark:text-slate-300 font-bold">{currencySymbol}{parseFloat(rec.bonus_amount || 0).toLocaleString()}</td>
                     <td className="py-3 px-4 text-xs text-slate-800 dark:text-slate-300 font-semibold">{currencySymbol}{parseFloat(rec.overtime_amount || 0).toLocaleString()}</td>
-                    <td className="py-3 px-4 text-xs text-slate-800 dark:text-slate-300 font-semibold">{currencySymbol}{parseFloat(rec.reimbursement_amount || 0).toLocaleString()}</td>
-                    <td className="py-3 px-4 text-xs text-red-500/90 font-bold">-{currencySymbol}{parseFloat(rec.deductions || 0).toLocaleString()}</td>
+                    <td className="py-3 px-4 text-xs">
+                      <div className="font-bold text-red-500/90">
+                        -{currencySymbol}{parseFloat(rec.deductions || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </div>
+                      {parseFloat(rec.leave_deduction || 0) > 0 && (
+                        <div className="text-[10px] text-slate-400 font-medium">
+                          incl. {currencySymbol}{parseFloat(rec.leave_deduction).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} absence LOP
+                        </div>
+                      )}
+                    </td>
                     <td className="py-3 px-4 text-xs text-emerald-600 dark:text-emerald-400 font-extrabold">{currencySymbol}{parseFloat(rec.net_salary || 0).toLocaleString()}</td>
                     <td className="py-3 px-4">
                       <Badge className={`${getStatusBadgeColor(rec.status)} font-bold text-[9px] px-2 py-0.5 rounded-sm`}>
@@ -723,7 +740,7 @@ export function PayrollRuns() {
                         <div className="inline-flex items-center gap-2">
                           <Button 
                             title="Email"
-                            onClick={() => alert("Mail payslip functionality is coming soon!")}
+                            onClick={() => toast.info("Emailing payslips directly is available in the Payslips tab.")}
                             className="inline-flex items-center justify-center border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/40 text-slate-600 dark:text-slate-400 font-bold text-[10px] h-8 w-8 p-0 rounded-sm cursor-pointer transition-all duration-300 bg-transparent"
                           >
                             <Mail className="h-3.5 w-3.5" />

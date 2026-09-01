@@ -29,6 +29,8 @@ export type HRSection =
   | 'leave-pending'
   | 'leave-approved'
   | 'leave-company'
+  | 'leave-balances'
+  | 'leave-settings'
   | 'payroll'
   | 'payroll-dashboard'
   | 'payroll-runs'

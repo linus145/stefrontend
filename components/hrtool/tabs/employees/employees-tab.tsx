@@ -1,25 +1,11 @@
 'use client';
 
+import React, { useState, useCallback, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { hrOrgService, hrEmployeeService } from '@/services/hr';
+import { hrOrgService, hrEmployeeService, hrPayrollService } from '@/services/hr';
 import { jobsService } from '@/services/jobs.service';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, Search, Mail, Phone, MapPin, MoreHorizontal, UserPlus, RefreshCw, Trash2, Calendar, User, BrainCircuit } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Input } from '@/components/ui/input';
-import { useState, useCallback } from 'react';
-import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
-import { cn } from '@/lib/utils';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,6 +18,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import { AddEmployeeModal } from './add-employee-modal';
 import { EmployeeDetailsView } from './employee-details-view';
+import { BulkImportModal } from './bulk-import-modal';
+import { EmployeesFilterBar } from './components/employees-filter-bar';
+import { EmployeesTable } from './components/employees-table';
+import { QuickSalaryConfigModal } from './components/quick-salary-config-modal';
 
 interface EmployeesTabProps {
   defaultRole?: 'EMPLOYEE' | 'MANAGER';
@@ -47,6 +37,79 @@ export function EmployeesTab({ defaultRole = 'EMPLOYEE' }: EmployeesTabProps) {
   const [startDateInput, setStartDateInput] = useState('');
   const [endDateInput, setEndDateInput] = useState('');
   const [page, setPage] = useState(1);
+  const [pageInput, setPageInput] = useState('1');
+
+  useEffect(() => {
+    setPageInput(String(page));
+  }, [page]);
+
+  // Salary Structure Quick Config State
+  const [salaryConfigEmployee, setSalaryConfigEmployee] = useState<any>(null);
+  const [salaryForm, setSalaryForm] = useState({
+    basic_salary: '',
+    hra: '',
+    overtime_rate: '0',
+    tax_percentage: '10',
+    pf_percentage: '12',
+    esi_percentage: '1.75',
+    status: 'ACTIVE'
+  });
+
+  const { data: payrollSettingsRes } = useQuery({
+    queryKey: ['payroll-settings'],
+    queryFn: () => hrPayrollService.getSettingsConfigs(),
+  });
+
+  const handleOpenSalaryModal = (emp: any) => {
+    const struct = emp.salary_structure_detail;
+    setSalaryConfigEmployee(emp);
+    if (struct) {
+      setSalaryForm({
+        basic_salary: String(struct.basic_salary || ''),
+        hra: String(struct.hra || ''),
+        overtime_rate: String(struct.overtime_rate || '0'),
+        tax_percentage: String(struct.tax_percentage ?? '10'),
+        pf_percentage: String(struct.pf_percentage ?? '12'),
+        esi_percentage: String(struct.esi_percentage ?? '1.75'),
+        status: struct.status || 'ACTIVE'
+      });
+    } else {
+      const baseSalary = emp.salary ? Number(emp.salary) : 0;
+      const defaultBasic = baseSalary > 0 ? Math.round(baseSalary * 0.6) : 0;
+      const defaultHra = baseSalary > 0 ? Math.round(baseSalary * 0.4) : 0;
+      setSalaryForm({
+        basic_salary: defaultBasic > 0 ? String(defaultBasic) : '',
+        hra: defaultHra > 0 ? String(defaultHra) : '',
+        overtime_rate: '0',
+        tax_percentage: String(payrollSettingsRes?.data?.tax_percentage ?? payrollSettingsRes?.data?.statutory_tax_percentage ?? '10'),
+        pf_percentage: String(payrollSettingsRes?.data?.statutory_pf_percentage ?? '12'),
+        esi_percentage: String(payrollSettingsRes?.data?.statutory_esi_percentage ?? '1.75'),
+        status: 'ACTIVE'
+      });
+    }
+  };
+
+  const saveSalaryMutation = useMutation({
+    mutationFn: (data: any) => {
+      if (salaryConfigEmployee?.salary_structure_detail?.id) {
+        return hrPayrollService.updateSalaryStructure(salaryConfigEmployee.salary_structure_detail.id, data);
+      }
+      return hrPayrollService.createSalaryStructure(data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['employees'] });
+      queryClient.invalidateQueries({ queryKey: ['payroll-structures'] });
+      toast.success(`Salary structure configured for ${salaryConfigEmployee?.first_name}!`);
+      setSalaryConfigEmployee(null);
+    },
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.error || err?.message || 'Failed to save salary structure.');
+    }
+  });
+
+  useEffect(() => {
+    setPage(1);
+  }, [defaultRole]);
 
   const [activeFilters, setActiveFilters] = useState({
     search: '',
@@ -68,7 +131,7 @@ export function EmployeesTab({ defaultRole = 'EMPLOYEE' }: EmployeesTabProps) {
       startDate: startDateInput,
       endDate: endDateInput
     });
-    setPage(1); // Reset page on filter apply
+    setPage(1);
   };
 
   const handleSortChange = (newOrder: string) => {
@@ -84,7 +147,6 @@ export function EmployeesTab({ defaultRole = 'EMPLOYEE' }: EmployeesTabProps) {
     setOrderingInput('-created_at');
     setStartDateInput('');
     setEndDateInput('');
-
     setActiveFilters({
       search: '',
       filter: 'ALL',
@@ -94,30 +156,32 @@ export function EmployeesTab({ defaultRole = 'EMPLOYEE' }: EmployeesTabProps) {
       startDate: '',
       endDate: ''
     });
-    setPage(1); // Reset page on clear filters
+    setPage(1);
   };
 
-  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(null);
-
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isBulkImportOpen, setIsBulkImportOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
-  const { data: designationsRes } = useQuery({
+  // Queries
+  const { data: designationsData } = useQuery({
     queryKey: ['designations'],
     queryFn: () => hrOrgService.getDesignations(),
   });
+  const designations = designationsData?.data?.results || [];
 
-  const { data: departmentsRes } = useQuery({
+  const { data: departmentsData } = useQuery({
     queryKey: ['departments'],
     queryFn: () => hrOrgService.getDepartments(),
   });
-
-  const designations = designationsRes?.data?.results || [];
-  const departments = departmentsRes?.data?.results || [];
+  const departments = departmentsData?.data?.results || [];
 
   const { data: employees, isLoading } = useQuery({
     queryKey: [
       'employees',
+      page,
       activeFilters.search,
       activeFilters.filter,
       activeFilters.ordering,
@@ -137,18 +201,9 @@ export function EmployeesTab({ defaultRole = 'EMPLOYEE' }: EmployeesTabProps) {
       ordering: activeFilters.ordering,
       joining_date__gte: activeFilters.startDate || undefined,
       joining_date__lte: activeFilters.endDate || undefined,
-      page: page
+      page: page,
+      page_size: 10
     }),
-  });
-
-  const rescheduleMutation = useMutation({
-    mutationFn: (applicationId: string) =>
-      jobsService.updateApplicationStatus(applicationId, 'INTERVIEW'),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['employees'] });
-      toast.success('Candidate moved back to Recruitment Pipeline');
-    },
-    onError: () => toast.error('Failed to move candidate back')
   });
 
   const updateEmployeeMutation = useMutation({
@@ -196,37 +251,82 @@ export function EmployeesTab({ defaultRole = 'EMPLOYEE' }: EmployeesTabProps) {
     if (deleteTarget) {
       deleteEmployeeMutation.mutate(deleteTarget.id);
     }
-  }, [deleteTarget]);
+  }, [deleteTarget, deleteEmployeeMutation]);
 
-  const renderSkeletons = () => (
-    <div className="w-full overflow-x-auto rounded-sm border border-border/40 bg-card/40 backdrop-blur-md shadow-sm">
-      <table className="w-full text-sm text-left">
-        <thead className="text-[11px] uppercase bg-muted/50 text-muted-foreground font-bold border-b border-border/40">
-          <tr>
-            <th className="px-4 py-3">Employee</th>
-            <th className="px-4 py-3">Role</th>
-            <th className="px-4 py-3">Contact</th>
-            <th className="px-4 py-3 w-[140px]">Type</th>
-            <th className="px-4 py-3 text-right">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {[1, 2, 3, 4, 5].map((i) => (
-            <tr key={i} className="border-b border-border/40 animate-pulse">
-              <td className="px-4 py-3 flex items-center gap-3">
-                <Skeleton className="h-9 w-9 rounded-sm" />
-                <div className="space-y-2"><Skeleton className="h-3 w-24" /><Skeleton className="h-2 w-16" /></div>
-              </td>
-              <td className="px-4 py-3 space-y-2"><Skeleton className="h-3 w-20" /><Skeleton className="h-2 w-16" /></td>
-              <td className="px-4 py-3 space-y-2"><Skeleton className="h-3 w-24" /><Skeleton className="h-2 w-20" /></td>
-              <td className="px-4 py-3"><Skeleton className="h-8 w-full rounded-sm" /></td>
-              <td className="px-4 py-3 flex justify-end"><Skeleton className="h-7 w-7 rounded-sm" /></td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
+  const handleExportData = async () => {
+    setIsExporting(true);
+    try {
+      const res = await hrEmployeeService.getEmployees({
+        search: activeFilters.search || undefined,
+        status: 'ACTIVE',
+        employment_type: activeFilters.filter === 'ALL' ? undefined : activeFilters.filter,
+        designation: activeFilters.designation === 'ALL' ? undefined : activeFilters.designation,
+        department: activeFilters.department === 'ALL' ? undefined : activeFilters.department,
+        role: defaultRole,
+        ordering: activeFilters.ordering,
+        joining_date__gte: activeFilters.startDate || undefined,
+        joining_date__lte: activeFilters.endDate || undefined,
+        page_size: 1000
+      });
+
+      const list = res?.data?.results || [];
+      if (list.length === 0) {
+        toast.error("No employee records to export.");
+        return;
+      }
+
+      const headers = [
+        "Employee ID",
+        "First Name",
+        "Last Name",
+        "Email",
+        "Phone",
+        "Designation",
+        "Department",
+        "Employment Type",
+        "Role",
+        "Joining Date",
+        "Reporting Manager",
+        "Gross Monthly Salary",
+        "Status"
+      ];
+
+      const rows = list.map((emp: any) => [
+        `"${emp.employee_id || ''}"`,
+        `"${emp.first_name || ''}"`,
+        `"${emp.last_name || ''}"`,
+        `"${emp.email || ''}"`,
+        `"${emp.phone || ''}"`,
+        `"${emp.designation_detail?.title || ''}"`,
+        `"${emp.department_detail?.name || ''}"`,
+        `"${emp.employment_type || ''}"`,
+        `"${emp.role || ''}"`,
+        `"${emp.joining_date || ''}"`,
+        `"${emp.reporting_manager_detail ? `${emp.reporting_manager_detail.first_name} ${emp.reporting_manager_detail.last_name}` : ''}"`,
+        emp.salary_structure_detail?.gross_salary || emp.salary || 0,
+        `"${emp.status || ''}"`
+      ]);
+
+      const csvContent = "\uFEFF" + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      const roleLabel = defaultRole === 'MANAGER' ? 'managers' : 'employees';
+      const timestamp = new Date().toISOString().split('T')[0];
+      link.setAttribute("download", `${roleLabel}_directory_export_${timestamp}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast.success(`${defaultRole === 'MANAGER' ? 'Manager' : 'Employee'} data exported successfully!`);
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to export data.");
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   if (isAddModalOpen) {
     return (
@@ -248,334 +348,110 @@ export function EmployeesTab({ defaultRole = 'EMPLOYEE' }: EmployeesTabProps) {
   }
 
   return (
-    <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
-      <div className="flex items-center justify-between border-b border-border/40 pb-2">
-        <div>
-          <h2 className="text-xl font-bold tracking-tight">
-            {defaultRole === 'MANAGER' ? 'Manager Directory' : 'Employee Directory'}
-          </h2>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="relative group">
-            <Button
-              onClick={() => setIsAddModalOpen(true)}
-              data-agent="add-employee-button"
-              aria-label={defaultRole === 'MANAGER' ? 'Add Manager' : 'Add Employee'}
-              className="bg-[#0a66c2] text-white hover:bg-[#004182] shadow-sm rounded-sm h-10 w-10 p-0 transition-all flex items-center justify-center cursor-pointer"
-            >
-              <UserPlus className="h-4 w-4" />
-            </Button>
-            <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 hidden group-hover:flex items-center justify-center z-30 pointer-events-none">
-              <div className="bg-popover text-popover-foreground border border-border text-[11px] font-semibold px-2 py-1 rounded shadow-md whitespace-nowrap animate-in fade-in zoom-in-95 duration-150">
-                {defaultRole === 'MANAGER' ? 'Add Manager' : 'Add Employee'}
-              </div>
-            </div>
-          </div>
-          <Button
-            type="button"
-            onClick={handleResetFilters}
-            variant="outline"
-            data-agent="reset-employee-filters-button"
-            className="border-border text-muted-foreground hover:bg-red-50/20 hover:text-red-600 hover:border-red-200 shadow-sm rounded-sm text-[11px] font-semibold px-4 h-10 transition-all whitespace-nowrap flex items-center gap-1.5"
-          >
-            <RefreshCw className="h-3.5 w-3.5" /> Reset Filters
-          </Button>
-        </div>
-      </div>
+    <div className="space-y-6">
+      <EmployeesFilterBar
+        defaultRole={defaultRole}
+        setIsAddModalOpen={setIsAddModalOpen}
+        setIsBulkImportOpen={setIsBulkImportOpen}
+        handleExportData={handleExportData}
+        isExporting={isExporting}
+        handleResetFilters={handleResetFilters}
+        handleApplyFilters={handleApplyFilters}
+        searchInput={searchInput}
+        setSearchInput={setSearchInput}
+        filterInput={filterInput}
+        setFilterInput={setFilterInput}
+        designationInput={designationInput}
+        setDesignationInput={setDesignationInput}
+        departmentInput={departmentInput}
+        setDepartmentInput={setDepartmentInput}
+        orderingInput={orderingInput}
+        handleSortChange={handleSortChange}
+        startDateInput={startDateInput}
+        setStartDateInput={setStartDateInput}
+        endDateInput={endDateInput}
+        setEndDateInput={setEndDateInput}
+        departments={departments}
+        designations={designations}
+      />
 
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          handleApplyFilters();
-        }}
-        className="flex flex-col xl:flex-row items-center justify-between gap-4 w-full"
-      >
-        {/* Search Filter */}
-        <div className="relative flex-1 w-full max-w-sm">
-          <button
-            type="submit"
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-[#0a66c2]/60 hover:text-[#0a66c2] transition-colors z-10"
-            title="Click to search"
-            data-agent="employee-search-button"
-          >
-            <Search className="h-4 w-4" />
-          </button>
-          <Input
-            placeholder="Search directory..."
-            className="pl-10 h-10 bg-background border border-border text-foreground ring-offset-background focus-visible:ring-1 focus-visible:ring-[#0a66c2]/50 focus-visible:border-[#0a66c2]/50 rounded-sm text-sm font-medium placeholder:text-muted-foreground/60 shadow-sm transition-all"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            data-agent="employee-search-input"
-          />
-        </div>
-
-        {/* Dynamic Dropdowns & Date Filters */}
-        <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto xl:justify-end">
-          {/* Employment Type Selector Dropdown */}
-          <div className="relative w-36">
-            <select
-              value={filterInput}
-              onChange={(e) => setFilterInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleApplyFilters();
-              }}
-              data-agent="employee-type-filter"
-              className="h-10 w-full bg-background border border-border text-foreground focus-visible:ring-1 focus-visible:ring-[#0a66c2]/50 focus-visible:border-[#0a66c2]/50 rounded-sm text-[11px] font-bold px-3 shadow-sm transition-all focus:outline-none cursor-pointer"
-            >
-              <option value="ALL" className="bg-background text-foreground">All Types</option>
-              <option value="FULL_TIME" className="bg-background text-foreground">Permanent</option>
-              <option value="CONTRACT" className="bg-background text-foreground">Contract</option>
-              <option value="INTERN" className="bg-background text-foreground">Intern</option>
-              <option value="ON_LEAVE" className="bg-background text-foreground">On Leave</option>
-              <option value="TERMINATED" className="bg-background text-foreground">Terminated</option>
-            </select>
-          </div>
-
-          {/* Designation Filter Dropdown */}
-          <div className="relative w-40">
-            <select
-              value={designationInput}
-              onChange={(e) => setDesignationInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleApplyFilters();
-              }}
-              data-agent="employee-designation-filter"
-              className="h-10 w-full bg-background border border-border text-foreground focus-visible:ring-1 focus-visible:ring-[#0a66c2]/50 focus-visible:border-[#0a66c2]/50 rounded-sm text-[11px] font-bold px-3 shadow-sm transition-all focus:outline-none cursor-pointer"
-            >
-              <option value="ALL" className="bg-background text-foreground">All Designations</option>
-              {designations.map((d: any) => (
-                <option key={d.id} value={d.id} className="bg-background text-foreground">{d.title}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Department Filter Dropdown */}
-          <div className="relative w-40">
-            <select
-              value={departmentInput}
-              onChange={(e) => setDepartmentInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleApplyFilters();
-              }}
-              data-agent="employee-department-filter"
-              className="h-10 w-full bg-background border border-border text-foreground focus-visible:ring-1 focus-visible:ring-[#0a66c2]/50 focus-visible:border-[#0a66c2]/50 rounded-sm text-[11px] font-bold px-3 shadow-sm transition-all focus:outline-none cursor-pointer"
-            >
-              <option value="ALL" className="bg-background text-foreground">All Departments</option>
-              {departments.map((d: any) => (
-                <option key={d.id} value={d.id} className="bg-background text-foreground">{d.name}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Sort / Ordering */}
-          <DropdownMenu>
-            <DropdownMenuTrigger data-agent="employee-sort-trigger" className="h-10 px-4 flex items-center justify-center gap-2 rounded-sm text-[11px] font-bold border border-border bg-background hover:bg-muted text-foreground transition-all outline-none whitespace-nowrap shadow-sm">
-              <Calendar className="h-3.5 w-3.5 text-[#0a66c2]" />
-              {orderingInput === '-created_at' ? 'Newest' : 'Oldest'}
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="rounded-sm border-border/50 bg-card/95 backdrop-blur-md shadow-xl min-w-[160px]">
-              <DropdownMenuItem
-                onClick={() => handleSortChange('-created_at')}
-                data-agent="employee-sort-newest-btn"
-                className={cn("text-xs font-semibold py-2.5 cursor-pointer focus:bg-[#0a66c2]/10", orderingInput === '-created_at' ? "text-[#0a66c2] bg-[#0a66c2]/5" : "")}
-              >
-                Newest First
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => handleSortChange('created_at')}
-                data-agent="employee-sort-oldest-btn"
-                className={cn("text-xs font-semibold py-2.5 cursor-pointer focus:bg-[#0a66c2]/10", orderingInput === 'created_at' ? "text-[#0a66c2] bg-[#0a66c2]/5" : "")}
-              >
-                Oldest First
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {/* Date range filters (moved to the last position) */}
-          <div className="flex items-center gap-2">
-            <div className="relative w-32">
-              <span className="absolute -top-2.5 left-2 bg-background px-1 text-[9px] font-bold text-muted-foreground z-10">Start Date</span>
-              <Input
-                type="date"
-                className="h-10 bg-background border border-border text-foreground focus-visible:ring-1 focus-visible:ring-[#0a66c2]/50 focus-visible:border-[#0a66c2]/50 rounded-sm text-xs font-medium shadow-sm transition-all relative"
-                value={startDateInput}
-                onChange={(e) => setStartDateInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleApplyFilters();
-                }}
-                data-agent="employee-start-date-input"
-              />
-            </div>
-            <span className="text-muted-foreground/50 font-medium">-</span>
-            <div className="relative w-32">
-              <span className="absolute -top-2.5 left-2 bg-background px-1 text-[9px] font-bold text-muted-foreground z-10">End Date</span>
-              <Input
-                type="date"
-                className="h-10 bg-background border border-border text-foreground focus-visible:ring-1 focus-visible:ring-[#0a66c2]/50 focus-visible:border-[#0a66c2]/50 rounded-sm text-xs font-medium shadow-sm transition-all relative"
-                value={endDateInput}
-                onChange={(e) => setEndDateInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleApplyFilters();
-                }}
-                data-agent="employee-end-date-input"
-              />
-            </div>
-          </div>
-        </div>
-      </form>
-
-      {isLoading ? renderSkeletons() : (
-        <div className="w-full overflow-x-auto rounded-sm border border-border/40 bg-card/40 backdrop-blur-md shadow-sm">
-          <table className="w-full text-sm text-left">
-            <thead className="text-[11px] uppercase bg-muted/50 text-muted-foreground font-bold border-b border-border/40">
-              <tr>
-                <th className="px-4 py-3">Employee</th>
-                <th className="px-4 py-3">Role</th>
-                <th className="px-4 py-3">Manager</th>
-                <th className="px-4 py-3">Contact</th>
-                <th className="px-4 py-3 w-[140px]">Type</th>
-                <th className="px-4 py-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {employees?.data?.results?.map((employee: any) => (
-                <tr key={employee.id} data-agent="employee-row" className="border-b border-border/40 hover:bg-muted/20 transition-colors group">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-9 w-9 border border-border/50 shadow-sm rounded-sm">
-                        <AvatarImage src={employee.avatar} className="rounded-sm" />
-                        <AvatarFallback className="bg-blue-500/5 text-[#0a66c2] font-semibold rounded-sm text-[10px]">
-                          {employee.first_name[0]}{employee.last_name[0]}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex flex-col">
-                        <span data-agent="employee-name" className="font-bold text-[13px] text-foreground group-hover:text-[#0a66c2] transition-colors">{employee.first_name} {employee.last_name}</span>
-                        <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">ID: {employee.employee_id}</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex flex-col">
-                      {employee.role === 'MANAGER' ? (
-                        <>
-                          <span className="text-[12px] font-semibold text-foreground">Manager</span>
-                          <span className="text-[11px] font-medium text-muted-foreground">{employee.department_detail?.name || 'No Department'}</span>
-                        </>
-                      ) : (
-                        <>
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="text-[12px] font-semibold text-foreground">{employee.designation_detail?.title || 'Team Member'}</span>
-                          </div>
-                          <span className="text-[11px] font-medium text-muted-foreground">{employee.department_detail?.name || 'No Department'}</span>
-                        </>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    {employee.reporting_manager_detail ? (
-                      <div className="flex items-center gap-2">
-                        <Avatar className="h-6 w-6 border border-border/50 shadow-sm rounded-sm">
-                          <AvatarFallback className="bg-[#0a66c2]/10 text-[#0a66c2] font-bold rounded-sm text-[8px]">
-                            {employee.reporting_manager_detail.first_name[0]}{employee.reporting_manager_detail.last_name[0]}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex flex-col">
-                          <span className="font-bold text-[12px] text-foreground">
-                            {employee.reporting_manager_detail.first_name} {employee.reporting_manager_detail.last_name}
-                          </span>
-                        </div>
-                      </div>
-                    ) : (
-                      <span className="text-[11px] text-muted-foreground font-semibold italic">Not Assigned</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex flex-col gap-1 text-[11px] font-semibold text-muted-foreground">
-                      <div className="flex items-center gap-2"><Mail className="h-3 w-3 text-[#0a66c2]/60" /> {employee.email}</div>
-                      <div className="flex items-center gap-2"><Phone className="h-3 w-3 text-[#0a66c2]/60" /> {employee.phone || 'No contact'}</div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <select
-                      value={employee.employment_type || 'FULL_TIME'}
-                      disabled={updateEmployeeMutation.isPending}
-                      onChange={(e) => updateEmployeeMutation.mutate({ id: employee.id, employment_type: e.target.value })}
-                      className="h-7 w-[105px] bg-[#0a66c2]/5 hover:bg-[#0a66c2]/10 border border-[#0a66c2]/20 focus-visible:ring-1 focus-visible:ring-[#0a66c2]/50 focus-visible:border-[#0a66c2]/50 rounded-sm text-[10px] font-bold text-[#0a66c2] px-2 shadow-sm transition-all focus:outline-none cursor-pointer"
-                    >
-                      <option value="FULL_TIME">Permanent</option>
-                      <option value="CONTRACT">Contract</option>
-                      <option value="INTERN">Intern</option>
-                      <option value="ON_LEAVE">On Leave</option>
-                      <option value="TERMINATED">Terminated</option>
-                    </select>
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="flex items-center justify-end gap-1.5">
-
-                      <button
-                        onClick={() => setSelectedEmployeeId(employee.id)}
-                        data-agent="employee-details-btn"
-                        className="w-7 h-7 flex items-center justify-center rounded-sm bg-[#0a66c2]/5 text-[#0a66c2] hover:bg-[#0a66c2] hover:text-white transition-all active:scale-95 border border-[#0a66c2]/10"
-                        title="View Details"
-                      >
-                        <User className="h-3 w-3" />
-                      </button>
-
-                      <button
-                        onClick={() => sendCredentialsMutation.mutate(employee.id)}
-                        disabled={sendCredentialsMutation.isPending}
-                        data-agent="employee-send-link-btn"
-                        className="w-7 h-7 flex items-center justify-center rounded-sm bg-[#0a66c2]/5 text-[#0a66c2] hover:bg-[#0a66c2] hover:text-white transition-all active:scale-95 border border-[#0a66c2]/10 disabled:opacity-50"
-                        title="Send Email Link"
-                      >
-                        <Mail className="h-3 w-3" />
-                      </button>
-
-                      <button
-                        onClick={() => setDeleteTarget({ id: employee.id, name: `${employee.first_name} ${employee.last_name}` })}
-                        data-agent="employee-delete-btn"
-                        className="w-7 h-7 flex items-center justify-center rounded-sm bg-red-500/5 text-red-600 hover:bg-red-600 hover:text-white transition-all active:scale-95 border border-red-500/10"
-                        title="Delete Employee"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <EmployeesTable
+        isLoading={isLoading}
+        employees={employees}
+        page={page}
+        updateEmployeeMutation={updateEmployeeMutation}
+        sendCredentialsMutation={sendCredentialsMutation}
+        handleOpenSalaryModal={handleOpenSalaryModal}
+        setSelectedEmployeeId={setSelectedEmployeeId}
+        setDeleteTarget={setDeleteTarget}
+      />
 
       {/* Pagination Controls */}
-      {(employees?.data?.count ?? 0) > 0 && (
-        <div className="flex justify-center items-center gap-4 pt-6 pb-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setPage(p => Math.max(1, p - 1))}
-            disabled={page === 1 || isLoading}
-            data-agent="employee-pagination-prev"
-            className="text-xs h-8 px-4 rounded-sm border-border text-muted-foreground shadow-sm hover:bg-muted"
-          >
-            Previous
-          </Button>
-          <span className="text-[11px] text-muted-foreground font-bold uppercase tracking-wider">
-            Page {page} of {Math.max(1, Math.ceil((employees?.data?.count || 0) / 10))}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setPage(p => p + 1)}
-            disabled={!employees?.data?.next || isLoading}
-            data-agent="employee-pagination-next"
-            className="text-xs h-8 px-4 rounded-sm border-border text-muted-foreground shadow-sm hover:bg-muted"
-          >
-            Next
-          </Button>
-        </div>
-      )}
+      {(employees?.data?.count ?? 0) > 0 && (() => {
+        const totalPages = Math.max(1, Math.ceil((employees?.data?.count || 0) / 10));
+        return (
+          <div className="flex justify-center items-center gap-3 pt-6 pb-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page <= 1 || isLoading}
+              data-agent="employee-pagination-prev"
+              className="text-xs h-8 px-4 rounded-sm border-border text-muted-foreground shadow-sm hover:bg-muted cursor-pointer"
+            >
+              Previous
+            </Button>
+            
+            <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground font-semibold uppercase tracking-wider">
+              <span>Page</span>
+              <input
+                type="number"
+                min={1}
+                max={totalPages}
+                value={pageInput}
+                onChange={(e) => setPageInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const parsed = parseInt(pageInput, 10);
+                    if (!isNaN(parsed)) {
+                      const clamped = Math.max(1, Math.min(parsed, totalPages));
+                      setPage(clamped);
+                      setPageInput(String(clamped));
+                    } else {
+                      setPageInput(String(page));
+                    }
+                  }
+                }}
+                onBlur={() => {
+                  const parsed = parseInt(pageInput, 10);
+                  if (!isNaN(parsed)) {
+                    const clamped = Math.max(1, Math.min(parsed, totalPages));
+                    setPage(clamped);
+                    setPageInput(String(clamped));
+                  } else {
+                    setPageInput(String(page));
+                  }
+                }}
+                data-agent="employee-page-number-input"
+                className="w-12 h-7 text-center rounded-sm bg-background border border-border text-xs font-bold text-foreground focus:outline-none focus:border-[#0a66c2] focus:ring-1 focus:ring-[#0a66c2]/50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-colors cursor-text"
+              />
+              <span>of {totalPages}</span>
+            </div>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={page >= totalPages || !employees?.data?.next || isLoading}
+              data-agent="employee-pagination-next"
+              className="text-xs h-8 px-4 rounded-sm border-border text-muted-foreground shadow-sm hover:bg-muted cursor-pointer"
+            >
+              Next
+            </Button>
+          </div>
+        );
+      })()}
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
@@ -601,6 +477,25 @@ export function EmployeesTab({ defaultRole = 'EMPLOYEE' }: EmployeesTabProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Bulk Import Modal */}
+      <BulkImportModal
+        open={isBulkImportOpen}
+        onOpenChange={setIsBulkImportOpen}
+        defaultRole={defaultRole}
+      />
+
+      {/* Quick Salary Structure Configuration Modal */}
+      {salaryConfigEmployee && (
+        <QuickSalaryConfigModal
+          employee={salaryConfigEmployee}
+          onClose={() => setSalaryConfigEmployee(null)}
+          salaryForm={salaryForm}
+          setSalaryForm={setSalaryForm}
+          saveSalaryMutation={saveSalaryMutation}
+          settingsRes={payrollSettingsRes}
+        />
+      )}
     </div>
   );
 }

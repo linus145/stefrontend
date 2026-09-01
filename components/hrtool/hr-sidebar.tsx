@@ -85,9 +85,11 @@ const NAVIGATION_SECTIONS: NavSection[] = [
         icon: FileText,
         subItems: [
           { id: 'leave-company', label: 'Company Leaves' },
+          { id: 'leave-balances', label: 'Employee Balances' },
           { id: 'leave-requests', label: 'Leave Requests' },
           { id: 'leave-pending', label: 'Pending' },
-          { id: 'leave-approved', label: 'Approved' }
+          { id: 'leave-approved', label: 'Approved' },
+          { id: 'leave-settings', label: 'Leave Settings' }
         ]
       },
     ]

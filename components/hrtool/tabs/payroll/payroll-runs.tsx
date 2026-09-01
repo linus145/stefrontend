@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,10 +12,13 @@ import {
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { hrPayrollService } from '@/services/hr';
+import { usePayrollProgress } from '@/context/PayrollProgressContext';
 import { toast } from 'sonner';
 
 export function PayrollRuns() {
+  const router = useRouter();
   const queryClient = useQueryClient();
+  const { startProgress } = usePayrollProgress();
   const [selectedRun, setSelectedRun] = useState<any>(null);
   const [runRecords, setRunRecords] = useState<any[]>([]);
   const [isLoadingRecords, setIsLoadingRecords] = useState(false);
@@ -43,34 +47,28 @@ export function PayrollRuns() {
     if (selectedRun) {
       setIsLoadingRecords(true);
       hrPayrollService.getPayrollRecords(selectedRun.id)
-        .then(res => {
-          if (res.data) {
-            setRunRecords(res.data);
-          }
+        .then((res: any) => {
+          setRunRecords(res?.data || []);
         })
         .catch(() => {
-          toast.error("Failed to load payroll details");
+          toast.error('Failed to load payroll drilldown records.');
         })
         .finally(() => {
           setIsLoadingRecords(false);
         });
+    } else {
+      setRunRecords([]);
     }
   }, [selectedRun]);
 
   // Mutations
   const generateMutation = useMutation({
-    mutationFn: (data: { month: number; year: number }) => 
-      hrPayrollService.generatePayroll(data.month, data.year),
+    mutationFn: (data: { month: number, year: number }) => hrPayrollService.generatePayroll(data.month, data.year),
     onSuccess: (res: any) => {
       queryClient.invalidateQueries({ queryKey: ['payrolls'] });
       queryClient.invalidateQueries({ queryKey: ['payroll-analytics'] });
-      queryClient.invalidateQueries({ queryKey: ['payroll-approvals'] });
       setIsNewRunOpen(false);
-      toast.success(res.message || 'Payroll generated successfully in Draft mode.');
-      // Schedule delayed refetches to catch Celery task completion
-      setTimeout(() => queryClient.invalidateQueries({ queryKey: ['payrolls'] }), 2000);
-      setTimeout(() => queryClient.invalidateQueries({ queryKey: ['payrolls'] }), 5000);
-      setTimeout(() => queryClient.invalidateQueries({ queryKey: ['payrolls'] }), 10000);
+      toast.success(res.message || 'Payroll run initiated successfully!');
     },
     onError: (err: any) => {
       toast.error(err.response?.data?.error || 'Failed to generate payroll run.');
@@ -86,15 +84,6 @@ export function PayrollRuns() {
       queryClient.invalidateQueries({ queryKey: ['payroll-approvals'] });
       setSelectedRun(null);
       toast.success(res.message || 'Payroll approved, finalized and paid successfully!');
-      // Delayed refetches to catch async payslip generation by Celery
-      setTimeout(() => {
-        queryClient.invalidateQueries({ queryKey: ['payslips'] });
-        queryClient.invalidateQueries({ queryKey: ['payrolls'] });
-      }, 3000);
-      setTimeout(() => {
-        queryClient.invalidateQueries({ queryKey: ['payslips'] });
-        queryClient.invalidateQueries({ queryKey: ['payrolls'] });
-      }, 8000);
     },
     onError: () => {
       toast.error('Failed to approve payroll cycle.');
@@ -123,17 +112,13 @@ export function PayrollRuns() {
       if (selectedRun && selectedRun.id === variables) {
         setIsLoadingRecords(true);
         hrPayrollService.getPayrollRecords(variables)
-          .then(recordRes => {
-            if (recordRes.data) setRunRecords(recordRes.data);
-          })
+          .then((r: any) => setRunRecords(r?.data || []))
           .finally(() => setIsLoadingRecords(false));
-      } else {
-        setSelectedRun(null);
       }
-      toast.success(res.message || 'Payroll recalculation completed successfully.');
+      toast.success('Payroll recalculated and refreshed successfully!');
     },
-    onError: (err: any) => {
-      toast.error(err.response?.data?.error || 'Failed to rerun payroll.');
+    onError: () => {
+      toast.error('Failed to recalculate payroll cycle.');
     }
   });
 
@@ -151,7 +136,11 @@ export function PayrollRuns() {
     }
   });
 
-  const onApproveRun = (id: string) => approveMutation.mutate(id);
+  const onApproveRun = (id: string) => {
+    startProgress(id, selectedRun?.records_count || runRecords.length || 13);
+    approveMutation.mutate(id);
+  };
+
   const onRejectRun = (id: string) => rejectMutation.mutate(id);
   const approvePending = approveMutation.isPending;
   const rejectPending = rejectMutation.isPending;
@@ -610,7 +599,6 @@ export function PayrollRuns() {
             </div>
           </div>
         )}
-
       </div>
     );
   }
@@ -680,7 +668,7 @@ export function PayrollRuns() {
                 <th className="py-2.5 px-4 text-[10px] font-bold tracking-wide text-slate-400">Reimbursement</th>
                 <th className="py-2.5 px-4 text-[10px] font-bold tracking-wide text-slate-400">Deductions (tax, pf)</th>
                 <th className="py-2.5 px-4 text-[10px] font-bold tracking-wide text-slate-400">Net payout</th>
-                <th className="py-2.5 px-4 text-[10px] font-bold tracking-wide text-slate-400">Deduction status</th>
+                <th className="py-2.5 px-4 text-[10px] font-bold tracking-wide text-slate-400">Payout status</th>
                 <th className="py-2.5 px-4 text-[10px] font-bold tracking-wide text-slate-400 text-right">Actions</th>
               </tr>
             </thead>
@@ -719,6 +707,7 @@ export function PayrollRuns() {
                     <td className="py-3 px-4 text-xs text-slate-800 dark:text-slate-300 font-bold">{currencySymbol}{parseFloat(rec.gross_salary || 0).toLocaleString()}</td>
                     <td className="py-3 px-4 text-xs text-slate-800 dark:text-slate-300 font-bold">{currencySymbol}{parseFloat(rec.bonus_amount || 0).toLocaleString()}</td>
                     <td className="py-3 px-4 text-xs text-slate-800 dark:text-slate-300 font-semibold">{currencySymbol}{parseFloat(rec.overtime_amount || 0).toLocaleString()}</td>
+                    <td className="py-3 px-4 text-xs text-slate-800 dark:text-slate-300 font-semibold">{currencySymbol}{parseFloat(rec.reimbursement_amount || 0).toLocaleString()}</td>
                     <td className="py-3 px-4 text-xs">
                       <div className="font-bold text-red-500/90">
                         -{currencySymbol}{parseFloat(rec.deductions || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -757,7 +746,6 @@ export function PayrollRuns() {
           </table>
         </div>
       </Card>
-
     </div>
   );
 }

@@ -35,9 +35,21 @@ export const hrPayrollService = {
   getPayrollAnalytics: (): Promise<BaseAPIResponse<any>> => 
     api.get<any>('/payroll/runs/analytics/').then(res => ({ status: 'success', message: '', data: res })),
 
+  getPayrollProgress: (id: string): Promise<BaseAPIResponse<{
+    payroll_id: string;
+    status: string;
+    total_count: number;
+    generated_count: number;
+    is_complete: boolean;
+  }>> => 
+    api.get<any>(`/payroll/runs/${id}/progress/`).then(res => ({ status: 'success', message: '', data: res })),
+
   // Salary Structure CRUD
-  getSalaryStructures: (): Promise<BaseAPIResponse<PaginatedResponse<any>>> => 
-    api.get<any>('/payroll/structures/').then(res => ({ status: 'success', message: '', data: res })),
+  getSalaryStructures: (params?: any): Promise<BaseAPIResponse<PaginatedResponse<any>>> => 
+    api.get<any>('/payroll/structures/', { params }).then(res => ({ status: 'success', message: '', data: res })),
+
+  bulkImportSalaryStructures: (data: { structures: any[] }): Promise<BaseAPIResponse<{ created_count: number; updated_count: number; total_processed: number; skipped_count: number; errors: string[]; message: string }>> => 
+    api.post<any>('/payroll/structures/bulk-import/', data).then(res => ({ status: 'success', message: '', data: res })),
 
   createSalaryStructure: (data: any): Promise<BaseAPIResponse<any>> => 
     api.post<any>('/payroll/structures/', data).then(res => ({ status: 'success', message: '', data: res })),

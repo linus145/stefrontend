@@ -40,6 +40,8 @@ export function PayrollSettingsClient() {
     statutory_pf_percentage: 12.00,
     statutory_esi_percentage: 1.75,
     statutory_tax_percentage: 10.00,
+    enable_tax_deductions: true,
+    enable_statutory_deductions: true,
     enable_leave_deductions: true,
     automation_enabled: true,
     finance_approval_required: false,
@@ -56,6 +58,8 @@ export function PayrollSettingsClient() {
         statutory_pf_percentage: Number(settingsRes.data.statutory_pf_percentage ?? settingsRes.data.pf_percentage ?? 12.00),
         statutory_esi_percentage: Number(settingsRes.data.statutory_esi_percentage ?? settingsRes.data.esi_percentage ?? 1.75),
         statutory_tax_percentage: Number(settingsRes.data.tax_percentage ?? settingsRes.data.statutory_tax_percentage ?? 10.00),
+        enable_tax_deductions: settingsRes.data.enable_tax_deductions ?? true,
+        enable_statutory_deductions: settingsRes.data.enable_statutory_deductions ?? true,
         enable_leave_deductions: settingsRes.data.enable_leave_deductions ?? true,
         automation_enabled: settingsRes.data.automation_enabled ?? true,
         finance_approval_required: settingsRes.data.finance_approval_required ?? false,
@@ -84,7 +88,7 @@ export function PayrollSettingsClient() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Payroll Settings & Automation</h2>
-          <p className="text-xs text-slate-500 font-semibold mt-0.5">Customize corporate payout automation models, default currency tokens, and compliance metrics.</p>
+          <p className="text-xs text-slate-500 font-semibold mt-0.5">Customize corporate payout automation models, tax deduction policies, and compliance metrics.</p>
         </div>
       </div>
 
@@ -94,7 +98,7 @@ export function PayrollSettingsClient() {
           {/* General Configurations */}
           <Card className="bg-white dark:bg-[#121320] border border-slate-150 rounded-sm shadow-sm">
             <CardHeader className="p-4 flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-xs font-extrabold text-slate-800 dark:text-slate-200 uppercase">Payout Parameters</CardTitle>
+              <CardTitle className="text-xs font-extrabold text-slate-800 dark:text-slate-200 uppercase">Payout Parameters & Ratios</CardTitle>
               <Landmark className="h-4.5 w-4.5 text-[#0a66c2]" />
             </CardHeader>
             <CardContent className="p-4 pt-0 space-y-4">
@@ -147,6 +151,70 @@ export function PayrollSettingsClient() {
                 </div>
               </div>
 
+              {/* Tax Deduction Toggle (For Small Companies) */}
+              <div className="space-y-1.5 pt-2 border-t border-slate-100 dark:border-slate-800/80">
+                <label className="text-[11px] font-bold text-slate-500 uppercase">Income Tax Deduction Policy</label>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setFormState({ ...formState, enable_tax_deductions: true })}
+                    className={`flex-1 h-9 rounded-sm font-extrabold text-xs transition-all border cursor-pointer ${formState.enable_tax_deductions
+                      ? 'bg-[#0a66c2] text-white border-[#0a66c2]'
+                      : 'bg-white dark:bg-[#1c1d30] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800'
+                      }`}
+                  >
+                    Deduct Taxes (Active)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormState({ ...formState, enable_tax_deductions: false })}
+                    className={`flex-1 h-9 rounded-sm font-extrabold text-xs transition-all border cursor-pointer ${!formState.enable_tax_deductions
+                      ? 'bg-[#0a66c2] text-white border-[#0a66c2]'
+                      : 'bg-white dark:bg-[#1c1d30] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800'
+                      }`}
+                  >
+                    No Tax Deduction (Exempt)
+                  </button>
+                </div>
+                <p className="text-[10px] text-slate-400 font-medium">
+                  {formState.enable_tax_deductions
+                    ? 'Income taxes will be deducted during monthly payroll calculations.'
+                    : 'Tax deductions disabled globally. Suitable for small startups & firms that do not withhold income tax.'}
+                </p>
+              </div>
+
+              {/* Statutory PF/ESI Toggle */}
+              <div className="space-y-1.5 pt-1">
+                <label className="text-[11px] font-bold text-slate-500 uppercase">Statutory PF & ESI Policy</label>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setFormState({ ...formState, enable_statutory_deductions: true })}
+                    className={`flex-1 h-9 rounded-sm font-extrabold text-xs transition-all border cursor-pointer ${formState.enable_statutory_deductions
+                      ? 'bg-[#0a66c2] text-white border-[#0a66c2]'
+                      : 'bg-white dark:bg-[#1c1d30] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800'
+                      }`}
+                  >
+                    Deduct PF/ESI
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormState({ ...formState, enable_statutory_deductions: false })}
+                    className={`flex-1 h-9 rounded-sm font-extrabold text-xs transition-all border cursor-pointer ${!formState.enable_statutory_deductions
+                      ? 'bg-[#0a66c2] text-white border-[#0a66c2]'
+                      : 'bg-white dark:bg-[#1c1d30] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800'
+                      }`}
+                  >
+                    No PF/ESI (Exempt)
+                  </button>
+                </div>
+                <p className="text-[10px] text-slate-400 font-medium">
+                  {formState.enable_statutory_deductions
+                    ? 'Standard PF and ESI contributions will be deducted.'
+                    : 'Statutory PF and ESI deductions disabled globally.'}
+                </p>
+              </div>
+
             </CardContent>
           </Card>
 
@@ -164,7 +232,7 @@ export function PayrollSettingsClient() {
                   <button
                     type="button"
                     onClick={() => setFormState({ ...formState, automation_enabled: true })}
-                    className={`flex-1 h-9 rounded-sm font-extrabold text-xs transition-all border ${formState.automation_enabled
+                    className={`flex-1 h-9 rounded-sm font-extrabold text-xs transition-all border cursor-pointer ${formState.automation_enabled
                       ? 'bg-[#0a66c2] text-white border-[#0a66c2]'
                       : 'bg-white dark:bg-[#1c1d30] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800'
                       }`}
@@ -174,7 +242,7 @@ export function PayrollSettingsClient() {
                   <button
                     type="button"
                     onClick={() => setFormState({ ...formState, automation_enabled: false })}
-                    className={`flex-1 h-9 rounded-sm font-extrabold text-xs transition-all border ${!formState.automation_enabled
+                    className={`flex-1 h-9 rounded-sm font-extrabold text-xs transition-all border cursor-pointer ${!formState.automation_enabled
                       ? 'bg-[#0a66c2] text-white border-[#0a66c2]'
                       : 'bg-white dark:bg-[#1c1d30] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800'
                       }`}
@@ -190,7 +258,7 @@ export function PayrollSettingsClient() {
                   <button
                     type="button"
                     onClick={() => setFormState({ ...formState, enable_leave_deductions: true })}
-                    className={`flex-1 h-9 rounded-sm font-extrabold text-xs transition-all border ${formState.enable_leave_deductions
+                    className={`flex-1 h-9 rounded-sm font-extrabold text-xs transition-all border cursor-pointer ${formState.enable_leave_deductions
                       ? 'bg-[#0a66c2] text-white border-[#0a66c2]'
                       : 'bg-white dark:bg-[#1c1d30] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800'
                       }`}
@@ -200,7 +268,7 @@ export function PayrollSettingsClient() {
                   <button
                     type="button"
                     onClick={() => setFormState({ ...formState, enable_leave_deductions: false })}
-                    className={`flex-1 h-9 rounded-sm font-extrabold text-xs transition-all border ${!formState.enable_leave_deductions
+                    className={`flex-1 h-9 rounded-sm font-extrabold text-xs transition-all border cursor-pointer ${!formState.enable_leave_deductions
                       ? 'bg-[#0a66c2] text-white border-[#0a66c2]'
                       : 'bg-white dark:bg-[#1c1d30] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800'
                       }`}

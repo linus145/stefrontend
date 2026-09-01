@@ -14,6 +14,12 @@ export const hrEmployeeService = {
   addManualEmployee: (data: any): Promise<BaseAPIResponse<any>> =>
     api.post<any>('/employees/employees/add-manual/', data).then(res => ({ status: 'success', message: '', data: res })),
 
+  bulkImportEmployees: (data: { employees: any[] }): Promise<BaseAPIResponse<any>> =>
+    api.post<any>('/employees/employees/bulk-import/', data).then(res => ({ status: 'success', message: '', data: res })),
+
+  getImportTaskStatus: (taskId: string): Promise<BaseAPIResponse<any>> =>
+    api.get<any>(`/employees/employees/import-status/${taskId}/`).then(res => ({ status: 'success', message: '', data: res })),
+
   updateEmployee: (id: string, data: any): Promise<BaseAPIResponse<any>> =>
     api.patch<any>(`/employees/employees/${id}/`, data).then(res => ({ status: 'success', message: '', data: res })),
 

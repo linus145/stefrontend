@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { User as UserIcon, Mail, Clock, BrainCircuit, Eye, CheckCircle, XCircle, ChevronDown, FileText, ArrowRight, MessageSquare, RefreshCw } from 'lucide-react';
+import { User as UserIcon, Mail, Clock, BrainCircuit, Eye, CheckCircle, XCircle, ChevronDown, FileText, ArrowRight, MessageSquare, RefreshCw, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { JobApplication, ApplicationStatus } from '@/types/jobs.types';
+import { ResumePreviewModal } from './resume-preview-modal';
 
 interface ApplicationCardProps {
   app: JobApplication;
@@ -19,6 +20,7 @@ export function ApplicationCard({
   isUpdatePending
 }: ApplicationCardProps) {
   const [isLetterOpen, setIsLetterOpen] = useState(false);
+  const [isResumeOpen, setIsResumeOpen] = useState(false);
   const statusDotColors: Record<ApplicationStatus, string> = {
     PENDING: 'bg-amber-500',
     REVIEWED: 'bg-blue-500',
@@ -94,16 +96,16 @@ export function ApplicationCard({
         <td className="px-4 py-2" onClick={(e) => e.stopPropagation()}>
           <div className="flex items-center gap-2">
             {app.resume_url ? (
-              <a
-                href={app.resume_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 rounded-[4px] text-xs font-semibold border border-blue-500/20 transition-colors shadow-sm"
-                title="View Resume"
+              <button
+                type="button"
+                onClick={() => setIsResumeOpen(true)}
+                data-agent={`view-resume-${app.id}`}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 rounded-[4px] text-xs font-semibold border border-blue-500/20 transition-colors shadow-sm cursor-pointer"
+                title="View Resume within page"
               >
                 <FileText className="w-3.5 h-3.5" />
                 Resume
-              </a>
+              </button>
             ) : (
               <span className="text-[11px] text-muted-foreground/50 italic">No resume</span>
             )}
@@ -111,8 +113,9 @@ export function ApplicationCard({
             {app.cover_letter && (
               <span className="relative group/tooltip inline-block">
                 <button
+                  type="button"
                   onClick={() => setIsLetterOpen(true)}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-muted/40 text-muted-foreground hover:bg-muted/80 rounded-[4px] text-xs font-semibold border border-border/80 transition-colors shadow-sm"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-muted/40 text-muted-foreground hover:bg-muted/80 rounded-[4px] text-xs font-semibold border border-border/80 transition-colors shadow-sm cursor-pointer"
                   title="View Cover Letter"
                 >
                   <MessageSquare className="w-3.5 h-3.5" />
@@ -255,9 +258,10 @@ export function ApplicationCard({
                   </div>
                   <button
                     onClick={() => setIsLetterOpen(false)}
-                    className="text-muted-foreground hover:text-foreground text-xs"
+                    aria-label="Close Cover Letter"
+                    className="w-7 h-7 flex items-center justify-center rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-all"
                   >
-                    Close
+                    <X className="w-4 h-4" />
                   </button>
                 </div>
                 <div className="bg-muted/30 border border-border/50 rounded-[4px] p-4 text-sm text-foreground/90 leading-relaxed max-h-[60vh] overflow-y-auto italic font-medium whitespace-pre-wrap">
@@ -273,6 +277,19 @@ export function ApplicationCard({
                 </div>
               </div>
             </div>
+          </td>
+        </tr>
+      )}
+
+      {/* Resume Preview Modal overlay */}
+      {isResumeOpen && (
+        <tr className="h-0">
+          <td colSpan={6} className="p-0 border-0 h-0">
+            <ResumePreviewModal
+              isOpen={isResumeOpen}
+              onClose={() => setIsResumeOpen(false)}
+              app={app}
+            />
           </td>
         </tr>
       )}

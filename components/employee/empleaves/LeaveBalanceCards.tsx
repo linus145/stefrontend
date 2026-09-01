@@ -22,6 +22,27 @@ export function LeaveBalanceCards({
   balancesList,
   onRequestLeave
 }: LeaveBalanceCardsProps) {
+  // Deduplicate balances by normalized leave category
+  const uniqueBalances = React.useMemo(() => {
+    const map = new Map<string, any>();
+    (balancesList || []).forEach((b: any) => {
+      const rawName = (b.leave_type_detail?.category || b.leave_type_name || b.leave_type?.name || 'OTHER').trim().toLowerCase();
+      let key = rawName;
+      if (rawName.includes('annual') || rawName.includes('vacation')) key = 'annual';
+      else if (rawName.includes('sick') || rawName.includes('medical')) key = 'sick';
+      else if (rawName.includes('casual') || rawName.includes('personal')) key = 'casual';
+      else if (rawName.includes('parental') || rawName.includes('maternity') || rawName.includes('paternity') || rawName.includes('occasional')) key = 'parental';
+      else if (rawName.includes('national') || rawName.includes('holiday')) key = 'national';
+
+      const currentUsed = parseFloat(b.used_days || '0');
+      const existing = map.get(key);
+      if (!existing || currentUsed > parseFloat(existing.used_days || '0')) {
+        map.set(key, b);
+      }
+    });
+    return Array.from(map.values());
+  }, [balancesList]);
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
@@ -43,7 +64,7 @@ export function LeaveBalanceCards({
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {balancesList.map((balance: any) => {
+        {uniqueBalances.map((balance: any) => {
           const total = parseFloat(balance.total_days || '10');
           const used = parseFloat(balance.used_days || '0');
           const remaining = total - used;

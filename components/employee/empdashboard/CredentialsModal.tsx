@@ -35,11 +35,11 @@ export function CredentialsModal({
     <div className="fixed inset-0 z-50 bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-300">
       <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-sm shadow-2xl p-6 relative overflow-hidden animate-in zoom-in-95 duration-200">
         {/* Top accent bar */}
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-amber-500" />
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-[#0a66c2]" />
 
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-xs font-bold uppercase tracking-widest text-slate-850 dark:text-slate-200 flex items-center gap-1.5 font-sans">
-            <Key className="h-4 w-4 text-amber-500" /> Update Account Credentials
+            <Key className="h-4 w-4 text-[#0a66c2]" /> Update Account Credentials
           </h3>
           <button
             type="button"
@@ -59,7 +59,7 @@ export function CredentialsModal({
               value={newPortalUsername}
               onChange={(e) => setNewPortalUsername(e.target.value)}
               placeholder="Enter unique portal username"
-              className="w-full rounded-sm bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs px-3 py-2 transition-colors focus:ring-1 focus:ring-amber-500 focus:border-amber-500 outline-none font-semibold"
+              className="w-full rounded-sm bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs px-3 py-2 transition-colors focus:ring-1 focus:ring-[#0a66c2] focus:border-[#0a66c2] outline-none font-semibold"
             />
             <p className="text-[9px] text-slate-450 dark:text-slate-500">Must be unique. You can use this to login to your employee portal.</p>
           </div>
@@ -72,7 +72,7 @@ export function CredentialsModal({
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="Enter new password to change"
-                className="w-full rounded-sm bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs px-3 py-2 pr-10 transition-colors focus:ring-1 focus:ring-amber-500 focus:border-amber-500 outline-none font-mono"
+                className="w-full rounded-sm bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs px-3 py-2 pr-10 transition-colors focus:ring-1 focus:ring-[#0a66c2] focus:border-[#0a66c2] outline-none font-mono"
               />
               <button
                 type="button"
@@ -97,7 +97,7 @@ export function CredentialsModal({
             <Button
               type="submit"
               disabled={isSubmittingCredentials}
-              className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-[10px] uppercase tracking-widest rounded-sm px-6 cursor-pointer"
+              className="bg-[#0a66c2] hover:bg-[#084e96] text-white font-bold text-[10px] uppercase tracking-widest rounded-sm px-6 cursor-pointer shadow-sm shadow-blue-500/15"
             >
               {isSubmittingCredentials ? (
                 <>

@@ -69,7 +69,7 @@ export function DashboardHeader({
           size="sm"
           className="h-8 px-2 sm:px-3 text-slate-550 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 border border-slate-200 dark:border-slate-800 rounded-sm mr-1 sm:mr-2"
         >
-          <Key className="h-3.5 w-3.5 sm:mr-2 text-amber-500" />
+          <Key className="h-3.5 w-3.5 sm:mr-2 text-[#0a66c2]" />
           <span className="hidden sm:inline-block text-xs tracking-wider font-bold">Credentials</span>
         </Button>
         <Button

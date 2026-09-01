@@ -5,8 +5,11 @@ export const hrLeaveService = {
   getLeaveRequests: (params?: any): Promise<BaseAPIResponse<PaginatedResponse<any>>> => 
     api.get<any>('/leave_management/requests/', { params }).then(res => ({ status: 'success', message: '', data: res })),
     
-  getLeaveBalances: (): Promise<BaseAPIResponse<PaginatedResponse<any>>> => 
-    api.get<any>('/leave_management/balances/').then(res => ({ status: 'success', message: '', data: res })),
+  getLeaveBalances: (params?: any): Promise<BaseAPIResponse<PaginatedResponse<any>>> => 
+    api.get<any>('/leave_management/balances/', { params }).then(res => ({ status: 'success', message: '', data: res })),
+    
+  updateLeaveBalance: (id: string, data: any): Promise<BaseAPIResponse<any>> => 
+    api.patch<any>(`/leave_management/balances/${id}/`, data).then(res => ({ status: 'success', message: '', data: res })),
     
   getLeaveTypes: (): Promise<BaseAPIResponse<PaginatedResponse<any>>> => 
     api.get<any>('/leave_management/types/').then(res => ({ status: 'success', message: '', data: res })),
@@ -31,5 +34,11 @@ export const hrLeaveService = {
 
   createLeaveRequest: (data: any): Promise<BaseAPIResponse<any>> => 
     api.post<any>('/leave_management/requests/', data).then(res => ({ status: 'success', message: '', data: res })),
+
+  getLeaveSettings: (): Promise<BaseAPIResponse<any>> =>
+    api.get<any>('/leave_management/settings/').then(res => ({ status: 'success', message: '', data: res })),
+
+  updateLeaveSettings: (data: any): Promise<BaseAPIResponse<any>> =>
+    api.post<any>('/leave_management/settings/update_settings/', data).then(res => ({ status: 'success', message: '', data: res })),
 };
 

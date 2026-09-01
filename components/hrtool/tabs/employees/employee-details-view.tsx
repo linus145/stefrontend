@@ -5,16 +5,15 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { hrOrgService, hrEmployeeService } from '@/services/hr';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import {
-  User, Shield, FileText, Calendar, Building, Globe, MapPin,
-  Phone, Mail, CheckCircle2, AlertCircle, Briefcase, Loader2, Save, ArrowLeft,
-  Landmark, CreditCard, Eye, EyeOff, Send, KeyRound
+  User, Shield, Loader2, Save, ArrowLeft, Send
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { EmployeePersonalTab } from './details/employee-personal-tab';
+import { EmployeeStatutoryTab } from './details/employee-statutory-tab';
 
 interface EmployeeDetailsViewProps {
   employeeId: string;
@@ -100,7 +99,7 @@ export function EmployeeDetailsView({ employeeId, onBack }: EmployeeDetailsViewP
         last_name: employee.last_name || '',
         email: employee.email || '',
         phone: employee.phone || '',
-        salary: employee.salary ? parseFloat(employee.salary).toString() : '0',
+        salary: employee.salary ? String(employee.salary) : '',
         employment_type: employee.employment_type || 'FULL_TIME',
         address: employee.address || '',
         status: employee.status || 'ACTIVE',
@@ -110,21 +109,17 @@ export function EmployeeDetailsView({ employeeId, onBack }: EmployeeDetailsViewP
         department: employee.department || '',
         reporting_manager: employee.reporting_manager || '',
 
-        // Aadhaar
         aadhaar_number: employee.aadhaar_detail?.aadhaar_number || '',
-        aadhaar_enrollment_no: employee.aadhaar_detail?.enrollment_no || '',
-        aadhaar_verified: employee.aadhaar_detail?.verified || false,
+        aadhaar_enrollment_no: employee.aadhaar_detail?.aadhaar_enrollment_no || '',
+        aadhaar_verified: !!employee.aadhaar_detail?.aadhaar_verified,
 
-        // PAN
         pan_number: employee.pan_detail?.pan_number || '',
-        pan_verified: employee.pan_detail?.verified || false,
+        pan_verified: !!employee.pan_detail?.pan_verified,
 
-        // Joining details
         joining_date: employee.joining_detail?.joining_date || employee.joining_date || '',
         probation_period: employee.joining_detail?.probation_period || '3 Months',
         confirmation_date: employee.joining_detail?.confirmation_date || '',
 
-        // Bank Details
         bank_name: employee.bank_detail?.bank_name || '',
         account_number: employee.bank_detail?.account_number || '',
         ifsc_code: employee.bank_detail?.ifsc_code || '',
@@ -136,107 +131,159 @@ export function EmployeeDetailsView({ employeeId, onBack }: EmployeeDetailsViewP
     }
   }, [employee]);
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const handleCheckboxChange = (name: string, checked: boolean) => {
+    setFormData((prev) => ({ ...prev, [name]: checked }));
+  };
+
   const updateMutation = useMutation({
-    mutationFn: (data: any) => hrEmployeeService.updateEmployee(employeeId, data),
+    mutationFn: (payload: any) => hrEmployeeService.updateEmployee(employeeId, payload),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['employees'] });
       queryClient.invalidateQueries({ queryKey: ['employee-detail', employeeId] });
-      queryClient.invalidateQueries({ queryKey: ['departments'] });
-      queryClient.invalidateQueries({ queryKey: ['designations'] });
-      toast.success('Employee profile and bank details updated successfully.');
-      onBack();
+      queryClient.invalidateQueries({ queryKey: ['employees'] });
+      toast.success('Employee profile updated successfully');
     },
-    onError: () => toast.error('Failed to update employee details.'),
+    onError: (err: any) => {
+      const errorMsg = err.response?.data?.email?.[0] || 
+                       err.response?.data?.employee_id?.[0] || 
+                       err.response?.data?.message || 
+                       err.message || 
+                       'Failed to update employee';
+      toast.error(errorMsg);
+    }
   });
 
   const sendCredentialsMutation = useMutation({
-    mutationFn: (data: { password?: string; portal_username?: string }) =>
-      hrEmployeeService.sendCredentials(employeeId, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['employee-detail', employeeId] });
-      toast.success('Password set and credentials email sent successfully!');
-      setFormData(prev => ({ ...prev, password: '' }));
+    mutationFn: () => hrEmployeeService.sendCredentials(employeeId),
+    onSuccess: (res: any) => {
+      if (res?.data?.sent) {
+        toast.success(`Credentials email dispatched successfully to ${res.data.email}`);
+      } else {
+        toast.info(`Email registered: ${res?.data?.email}. Portal link: ${res?.data?.login_url}`);
+      }
     },
-    onError: () => toast.error('Failed to send credentials email.'),
+    onError: (err: any) => {
+      toast.error(err.message || 'Failed to dispatch credentials email.');
+    }
   });
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { id, type } = e.target;
-    const value = type === 'checkbox' ? (e.target as HTMLInputElement).checked : e.target.value;
-    setFormData(prev => ({ ...prev, [id]: value }));
-  };
-
-  const handleCheckboxChange = (id: string, checked: boolean) => {
-    setFormData(prev => ({ ...prev, [id]: checked }));
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const payload = {
+    const payload: any = {
       first_name: formData.first_name,
       last_name: formData.last_name,
       email: formData.email,
       phone: formData.phone,
-      salary: formData.salary ? parseFloat(formData.salary) : 0,
+      salary: formData.salary ? Number(formData.salary) : null,
       employment_type: formData.employment_type,
       address: formData.address,
       status: formData.status,
       role: formData.role,
-      designation: formData.role === 'MANAGER' ? null : (formData.designation || null),
+      designation: formData.designation || null,
+      employee_id: formData.employee_id,
       department: formData.department || null,
       reporting_manager: formData.reporting_manager || null,
-      employee_id: formData.employee_id,
-      portal_username: formData.portal_username || undefined,
-      // Only send password if it was changed from the stored value
-      ...(formData.password && formData.password !== (employee?.portal_password || '') ? { password: formData.password } : {}),
+
       aadhaar_detail: {
         aadhaar_number: formData.aadhaar_number,
-        enrollment_no: formData.aadhaar_enrollment_no,
-        verified: formData.aadhaar_verified,
+        aadhaar_enrollment_no: formData.aadhaar_enrollment_no,
+        aadhaar_verified: formData.aadhaar_verified
       },
+
       pan_detail: {
         pan_number: formData.pan_number,
-        verified: formData.pan_verified,
+        pan_verified: formData.pan_verified
       },
+
       joining_detail: {
         joining_date: formData.joining_date || null,
         probation_period: formData.probation_period,
-        confirmation_date: formData.confirmation_date || null,
+        confirmation_date: formData.confirmation_date || null
       },
+
       bank_detail: {
         bank_name: formData.bank_name,
         account_number: formData.account_number,
         ifsc_code: formData.ifsc_code,
         account_holder_name: formData.account_holder_name,
-        branch_name: formData.branch_name,
+        branch_name: formData.branch_name
       }
     };
+
+    if (formData.password) {
+      payload.password = formData.password;
+    }
+    if (formData.portal_username) {
+      payload.portal_username = formData.portal_username;
+    }
+
     updateMutation.mutate(payload);
   };
 
+  if (detailsLoading) {
+    return (
+      <div className="flex h-96 items-center justify-center">
+        <div className="flex flex-col items-center gap-2">
+          <Loader2 className="h-8 w-8 animate-spin text-[#0a66c2]" />
+          <p className="text-sm font-semibold text-muted-foreground">Loading employee record...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6 max-w-3xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-300">
-      {/* Back Button */}
+    <div className="space-y-6">
+      {/* Top action bar */}
       <div className="flex items-center justify-between">
         <Button
-          type="button"
-          onClick={onBack}
           variant="outline"
-          className="h-10 px-4 border-border hover:bg-blue-50/30 text-muted-foreground font-bold text-xs rounded-sm gap-2 shadow-sm transition-all"
-          data-agent="employee-back-btn"
+          onClick={onBack}
+          className="rounded-sm border-border bg-white text-muted-foreground hover:bg-muted font-bold text-xs gap-2"
+          data-agent="employee-back-button"
         >
-          <ArrowLeft className="h-4 w-4 text-[#0a66c2]" /> Back
+          <ArrowLeft className="h-4 w-4" /> Back to Directory
         </Button>
+
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => sendCredentialsMutation.mutate()}
+            disabled={sendCredentialsMutation.isPending}
+            className="rounded-sm border-border bg-white text-[#0a66c2] hover:bg-[#0a66c2]/5 font-bold text-xs gap-2 shadow-sm"
+            data-agent="employee-dispatch-credentials-btn"
+          >
+            {sendCredentialsMutation.isPending ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Send className="h-3.5 w-3.5" />
+            )}
+            Send Portal Access Email
+          </Button>
+
+          <Button
+            onClick={handleSubmit}
+            disabled={updateMutation.isPending}
+            className="rounded-sm bg-[#0a66c2] text-white hover:bg-[#084e96] font-bold text-xs gap-2 shadow-sm"
+            data-agent="employee-save-changes-btn"
+          >
+            {updateMutation.isPending ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Save className="h-3.5 w-3.5" />
+            )}
+            Save Profile
+          </Button>
+        </div>
       </div>
 
-      {detailsLoading ? (
-        <Card className="border-border/40 bg-card/40 backdrop-blur-md rounded-sm h-96 flex flex-col items-center justify-center gap-3">
-          <Loader2 className="h-8 w-8 text-[#0a66c2] animate-spin" />
-          <p className="text-xs font-semibold text-muted-foreground">Fetching full employee profile...</p>
-        </Card>
-      ) : (
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <Card className="border-border/40 bg-card/40 backdrop-blur-md rounded-sm shadow-xl overflow-hidden">
+      <form onSubmit={handleSubmit}>
+        <div className="space-y-6">
+          <Card className="border-border/40 bg-card rounded-sm shadow-sm overflow-hidden">
             {/* Header section in card */}
             <div className="bg-muted/30 p-6 border-b border-border/40 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-4 text-center sm:text-left">
@@ -298,394 +345,26 @@ export function EmployeeDetailsView({ employeeId, onBack }: EmployeeDetailsViewP
 
             <CardContent className="p-6">
               {activeTab === 'personal' ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  {/* Employee ID */}
-                  <div className="space-y-1.5 sm:col-span-2">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Employee ID</label>
-                    <Input id="employee_id" value={formData.employee_id} onChange={handleChange} required className="rounded-sm bg-white" placeholder="e.g. EMP-101" data-agent="employee-id-input" />
-                  </div>
-
-                  {/* First Name */}
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">First Name</label>
-                    <Input id="first_name" value={formData.first_name} onChange={handleChange} required className="rounded-sm bg-white" data-agent="employee-first-name-input" />
-                  </div>
-
-                  {/* Last Name */}
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Last Name</label>
-                    <Input id="last_name" value={formData.last_name} onChange={handleChange} required className="rounded-sm bg-white" data-agent="employee-last-name-input" />
-                  </div>
-
-                  {/* Email */}
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Email</label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input id="email" type="email" value={formData.email} onChange={handleChange} required className="rounded-sm pl-10 bg-white" data-agent="employee-email-input" />
-                    </div>
-                  </div>
-
-                  {/* Phone */}
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Phone</label>
-                    <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input id="phone" value={formData.phone} onChange={handleChange} className="rounded-sm pl-10 bg-white" data-agent="employee-phone-input" />
-                    </div>
-                  </div>
-
-                  {/* Salary */}
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Salary (Monthly)</label>
-                    <Input id="salary" type="number" value={formData.salary} onChange={handleChange} className="rounded-sm bg-white" data-agent="employee-salary-input" />
-                  </div>
-
-                  {/* Employment Type */}
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Employment Type</label>
-                    <select
-                      id="employment_type"
-                      value={formData.employment_type}
-                      onChange={handleChange}
-                      className="flex h-10 w-full items-center justify-between rounded-sm border border-input bg-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
-                      data-agent="employee-type-select"
-                    >
-                      <option value="FULL_TIME">Permanent</option>
-                      <option value="CONTRACT">Contract</option>
-                      <option value="INTERN">Intern</option>
-                    </select>
-                  </div>
-
-                  {/* Status */}
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Status</label>
-                    <select
-                      id="status"
-                      value={formData.status}
-                      onChange={handleChange}
-                      className="flex h-10 w-full items-center justify-between rounded-sm border border-input bg-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
-                      data-agent="employee-status-select"
-                    >
-                      <option value="ACTIVE">Active</option>
-                      <option value="INACTIVE">Inactive</option>
-                      <option value="ON_BOARDING">On Boarding</option>
-                      <option value="EXITED">Exited</option>
-                    </select>
-                  </div>
-
-                  {/* Portal Role */}
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Portal Role</label>
-                    {formData.role === 'MANAGER' ? (
-                      <Input
-                        value="Manager"
-                        disabled
-                        className="rounded-sm bg-muted text-muted-foreground font-semibold text-sm cursor-not-allowed h-10"
-                      />
-                    ) : (
-                      <select
-                        id="role"
-                        value={formData.role}
-                        onChange={handleChange}
-                        className="flex h-10 w-full items-center justify-between rounded-sm border border-input bg-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
-                        data-agent="employee-role-select"
-                      >
-                        <option value="EMPLOYEE">Employee</option>
-                        <option value="MANAGER">Manager</option>
-                      </select>
-                    )}
-                  </div>
-
-                  {/* Designation */}
-                  {formData.role !== 'MANAGER' && (
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Designation</label>
-                      <select
-                        id="designation"
-                        value={formData.designation}
-                        onChange={handleChange}
-                        className="flex h-10 w-full items-center justify-between rounded-sm border border-input bg-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
-                        data-agent="employee-designation-select"
-                      >
-                        <option value="">Select Designation</option>
-                        {designations.map((d: any) => (
-                          <option key={d.id} value={d.id}>{d.title}</option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
-
-                  {/* Department */}
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Department</label>
-                    <select
-                      id="department"
-                      value={formData.department}
-                      onChange={handleChange}
-                      className="flex h-10 w-full items-center justify-between rounded-sm border border-input bg-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
-                      data-agent="employee-department-select"
-                    >
-                      <option value="">Select Department</option>
-                      {departments.map((d: any) => (
-                        <option key={d.id} value={d.id}>{d.name}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Reporting Manager */}
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Reporting Manager</label>
-                    <select
-                      id="reporting_manager"
-                      value={formData.reporting_manager}
-                      onChange={handleChange}
-                      className="flex h-10 w-full items-center justify-between rounded-sm border border-input bg-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
-                      data-agent="employee-reporting-manager-select"
-                    >
-                      <option value="">Select Manager</option>
-                      {managers.map((m: any) => (
-                        <option key={m.id} value={m.id}>
-                          {m.first_name} {m.last_name} ({m.employee_id || 'MGR'})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Address */}
-                  <div className="space-y-1.5 sm:col-span-2">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Physical Address</label>
-                    <textarea
-                      id="address"
-                      value={formData.address}
-                      onChange={handleChange}
-                      rows={3}
-                      className="w-full rounded-sm border border-input bg-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring resize-none"
-                      data-agent="employee-address-textarea"
-                    />
-                  </div>
-
-                  {/* Portal Access Credentials */}
-                  <Card className="border-border/40 bg-card/10 rounded-sm shadow-sm sm:col-span-2 mt-4 animate-in fade-in duration-300">
-                    <CardHeader className="py-3 px-4 border-b border-border/30 bg-muted/10">
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-foreground flex items-center gap-1.5">
-                        <KeyRound className="h-4 w-4 text-[#0a66c2]" /> Portal Access Credentials
-                      </h4>
-                      <p className="text-[10px] text-muted-foreground mt-1">
-                        Set the employee&apos;s login password and send it via email. The password will be included in the credentials email.
-                      </p>
-                    </CardHeader>
-                    <CardContent className="p-4 space-y-4">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="space-y-1.5">
-                          <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Portal Username</label>
-                          <div className="relative">
-                            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input 
-                              id="portal_username"
-                              value={formData.portal_username} 
-                              onChange={handleChange} 
-                              className="rounded-sm pl-10 bg-white font-semibold text-xs text-foreground" 
-                              placeholder="e.g. emp_john123"
-                              data-agent="employee-portal-username-input"
-                            />
-                          </div>
-                        </div>
-                        <div className="space-y-1.5">
-                          <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Set / Reset Password</label>
-                          <div className="relative">
-                            <Input 
-                               id="password" 
-                               type={showPassword ? "text" : "password"} 
-                               value={formData.password} 
-                               onChange={handleChange} 
-                               className="rounded-sm pr-10 bg-white" 
-                               placeholder="Enter new password" 
-                               data-agent="employee-password-reset-input" 
-                             />
-                            <button
-                              type="button"
-                              onClick={() => setShowPassword(!showPassword)}
-                              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors outline-none cursor-pointer"
-                            >
-                              {showPassword ? (
-                                <EyeOff className="h-4 w-4" />
-                              ) : (
-                                <Eye className="h-4 w-4" />
-                              )}
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
+                <EmployeePersonalTab
+                  formData={formData}
+                  handleChange={handleChange}
+                  designations={designations}
+                  departments={departments}
+                  managers={managers}
+                  showPassword={showPassword}
+                  setShowPassword={setShowPassword}
+                />
               ) : (
-                <div className="space-y-6">
-                  {/* Aadhaar Details Card */}
-                  <Card className="border-border/40 bg-card rounded-sm shadow-sm">
-                    <CardHeader className="py-3 px-4 border-b border-border/30 bg-muted/10">
-                      <div className="flex items-center justify-between">
-                        <h4 className="text-xs font-bold uppercase tracking-wider text-foreground flex items-center gap-1.5">
-                          <Shield className="h-4 w-4 text-[#0a66c2]" /> Aadhaar Details (UID)
-                        </h4>
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            id="aadhaar_verified"
-                            checked={formData.aadhaar_verified}
-                            onChange={(e) => handleCheckboxChange('aadhaar_verified', e.target.checked)}
-                            className="h-4 w-4 text-[#0a66c2] border-border rounded cursor-pointer"
-                            data-agent="employee-aadhaar-verified-checkbox"
-                          />
-                          <label htmlFor="aadhaar_verified" className="text-[11px] font-bold text-muted-foreground cursor-pointer select-none uppercase tracking-wide">
-                            Verified
-                          </label>
-                          {formData.aadhaar_verified ? (
-                            <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                          ) : (
-                            <AlertCircle className="h-4 w-4 text-amber-500" />
-                          )}
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="space-y-1.5">
-                        <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Aadhaar Number (12 Digits)</label>
-                        <Input id="aadhaar_number" value={formData.aadhaar_number} onChange={handleChange} placeholder="XXXX XXXX XXXX" maxLength={14} className="rounded-sm bg-white" data-agent="employee-aadhaar-number-input" />
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Enrollment Number (Optional)</label>
-                        <Input id="aadhaar_enrollment_no" value={formData.aadhaar_enrollment_no} onChange={handleChange} placeholder="Enrollment No" className="rounded-sm bg-white" data-agent="employee-aadhaar-enrollment-input" />
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* PAN Details Card */}
-                  <Card className="border-border/40 bg-card rounded-sm shadow-sm">
-                    <CardHeader className="py-3 px-4 border-b border-border/30 bg-muted/10">
-                      <div className="flex items-center justify-between">
-                        <h4 className="text-xs font-bold uppercase tracking-wider text-foreground flex items-center gap-1.5">
-                          <FileText className="h-4 w-4 text-[#0a66c2]" /> PAN Details
-                        </h4>
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            id="pan_verified"
-                            checked={formData.pan_verified}
-                            onChange={(e) => handleCheckboxChange('pan_verified', e.target.checked)}
-                            className="h-4 w-4 text-[#0a66c2] border-border rounded cursor-pointer"
-                            data-agent="employee-pan-verified-checkbox"
-                          />
-                          <label htmlFor="pan_verified" className="text-[11px] font-bold text-muted-foreground cursor-pointer select-none uppercase tracking-wide">
-                            Verified
-                          </label>
-                          {formData.pan_verified ? (
-                            <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                          ) : (
-                            <AlertCircle className="h-4 w-4 text-amber-500" />
-                          )}
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="p-4">
-                      <div className="space-y-1.5 max-w-sm">
-                        <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">PAN Number</label>
-                        <Input id="pan_number" value={formData.pan_number} onChange={handleChange} placeholder="ABCDE1234F" maxLength={10} className="rounded-sm bg-white" data-agent="employee-pan-number-input" />
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Bank Details Card */}
-                  <Card className="border-border/40 bg-card rounded-sm shadow-sm">
-                    <CardHeader className="py-3 px-4 border-b border-border/30 bg-muted/10">
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-foreground flex items-center gap-1.5">
-                        <Landmark className="h-4 w-4 text-[#0a66c2]" /> Bank Account Details
-                      </h4>
-                    </CardHeader>
-                    <CardContent className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="space-y-1.5">
-                        <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Bank Name</label>
-                        <div className="relative">
-                          <Landmark className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input id="bank_name" value={formData.bank_name} onChange={handleChange} placeholder="e.g. State Bank of India" className="rounded-sm bg-white pl-10" data-agent="employee-bank-name-input" />
-                        </div>
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Account Number</label>
-                        <div className="relative">
-                          <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input id="account_number" value={formData.account_number} onChange={handleChange} placeholder="Account Number" className="rounded-sm bg-white pl-10" data-agent="employee-bank-account-input" />
-                        </div>
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">IFSC / Routing Code</label>
-                        <Input id="ifsc_code" value={formData.ifsc_code} onChange={handleChange} placeholder="IFSC Code" className="rounded-sm bg-white" data-agent="employee-bank-ifsc-input" />
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Account Holder Name</label>
-                        <Input id="account_holder_name" value={formData.account_holder_name} onChange={handleChange} placeholder="Holder Name" className="rounded-sm bg-white" data-agent="employee-bank-holder-input" />
-                      </div>
-                      <div className="space-y-1.5 sm:col-span-2">
-                        <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Branch Location / Address</label>
-                        <Input id="branch_name" value={formData.branch_name} onChange={handleChange} placeholder="Branch Location" className="rounded-sm bg-white" data-agent="employee-bank-branch-input" />
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Joining & Onboarding details */}
-                  <Card className="border-border/40 bg-card rounded-sm shadow-sm">
-                    <CardHeader className="py-3 px-4 border-b border-border/30 bg-muted/10">
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-foreground flex items-center gap-1.5">
-                        <Calendar className="h-4 w-4 text-[#0a66c2]" /> Onboarding & Joining Details
-                      </h4>
-                    </CardHeader>
-                    <CardContent className="p-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
-                      <div className="space-y-1.5">
-                        <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Date Joined</label>
-                        <Input id="joining_date" type="date" value={formData.joining_date} onChange={handleChange} className="rounded-sm bg-white" data-agent="employee-joining-date-input" />
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Probation Period</label>
-                        <Input id="probation_period" value={formData.probation_period} onChange={handleChange} placeholder="e.g. 3 Months" className="rounded-sm bg-white" data-agent="employee-probation-input" />
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Confirmation Date</label>
-                        <Input id="confirmation_date" type="date" value={formData.confirmation_date} onChange={handleChange} className="rounded-sm bg-white" data-agent="employee-confirmation-date-input" />
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
+                <EmployeeStatutoryTab
+                  formData={formData}
+                  handleChange={handleChange}
+                  handleCheckboxChange={handleCheckboxChange}
+                />
               )}
             </CardContent>
-
-            {/* Footer inside card */}
-            <div className="p-6 border-t border-border/40 bg-muted/20 flex items-center justify-end gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onBack}
-                className="rounded-sm h-10 px-5 text-xs font-bold border-border"
-                data-agent="employee-cancel-button"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={updateMutation.isPending}
-                className="bg-[#0a66c2] text-white hover:bg-[#004182] rounded-sm h-10 px-8 text-xs font-bold flex items-center gap-2 shadow-md hover:shadow-lg transition-all"
-                data-agent="employee-submit-button"
-              >
-                {updateMutation.isPending ? (
-                  <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</>
-                ) : (
-                  <><Save className="w-4 h-4" /> Save Changes</>
-                )}
-              </Button>
-            </div>
           </Card>
-        </form>
-      )}
+        </div>
+      </form>
     </div>
   );
 }

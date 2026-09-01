@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { hrPayrollService } from '@/services/hr';
@@ -9,13 +10,16 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { LocalLoader } from '@/components/ui/local-loader';
+import { usePayrollProgress } from '@/context/PayrollProgressContext';
 import { 
   ShieldCheck, Calendar, Check, X, ShieldAlert, ArrowRight, Download 
 } from 'lucide-react';
 
 export function PayrollApprovalsClient() {
+  const router = useRouter();
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const { startProgress } = usePayrollProgress();
   const [selectedRun, setSelectedRun] = React.useState<any | null>(null);
 
   const { data: approvalsRes, isLoading } = useQuery({
@@ -137,6 +141,16 @@ export function PayrollApprovalsClient() {
 
   const approvalCheck = getApprovalStatusAndCheck();
 
+  const handleApprove = () => {
+    if (!selectedRun) return;
+    const isFinalStage = !approvalCheck.currentStage || approvalCheck.currentStage.toLowerCase().includes('director') || !settingsRes?.data?.director_approval_required;
+
+    if (isFinalStage) {
+      startProgress(selectedRun.id, selectedRun.records_count || runRecords.length || 13);
+    }
+    approveMutation.mutate(selectedRun.id);
+  };
+
   // Drilldown audit mode
   if (selectedRun) {
     return (
@@ -171,7 +185,7 @@ export function PayrollApprovalsClient() {
               Reject run
             </Button>
             <Button 
-              onClick={() => approveMutation.mutate(selectedRun.id)}
+              onClick={handleApprove}
               disabled={approveMutation.isPending || !approvalCheck.allowed}
               data-agent="payroll-run-approve-btn"
               className="bg-[#0a66c2] hover:bg-[#084e96] text-white shadow-md shadow-blue-500/15 rounded-sm text-xs font-bold py-2 px-4 cursor-pointer transition-all duration-300 flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -206,7 +220,7 @@ export function PayrollApprovalsClient() {
                   <th className="py-2.5 px-4 text-[10px] font-bold tracking-wide text-slate-400">Reimbursement</th>
                   <th className="py-2.5 px-4 text-[10px] font-bold tracking-wide text-slate-400">Deductions (tax, pf)</th>
                   <th className="py-2.5 px-4 text-[10px] font-bold tracking-wide text-slate-400">Net payout</th>
-                  <th className="py-2.5 px-4 text-[10px] font-bold tracking-wide text-slate-400">Deduction status</th>
+                  <th className="py-2.5 px-4 text-[10px] font-bold tracking-wide text-slate-400">Payout status</th>
                   <th className="py-2.5 px-4 text-[10px] font-bold tracking-wide text-slate-400 text-right">Actions</th>
                 </tr>
               </thead>

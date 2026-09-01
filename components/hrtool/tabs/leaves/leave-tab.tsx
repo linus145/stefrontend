@@ -38,6 +38,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { EmployeeBalancesView } from './components/employee-balances-view';
+import { LeaveSettingsView } from './components/leave-settings-view';
 
 interface LeaveTabProps {
   filterStatus?: 'pending' | 'approved';
@@ -66,7 +68,7 @@ export function LeaveTab({ filterStatus, subTab }: LeaveTabProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingType, setEditingType] = useState<any | null>(null);
   const [deleteTypeTarget, setDeleteTypeTarget] = useState<{ id: string; name: string } | null>(null);
-  
+
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('OTHER');
@@ -172,6 +174,8 @@ export function LeaveTab({ filterStatus, subTab }: LeaveTabProps) {
     }
   };
 
+  const handleSaveType = handleSubmit;
+
   const approveMutation = useMutation({
     mutationFn: (id: string) => hrLeaveService.approveLeave(id),
     onSuccess: () => {
@@ -223,6 +227,14 @@ export function LeaveTab({ filterStatus, subTab }: LeaveTabProps) {
 
   const header = getPageHeader();
 
+  if (subTab === 'leave-balances') {
+    return <EmployeeBalancesView />;
+  }
+
+  if (subTab === 'leave-settings') {
+    return <LeaveSettingsView />;
+  }
+
   if (subTab === 'leave-company') {
     return (
       <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
@@ -230,7 +242,7 @@ export function LeaveTab({ filterStatus, subTab }: LeaveTabProps) {
           <div>
             <h2 className="text-2xl font-bold tracking-tight">Company Leaves</h2>
           </div>
-          <Button 
+          <Button
             onClick={handleCreate}
             data-agent="leave-add-type-btn"
             className="bg-[#0a66c2] hover:bg-[#004182] text-white rounded-sm font-bold shadow-md shadow-blue-500/10 px-4 py-2 text-xs flex items-center gap-1.5 transition-all"
@@ -268,7 +280,7 @@ export function LeaveTab({ filterStatus, subTab }: LeaveTabProps) {
               </div>
               <h3 className="text-base font-bold">No Leave Categories</h3>
               <p className="text-xs text-muted-foreground max-w-sm">Define your organization's leaves (e.g. Sick, Casual, Annual) to allow employees to request time off.</p>
-              <Button 
+              <Button
                 onClick={handleCreate}
                 variant="outline"
                 className="text-xs font-semibold rounded-sm border-blue-500/30 text-blue-600 hover:bg-blue-500/5 mt-2"
@@ -343,7 +355,7 @@ export function LeaveTab({ filterStatus, subTab }: LeaveTabProps) {
                     </Badge>
                     <Badge variant="outline" className={cn(
                       "text-[8px] px-1.5 py-0 font-bold rounded-sm uppercase tracking-wider shadow-none",
-                      type.is_paid !== false 
+                      type.is_paid !== false
                         ? "border-green-500/20 text-green-600 bg-green-500/5"
                         : "border-slate-500/20 text-slate-500 bg-slate-500/5"
                     )}>
@@ -351,7 +363,7 @@ export function LeaveTab({ filterStatus, subTab }: LeaveTabProps) {
                     </Badge>
                     <Badge variant="outline" className={cn(
                       "text-[8px] px-1.5 py-0 font-bold rounded-sm uppercase tracking-wider shadow-none",
-                      type.carry_forward === true 
+                      type.carry_forward === true
                         ? "border-blue-500/20 text-blue-600 bg-blue-500/5"
                         : "border-amber-500/20 text-amber-600 bg-amber-500/5"
                     )}>
@@ -475,8 +487,8 @@ export function LeaveTab({ filterStatus, subTab }: LeaveTabProps) {
                   disabled={createTypeMutation.isPending || updateTypeMutation.isPending}
                   className="rounded-sm text-xs font-semibold h-9 px-5 bg-[#0a66c2] text-white hover:bg-[#004182] shadow-lg shadow-blue-500/20"
                 >
-                  {createTypeMutation.isPending || updateTypeMutation.isPending 
-                    ? 'Saving...' 
+                  {createTypeMutation.isPending || updateTypeMutation.isPending
+                    ? 'Saving...'
                     : editingType ? 'Save Changes' : 'Create Category'
                   }
                 </Button>

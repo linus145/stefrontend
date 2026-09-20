@@ -109,7 +109,7 @@ export function ChangePasswordSection({ expanded, onToggle }: ChangePasswordSect
           className="w-full flex items-center justify-between py-4 px-2 hover:bg-muted/30 rounded-sm transition-colors text-left"
        >
           <div className="flex items-center gap-3">
-             <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
+             <div className="w-8 h-8 rounded-full bg-[#0a66c2]/10 flex items-center justify-center text-[#0a66c2] shrink-0">
                 <Lock className="w-4 h-4" />
              </div>
              <div>
@@ -124,13 +124,13 @@ export function ChangePasswordSection({ expanded, onToggle }: ChangePasswordSect
           <div className="p-4 sm:p-6 mx-2 mb-4 bg-muted/20 rounded-sm animate-in fade-in slide-in-from-top-1">
              <form onSubmit={handlePasswordChange} className="space-y-4 max-w-md">
                 <div className="space-y-1.5 group">
-                   <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest ml-1 transition-colors group-focus-within:text-primary">Current Password</label>
+                   <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest ml-1 transition-colors group-focus-within:text-[#0a66c2]">Current Password</label>
                    <div className="relative">
                       <Input 
                          type={showPasswords.old ? "text" : "password"} 
                          value={passwords.old_password} 
                          onChange={(e) => setPasswords({...passwords, old_password: e.target.value})} 
-                         className="h-10 bg-background border-border rounded-sm pr-10 focus:ring-1 focus:ring-primary/40 transition-all shadow-sm text-sm" 
+                         className="h-10 bg-background border-border rounded-sm pr-10 focus:ring-1 focus:ring-[#0a66c2]/40 transition-all shadow-sm text-sm" 
                          placeholder="Enter current password"
                          required
                       />
@@ -144,13 +144,13 @@ export function ChangePasswordSection({ expanded, onToggle }: ChangePasswordSect
                    </div>
                 </div>
                 <div className="space-y-1.5 group">
-                   <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest ml-1 transition-colors group-focus-within:text-primary">New Password</label>
+                   <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest ml-1 transition-colors group-focus-within:text-[#0a66c2]">New Password</label>
                    <div className="relative">
                       <Input 
                          type={showPasswords.new ? "text" : "password"} 
                          value={passwords.new_password} 
                          onChange={(e) => setPasswords({...passwords, new_password: e.target.value})} 
-                         className="h-10 bg-background border-border rounded-sm pr-10 focus:ring-1 focus:ring-primary/40 transition-all shadow-sm text-sm" 
+                         className="h-10 bg-background border-border rounded-sm pr-10 focus:ring-1 focus:ring-[#0a66c2]/40 transition-all shadow-sm text-sm" 
                          placeholder="Enter new password"
                          required
                       />
@@ -164,13 +164,13 @@ export function ChangePasswordSection({ expanded, onToggle }: ChangePasswordSect
                    </div>
                 </div>
                 <div className="space-y-1.5 group">
-                   <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest ml-1 transition-colors group-focus-within:text-primary">Confirm New Password</label>
+                   <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest ml-1 transition-colors group-focus-within:text-[#0a66c2]">Confirm New Password</label>
                    <div className="relative">
                       <Input 
                          type={showPasswords.confirm ? "text" : "password"} 
                          value={passwords.confirm_password} 
                          onChange={(e) => setPasswords({...passwords, confirm_password: e.target.value})} 
-                         className="h-10 bg-background border-border rounded-sm pr-10 focus:ring-1 focus:ring-primary/40 transition-all shadow-sm text-sm" 
+                         className="h-10 bg-background border-border rounded-sm pr-10 focus:ring-1 focus:ring-[#0a66c2]/40 transition-all shadow-sm text-sm" 
                          placeholder="Confirm new password"
                          required
                       />
@@ -207,7 +207,7 @@ export function ChangePasswordSection({ expanded, onToggle }: ChangePasswordSect
                                   placeholder="6-digit code"
                                   value={passwordSecondaryOtp}
                                   onChange={(e) => setPasswordSecondaryOtp(e.target.value.replace(/\D/g, ''))}
-                                  className="h-10 text-sm font-mono tracking-widest pl-10 bg-background border-border rounded-sm focus:ring-1 focus:ring-primary/40"
+                                  className="h-10 text-sm font-mono tracking-widest pl-10 bg-background border-border rounded-sm focus:ring-1 focus:ring-[#0a66c2]/40"
                                   required
                                />
                             </div>
@@ -227,29 +227,29 @@ export function ChangePasswordSection({ expanded, onToggle }: ChangePasswordSect
                                   placeholder="6-digit code"
                                   value={passwordThirdOtp}
                                   onChange={(e) => setPasswordThirdOtp(e.target.value.replace(/\D/g, ''))}
-                                  className="h-10 text-sm font-mono tracking-widest pl-10 bg-background border-border rounded-sm focus:ring-1 focus:ring-primary/40"
+                                  className="h-10 text-sm font-mono tracking-widest pl-10 bg-background border-border rounded-sm focus:ring-1 focus:ring-[#0a66c2]/40"
                                   required
                                />
                             </div>
                          </div>
                       </div>
                       <div className="flex justify-start">
-                         <button
-                            type="button"
-                            onClick={handleResendPasswordOTPs}
-                            disabled={isSubmitting}
-                            className="text-xs text-primary hover:text-primary/80 font-semibold transition-colors disabled:opacity-50"
-                         >
-                            {isSubmitting ? 'Resending...' : 'Resend Codes'}
-                         </button>
-                      </div>
-                   </div>
-                )}
+                          <button
+                             type="button"
+                             onClick={handleResendPasswordOTPs}
+                             disabled={isSubmitting}
+                             className="text-xs text-[#0a66c2] hover:text-[#004182] font-semibold transition-colors disabled:opacity-50"
+                          >
+                             {isSubmitting ? 'Resending...' : 'Resend Codes'}
+                          </button>
+                       </div>
+                    </div>
+                 )}
 
                 <Button 
                    type="submit" 
                    disabled={isSubmitting} 
-                   className="w-full sm:w-auto rounded-sm bg-primary text-primary-foreground font-semibold text-xs px-6 h-10 shadow-sm hover:translate-y-[-1px] active:scale-95 transition-all mt-4"
+                   className="w-full sm:w-auto rounded-sm bg-[#0a66c2] hover:bg-[#004182] text-white font-semibold text-xs px-6 h-10 shadow-sm shadow-[#0a66c2]/20 hover:translate-y-[-1px] active:scale-95 transition-all mt-4 cursor-pointer disabled:opacity-60"
                 >
                    {isSubmitting ? 'Updating...' : (password2FARequired ? 'Verify & Save Password' : 'Save password')}
                 </Button>

@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { aiInterviewsService } from '@/services/ai-interviews.service';
 import { jobsService } from '@/services/jobs.service';
+import { ManualScheduleModal } from './scheduling/manual-schedule-modal';
 import {
   Search,
   Users2,
@@ -14,10 +15,10 @@ import {
   RefreshCw,
   CheckCircle2,
   Timer,
-  CalendarDays,
   Trash2,
   Copy,
-  Mail
+  Mail,
+  Plus,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -50,6 +51,7 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('all');
+  const [isManualModalOpen, setIsManualModalOpen] = useState(false);
 
   const { data: sessionsResponse, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ['ai-interview-sessions'],
@@ -396,6 +398,25 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
         </div>
 
         <div className="flex flex-wrap items-center gap-4">
+          <div className="relative group">
+            <button
+              onClick={() => setIsManualModalOpen((prev) => !prev)}
+              data-agent="schedule-interview-button"
+              aria-label={isManualModalOpen ? "Close Scheduling" : "Manual Interview Scheduling"}
+              className={cn(
+                "w-9 h-9 flex items-center justify-center rounded-sm text-white transition-all shadow-sm active:scale-95 cursor-pointer shrink-0",
+                isManualModalOpen ? "bg-[#004182]" : "bg-[#0a66c2] hover:bg-[#004182]"
+              )}
+            >
+              <Plus className={cn("w-4 h-4 transition-transform duration-200", isManualModalOpen && "rotate-45")} />
+            </button>
+            <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 hidden group-hover:flex items-center justify-center z-30 pointer-events-none">
+              <div className="bg-popover text-popover-foreground border border-border text-[11px] font-semibold px-2 py-1 rounded shadow-md whitespace-nowrap animate-in fade-in zoom-in-95 duration-150">
+                {isManualModalOpen ? "Close Scheduling" : "Manual Interview Scheduling"}
+              </div>
+            </div>
+          </div>
+
           <button
             onClick={handleSync}
             disabled={isRefetching}
@@ -499,6 +520,20 @@ export function InterviewPipelineView({ onConfigure, onSectionChange }: Intervie
           </table>
         </div>
       </div>
+
+      {/* Manual Interview Scheduling Modal */}
+      {isManualModalOpen && (
+        <ManualScheduleModal
+          isOpen={isManualModalOpen}
+          onClose={() => setIsManualModalOpen(false)}
+          onSuccess={() => {
+            queryClient.invalidateQueries({ queryKey: ['ai-interview-sessions'] });
+          }}
+        />
+      )}
     </div>
   );
 }
+
+
+

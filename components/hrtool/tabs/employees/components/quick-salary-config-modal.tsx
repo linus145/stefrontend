@@ -60,7 +60,7 @@ export function QuickSalaryConfigModal({
 
   return (
     <div className="fixed inset-0 bg-slate-900/20 dark:bg-black/40 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200 pointer-events-none">
-      <div className="bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800/80 rounded-xl w-full max-w-lg shadow-2xl p-6 relative overflow-hidden animate-in zoom-in-95 duration-300 pointer-events-auto">
+      <div className="bg-white dark:bg-[#121320] border border-slate-150 dark:border-slate-800/80 rounded-[6px] w-full max-w-lg shadow-2xl p-6 relative overflow-hidden animate-in zoom-in-95 duration-300 pointer-events-auto">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer"
@@ -69,7 +69,7 @@ export function QuickSalaryConfigModal({
         </button>
 
         <div className="flex items-center gap-2.5 mb-1">
-          <div className="p-2 rounded-md bg-[#0a66c2]/10 text-[#0a66c2]">
+          <div className="p-2 rounded-[6px] bg-[#0a66c2]/10 text-[#0a66c2]">
             <CreditCard className="w-5 h-5" />
           </div>
           <div>
@@ -91,7 +91,7 @@ export function QuickSalaryConfigModal({
                 value={salaryForm.basic_salary}
                 onChange={(e) => setSalaryForm((prev) => ({ ...prev, basic_salary: e.target.value }))}
                 placeholder="e.g. 45000"
-                className="h-9 text-xs font-semibold"
+                className="h-9 text-xs font-semibold !rounded-[6px]"
               />
             </div>
             <div className="space-y-1.5">
@@ -101,7 +101,7 @@ export function QuickSalaryConfigModal({
                 value={salaryForm.hra}
                 onChange={(e) => setSalaryForm((prev) => ({ ...prev, hra: e.target.value }))}
                 placeholder="e.g. 18000"
-                className="h-9 text-xs font-semibold"
+                className="h-9 text-xs font-semibold !rounded-[6px]"
               />
             </div>
           </div>
@@ -114,7 +114,7 @@ export function QuickSalaryConfigModal({
                 value={salaryForm.overtime_rate}
                 onChange={(e) => setSalaryForm((prev) => ({ ...prev, overtime_rate: e.target.value }))}
                 placeholder="e.g. 250"
-                className="h-9 text-xs font-semibold"
+                className="h-9 text-xs font-semibold !rounded-[6px]"
               />
             </div>
             <div className="space-y-1.5">
@@ -124,7 +124,7 @@ export function QuickSalaryConfigModal({
                 value={salaryForm.tax_percentage}
                 onChange={(e) => setSalaryForm((prev) => ({ ...prev, tax_percentage: e.target.value }))}
                 placeholder="10"
-                className="h-9 text-xs font-semibold"
+                className="h-9 text-xs font-semibold !rounded-[6px]"
               />
             </div>
           </div>
@@ -137,7 +137,7 @@ export function QuickSalaryConfigModal({
                 value={salaryForm.pf_percentage}
                 onChange={(e) => setSalaryForm((prev) => ({ ...prev, pf_percentage: e.target.value }))}
                 placeholder="12"
-                className="h-9 text-xs font-semibold"
+                className="h-9 text-xs font-semibold !rounded-[6px]"
               />
             </div>
             <div className="space-y-1.5">
@@ -147,13 +147,13 @@ export function QuickSalaryConfigModal({
                 value={salaryForm.esi_percentage}
                 onChange={(e) => setSalaryForm((prev) => ({ ...prev, esi_percentage: e.target.value }))}
                 placeholder="1.75"
-                className="h-9 text-xs font-semibold"
+                className="h-9 text-xs font-semibold !rounded-[6px]"
               />
             </div>
           </div>
 
           {/* Live Gross & Net Preview */}
-          <div className="p-3 bg-slate-50 dark:bg-[#151624]/60 border border-slate-200 dark:border-slate-800/80 rounded-md space-y-1 text-xs">
+          <div className="p-3 bg-slate-50 dark:bg-[#151624]/60 border border-slate-200 dark:border-slate-800/80 rounded-[6px] space-y-1 text-xs">
             <div className="flex justify-between items-center text-slate-600 dark:text-slate-400">
               <span>Gross Monthly:</span>
               <span className="font-bold text-slate-900 dark:text-white">₹{gross.toLocaleString('en-IN')}</span>
@@ -181,7 +181,7 @@ export function QuickSalaryConfigModal({
                 variant="outline"
                 size="sm"
                 onClick={onClose}
-                className="text-xs h-9"
+                className="text-xs h-9 !rounded-[6px]"
               >
                 Cancel
               </Button>
@@ -202,7 +202,7 @@ export function QuickSalaryConfigModal({
                     deduct_absent_leaves: true,
                   });
                 }}
-                className="bg-[#0a66c2] hover:bg-[#084e96] text-white text-xs font-semibold h-9 px-4"
+                className="bg-[#0a66c2] hover:bg-[#084e96] text-white text-xs font-semibold h-9 px-4 !rounded-[6px]"
               >
                 {saveSalaryMutation.isPending ? 'Saving...' : 'Save Structure'}
               </Button>

@@ -161,5 +161,7 @@ export interface RecruiterDashboardStats {
 
 export interface CompanyCheckData {
   has_company: boolean;
+  has_active_subscription?: boolean;
+  has_hr_access?: boolean;
   company?: CompanyProfile;
 }

@@ -166,7 +166,7 @@ export function TwoStepVerificationSection({ expanded, onToggle }: TwoStepVerifi
           className="w-full flex items-center justify-between py-4 px-2 hover:bg-muted/30 rounded-sm transition-colors text-left"
        >
           <div className="flex items-center gap-3">
-             <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
+             <div className="w-8 h-8 rounded-full bg-[#0a66c2]/10 flex items-center justify-center text-[#0a66c2] shrink-0">
                 <Shield className="w-4 h-4" />
              </div>
              <div>
@@ -204,7 +204,7 @@ export function TwoStepVerificationSection({ expanded, onToggle }: TwoStepVerifi
                          type="button"
                          onClick={handleDisable2FA}
                          disabled={isDisabling2FA}
-                         className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-1 focus:ring-primary bg-emerald-500"
+                         className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-1 focus:ring-[#0a66c2] bg-emerald-500"
                       >
                          <span
                             className="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow transition duration-200 ease-in-out translate-x-5"
@@ -229,7 +229,7 @@ export function TwoStepVerificationSection({ expanded, onToggle }: TwoStepVerifi
                             setSetupMode2FA('setup');
                             setSetupStep2FA('secondary_email');
                          }}
-                         className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-1 focus:ring-primary bg-muted-foreground/30"
+                         className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-1 focus:ring-[#0a66c2] bg-muted-foreground/30"
                       >
                          <span
                             className="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out translate-x-0"
@@ -246,7 +246,7 @@ export function TwoStepVerificationSection({ expanded, onToggle }: TwoStepVerifi
                          <h5 className="text-sm font-bold text-foreground">Set up Two-step verification</h5>
                          <p className="text-xs text-muted-foreground mt-0.5">Please verify two backup emails, one after another.</p>
                       </div>
-                      <div className="flex items-center gap-1.5 bg-primary/10 text-primary font-bold text-[11px] px-2.5 py-0.5 rounded-sm">
+                      <div className="flex items-center gap-1.5 bg-[#0a66c2]/10 text-[#0a66c2] font-bold text-[11px] px-2.5 py-0.5 rounded-sm">
                          <span>Step {setupStep2FA.startsWith('secondary') ? '1' : '2'} of 2</span>
                       </div>
                    </div>
@@ -256,12 +256,12 @@ export function TwoStepVerificationSection({ expanded, onToggle }: TwoStepVerifi
                       {/* Step 1 Indicator */}
                       <div className={cn(
                          "flex items-center gap-2.5 pb-2 border-b-2 transition-all",
-                         setupStep2FA.startsWith('secondary') ? "border-primary" : "border-emerald-500"
+                         setupStep2FA.startsWith('secondary') ? "border-[#0a66c2]" : "border-emerald-500"
                       )}>
                          <div className={cn(
                             "w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all shrink-0",
                             setupStep2FA.startsWith('secondary') 
-                               ? "bg-primary text-primary-foreground" 
+                               ? "bg-[#0a66c2] text-white" 
                                : "bg-emerald-500 text-white"
                          )}>
                             {setupStep2FA.startsWith('secondary') ? "1" : <Check className="w-3.5 h-3.5" />}
@@ -277,12 +277,12 @@ export function TwoStepVerificationSection({ expanded, onToggle }: TwoStepVerifi
                       {/* Step 2 Indicator */}
                       <div className={cn(
                          "flex items-center gap-2.5 pb-2 border-b-2 transition-all",
-                         setupStep2FA.startsWith('third') ? "border-primary" : "border-transparent"
+                         setupStep2FA.startsWith('third') ? "border-[#0a66c2]" : "border-transparent"
                       )}>
                          <div className={cn(
                             "w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all shrink-0",
                             setupStep2FA.startsWith('third') 
-                               ? "bg-primary text-primary-foreground" 
+                               ? "bg-[#0a66c2] text-white" 
                                : "bg-muted text-muted-foreground"
                          )}>
                             2
@@ -308,7 +308,7 @@ export function TwoStepVerificationSection({ expanded, onToggle }: TwoStepVerifi
                                   placeholder="backup1@email.com"
                                   value={secondaryEmail}
                                   onChange={(e) => setSecondaryEmail(e.target.value)}
-                                  className="h-10 text-sm bg-background border-border pl-10 rounded-sm focus:ring-1 focus:ring-primary/40"
+                                  className="h-10 text-sm bg-background border-border pl-10 rounded-sm focus:ring-1 focus:ring-[#0a66c2]/40"
                                   required
                                />
                             </div>
@@ -322,14 +322,14 @@ export function TwoStepVerificationSection({ expanded, onToggle }: TwoStepVerifi
                                   setSecondaryEmail('');
                                }}
                                variant="ghost" 
-                               className="h-9 px-4 rounded-sm text-xs font-semibold text-muted-foreground hover:text-foreground"
+                               className="h-9 px-4 rounded-sm text-xs font-semibold text-muted-foreground hover:text-foreground cursor-pointer"
                             >
                                Cancel
                             </Button>
                             <Button 
                                type="submit"
                                disabled={isSending2FA}
-                               className="h-9 px-5 rounded-sm bg-primary text-primary-foreground text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
+                               className="h-9 px-5 rounded-sm bg-[#0a66c2] hover:bg-[#004182] text-white text-xs font-bold transition-all shadow-sm shadow-[#0a66c2]/20 flex items-center gap-1.5 cursor-pointer disabled:opacity-60"
                             >
                                {isSending2FA ? 'Sending OTP...' : (
                                   <>
@@ -359,7 +359,7 @@ export function TwoStepVerificationSection({ expanded, onToggle }: TwoStepVerifi
                                   placeholder="6-digit code"
                                   value={secondaryOtp}
                                   onChange={(e) => setSecondaryOtp(e.target.value.replace(/\D/g, ''))}
-                                  className="h-10 text-sm font-mono tracking-widest pl-10 bg-background border-border rounded-sm focus:ring-1 focus:ring-primary/40"
+                                  className="h-10 text-sm font-mono tracking-widest pl-10 bg-background border-border rounded-sm focus:ring-1 focus:ring-[#0a66c2]/40"
                                   required
                                />
                             </div>
@@ -370,7 +370,7 @@ export function TwoStepVerificationSection({ expanded, onToggle }: TwoStepVerifi
                                type="button"
                                onClick={(e) => handleRequestSecondaryOTP(e)}
                                disabled={isSending2FA}
-                               className="text-xs text-primary hover:text-primary/80 font-semibold text-left transition-colors disabled:opacity-50 animate-pulse"
+                               className="text-xs text-[#0a66c2] hover:text-[#004182] font-semibold text-left transition-colors disabled:opacity-50"
                             >
                                {isSending2FA ? 'Resending...' : 'Resend Code'}
                             </button>
@@ -379,14 +379,14 @@ export function TwoStepVerificationSection({ expanded, onToggle }: TwoStepVerifi
                                   type="button"
                                   onClick={() => setSetupStep2FA('secondary_email')}
                                   variant="ghost" 
-                                  className="h-9 px-4 rounded-sm text-xs font-semibold text-muted-foreground hover:text-foreground"
+                                  className="h-9 px-4 rounded-sm text-xs font-semibold text-muted-foreground hover:text-foreground cursor-pointer"
                                >
                                   Back
                                </Button>
                                <Button 
                                   type="submit"
                                   disabled={isVerifying2FA}
-                                  className="h-9 px-6 rounded-sm bg-primary text-primary-foreground text-xs font-bold transition-all shadow-sm"
+                                  className="h-9 px-6 rounded-sm bg-[#0a66c2] hover:bg-[#004182] text-white text-xs font-bold transition-all shadow-sm shadow-[#0a66c2]/20 cursor-pointer disabled:opacity-60"
                                >
                                   {isVerifying2FA ? 'Verifying...' : 'Verify Email'}
                                </Button>
@@ -413,7 +413,7 @@ export function TwoStepVerificationSection({ expanded, onToggle }: TwoStepVerifi
                                   placeholder="backup2@email.com"
                                   value={thirdEmail}
                                   onChange={(e) => setThirdEmail(e.target.value)}
-                                  className="h-10 text-sm bg-background border-border pl-10 rounded-sm focus:ring-1 focus:ring-primary/40"
+                                  className="h-10 text-sm bg-background border-border pl-10 rounded-sm focus:ring-1 focus:ring-[#0a66c2]/40"
                                   required
                                />
                             </div>
@@ -429,14 +429,14 @@ export function TwoStepVerificationSection({ expanded, onToggle }: TwoStepVerifi
                                   setSetupStep2FA('secondary_email');
                                }}
                                variant="ghost" 
-                               className="h-9 px-4 rounded-sm text-xs font-semibold text-muted-foreground hover:text-foreground"
+                               className="h-9 px-4 rounded-sm text-xs font-semibold text-muted-foreground hover:text-foreground cursor-pointer"
                             >
                                Cancel
                             </Button>
                             <Button 
                                type="submit"
                                disabled={isSending2FA}
-                               className="h-9 px-5 rounded-sm bg-primary text-primary-foreground text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
+                               className="h-9 px-5 rounded-sm bg-[#0a66c2] hover:bg-[#004182] text-white text-xs font-bold transition-all shadow-sm shadow-[#0a66c2]/20 flex items-center gap-1.5 cursor-pointer disabled:opacity-60"
                             >
                                {isSending2FA ? 'Sending OTP...' : (
                                   <>
@@ -466,7 +466,7 @@ export function TwoStepVerificationSection({ expanded, onToggle }: TwoStepVerifi
                                   placeholder="6-digit code"
                                   value={thirdOtp}
                                   onChange={(e) => setThirdOtp(e.target.value.replace(/\D/g, ''))}
-                                  className="h-10 text-sm font-mono tracking-widest pl-10 bg-background border-border rounded-sm focus:ring-1 focus:ring-primary/40"
+                                  className="h-10 text-sm font-mono tracking-widest pl-10 bg-background border-border rounded-sm focus:ring-1 focus:ring-[#0a66c2]/40"
                                   required
                                />
                             </div>
@@ -477,7 +477,7 @@ export function TwoStepVerificationSection({ expanded, onToggle }: TwoStepVerifi
                                type="button"
                                onClick={(e) => handleRequestThirdOTP(e)}
                                disabled={isSending2FA}
-                               className="text-xs text-primary hover:text-primary/80 font-semibold text-left transition-colors disabled:opacity-50 animate-pulse"
+                               className="text-xs text-[#0a66c2] hover:text-[#004182] font-semibold text-left transition-colors disabled:opacity-50"
                             >
                                {isSending2FA ? 'Resending...' : 'Resend Code'}
                             </button>
@@ -486,14 +486,14 @@ export function TwoStepVerificationSection({ expanded, onToggle }: TwoStepVerifi
                                   type="button"
                                   onClick={() => setSetupStep2FA('third_email')}
                                   variant="ghost" 
-                                  className="h-9 px-4 rounded-sm text-xs font-semibold text-muted-foreground hover:text-foreground"
+                                  className="h-9 px-4 rounded-sm text-xs font-semibold text-muted-foreground hover:text-foreground cursor-pointer"
                                >
                                   Back
                                </Button>
                                <Button 
                                   type="submit"
                                   disabled={isVerifying2FA}
-                                  className="h-9 px-6 rounded-sm bg-primary text-primary-foreground text-xs font-bold transition-all shadow-sm"
+                                  className="h-9 px-6 rounded-sm bg-[#0a66c2] hover:bg-[#004182] text-white text-xs font-bold transition-all shadow-sm shadow-[#0a66c2]/20 cursor-pointer disabled:opacity-60"
                                >
                                   {isVerifying2FA ? 'Verifying...' : 'Verify & Enable 2FA'}
                                </Button>

@@ -200,7 +200,7 @@ export function PaymentUploader({ planPrice, latestPayment }: PaymentUploaderPro
             <select
               value={paymentMethod}
               onChange={(e) => setPaymentMethod(e.target.value)}
-              className="w-full h-10 px-3 border border-border bg-background rounded-sm text-xs font-medium text-foreground focus:ring-1 focus:ring-primary/40 focus:outline-none"
+              className="w-full h-10 px-3 border border-border bg-background rounded-sm text-xs font-medium text-foreground focus:ring-1 focus:ring-[#0a66c2]/40 focus:outline-none"
             >
               <option value="UPI">UPI App (GPay / PhonePe / Paytm)</option>
               <option value="GPay">Google Pay (Direct Transfer)</option>
@@ -219,7 +219,7 @@ export function PaymentUploader({ planPrice, latestPayment }: PaymentUploaderPro
               placeholder="e.g. HDFC Bank, ICICI Bank, SBI"
               value={bankName}
               onChange={(e) => setBankName(e.target.value)}
-              className="w-full h-10 px-3 border border-border bg-background rounded-sm text-xs font-medium text-foreground placeholder:text-muted-foreground/60 focus:ring-1 focus:ring-primary/40 focus:outline-none shadow-sm"
+              className="w-full h-10 px-3 border border-border bg-background rounded-sm text-xs font-medium text-foreground placeholder:text-muted-foreground/60 focus:ring-1 focus:ring-[#0a66c2]/40 focus:outline-none shadow-sm"
               required
             />
           </div>
@@ -229,7 +229,7 @@ export function PaymentUploader({ planPrice, latestPayment }: PaymentUploaderPro
             <select
               value={paymentType}
               onChange={(e) => setPaymentType(e.target.value)}
-              className="w-full h-10 px-3 border border-border bg-background rounded-sm text-xs font-medium text-foreground focus:ring-1 focus:ring-primary/40 focus:outline-none"
+              className="w-full h-10 px-3 border border-border bg-background rounded-sm text-xs font-medium text-foreground focus:ring-1 focus:ring-[#0a66c2]/40 focus:outline-none"
             >
               <option value="new">New Subscription</option>
               <option value="upgrade">Upgrading Subscription</option>
@@ -244,7 +244,7 @@ export function PaymentUploader({ planPrice, latestPayment }: PaymentUploaderPro
                 placeholder="e.g. PhonePe registered number or UPI VPA"
                 value={upgradeUpiOrPhone}
                 onChange={(e) => setUpgradeUpiOrPhone(e.target.value)}
-                className="w-full h-10 px-3 border border-border bg-background rounded-sm text-xs font-medium text-foreground placeholder:text-muted-foreground/60 focus:ring-1 focus:ring-primary/40 focus:outline-none shadow-sm"
+                className="w-full h-10 px-3 border border-border bg-background rounded-sm text-xs font-medium text-foreground placeholder:text-muted-foreground/60 focus:ring-1 focus:ring-[#0a66c2]/40 focus:outline-none shadow-sm"
                 required={paymentType === 'upgrade'}
               />
             </div>
@@ -257,7 +257,7 @@ export function PaymentUploader({ planPrice, latestPayment }: PaymentUploaderPro
               placeholder="e.g. 12-digit UPI Ref Number"
               value={transactionId}
               onChange={(e) => setTransactionId(e.target.value)}
-              className="w-full h-10 px-3 border border-border bg-background rounded-sm text-xs font-medium text-foreground placeholder:text-muted-foreground/60 focus:ring-1 focus:ring-primary/40 focus:outline-none shadow-sm"
+              className="w-full h-10 px-3 border border-border bg-background rounded-sm text-xs font-medium text-foreground placeholder:text-muted-foreground/60 focus:ring-1 focus:ring-[#0a66c2]/40 focus:outline-none shadow-sm"
               required
             />
           </div>

@@ -38,6 +38,7 @@ export function DashboardViewShell({ initialSection = 'dashboard' }: DashboardVi
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
   const [chatIntent, setChatIntent] = useState<'connection' | 'direct' | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [highlightCompanyRegister, setHighlightCompanyRegister] = useState(false);
   const [isRightSidebarCollapsed, setIsRightSidebarCollapsed] = useState(false);
   const [isLeftSidebarCollapsed, setIsLeftSidebarCollapsed] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -88,6 +89,15 @@ export function DashboardViewShell({ initialSection = 'dashboard' }: DashboardVi
       }
     }
   }, [isLoading, isAuthenticated]);
+
+  // Listen for highlight signal from HR access check
+  useEffect(() => {
+    const handleHighlight = () => {
+      setHighlightCompanyRegister(true);
+    };
+    window.addEventListener('highlight-company-register', handleHighlight);
+    return () => window.removeEventListener('highlight-company-register', handleHighlight);
+  }, []);
 
   // Close mobile sidebar on navigation
   const handleSectionChange = (section: DashboardSection, userId: string | null = null, intent?: 'connection' | 'direct') => {
@@ -146,7 +156,10 @@ export function DashboardViewShell({ initialSection = 'dashboard' }: DashboardVi
             {/* Recruiter CTA Banner - Hidden on mobile for cleaner UX */}
             <a
               href="/recruiter/register"
-              className="hidden md:block group relative mb-8 w-full rounded-sm overflow-hidden border border-border/60 bg-muted/20 hover:bg-muted/40 transition-all"
+              className={cn(
+                "hidden md:block group relative mb-8 w-full rounded-sm overflow-hidden border border-border/60 bg-muted/20 hover:bg-muted/40 transition-all",
+                highlightCompanyRegister && "border-blue-500/80 ring-2 ring-blue-500/30 bg-blue-500/[0.04] shadow-lg shadow-blue-500/10"
+              )}
             >
               <div className="flex items-center justify-between px-6 py-5">
                 <div className="flex items-center gap-4">
@@ -154,12 +167,20 @@ export function DashboardViewShell({ initialSection = 'dashboard' }: DashboardVi
                     <Users className="w-6 h-6 text-[#0a66c2]" />
                   </div>
                   <div>
+                    {highlightCompanyRegister && (
+                      <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-blue-500/15 text-blue-600 dark:text-blue-400 mb-1 animate-pulse">
+                        Action Required for HR Tool Access
+                      </span>
+                    )}
                     <p className="text-base font-bold text-foreground">Are you a company? Start posting jobs</p>
                     <p className="text-sm text-muted-foreground">Reach thousands of founders and professionals on B2linq</p>
                   </div>
                 </div>
-                <div className="hidden sm:flex items-center gap-2 px-5 py-2.5 rounded-sm bg-[#0a66c2] text-white text-sm font-bold shadow-md shadow-[#0a66c2]/20 hover:bg-[#004182] transition-all">
-                  Register Now →
+
+                <div className="hidden sm:flex items-center">
+                  <span className="inline-flex items-center justify-center px-4 py-2 rounded-md bg-[#0a66c2] hover:bg-[#004182] text-white text-sm font-semibold transition-colors shadow-sm">
+                    Register Now
+                  </span>
                 </div>
               </div>
             </a>

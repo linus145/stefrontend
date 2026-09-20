@@ -42,6 +42,24 @@ export function PayrollRuns() {
   const rawListForPolling = (Array.isArray(payrolls?.data?.results) ? payrolls.data.results : (Array.isArray(payrolls?.data) ? payrolls.data : [])) as any[];
   const hasDraftRun = rawListForPolling.some((r: any) => r.status === 'DRAFT');
 
+  // Listen for agent tool updates to refresh the cycle runs list instantly without a full page reload
+  useEffect(() => {
+    const handlePayrollRefresh = () => {
+      queryClient.invalidateQueries({ queryKey: ['payrolls'] });
+      queryClient.invalidateQueries({ queryKey: ['payroll-analytics'] });
+      queryClient.refetchQueries({ queryKey: ['payrolls'] });
+      router.refresh();
+    };
+
+    window.addEventListener('payroll-updated', handlePayrollRefresh);
+    window.addEventListener('agent-payroll-generated', handlePayrollRefresh);
+
+    return () => {
+      window.removeEventListener('payroll-updated', handlePayrollRefresh);
+      window.removeEventListener('agent-payroll-generated', handlePayrollRefresh);
+    };
+  }, [queryClient, router]);
+
   // Fetch records when a payroll run is clicked
   useEffect(() => {
     if (selectedRun) {

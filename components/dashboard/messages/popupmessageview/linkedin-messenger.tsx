@@ -112,6 +112,7 @@ export function LinkedInMessenger() {
 
       {/* Main Collapsible Messenger Card */}
       <div
+        id="linkedin-messenger-card"
         style={{
           width: `${width}px`,
           height: isOpen ? `${height}px` : '48px',

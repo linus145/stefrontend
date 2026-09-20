@@ -13,10 +13,35 @@ export interface InterviewConfig {
   force?: boolean;
 }
 
+export interface ManualSchedulePayload {
+  candidate_name: string;
+  candidate_email: string;
+  candidate_phone?: string;
+  job_id?: string;
+  custom_job_title?: string;
+  rounds?: Array<{
+    type: 'TECHNICAL' | 'CODING' | 'HR' | 'BEHAVIORAL' | 'SYSTEM_DESIGN';
+    title?: string;
+    difficulty: 'ENTRY' | 'MID' | 'SENIOR' | 'LEAD';
+    timer_minutes?: number;
+    timer_seconds?: number;
+    max_questions?: number;
+    round_category?: string;
+    question_format?: string;
+  }>;
+  send_invite_email?: boolean;
+  notes?: string;
+}
+
 export const aiInterviewsService = {
   // Fetch all interview sessions for the recruiter's company
   getSessions: async () => {
     return api.get<any>('/AIrounds/sessions/');
+  },
+
+  // Manually schedule an interview directly
+  scheduleManualInterview: async (data: ManualSchedulePayload) => {
+    return api.post<any>('/AIrounds/schedule-manual/', data);
   },
 
   // Orchestrate a new interview

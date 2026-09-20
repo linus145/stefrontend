@@ -16,6 +16,7 @@ import { GlobalLoader } from '@/components/ui/global-loader';
 import { useQuery } from '@tanstack/react-query';
 import { jobsService } from '@/services/jobs.service';
 import { PremiumLocker } from '@/components/ui/premium-locker';
+import { cn } from '@/lib/utils';
 
 export function RecruiterShell() {
   const { user, isAuthenticated, isLoading: authLoading, userSubscription } = useAuth();
@@ -149,14 +150,6 @@ export function RecruiterShell() {
 
   return (
     <div className="flex min-h-screen bg-background selection:bg-blue-500/20">
-      {/* Mobile overlay */}
-      {isMobileSidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden animate-in fade-in duration-200"
-          onClick={() => setIsMobileSidebarOpen(false)}
-        />
-      )}
-
       <RecruiterHeader
         companyName={company.company_name}
         isApproved={company.is_approved ?? false}
@@ -164,6 +157,17 @@ export function RecruiterShell() {
         activeTab={activeTab}
         onTabChange={handleTabChange}
         onMobileMenuToggle={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
+      />
+
+      {/* Mobile overlay */}
+      <div
+        className={cn(
+          "fixed inset-0 top-16 bg-black/50 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300",
+          isMobileSidebarOpen
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none"
+        )}
+        onClick={() => setIsMobileSidebarOpen(false)}
       />
 
       <RecruiterSidebar

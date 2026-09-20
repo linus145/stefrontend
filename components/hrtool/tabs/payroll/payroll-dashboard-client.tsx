@@ -1,7 +1,7 @@
 'use client';
 
-import React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, { useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { hrPayrollService } from '@/services/hr';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +14,24 @@ import {
 import Link from 'next/link';
 
 export function PayrollDashboardClient() {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    const handlePayrollRefresh = () => {
+      queryClient.invalidateQueries({ queryKey: ['payroll-analytics'] });
+      queryClient.invalidateQueries({ queryKey: ['payrolls'] });
+      queryClient.refetchQueries({ queryKey: ['payrolls'] });
+    };
+
+    window.addEventListener('payroll-updated', handlePayrollRefresh);
+    window.addEventListener('agent-payroll-generated', handlePayrollRefresh);
+
+    return () => {
+      window.removeEventListener('payroll-updated', handlePayrollRefresh);
+      window.removeEventListener('agent-payroll-generated', handlePayrollRefresh);
+    };
+  }, [queryClient]);
+
   const { data: analytics, isLoading: isAnalyticsLoading } = useQuery({
     queryKey: ['payroll-analytics'],
     queryFn: () => hrPayrollService.getDashboardAnalytics(),

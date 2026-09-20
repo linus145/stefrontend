@@ -98,7 +98,7 @@ export function PayrollProgressProvider({ children }: { children: React.ReactNod
         if (isMounted && res?.data) {
           const total = res.data.total_count || state.totalCount || 13;
           const generated = res.data.generated_count || 0;
-          const finished = res.data.is_complete || (total > 0 && generated >= total);
+          const finished = res.data.is_complete || (total > 0 && generated >= total) || res.data.status === 'FAILED';
 
           setState((prev) => ({
             ...prev,
@@ -107,8 +107,12 @@ export function PayrollProgressProvider({ children }: { children: React.ReactNod
             isFinished: finished,
           }));
         }
-      } catch {
+      } catch (err: any) {
         if (isMounted) {
+          if (err?.response?.status === 404 || err?.response?.status === 403) {
+            dismissProgress();
+            return;
+          }
           setState((prev) => {
             const nextGen = Math.min(prev.generatedCount + 1, prev.totalCount);
             return {

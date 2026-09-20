@@ -45,26 +45,30 @@ export function MessageItem({
             ? "bg-primary/10 text-foreground rounded-br-none border border-primary/20"
             : "bg-muted/50 text-foreground border border-border rounded-bl-none"
         )}>
-
           {text}
         </div>
 
-        {/* Action Menu (Only for own messages) */}
-        {isMine && (
-          <div className="absolute -left-10 top-1/2 -translate-y-1/2 opacity-0 group-hover/item:opacity-100 transition-opacity hidden sm:block">
-            <DropdownMenu>
-              <DropdownMenuTrigger className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-muted/80 text-muted-foreground outline-none transition-all">
-                <MoreHorizontal className="w-4 h-4" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-40 bg-card border-border rounded-xl shadow-xl">
-                <DropdownMenuItem onClick={onDelete} className="flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium text-destructive cursor-pointer hover:bg-destructive/10">
-                  <Trash2 className="w-3.5 h-3.5" />
-                  <span>Delete message</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        )}
+        {/* Action Menu (For both own messages and other messages) */}
+        <div className={cn(
+          "absolute top-1/2 -translate-y-1/2 opacity-60 group-hover/item:opacity-100 transition-opacity flex items-center justify-center",
+          isMine ? "-left-8" : "-right-8"
+        )}>
+          <DropdownMenu>
+            <DropdownMenuTrigger className="w-6 h-6 flex items-center justify-center rounded-md hover:bg-muted text-muted-foreground hover:text-foreground outline-none transition-all cursor-pointer">
+              <MoreHorizontal className="w-3.5 h-3.5" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align={isMine ? "end" : "start"} className="!min-w-0 w-auto p-1 bg-card border border-border rounded-lg shadow-md">
+              <DropdownMenuItem
+                onClick={onDelete}
+                variant="destructive"
+                className="w-7 h-7 p-0 flex items-center justify-center rounded-md cursor-pointer"
+                title="Delete message"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
 
         <span className="text-[10px] font-medium text-muted-foreground opacity-50 mt-1.5 px-1">{time}</span>
       </div>

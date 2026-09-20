@@ -417,11 +417,11 @@ export function BulkImportModal({ open, onOpenChange, defaultRole = 'EMPLOYEE' }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="!w-[95vw] !max-w-5xl sm:!max-w-5xl md:!max-w-5xl lg:!max-w-5xl max-h-[92vh] flex flex-col p-6 gap-4 bg-background border border-border/80 shadow-2xl rounded-xl">
+      <DialogContent className="!w-[95vw] !max-w-5xl sm:!max-w-5xl md:!max-w-5xl lg:!max-w-5xl max-h-[92vh] flex flex-col p-6 gap-4 bg-background border border-border/80 shadow-2xl !rounded-[6px]">
         <DialogHeader className="border-b border-border/40 pb-3 shrink-0">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-md bg-[#0a66c2]/10 text-[#0a66c2]">
+              <div className="p-2 rounded-[6px] bg-[#0a66c2]/10 text-[#0a66c2]">
                 <Users className="w-5 h-5" />
               </div>
               <div>
@@ -460,7 +460,7 @@ export function BulkImportModal({ open, onOpenChange, defaultRole = 'EMPLOYEE' }
         <div className="flex-1 overflow-y-auto min-h-0 space-y-4 pr-1">
           {/* Live Progress Bar during background import */}
           {importProgress && (
-            <div className="p-5 rounded-xl bg-card border border-[#0a66c2]/30 shadow-md space-y-3 animate-in fade-in">
+            <div className="p-5 rounded-[6px] bg-card border border-[#0a66c2]/30 shadow-md space-y-3 animate-in fade-in">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   <Loader2 className="w-4 h-4 text-[#0a66c2] animate-spin" />
@@ -486,7 +486,7 @@ export function BulkImportModal({ open, onOpenChange, defaultRole = 'EMPLOYEE' }
 
           {/* Success / Summary Alert */}
           {importResult && !importProgress && (
-            <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20 space-y-2 animate-in fade-in">
+            <div className="p-4 rounded-[6px] bg-emerald-500/10 border border-emerald-500/20 space-y-2 animate-in fade-in">
               <div className="flex items-center gap-2 text-sm font-bold text-emerald-800 dark:text-emerald-300">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                 Batch Import Completed
@@ -534,7 +534,7 @@ export function BulkImportModal({ open, onOpenChange, defaultRole = 'EMPLOYEE' }
               {parsedRows.length === 0 ? (
                 <div
                   onClick={() => fileInputRef.current?.click()}
-                  className="border-2 border-dashed border-border/80 hover:border-[#0a66c2] hover:bg-[#0a66c2]/5 transition-all rounded-xl p-10 text-center cursor-pointer space-y-3 group"
+                  className="border-2 border-dashed border-border/80 hover:border-[#0a66c2] hover:bg-[#0a66c2]/5 transition-all rounded-[6px] p-10 text-center cursor-pointer space-y-3 group"
                 >
                   <div className="w-14 h-14 rounded-full bg-[#0a66c2]/10 text-[#0a66c2] flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
                     <UploadCloud className="w-7 h-7" />
@@ -551,7 +551,7 @@ export function BulkImportModal({ open, onOpenChange, defaultRole = 'EMPLOYEE' }
               ) : (
                 <div className="space-y-3">
                   {/* File Header Info */}
-                  <div className="flex items-center justify-between bg-card border border-border/70 p-3 rounded-lg">
+                  <div className="flex items-center justify-between bg-card border border-border/70 p-3 rounded-[6px]">
                     <div className="flex items-center gap-2.5">
                       <FileSpreadsheet className="w-5 h-5 text-emerald-600" />
                       <div>
@@ -567,14 +567,14 @@ export function BulkImportModal({ open, onOpenChange, defaultRole = 'EMPLOYEE' }
                       variant="ghost"
                       size="sm"
                       onClick={handleReset}
-                      className="text-xs text-muted-foreground hover:text-red-600 h-8 gap-1"
+                      className="text-xs text-muted-foreground hover:text-red-600 h-8 gap-1 rounded-[6px]"
                     >
                       <Trash2 className="w-3.5 h-3.5" /> Remove
                     </Button>
                   </div>
 
                   {/* Live Preview Table */}
-                  <div className="border border-border rounded-lg overflow-x-auto overflow-y-auto max-h-[440px] bg-card/30">
+                  <div className="border border-border rounded-[6px] overflow-x-auto overflow-y-auto max-h-[440px] bg-card/30">
                     <table className="w-full text-left text-xs border-collapse min-w-[750px]">
                       <thead className="bg-muted/70 text-[11px] font-bold text-muted-foreground sticky top-0 border-b border-border z-10 backdrop-blur-sm">
                         <tr>

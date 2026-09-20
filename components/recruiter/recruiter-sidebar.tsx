@@ -30,8 +30,8 @@ const NAVIGATION_ITEMS: { id: RecruiterSection; label: string; icon: any }[] = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard },
   { id: 'my-jobs', label: 'Jobs', icon: Briefcase },
   { id: 'applications', label: 'Applications', icon: Users },
-  { id: 'company', label: 'Company Profile', icon: Building2 },
   { id: 'messages', label: 'Messages', icon: MessageSquare },
+  { id: 'company', label: 'Company Profile', icon: Building2 },
 ];
 
 export function RecruiterSidebar({
@@ -52,16 +52,18 @@ export function RecruiterSidebar({
   return (
     <aside
       className={cn(
-        "fixed left-0 top-16 bottom-0 bg-card border-r border-border flex flex-col justify-between py-6 z-30 transition-all duration-300 ease-in-out",
-        "hidden lg:flex",
+        "fixed left-0 top-16 bottom-0 bg-card border-r border-border flex flex-col justify-between py-6 transition-all duration-300 ease-in-out",
+        "lg:flex z-30",
         isCollapsed ? "lg:w-20" : "lg:w-60",
-        isMobileOpen && "!flex w-72 shadow-2xl bg-card"
+        isMobileOpen
+          ? "flex w-72 shadow-2xl z-50 translate-x-0 pointer-events-auto"
+          : "max-lg:flex max-lg:w-72 max-lg:-translate-x-full max-lg:pointer-events-none max-lg:z-50"
       )}
     >
       {/* Mobile Close */}
       <button
         onClick={onMobileClose}
-        className="absolute top-4 right-4 lg:hidden w-8 h-8 rounded-[4px] bg-muted/50 border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-all"
+        className="absolute top-4 right-4 lg:hidden w-8 h-8 rounded-[4px] bg-muted/50 border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-all cursor-pointer z-10"
       >
         <X className="h-4 w-4" />
       </button>
@@ -78,7 +80,7 @@ export function RecruiterSidebar({
       <div className="shrink-0 pb-3 border-b border-border/60">
         {/* User profile info */}
         {(!isCollapsed || isMobileOpen) && user?.email ? (
-          <div className="px-5 flex items-center gap-2.5 min-w-0">
+          <div className="px-5 flex items-center gap-2.5 min-w-0 pr-12">
             <div className="w-6 h-6 rounded-full bg-secondary flex items-center justify-center shrink-0 border border-border">
               <User className="w-3.5 h-3.5 text-muted-foreground" />
             </div>

@@ -9,6 +9,7 @@ import { ArrowRight, Mail, Lock, User, Briefcase, Eye, EyeOff, Phone } from 'luc
 import { useAuth } from '@/hooks/useAuth';
 import { GoogleLoginButton } from './google-login-button';
 import { cn } from '@/lib/utils';
+import { PhoneInput } from '@/components/ui/phone-input';
 
 export function RegisterForm() {
   const router = useRouter();
@@ -64,9 +65,10 @@ export function RegisterForm() {
   };
 
   const validatePhone = (val: string) => {
-    if (!val.trim()) return 'Mobile number is required';
-    const phoneRegex = /^\+?1?\d{9,15}$/;
-    if (!phoneRegex.test(val.trim())) return 'Invalid phone number format';
+    if (!val || !val.trim()) return null; // Mobile number is optional
+    const clean = val.replace(/[\s-]/g, '');
+    const phoneRegex = /^\+?[1-9]\d{7,14}$/;
+    if (!phoneRegex.test(clean)) return 'Invalid phone number format (e.g. +91 9876543210)';
     return null;
   };
 
@@ -182,6 +184,17 @@ export function RegisterForm() {
       const confErr = validateConfirmPassword(confirmPassword, id === 'password' ? value : formData.password);
       if (confErr) next.confirm_password = [confErr];
       else delete next.confirm_password;
+      return next;
+    });
+  };
+
+  const handlePhoneChange = (val: string) => {
+    setFormData(prev => ({ ...prev, phone_number: val }));
+    const err = validatePhone(val);
+    setErrors(prev => {
+      const next = { ...prev };
+      if (err) next.phone_number = [err];
+      else delete next.phone_number;
       return next;
     });
   };
@@ -320,26 +333,20 @@ export function RegisterForm() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider" htmlFor="phone_number">
-                    Mobile Number
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                      <Phone className="h-4 w-4" />
-                    </div>
-                    <input
-                      id="phone_number"
-                      type="tel"
-                      placeholder="+1234567890"
-                      disabled={isSubmitting}
-                      value={formData.phone_number}
-                      onChange={handleChange}
-                      className={cn(
-                        "w-full rounded-sm bg-[#f8fafc] dark:bg-[#151624] border text-slate-900 dark:text-white pl-10 pr-4 py-2.5 text-sm transition-all focus:ring-1 focus:ring-[#5e3be1] focus:border-[#5e3be1] outline-none",
-                        errors.phone_number ? 'border-red-400 dark:border-red-500/50' : 'border-slate-200 dark:border-slate-800'
-                      )}
-                    />
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider" htmlFor="phone_number">
+                      Mobile Number <span className="text-[10px] font-normal normal-case text-slate-400 dark:text-slate-500">(Optional)</span>
+                    </label>
                   </div>
+                  <PhoneInput
+                    id="phone_number"
+                    disabled={isSubmitting}
+                    value={formData.phone_number}
+                    onChange={handlePhoneChange}
+                    defaultCountry="IN"
+                    placeholder="98765 43210"
+                    hasError={Boolean(errors.phone_number)}
+                  />
                   {errors.phone_number && (
                     <p className="text-[10px] font-medium text-red-500 mt-1">
                       {errors.phone_number[0]}

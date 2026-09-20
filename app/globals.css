@@ -196,3 +196,43 @@ nav a {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Animated hand gestures & glowing effects for registration callouts */
+@keyframes handBounce {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(7px) scale(1.1);
+  }
+}
+
+@keyframes handPointRight {
+  0%, 100% {
+    transform: translateX(0) scale(1);
+  }
+  50% {
+    transform: translateX(5px) scale(1.15);
+  }
+}
+
+@keyframes haloPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(10, 102, 194, 0.45);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(10, 102, 194, 0);
+  }
+}
+
+.animate-hand-bounce {
+  animation: handBounce 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.animate-hand-tap {
+  animation: handPointRight 1s ease-in-out infinite;
+}
+
+.animate-halo-pulse {
+  animation: haloPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}

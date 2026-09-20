@@ -15,6 +15,7 @@ import { useQuery } from '@tanstack/react-query';
 import { creditsService } from '@/services/credits.service';
 import { notificationService } from '@/services/notification.service';
 import { toast } from 'sonner';
+import { HrAccessModal } from './hr-access-modal';
 
 export type DashboardSection = 'dashboard' | 'Profile' | 'messages' | 'network' | 'settings' | 'jobs' | 'news' | 'hire' | 'create-post' | 'notifications' | 'premium' | 'credits' | 'userblogs' | 'company' | 'company Page';
 
@@ -48,6 +49,20 @@ export function LeftSidebar({
 }: LeftSidebarProps) {
   const { logout, user, userSubscription } = useAuth();
   const { isDark, toggleTheme } = useDashboardTheme();
+  const [showHrModal, setShowHrModal] = React.useState(false);
+
+  const handleHrClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setShowHrModal(true);
+  };
+
+  const handleGoToJobsFromHr = () => {
+    setShowHrModal(false);
+    onSectionChange('jobs');
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('highlight-company-register'));
+    }
+  };
 
 
   const isPremium = !!(userSubscription &&
@@ -253,16 +268,15 @@ export function LeftSidebar({
             {(!isCollapsed || isMobileOpen) && <span className="truncate">Hire with AI</span>}
           </a>
 
-          <a
-            href="/Hrtools"
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            type="button"
+            onClick={handleHrClick}
             title="HR Tool"
-            className="w-full flex items-center gap-2.5 px-3 py-1.5 text-[13px] font-medium transition-all group rounded-md text-muted-foreground hover:bg-muted/50 hover:text-foreground cursor-pointer"
+            className="w-full flex items-center gap-2.5 px-3 py-1.5 text-[13px] font-medium transition-all group rounded-md text-muted-foreground hover:bg-muted/50 hover:text-foreground cursor-pointer text-left"
           >
             <Building2 className="w-4 h-4 shrink-0 text-muted-foreground group-hover:text-[#0a66c2] transition-colors" />
             {(!isCollapsed || isMobileOpen) && <span className="truncate">HR Tool</span>}
-          </a>
+          </button>
 
 
         </nav>
@@ -322,6 +336,13 @@ export function LeftSidebar({
           </div>
         )}
       </div>
+
+      <HrAccessModal
+        isOpen={showHrModal}
+        onClose={() => setShowHrModal(false)}
+        onGoToJobs={handleGoToJobsFromHr}
+        isPremium={isPremium}
+      />
     </aside>
   );
 }

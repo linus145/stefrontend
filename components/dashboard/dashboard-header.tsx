@@ -60,6 +60,21 @@ export function DashboardHeader({
    });
    const creditBalance = creditsData?.data?.balance ?? 0;
 
+   // Close desktop profile menu when clicking outside
+   React.useEffect(() => {
+      const handleClickOutside = (e: MouseEvent) => {
+         if (isMenuLocked) {
+            const target = e.target as HTMLElement;
+            if (!target.closest('.group\\/profile')) {
+               setIsMenuLocked(false);
+               setShowProfileMenu(false);
+            }
+         }
+      };
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+   }, [isMenuLocked]);
+
    const markReadMutation = useMutation({
       mutationFn: notificationService.markNotificationRead,
       onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notifications'] }),
@@ -230,13 +245,28 @@ export function DashboardHeader({
    return (
       <>
          {/* ═══ Mobile Profile Sidebar Overlay ═══ */}
-         {showMobileProfileSidebar && (
-            <div className="fixed inset-0 top-20 z-[100] lg:hidden" onClick={() => setShowMobileProfileSidebar(false)}>
-               <div className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200" />
-               <div
-                  className="absolute left-0 top-0 h-full w-60 bg-background border-r border-border shadow-2xl animate-in slide-in-from-left duration-300 flex flex-col"
-                  onClick={(e) => e.stopPropagation()}
-               >
+         <div
+            className={cn(
+               "fixed inset-0 top-20 z-[100] lg:hidden transition-all duration-300",
+               showMobileProfileSidebar
+                  ? "pointer-events-auto visible"
+                  : "pointer-events-none invisible"
+            )}
+            onClick={() => setShowMobileProfileSidebar(false)}
+         >
+            <div
+               className={cn(
+                  "absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300",
+                  showMobileProfileSidebar ? "opacity-100" : "opacity-0"
+               )}
+            />
+            <div
+               className={cn(
+                  "absolute left-0 top-0 h-full w-60 bg-background border-r border-border shadow-2xl flex flex-col transition-transform duration-300 ease-in-out",
+                  showMobileProfileSidebar ? "translate-x-0" : "-translate-x-full"
+               )}
+               onClick={(e) => e.stopPropagation()}
+            >
                   {/* Plan & Credits Info */}
                   <div className="px-5 py-3.5 border-b border-border/60">
                      <div className="flex items-center justify-between text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
@@ -315,9 +345,8 @@ export function DashboardHeader({
                         Logout
                      </button>
                   </div>
-               </div>
-            </div>
-         )}
+                </div>
+             </div>
 
          <header className={cn(
             "fixed top-0 left-0 right-0 z-[60]",
@@ -327,7 +356,7 @@ export function DashboardHeader({
             <div className="flex lg:hidden items-center justify-between h-full px-4">
                {/* Left: Profile Avatar */}
                <button
-                  onClick={() => setShowMobileProfileSidebar(true)}
+                  onClick={() => setShowMobileProfileSidebar(prev => !prev)}
                   className={cn(
                      "w-9 h-9 rounded-full transition-all active:scale-95 shrink-0 flex items-center justify-center p-[2px]",
                      isPremium
@@ -550,7 +579,7 @@ export function DashboardHeader({
                      onMouseLeave={() => !isMenuLocked && setShowProfileMenu(false)}
                   >
                      <div
-                        onClick={() => onSectionChange('Profile')}
+                        onClick={toggleMenu}
                         className="relative mb-0.5"
                      >
                         <div className={cn(

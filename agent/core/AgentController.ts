@@ -6,6 +6,7 @@ import { AgentRealtimeStream } from '@/agent/core/AgentRealtimeStream';
 import { StateObserver } from '@/agent/core/StateObserver';
 import { api } from '@/lib/api';
 import { aiAgentService } from '@/services/ai-agents.service';
+import { AgentToolController } from '../tools/AgentToolController';
 
 interface LLMAction {
   action_type: string;
@@ -212,6 +213,19 @@ export class AgentController {
 
     this.llmActionHistory = [];
     this.legacyActionHistory = [];
+
+    // Check if goal matches a deterministic tool (Shift from Playwright to direct Tool Generation)
+    const toolController = AgentToolController.getInstance();
+    const { canHandle } = await toolController.canHandle(goal);
+    if (canHandle) {
+      this._isLLMMode = false;
+      this.stream.emit('status', `Direct Tool Execution: Processing "${goal}"...`);
+      await this.createBackendExecution(goal);
+      const result = await toolController.executeGoal(goal);
+      await this.updateBackendExecution(result.status === 'SUCCESS' ? 'success' : 'failed');
+      this.isRunning = false;
+      return;
+    }
 
     if (this.shouldUseLLM(goal)) {
       this._isLLMMode = true;

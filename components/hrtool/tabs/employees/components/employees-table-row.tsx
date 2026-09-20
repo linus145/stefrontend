@@ -129,7 +129,7 @@ export function EmployeesTableRow({
             type="button"
             onClick={() => handleOpenSalaryModal(employee)}
             title="Click to view or edit compensation profile"
-            className="inline-flex items-center gap-1.5 px-2 py-1 rounded-sm bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25 text-[11px] font-bold transition-all cursor-pointer group/badge"
+            className="inline-flex items-center gap-1.5 px-2 py-1 rounded-[6px] bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25 text-[11px] font-bold transition-all cursor-pointer group/badge"
           >
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
             <span>₹{Number(employee.salary_structure_detail.gross_salary || employee.salary || 0).toLocaleString('en-IN')}/mo</span>
@@ -138,7 +138,7 @@ export function EmployeesTableRow({
           <Button
             size="sm"
             onClick={() => handleOpenSalaryModal(employee)}
-            className="h-7 text-[11px] font-bold bg-[#0a66c2] hover:bg-[#084e96] text-white rounded-sm px-2.5 transition-all shadow-sm flex items-center gap-1 cursor-pointer"
+            className="h-7 text-[11px] font-bold bg-[#0a66c2] hover:bg-[#084e96] text-white !rounded-[6px] px-2.5 transition-all shadow-sm flex items-center gap-1 cursor-pointer"
           >
             <Plus className="w-3 h-3" /> Configure
           </Button>

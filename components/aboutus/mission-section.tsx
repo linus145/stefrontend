@@ -13,19 +13,16 @@ interface MissionSectionProps {
 export const MissionSection = ({ principles = [] }: MissionSectionProps) => {
   const displayPrinciples = principles.length > 0 ? principles : [
     {
-      title: "Efficiency",
-      description: "We eliminate the friction in capital allocation through advanced matching algorithms.",
-      
+      title: "Autonomous Efficiency",
+      description: "We eliminate manual recruiting bottlenecks through end-to-end autonomous agentic pipelines that source, screen, and interview candidates without any human help.",
     },
     {
-      title: "Transparency",
-      description: "Every connection on B2linq is backed by verified data and genuine intent.",
-     
+      title: "Objective Precision",
+      description: "Every candidate assessment is backed by verified capability data, structured AI voice interviews, and standardized scoring with zero human bias.",
     },
     {
-      title: "Velocity",
-      description: "Moving at the speed of thought. We help startups go from seed to scale faster.",
-      
+      title: "Instant Velocity",
+      description: "Accelerate hiring from job opening to final candidate evaluation in minutes rather than weeks, operating 24/7 without human latency.",
     }
   ];
 
@@ -38,7 +35,7 @@ export const MissionSection = ({ principles = [] }: MissionSectionProps) => {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {displayPrinciples.map((m, i) => (
-            <div key={i} className="bg-white dark:bg-slate-950 p-6 sm:p-8 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-sm hover:shadow-md transition-all duration-300">
+            <div key={i} className="bg-white dark:bg-slate-950 p-6 sm:p-8 rounded-sm border border-slate-200 dark:border-slate-800/80 shadow-sm hover:shadow-md transition-all duration-300">
               {/* <div className="text-4xl mb-6">{m.icon}</div> */}
               <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-50 mb-3 transition-colors duration-300">{m.title}</h3>
               <p className="text-slate-600 dark:text-slate-400 leading-relaxed transition-colors duration-300">{m.description}</p>

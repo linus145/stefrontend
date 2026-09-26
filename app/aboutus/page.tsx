@@ -10,7 +10,7 @@ import { SEOStructuredData } from '@/components/Public/seo-structured-data';
 export async function generateMetadata(): Promise<Metadata> {
   return getPageMetadata('/aboutus', {
     title: 'About Us | B2linq Autonomous Hiring Platform',
-    description: 'Learn about our mission to eliminate manual recruiting bottlenecks and build the leading autonomous agentic infrastructure connecting exceptional talent and teams.',
+    description: 'Learn about our mission to eliminate manual recruiting bottlenecks with fully autonomous hiring agents that source, screen, and interview talent without any human help.',
   });
 }
 
@@ -24,22 +24,22 @@ export default async function AboutPage() {
     console.error("Failed to fetch About Us data:", error);
     // Fallback data
     aboutData = {
-      title: "Architecting the future of Startup Ecosystems.",
-      description: "B2linq was founded on a simple premise: the best ideas deserve the best capital and the best talent, without the noise of traditional networking. We are building the infrastructure for the next generation of founders.",
+      title: "Architecting the future of Autonomous Hiring.",
+      description: "B2linq, developed by BillionWorld Pvt Limited, is the premier autonomous hiring platform built to orchestrate end-to-end recruitment without any human help. Our specialized AI agents autonomously source talent, screen candidates, conduct dynamic voice interviews, and make data-driven hiring decisions—delivering seamless, unbiased hiring without human intervention.",
       principles: [
         {
-          title: "Efficiency",
-          description: "We eliminate the friction in capital allocation through advanced matching algorithms.",
+          title: "Autonomous Efficiency",
+          description: "We eliminate manual recruiting bottlenecks through end-to-end autonomous agentic pipelines that source, screen, and interview candidates without any human help.",
           icon: "⚡"
         },
         {
-          title: "Transparency",
-          description: "Every connection on B2linq is backed by verified data and genuine intent.",
+          title: "Objective Precision",
+          description: "Every candidate assessment is backed by verified capability data, structured AI voice interviews, and standardized scoring with zero human bias.",
           icon: "💎"
         },
         {
-          title: "Velocity",
-          description: "Moving at the speed of thought. We help startups go from seed to scale faster.",
+          title: "Instant Velocity",
+          description: "Accelerate hiring from job opening to final candidate evaluation in minutes rather than weeks, operating 24/7 without human latency.",
           icon: "🚀"
         }
       ]
@@ -83,11 +83,11 @@ export default async function AboutPage() {
         {/* Call to action section */}
         <section className="py-32 px-6 text-center max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-50 tracking-tight mb-6 transition-colors duration-300">
-            Join us in reshaping the ecosystem.
+            Join us in reshaping autonomous hiring.
           </h2>
           <p className="text-lg text-slate-600 dark:text-slate-400 mb-10 leading-relaxed transition-colors duration-300">
-            Whether you are a founder looking for capital or an investor seeking the next unicorn, 
-            B2linq is the place where momentum begins.
+            Whether you are scaling high-velocity engineering teams or expanding global operations, 
+            B2linq by BillionWorld Pvt Limited empowers organizations to hire top talent end-to-end without any human help.
           </p>
         </section>
       </main>

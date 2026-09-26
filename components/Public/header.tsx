@@ -59,7 +59,7 @@ export function Header() {
           <Link href="/pricing" className="hover:text-slate-900 dark:hover:text-slate-50 transition-colors">Pricing</Link>
           <Link href="/blogs" className="hover:text-slate-900 dark:hover:text-slate-50 transition-colors">Blog</Link>
           <Link href="/careers" className="hover:text-slate-900 dark:hover:text-slate-50 transition-colors">Careers</Link>
-          <Link href="/book-demo" className="hover:text-slate-900 dark:hover:text-slate-50 transition-colors">Contact</Link>
+          <Link href="/book-demo" className="hover:text-slate-900 dark:hover:text-slate-50 transition-colors">ContactUs</Link>
           <Link href="/seedemo" className="hover:text-slate-900 dark:hover:text-slate-50 transition-colors">See Demo</Link>
       
         </nav>

@@ -85,6 +85,7 @@ export interface PhoneInputProps {
   required?: boolean;
   hasError?: boolean;
   className?: string;
+  containerClassName?: string;
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
 }
 
@@ -99,6 +100,7 @@ export function PhoneInput({
   required = false,
   hasError = false,
   className,
+  containerClassName,
   onBlur
 }: PhoneInputProps) {
   const generatedId = useId();
@@ -267,7 +269,8 @@ export function PhoneInput({
           'flex items-center w-full rounded-sm bg-[#f8fafc] dark:bg-[#151624] border transition-all h-10',
           hasError
             ? 'border-red-400 dark:border-red-500/50 ring-1 ring-red-400/30'
-            : 'border-slate-200 dark:border-slate-800 focus-within:ring-1 focus-within:ring-[#0a66c2] focus-within:border-[#0a66c2]'
+            : 'border-slate-200 dark:border-slate-800 focus-within:ring-1 focus-within:ring-[#0a66c2] focus-within:border-[#0a66c2]',
+          containerClassName
         )}
       >
         {/* Country Code Trigger Button (Stable & Uneditable prefix) */}
@@ -341,6 +344,7 @@ export function PhoneInput({
       {isOpen && (
         <div
           onKeyDown={handleKeyDown}
+          style={{ height: 'auto', maxHeight: '360px' }}
           className={cn(
             'absolute z-50 left-0 mt-1.5 w-full max-w-[360px] sm:w-[320px] rounded-sm',
             'bg-white dark:bg-[#121320] border border-slate-200 dark:border-slate-800',

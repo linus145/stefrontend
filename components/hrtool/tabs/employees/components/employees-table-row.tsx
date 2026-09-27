@@ -94,7 +94,9 @@ export function EmployeesTableRow({
             </div>
           </div>
         ) : (
-          <span className="text-[11px] text-muted-foreground font-semibold italic">Not Assigned</span>
+          <span className="text-[11px] text-muted-foreground font-semibold italic">
+            {employee.role === 'MANAGER' ? 'Not Applicable' : 'Not Assigned'}
+          </span>
         )}
       </td>
       <td className="px-4 py-3">

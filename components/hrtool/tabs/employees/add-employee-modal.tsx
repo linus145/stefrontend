@@ -321,12 +321,18 @@ export function AddEmployeeModal({ open, onOpenChange, defaultRole = 'EMPLOYEE' 
                     <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground" htmlFor="reporting_manager">Reporting Manager</label>
                     <select
                       id="reporting_manager"
-                      value={newEmployee.reporting_manager}
+                      value={newEmployee.reporting_manager || ''}
+                      disabled={newEmployee.role === 'MANAGER' || defaultRole === 'MANAGER'}
                       onChange={handleInputChange}
-                      className="flex h-10 w-full items-center justify-between rounded-sm border border-input bg-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                      className={cn(
+                        "flex h-10 w-full items-center justify-between rounded-sm border border-input px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring transition-colors",
+                        (newEmployee.role === 'MANAGER' || defaultRole === 'MANAGER')
+                          ? "bg-muted text-muted-foreground cursor-not-allowed font-medium select-none"
+                          : "bg-white"
+                      )}
                       data-agent="employee-reporting-manager-select"
                     >
-                      <option value="">Select Manager</option>
+                      <option value="">{(newEmployee.role === 'MANAGER' || defaultRole === 'MANAGER') ? 'Not Applicable (Self Manager)' : 'Select Manager'}</option>
                       {managers.map((m: any) => (
                         <option key={m.id} value={m.id}>
                           {m.first_name} {m.last_name} ({m.employee_id || 'MGR'})

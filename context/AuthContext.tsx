@@ -200,8 +200,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       } catch {
         // Profile failed (401). User is not authenticated.
-        // Explicitly call logout to clear potentially invalid cookies
-        await authService.logout().catch(() => { });
+        // Use the correct logout endpoint based on the current path
+        const isEmployeePath = typeof window !== 'undefined' && window.location.pathname.startsWith('/employee');
+        if (isEmployeePath) {
+          await authService.employeeLogout().catch(() => { });
+        } else {
+          await authService.logout().catch(() => { });
+        }
         setUser(null);
         setUserSubscription(null);
       } finally {
